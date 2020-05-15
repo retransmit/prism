@@ -1,8 +1,6 @@
 #!/usr/bin/env node
 
 import Koa = require("koa");
-import session = require("koa-session");
-import mount = require("koa-mount");
 import Router = require("koa-router");
 import bodyParser = require("koa-bodyparser");
 import yargs = require("yargs");
@@ -11,12 +9,12 @@ import { join } from "path";
 import * as db from "./db";
 import * as jwt from "./utils/jwt";
 import * as config from "./config";
-import { IAppConfig, IJwtConfig } from "./types";
-import { login } from "./api/account";
+import { IAppConfig, IJwtConfig, HttpMethods } from "./types";
+
+import { createHandler } from "./api/channel";
 import { health } from "./api/sys/health";
 
 const packageJson = require("../package.json");
-const grant = require("grant-koa");
 
 const argv = yargs.options({
   c: { type: "string", alias: "config" },
@@ -25,28 +23,55 @@ const argv = yargs.options({
 }).argv;
 
 export async function startApp(port: number, configDir: string) {
-  const oauthConfig = require(join(configDir, "oauth.js"));
-  const dbConfig = require(join(configDir, "pg.js"));
-  const jwtConfig: IJwtConfig = require(join(configDir, "jwt.js"));
   const appConfig: IAppConfig = require(join(configDir, "app.js"));
+
+  const jwtConfig: IJwtConfig | undefined = appConfig.jwt
+    ? require(join(configDir, "jwt.js"))
+    : undefined;
+
+  const dbConfig = require(join(configDir, "pg.js"));
 
   // Init utils
   db.init(dbConfig);
-  jwt.init(jwtConfig);
   config.init(appConfig);
+
+  if (jwtConfig) {
+    jwt.init(jwtConfig);
+  }
 
   // Set up routes
   const router = new Router();
 
-  router.post("/login", login);
+  const routes = config.get().routes;
+  for (const route in appConfig.routes) {
+    const routeConfig = routes[route];
+
+    if (routeConfig.methods.includes("GET")) {
+      router.get(route, createHandler("GET"));
+    }
+
+    if (routeConfig.methods.includes("POST")) {
+      router.post(route, createHandler("POST"));
+    }
+
+    if (routeConfig.methods.includes("PUT")) {
+      router.put(route, createHandler("PUT"));
+    }
+
+    if (routeConfig.methods.includes("DELETE")) {
+      router.del(route, createHandler("DELETE"));
+    }
+
+    if (routeConfig.methods.includes("PATCH")) {
+      router.patch(route, createHandler("PATCH"));
+    }
+  }
+
   router.get("/sys/health", health);
 
   // Start app
   var app = new Koa();
   app.use(bodyParser());
-  app.keys = appConfig.sessionKeys.split(",");
-  app.use(session(app));
-  app.use(mount(grant(oauthConfig)));
   app.use(router.routes());
   app.use(router.allowedMethods());
 
