@@ -21,7 +21,13 @@ const argv = yargs.options({
 
 export async function startApp(port: number, configDir: string) {
   const appConfig: IAppConfig = require(join(configDir, "app.js"));
+  return await startWithConfiguration(port, appConfig);
+}
 
+export async function startWithConfiguration(
+  port: number,
+  appConfig: IAppConfig
+) {
   // Set up the config
   config.set(appConfig);
 

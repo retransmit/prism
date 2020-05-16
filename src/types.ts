@@ -12,7 +12,7 @@ export interface IAppConfig {
   responseChannel?: string;
   routes: {
     [key: string]: {
-      [key in HttpMethods]: HandlerConfig;
+      [key in HttpMethods]?: HandlerConfig;
     };
   };
   handlers?: {
@@ -22,7 +22,7 @@ export interface IAppConfig {
       response: any
     ) => Promise<{ handled: boolean }>;
   };
-  redis: {
+  redis?: {
     options: ClientOpts;
   };
 }
@@ -35,9 +35,9 @@ export type HandlerConfig = {
   responseChannel?: string;
   services: {
     [key: string]: {
-      awaitResponse: boolean;
-      abortOnError: boolean;
-      timeoutMS: number;
+      awaitResponse?: boolean;
+      abortOnError?: boolean;
+      timeoutMS?: number;
     };
   };
   numRequestChannels?: number;

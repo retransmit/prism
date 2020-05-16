@@ -43,7 +43,9 @@ export async function init() {
 
   for (const route in config.routes) {
     for (const method in config.routes[route]) {
-      const handlerConfig = config.routes[route][method as HttpMethods];
+      const handlerConfig = config.routes[route][
+        method as HttpMethods
+      ] as HandlerConfig;
       if (handlerConfig.responseChannel) {
         subscriber.subscribe(handlerConfig.responseChannel);
       }
@@ -266,7 +268,7 @@ async function waitForServiceResults(
         timeoutTicks:
           Date.now() + (handlerConfig.services[service].timeoutMS || 30000),
         startTime: Date.now(),
-        ignoreErrors: handlerConfig.services[service].abortOnError,
+        ignoreErrors: handlerConfig.services[service].abortOnError === false,
         onSuccess: success,
         onError: error,
       });
