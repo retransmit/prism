@@ -5,14 +5,15 @@ import {
   ServiceResult,
   HttpResponse,
   HandlerConfig,
-  TrackingData,
   IAppConfig,
+  CollatedResult,
+  ChannelResult,
 } from "./types";
 import randomId from "./random";
-import redis, { RedisClient } from "redis";
+import redis = require("redis");
 
-let subscriber: RedisClient;
-let publisher: RedisClient;
+let subscriber: redis.RedisClient;
+let publisher: redis.RedisClient;
 
 type RequestData = {
   id: string;
@@ -23,8 +24,8 @@ type RequestData = {
   service: string;
   startTime: number;
   ignoreErrors: boolean;
-  onSuccess: (result: TrackingData & ServiceResult) => void;
-  onError: (result: TrackingData & ServiceResult) => void;
+  onSuccess: (result: ChannelResult) => void;
+  onError: (result: ChannelResult) => void;
 };
 
 const activeRequests = new Map<string, RequestData>();
@@ -32,8 +33,8 @@ const activeRequests = new Map<string, RequestData>();
 export async function init() {
   const config = configModule.get();
 
-  subscriber = redis.createClient(config.redis.options);
-  publisher = redis.createClient(config.redis.options);
+  subscriber = redis.createClient(config.redis?.options);
+  publisher = redis.createClient(config.redis?.options);
 
   // Setup subscriptions
   if (config.responseChannel) {
@@ -52,7 +53,7 @@ export async function init() {
   subscriber.on("message", processMessages);
 
   // Some services may never respond. Fail them.
-  setInterval(cleanupMessages, config.timeoutCheckIntervalMS || 30000);
+  setInterval(cleanupMessages, config.cleanupIntervalMS || 10000);
 }
 
 /*
@@ -66,17 +67,23 @@ function processMessages(channel: string, messageString: string) {
     const processingTime = Date.now() - activeRequest.startTime;
 
     if (serviceResult.success) {
-      activeRequest.onSuccess({ time: processingTime, ...serviceResult });
+      activeRequest.onSuccess({
+        time: processingTime,
+        ignore: false,
+        result: serviceResult,
+      });
     } else {
       if (activeRequest.ignoreErrors === true) {
         activeRequest.onSuccess({
-          id: activeRequest.id,
           time: processingTime,
-          success: true,
           ignore: true,
         });
       } else {
-        activeRequest.onError({ time: processingTime, ...serviceResult });
+        activeRequest.onError({
+          time: processingTime,
+          ignore: false,
+          result: serviceResult,
+        });
       }
     }
   }
@@ -98,18 +105,20 @@ function cleanupMessages() {
   for (const [id, requestData] of timedOut) {
     if (requestData.ignoreErrors === true) {
       requestData.onSuccess({
-        id,
         time: Date.now() - requestData.startTime,
-        success: false,
+        ignore: true,
       });
     } else {
       requestData.onError({
-        id,
         time: Date.now() - requestData.startTime,
-        success: false,
-        response: {
-          content: `${requestData.service} timed out.`,
-          status: 408,
+        ignore: false,
+        result: {
+          id: requestData.id,
+          success: false,
+          response: {
+            content: `${requestData.service} timed out.`,
+            status: 408,
+          },
         },
       });
     }
@@ -160,8 +169,7 @@ export function createHandler(method: HttpMethods) {
       // Publish the request on to the redis channel
       publisher.publish(channelId, JSON.stringify(payload));
 
-      const serviceResults: (TrackingData &
-        ServiceResult)[] = await waitForServiceResults(
+      const collatedResult: CollatedResult = await waitForServiceResults(
         requestId,
         ctx.path,
         method,
@@ -169,13 +177,10 @@ export function createHandler(method: HttpMethods) {
         config
       );
 
-      let mergedResult: ServiceResult = mergeResponses(
-        requestId,
-        serviceResults
-      );
+      let response = mergeIntoResponse(requestId, collatedResult);
 
       // Add a rollback to the channel on error
-      if (!mergedResult.success) {
+      if (collatedResult.aborted) {
         const errorPayload = {
           id: requestId,
           type: "rollback",
@@ -186,16 +191,14 @@ export function createHandler(method: HttpMethods) {
 
       // See if there are any custom handlers for final response
       if (config.handlers && config.handlers.response) {
-        const result = await config.handlers.response(ctx, mergedResult);
+        const result = await config.handlers.response(ctx, response);
         if (result.handled) {
           return;
         }
       }
 
       // Send response back to the client.
-      if (mergedResult.response) {
-        const response = mergedResult.response;
-
+      if (response) {
         // Redirect and return
         if (response.redirect) {
           ctx.redirect(response.redirect);
@@ -246,13 +249,13 @@ async function waitForServiceResults(
   method: string,
   handlerConfig: HandlerConfig,
   config: IAppConfig
-): Promise<(TrackingData & ServiceResult)[]> {
+): Promise<CollatedResult> {
   const toWait = Object.keys(handlerConfig.services).filter(
-    (serviceName) => handlerConfig.services[serviceName].awaitResponse
+    (serviceName) => handlerConfig.services[serviceName].awaitResponse !== false
   );
 
   const promises = toWait.map((service) => {
-    return new Promise<TrackingData & ServiceResult>((success, error) => {
+    return new Promise<ChannelResult>((success, error) => {
       activeRequests.set(requestId, {
         id: requestId,
         channel: (handlerConfig.requestChannel ||
@@ -260,7 +263,8 @@ async function waitForServiceResults(
         path: path,
         method: method,
         service,
-        timeoutTicks: Date.now() + handlerConfig.services[service].timeoutMS,
+        timeoutTicks:
+          Date.now() + (handlerConfig.services[service].timeoutMS || 30000),
         startTime: Date.now(),
         ignoreErrors: handlerConfig.services[service].abortOnError,
         onSuccess: success,
@@ -270,53 +274,67 @@ async function waitForServiceResults(
   });
 
   try {
-    return await Promise.all(promises);
+    return {
+      aborted: false,
+      results: await Promise.all(promises),
+    };
   } catch (ex) {
-    return [ex];
+    return {
+      aborted: true,
+      errorResult: ex,
+    };
   }
 }
 
 /*
   Merge received results into a final response
 */
-function mergeResponses(
+function mergeIntoResponse(
   requestId: string,
-  serviceResults: (TrackingData & ServiceResult)[]
-): ServiceResult {
-  let finalResponse = serviceResults.reduce(
-    (acc, result) => {
-      if (result.ignore !== false) {
-        if (result.response) {
-          if (result.response.content) {
-            if (typeof result.response.content === "object") {
-              acc.content = { ...acc.content, ...result.response.content };
-            } else {
-              acc.content = result.response.content;
+  collatedResult: CollatedResult
+): HttpResponse | undefined {
+  if (!collatedResult.aborted) {
+    let finalResponse = collatedResult.results.reduce(
+      (acc, result) => {
+        if (result.ignore === false) {
+          if (result.result.response) {
+            if (result.result.response.content) {
+              if (typeof result.result.response.content === "object") {
+                acc.content = {
+                  ...acc.content,
+                  ...result.result.response.content,
+                };
+              } else {
+                acc.content = result.result.response.content;
+              }
+              if (result.result.response.contentType) {
+                acc.contentType = result.result.response.contentType;
+              }
             }
-            if (result.response.contentType) {
-              acc.contentType = result.response.contentType;
+            if (result.result.response.redirect) {
+              acc.redirect = result.result.response.redirect;
             }
-          }
-          if (result.response.redirect) {
-            acc.redirect = result.response.redirect;
-          }
-          if (result.response.status) {
-            acc.status = result.response.status;
-          }
-          if (result.response.cookies) {
-            acc.cookies = (acc.cookies || []).concat(result.response.cookies);
+            if (result.result.response.status) {
+              acc.status = result.result.response.status;
+            }
+            if (result.result.response.cookies) {
+              acc.cookies = (acc.cookies || []).concat(
+                result.result.response.cookies
+              );
+            }
           }
         }
-      }
-
-      return acc;
-    },
-    { status: 200, content: "" } as HttpResponse
-  );
-
-  return {
-    id: requestId,
-    success: true,
-    response: finalResponse,
-  };
+        return acc;
+      },
+      { status: 200, content: "" } as HttpResponse
+    );
+    return finalResponse;
+  } else {
+    return collatedResult.errorResult.ignore === false
+      ? collatedResult.errorResult.result.response
+      : {
+          status: 500,
+          content: "Internal server error",
+        };
+  }
 }

@@ -7,7 +7,7 @@ export type HttpMethods = "GET" | "POST" | "PUT" | "DELETE" | "PATCH";
   Application Config
 */
 export interface IAppConfig {
-  timeoutCheckIntervalMS?: number;
+  cleanupIntervalMS?: number;
   requestChannel?: string;
   responseChannel?: string;
   routes: {
@@ -53,6 +53,30 @@ export type ServiceResult = {
 };
 
 /*
+  Output from the queue
+*/
+export type ChannelResult =
+  | {
+      time: number;
+      ignore: false;
+      result: ServiceResult;
+    }
+  | {
+      time: number;
+      ignore: true;
+    };
+
+/*
+  Result of collating results from services
+*/
+export type CollatedResult =
+  | {
+      aborted: false;
+      results: ChannelResult[];
+    }
+  | { aborted: true; errorResult: ChannelResult };
+
+/*
   Can be used to form an HttpResponse
 */
 export type HttpResponse = {
@@ -70,12 +94,4 @@ export type HttpResponse = {
   }[];
   content?: any;
   contentType?: string;
-};
-
-/*
-  Metadata associated with a Request
-*/
-export type TrackingData = {
-  time: number;
-  ignore?: boolean;
 };

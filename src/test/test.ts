@@ -1,6 +1,7 @@
 import "mocha";
 import "should";
-import serviceTest from "./serviceTest";
+
+import { startApp } from "..";
 
 function run() {
   /* Sanity check to make sure we don't accidentally run on the server. */
@@ -22,11 +23,18 @@ function run() {
   const configDir = process.env.CONFIG_DIR;
 
   describe("dissipate", () => {
-    before(async function resetEverything() {});
+    let app: any;
+
+    before(async function resetEverything() {
+      const service = await startApp(port, configDir);
+      app = service.listen();
+    });
 
     beforeEach(async function resetBeforeEach() {});
 
-    serviceTest(port, configDir);
+    it("does something...", async () => {
+      
+    });
   });
 }
 
