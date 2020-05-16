@@ -21,12 +21,12 @@ function run() {
   const port = parseInt(process.env.PORT);
   const configDir = process.env.CONFIG_DIR;
 
-  describe("border-patrol", () => {
+  describe("dissipate", () => {
     before(async function resetEverything() {});
 
     beforeEach(async function resetBeforeEach() {});
 
-    // serviceTest(dbConfig, port, configDir);
+    serviceTest(port, configDir);
   });
 }
 
