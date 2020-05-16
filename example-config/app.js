@@ -1,30 +1,14 @@
 module.exports = {
-  jwt: {
-    fieldName: "jwt-data",
-    required: true,
-    requiredFields: {
-      user: "*",
-    },
-  },
-  logging: {
-    jwt: false,
-  },
+  requestChannel: "input",
+  responseChannel: "output",
   routes: {
     "/users": {
-      methods: ["POST"],
-      services: {
-        userService: {
-          validateJwt: true,
-          passJwt: true,
-          awaitResponse: true,
-          mergeResponse: true,
-          mergeInto: "field",
-          abortOnError: true,
-          logErrors: true,
-          timeoutMS: 0,
+      POST: {
+        userservice: {
+          
         },
+      
       },
-      numChannels: 4,
     },
   },
 };

@@ -2,7 +2,7 @@ import { IAppConfig } from "../types";
 
 let config: IAppConfig;
 
-export function init(c: IAppConfig) {
+export function set(c: IAppConfig) {
   config = c;
 }
 

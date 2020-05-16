@@ -6,13 +6,10 @@ import bodyParser = require("koa-bodyparser");
 import yargs = require("yargs");
 import { join } from "path";
 
-import * as db from "./db";
-import * as jwt from "./utils/jwt";
 import * as config from "./config";
-import { IAppConfig, IJwtConfig, HttpMethods } from "./types";
+import { IAppConfig } from "./types";
 
-import { createHandler } from "./api/channel";
-import { health } from "./api/sys/health";
+import { createHandler, init } from "./handler";
 
 const packageJson = require("../package.json");
 
@@ -25,49 +22,40 @@ const argv = yargs.options({
 export async function startApp(port: number, configDir: string) {
   const appConfig: IAppConfig = require(join(configDir, "app.js"));
 
-  const jwtConfig: IJwtConfig | undefined = appConfig.jwt
-    ? require(join(configDir, "jwt.js"))
-    : undefined;
+  // Set up the config
+  config.set(appConfig);
 
-  const dbConfig = require(join(configDir, "pg.js"));
-
-  // Init utils
-  db.init(dbConfig);
-  config.init(appConfig);
-
-  if (jwtConfig) {
-    jwt.init(jwtConfig);
-  }
+  // Init handlers
+  init();
 
   // Set up routes
   const router = new Router();
 
   const routes = config.get().routes;
+
   for (const route in appConfig.routes) {
     const routeConfig = routes[route];
 
-    if (routeConfig.methods.includes("GET")) {
+    if (routeConfig["GET"]) {
       router.get(route, createHandler("GET"));
     }
 
-    if (routeConfig.methods.includes("POST")) {
+    if (routeConfig["POST"]) {
       router.post(route, createHandler("POST"));
     }
 
-    if (routeConfig.methods.includes("PUT")) {
+    if (routeConfig["PUT"]) {
       router.put(route, createHandler("PUT"));
     }
 
-    if (routeConfig.methods.includes("DELETE")) {
+    if (routeConfig["DELETE"]) {
       router.del(route, createHandler("DELETE"));
     }
 
-    if (routeConfig.methods.includes("PATCH")) {
+    if (routeConfig["PATCH"]) {
       router.patch(route, createHandler("PATCH"));
     }
   }
-
-  router.get("/sys/health", health);
 
   // Start app
   var app = new Koa();
