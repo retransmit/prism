@@ -7,27 +7,14 @@ import {
   HandlerConfig,
   IAppConfig,
   CollatedResult,
-  ChannelResult,
-  ServiceHandlerConfig,
+  FetchedResult,
+  RequestData,
 } from "./types";
 import randomId from "./random";
 import redis = require("redis");
 
 let subscriber: redis.RedisClient;
 let publisher: redis.RedisClient;
-
-type RequestData = {
-  id: string;
-  path: string;
-  channel: string;
-  timeoutTicks: number;
-  method: string;
-  service: string;
-  startTime: number;
-  serviceConfig: ServiceHandlerConfig;
-  onSuccess: (result: ChannelResult) => void;
-  onError: (result: ChannelResult) => void;
-};
 
 const activeRequests = new Map<string, RequestData>();
 
@@ -62,81 +49,137 @@ export async function init() {
 /*
   Messages in various responseChannels (sent by the participating services) land here.
 */
-function processMessages(channel: string, messageString: string) {
+async function processMessages(channel: string, messageString: string) {
+  const config = configModule.get();
+
   const serviceResult = JSON.parse(messageString) as ServiceResult;
+
   const activeRequest = activeRequests.get(
     `${serviceResult.id}+${serviceResult.service}`
   );
 
   if (activeRequest && activeRequest.channel === channel) {
+    const handlerConfig = config.routes[activeRequest.path][
+      activeRequest.method
+    ] as HandlerConfig;
+    const resultHandler =
+      (config.handlers && config.handlers.result) ||
+      (handlerConfig.handlers && handlerConfig.handlers.result);
+
     const processingTime = Date.now() - activeRequest.startTime;
 
     if (serviceResult.success) {
-      activeRequest.onSuccess({
+      const fetchedResult = {
         time: processingTime,
         ignore: false,
-        serviceConfig: activeRequest.serviceConfig,
+        path: activeRequest.path,
+        method: activeRequest.method,
+        service: activeRequest.service,
         serviceResult: serviceResult,
-      });
+      };
+      activeRequest.onSuccess(
+        resultHandler ? await resultHandler(fetchedResult) : fetchedResult
+      );
     } else {
-      if (activeRequest.serviceConfig.abortOnError === false) {
-        activeRequest.onSuccess({
+      const handlerConfig = config.routes[activeRequest.path][
+        activeRequest.method
+      ] as HandlerConfig;
+      if (
+        handlerConfig.services[activeRequest.service].abortOnError === false
+      ) {
+        const fetchedResult = {
           time: processingTime,
-          ignore: true,
-        });
+          ignore: true as true,
+          path: activeRequest.path,
+          method: activeRequest.method,
+          service: activeRequest.service,
+        };
+        activeRequest.onSuccess(
+          resultHandler ? await resultHandler(fetchedResult) : fetchedResult
+        );
       } else {
-        activeRequest.onError({
+        const fetchedResult = {
           time: processingTime,
           ignore: false,
-          serviceConfig: activeRequest.serviceConfig,
+          path: activeRequest.path,
+          method: activeRequest.method,
+          service: activeRequest.service,
           serviceResult: serviceResult,
-        });
+        };
+        activeRequest.onError(
+          resultHandler ? await resultHandler(fetchedResult) : fetchedResult
+        );
       }
     }
   }
 }
 
+let isCleaningUp = false;
+
 /*
   Scavenging for timed out messages
 */
-function cleanupMessages() {
-  const entries = activeRequests.entries();
+async function cleanupMessages() {
+  if (!isCleaningUp) {
+    isCleaningUp = true;
+    const config = configModule.get();
+    const entries = activeRequests.entries();
 
-  const timedOut: [string, RequestData][] = [];
-  for (const [id, requestData] of entries) {
-    if (Date.now() > requestData.timeoutTicks) {
-      timedOut.push([requestData.id, requestData]);
+    const timedOut: [string, RequestData][] = [];
+    for (const [id, requestData] of entries) {
+      if (Date.now() > requestData.timeoutTicks) {
+        timedOut.push([requestData.id, requestData]);
+      }
     }
-  }
 
-  for (const [activeRequestId, requestData] of timedOut) {
-    if (requestData.serviceConfig.abortOnError === false) {
-      requestData.onSuccess({
-        time: Date.now() - requestData.startTime,
-        ignore: true,
-      });
-    } else {
-      requestData.onError({
-        time: Date.now() - requestData.startTime,
-        ignore: false,
-        serviceConfig: requestData.serviceConfig,
-        serviceResult: {
-          id: requestData.id,
-          success: false,
+    for (const [activeRequestId, requestData] of timedOut) {
+      const handlerConfig = config.routes[requestData.path][
+        requestData.method
+      ] as HandlerConfig;
+      const resultHandler =
+        (config.handlers && config.handlers.result) ||
+        (handlerConfig.handlers && handlerConfig.handlers.result);
+
+      if (handlerConfig.services[requestData.service].abortOnError === false) {
+        const fetchedResult = {
+          time: Date.now() - requestData.startTime,
+          ignore: true as true,
+          path: requestData.path,
+          method: requestData.method,
           service: requestData.service,
-          response: {
-            content: `${requestData.service} timed out.`,
-            status: 408,
+        };
+        requestData.onSuccess(
+          resultHandler ? await resultHandler(fetchedResult) : fetchedResult
+        );
+      } else {
+        const fetchedResult = {
+          time: Date.now() - requestData.startTime,
+          ignore: false,
+          service: requestData.service,
+          path: requestData.path,
+          method: requestData.method,
+          serviceResult: {
+            id: requestData.id,
+            success: false,
+            service: requestData.service,
+            response: {
+              content: `${requestData.service} timed out.`,
+              status: 408,
+            },
           },
-        },
-      });
+        };
+        requestData.onError(
+          resultHandler ? await resultHandler(fetchedResult) : fetchedResult
+        );
+      }
+      activeRequests.delete(activeRequestId);
     }
-    activeRequests.delete(activeRequestId);
+    isCleaningUp = false;
   }
 }
 
 /*
-  This handles HTTP requests from various clients.
+  Make an HTTP request handler
 */
 export function createHandler(method: HttpMethods) {
   const config = configModule.get();
@@ -178,7 +221,7 @@ export function createHandler(method: HttpMethods) {
       // Publish the request on to the redis channel
       publisher.publish(channelId, JSON.stringify(payload));
 
-      const collatedResult: CollatedResult = await waitForServiceResults(
+      const collatedResults: CollatedResult = await waitForServiceResults(
         requestId,
         ctx.path,
         method,
@@ -186,10 +229,10 @@ export function createHandler(method: HttpMethods) {
         config
       );
 
-      let response = mergeIntoResponse(requestId, collatedResult);
+      let response = mergeIntoResponse(requestId, collatedResults);
 
       // Add a rollback to the channel on error
-      if (collatedResult.aborted) {
+      if (collatedResults.aborted) {
         const errorPayload = {
           id: requestId,
           type: "rollback",
@@ -208,37 +251,47 @@ export function createHandler(method: HttpMethods) {
 
       // Send response back to the client.
       if (response) {
-        // Redirect and return
-        if (response.redirect) {
-          ctx.redirect(response.redirect);
-          return;
-        }
-
-        // HTTP status
-        if (response.status) {
-          ctx.status = response.status;
-        }
-
-        // Response body
-        ctx.body = response.content;
-
-        // Cookies!
-        if (response.cookies) {
-          for (const cookie of response.cookies) {
-            ctx.cookies.set(cookie.name, cookie.value, {
-              domain: cookie.domain,
-              path: cookie.path,
-              maxAge: cookie.maxAge,
-              secure: cookie.secure,
-              httpOnly: cookie.httpOnly,
-              overwrite: cookie.overwrite,
-            });
+        if (
+          response.status &&
+          response.status >= 500 &&
+          response.status <= 599 &&
+          (handlerConfig.genericErrors || config.genericErrors)
+        ) {
+          ctx.status = 500;
+          ctx.body = `Internal Server Error.`;
+        } else {
+          // Redirect and return
+          if (response.redirect) {
+            ctx.redirect(response.redirect);
+            return;
           }
-        }
 
-        // Content type
-        if (response.contentType) {
-          ctx.type = response.contentType;
+          // HTTP status
+          if (response.status) {
+            ctx.status = response.status;
+          }
+
+          // Content type
+          if (response.contentType) {
+            ctx.type = response.contentType;
+          }
+
+          // Response body
+          ctx.body = response.content;
+
+          // Cookies!
+          if (response.cookies) {
+            for (const cookie of response.cookies) {
+              ctx.cookies.set(cookie.name, cookie.value, {
+                domain: cookie.domain,
+                path: cookie.path,
+                maxAge: cookie.maxAge,
+                secure: cookie.secure,
+                httpOnly: cookie.httpOnly,
+                overwrite: cookie.overwrite,
+              });
+            }
+          }
         }
       }
     } else {
@@ -255,7 +308,7 @@ export function createHandler(method: HttpMethods) {
 async function waitForServiceResults(
   requestId: string,
   path: string,
-  method: string,
+  method: HttpMethods,
   handlerConfig: HandlerConfig,
   config: IAppConfig
 ): Promise<CollatedResult> {
@@ -264,7 +317,7 @@ async function waitForServiceResults(
   );
 
   const promises = toWait.map((service) => {
-    return new Promise<ChannelResult>((success, error) => {
+    return new Promise<FetchedResult>((success, error) => {
       activeRequests.set(`${requestId}+${service}`, {
         id: requestId,
         channel: (handlerConfig.requestChannel ||
@@ -272,7 +325,6 @@ async function waitForServiceResults(
         path,
         method,
         service,
-        serviceConfig: handlerConfig.services[service],
         timeoutTicks:
           Date.now() + (handlerConfig.services[service].timeoutMS || 30000),
         startTime: Date.now(),
@@ -300,47 +352,153 @@ async function waitForServiceResults(
 */
 function mergeIntoResponse(
   requestId: string,
-  collatedResult: CollatedResult
+  collatedResults: CollatedResult
 ): HttpResponse | undefined {
-  if (!collatedResult.aborted) {
-    let finalResponse = collatedResult.results.reduce(
-      (acc, result) => {
-        if (result.ignore === false && result.serviceConfig.merge !== false) {
+  const config = configModule.get();
+  if (!collatedResults.aborted) {
+    let finalResponse: HttpResponse = { status: 200, content: undefined };
+
+    for (const result of collatedResults.results) {
+      if (result.ignore === false) {
+        const handlerConfig = config.routes[result.path][
+          result.method
+        ] as HandlerConfig;
+        if (handlerConfig.services[result.service].merge !== false) {
           if (result.serviceResult.response) {
             if (result.serviceResult.response.content) {
-              if (typeof result.serviceResult.response.content === "object") {
-                acc.content = {
-                  ...acc.content,
-                  ...result.serviceResult.response.content,
+              /*
+              If the response has already been redirected, you can't write on to it.
+            */
+              if (finalResponse.redirect) {
+                return {
+                  status: 500,
+                  content: `${result.serviceResult.service} is redirecting the response to ${result.serviceResult.response.redirect} but content has already been added to the response.`,
                 };
               } else {
-                acc.content = result.serviceResult.response.content;
+                /*
+                If current response is not an object and new result is an object, we throw an error. We can't merge an object on to a string.
+              */
+                if (typeof result.serviceResult.response.content === "object") {
+                  if (typeof finalResponse.content === "undefined") {
+                    finalResponse.content =
+                      result.serviceResult.response.content;
+                    finalResponse.contentType = "application/json";
+                  } else {
+                    if (typeof finalResponse.content !== "object") {
+                      return {
+                        status: 500,
+                        content: `Cannot merge multiple types of content. ${
+                          result.serviceResult.service
+                        } is returned a json response while the current response is of type ${typeof finalResponse.content}.`,
+                      };
+                    } else {
+                      finalResponse.content = {
+                        ...finalResponse.content,
+                        ...result.serviceResult.response.content,
+                      };
+                      finalResponse.contentType = "application/json";
+                    }
+                  }
+                } else {
+                  /*
+                  Again, if current response is already set, we can't overwrite.
+                */
+                  if (typeof finalResponse.content !== "undefined") {
+                    return {
+                      status: 500,
+                      content: `${result.serviceResult.service} returned a response which will overwrite current response.`,
+                    };
+                  } else {
+                    finalResponse.content =
+                      result.serviceResult.response.content;
+                  }
+                }
               }
+
+              /*
+              Content type cannot be changed once set.
+            */
               if (result.serviceResult.response.contentType) {
-                acc.contentType = result.serviceResult.response.contentType;
+                if (
+                  finalResponse.contentType &&
+                  result.serviceResult.response.contentType !==
+                    finalResponse.contentType
+                ) {
+                  return {
+                    status: 500,
+                    content: `${result.serviceResult.service} returned content type ${result.serviceResult.response.contentType} while the current response has content type ${finalResponse.contentType}.`,
+                  };
+                } else {
+                  finalResponse.contentType =
+                    result.serviceResult.response.contentType;
+                }
               }
             }
+
+            /*
+            If the response content has already been modified previously, then you cannot redirect. If there's already a pending redirect, you cannot redirect again.
+          */
             if (result.serviceResult.response.redirect) {
-              acc.redirect = result.serviceResult.response.redirect;
+              if (finalResponse.content) {
+                return {
+                  status: 500,
+                  content: `${result.serviceResult.service} is redirecting to ${result.serviceResult.response.redirect} but the current response already has some content.`,
+                };
+              } else if (finalResponse.redirect) {
+                return {
+                  status: 500,
+                  content: `${result.serviceResult.service} is redirecting to ${result.serviceResult.response.redirect} but the response has already been redirected to ${finalResponse.redirect}.`,
+                };
+              } else {
+                finalResponse.redirect = result.serviceResult.response.redirect;
+              }
             }
+
+            /*
+            Cannot have multiple status codes.
+            If results have differing 2xx codes, send 200.
+            If results have 2xx and 4xx (or 3xx or 5xx), that's an error
+          */
             if (result.serviceResult.response.status) {
-              acc.status = result.serviceResult.response.status;
+              if (!finalResponse.status) {
+                finalResponse.status = result.serviceResult.response.status;
+              } else {
+                if (
+                  finalResponse.status !== result.serviceResult.response.status
+                ) {
+                  if (
+                    finalResponse.status >= 200 &&
+                    finalResponse.status <= 299 &&
+                    result.serviceResult.response.status >= 200 &&
+                    result.serviceResult.response.status <= 299
+                  ) {
+                    finalResponse.status = 200;
+                  } else {
+                    return {
+                      status: 500,
+                      content: `${result.serviceResult.service} is returning status code ${result.serviceResult.response.status} but the response already has its status set to ${finalResponse.status}.`,
+                    };
+                  }
+                }
+              }
             }
+
+            /*
+            We concat all cookies.
+          */
             if (result.serviceResult.response.cookies) {
-              acc.cookies = (acc.cookies || []).concat(
+              finalResponse.cookies = (finalResponse.cookies || []).concat(
                 result.serviceResult.response.cookies
               );
             }
           }
         }
-        return acc;
-      },
-      { status: 200, content: "" } as HttpResponse
-    );
+      }
+    }
     return finalResponse;
   } else {
-    return collatedResult.errorResult.ignore === false
-      ? collatedResult.errorResult.serviceResult.response
+    return collatedResults.errorResult.ignore === false
+      ? collatedResults.errorResult.serviceResult.response
       : {
           status: 500,
           content: "Internal server error",

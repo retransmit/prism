@@ -2,7 +2,7 @@ import request = require("supertest");
 import { doPubSub } from "./utils";
 
 export default async function (app: { instance: any }) {
-  it(`merges results`, async () => {
+  it(`must not overwrite json content with string content`, async () => {
     const config = {
       requestChannel: "input",
       responseChannel: "output",
@@ -34,9 +34,7 @@ export default async function (app: { instance: any }) {
         service: "messagingservice",
         success: true,
         response: {
-          content: {
-            message: "hello world",
-          },
+          content: "Hello world",
         },
       },
     ];
@@ -56,10 +54,7 @@ export default async function (app: { instance: any }) {
 
     const [response, json] = result;
     json.data.headers.origin.should.equal("http://localhost:3000");
-    response.status.should.equal(200);
-    response.body.should.deepEqual({
-      user: 1,
-      message: "hello world",
-    });
+    response.status.should.equal(500);
+    response.text.should.equal("messagingservice returned a response which will overwrite current response.")
   });
 }

@@ -15,16 +15,19 @@ export interface IAppConfig {
       [key in HttpMethods]?: HandlerConfig;
     };
   };
+  redis?: {
+    options: ClientOpts;
+  };
   handlers?: {
+    result?: (result: FetchedResult) => Promise<FetchedResult>;
     request?: (ctx: IRouterContext) => Promise<{ handled: boolean }>;
     response?: (
       ctx: IRouterContext,
       response: any
     ) => Promise<{ handled: boolean }>;
   };
-  redis?: {
-    options: ClientOpts;
-  };
+  genericErrors?: boolean;
+  logError?: (error: string) => Promise<void>;
 }
 
 /*
@@ -37,6 +40,18 @@ export type HandlerConfig = {
     [key: string]: ServiceHandlerConfig;
   };
   numRequestChannels?: number;
+  handlers?: {
+    result?: (result: FetchedResult) => Promise<FetchedResult>;
+    request?: (ctx: IRouterContext) => Promise<{ handled: boolean }>;
+    response?: (
+      ctx: IRouterContext,
+      response: any
+    ) => Promise<{ handled: boolean }>;
+  };
+  contentType?: string;
+  onContentTypeMismatch?: "ignore" | "fail";
+  genericErrors?: boolean;
+  logError?: (error: string) => Promise<void>;
 };
 
 /*
@@ -60,16 +75,36 @@ export type ServiceResult = {
 };
 
 /*
-  Output from the queue
+  Currently active requests
 */
-export type ChannelResult =
+export type RequestData = {
+  id: string;
+  path: string;
+  channel: string;
+  timeoutTicks: number;
+  method: HttpMethods;
+  service: string;
+  startTime: number;
+  onSuccess: (result: FetchedResult) => void;
+  onError: (result: FetchedResult) => void;
+};
+
+/*
+  Output of processMessages()
+*/
+export type FetchedResult =
   | {
       time: number;
       ignore: false;
-      serviceConfig: ServiceHandlerConfig,
+      path: string;
+      method: HttpMethods;
+      service: string;
       serviceResult: ServiceResult;
     }
   | {
+      path: string;
+      method: HttpMethods;
+      service: string;
       time: number;
       ignore: true;
     };
@@ -80,9 +115,9 @@ export type ChannelResult =
 export type CollatedResult =
   | {
       aborted: false;
-      results: ChannelResult[];
+      results: FetchedResult[];
     }
-  | { aborted: true; errorResult: ChannelResult };
+  | { aborted: true; errorResult: FetchedResult };
 
 /*
   Can be used to form an HttpResponse

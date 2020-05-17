@@ -7,6 +7,8 @@ import Koa = require("koa");
 import mergeResults from "./mergeResults";
 import httpMethods from "./httpMethods";
 import dontMergeIgnored from "./dontMergeIgnored";
+import showGenericErrors from "./showGenericErrors";
+import mustNotOverwriteJsonWithString from "./mustNotOverwriteJsonWithString";
 
 function closeServerCb(app: Koa<any, any>, cb: any) {
   (app as any).close(cb);
@@ -42,6 +44,8 @@ function run() {
     httpMethods(app);
     mergeResults(app);
     dontMergeIgnored(app);
+    mustNotOverwriteJsonWithString(app);
+    showGenericErrors(app);
   });
 }
 

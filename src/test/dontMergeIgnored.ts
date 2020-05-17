@@ -1,7 +1,7 @@
 import request = require("supertest");
 import { doPubSub } from "./utils";
 
-export default async function (app: { instance: any },) {
+export default async function (app: { instance: any }) {
   it(`does not merge ignored results`, async () => {
     const config = {
       requestChannel: "input",
@@ -12,7 +12,7 @@ export default async function (app: { instance: any },) {
             services: {
               userservice: {},
               messagingservice: {
-                merge: false
+                merge: false,
               },
             },
           },
@@ -58,8 +58,9 @@ export default async function (app: { instance: any },) {
 
     const [response, json] = result;
     json.data.headers.origin.should.equal("http://localhost:3000");
+    response.status.should.equal(200);
     response.body.should.deepEqual({
-      user: 1
+      user: 1,
     });
   });
 }

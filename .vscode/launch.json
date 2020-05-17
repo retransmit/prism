@@ -24,7 +24,8 @@
       "preLaunchTask": "build",
       "env": {
         "CHIMPANZEE_DEBUG": "1"
-      }
+      },
+      "envFile": "${workspaceFolder}/.env"
     }
   ]
 }

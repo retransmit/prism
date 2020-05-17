@@ -57,6 +57,7 @@ export default async function (app: { instance: any }) {
 
       const [response, json] = result;
       json.data.headers.origin.should.equal("http://localhost:3000");
+      response.status.should.equal(200);
       response.text.should.equal("Everything worked.");
     });
   });
