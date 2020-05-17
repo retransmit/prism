@@ -1,5 +1,5 @@
 {
-  "name": "dissipate",
+  "name": "retransmit",
   "version": "0.0.1",
   "author": "Jeswin Kumar<jeswinpk@agilehead.com>",
   "contributors": [
@@ -10,7 +10,7 @@
     "test": "./build.sh && mocha --exit dist/test/test.js"
   },
   "bin": {
-    "dissipate": "dist/index.js"
+    "retransmit": "dist/index.js"
   },
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

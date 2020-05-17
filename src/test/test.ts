@@ -30,7 +30,7 @@ function run() {
 
   const configDir = process.env.CONFIG_DIR;
 
-  describe("dissipate", () => {
+  describe("retransmit", () => {
     let app: { instance: any } = { instance: undefined };
 
     before(async function resetEverything() {});

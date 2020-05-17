@@ -48,8 +48,6 @@ export type HandlerConfig = {
       response: any
     ) => Promise<{ handled: boolean }>;
   };
-  contentType?: string;
-  onContentTypeMismatch?: "ignore" | "fail";
   genericErrors?: boolean;
   logError?: (error: string) => Promise<void>;
 };
@@ -62,6 +60,7 @@ export type ServiceHandlerConfig = {
   merge?: boolean;
   abortOnError?: boolean;
   timeoutMS?: number;
+  mergeField?: string;
 };
 
 /*

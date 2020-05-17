@@ -392,10 +392,19 @@ function mergeIntoResponse(
                         } is returned a json response while the current response is of type ${typeof finalResponse.content}.`,
                       };
                     } else {
-                      finalResponse.content = {
-                        ...finalResponse.content,
-                        ...result.serviceResult.response.content,
-                      };
+                      const mergeField =
+                        handlerConfig.services[result.serviceResult.service]
+                          .mergeField;
+
+                      finalResponse.content = mergeField
+                        ? {
+                            ...finalResponse.content,
+                            [mergeField]: result.serviceResult.response.content,
+                          }
+                        : {
+                            ...finalResponse.content,
+                            ...result.serviceResult.response.content,
+                          };
                       finalResponse.contentType = "application/json";
                     }
                   }
@@ -409,8 +418,13 @@ function mergeIntoResponse(
                       content: `${result.serviceResult.service} returned a response which will overwrite current response.`,
                     };
                   } else {
-                    finalResponse.content =
-                      result.serviceResult.response.content;
+                    const mergeField =
+                      handlerConfig.services[result.serviceResult.service]
+                        .mergeField;
+
+                    finalResponse.content = mergeField
+                      ? { [mergeField]: result.serviceResult.response.content }
+                      : result.serviceResult.response.content;
                   }
                 }
               }
