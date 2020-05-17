@@ -25,7 +25,7 @@ export async function startApp(port: number, configDir: string) {
 }
 
 export async function startWithConfiguration(
-  port: number,
+  port: number | undefined,
   appConfig: IAppConfig
 ) {
   // Set up the config
@@ -69,7 +69,11 @@ export async function startWithConfiguration(
   app.use(router.routes());
   app.use(router.allowedMethods());
 
-  app.listen(port);
+  if (port) {
+    app.listen(port);
+  } else {
+    app.listen();
+  }
 
   return app;
 }

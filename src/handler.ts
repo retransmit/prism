@@ -8,6 +8,7 @@ import {
   IAppConfig,
   CollatedResult,
   ChannelResult,
+  ServiceHandlerConfig,
 } from "./types";
 import randomId from "./random";
 import redis = require("redis");
@@ -23,7 +24,7 @@ type RequestData = {
   method: string;
   service: string;
   startTime: number;
-  ignoreErrors: boolean;
+  serviceConfig: ServiceHandlerConfig;
   onSuccess: (result: ChannelResult) => void;
   onError: (result: ChannelResult) => void;
 };
@@ -63,7 +64,9 @@ export async function init() {
 */
 function processMessages(channel: string, messageString: string) {
   const serviceResult = JSON.parse(messageString) as ServiceResult;
-  const activeRequest = activeRequests.get(serviceResult.id);
+  const activeRequest = activeRequests.get(
+    `${serviceResult.id}+${serviceResult.service}`
+  );
 
   if (activeRequest && activeRequest.channel === channel) {
     const processingTime = Date.now() - activeRequest.startTime;
@@ -72,10 +75,11 @@ function processMessages(channel: string, messageString: string) {
       activeRequest.onSuccess({
         time: processingTime,
         ignore: false,
-        result: serviceResult,
+        serviceConfig: activeRequest.serviceConfig,
+        serviceResult: serviceResult,
       });
     } else {
-      if (activeRequest.ignoreErrors === true) {
+      if (activeRequest.serviceConfig.abortOnError === false) {
         activeRequest.onSuccess({
           time: processingTime,
           ignore: true,
@@ -84,7 +88,8 @@ function processMessages(channel: string, messageString: string) {
         activeRequest.onError({
           time: processingTime,
           ignore: false,
-          result: serviceResult,
+          serviceConfig: activeRequest.serviceConfig,
+          serviceResult: serviceResult,
         });
       }
     }
@@ -104,8 +109,8 @@ function cleanupMessages() {
     }
   }
 
-  for (const [id, requestData] of timedOut) {
-    if (requestData.ignoreErrors === true) {
+  for (const [activeRequestId, requestData] of timedOut) {
+    if (requestData.serviceConfig.abortOnError === false) {
       requestData.onSuccess({
         time: Date.now() - requestData.startTime,
         ignore: true,
@@ -114,9 +119,11 @@ function cleanupMessages() {
       requestData.onError({
         time: Date.now() - requestData.startTime,
         ignore: false,
-        result: {
+        serviceConfig: requestData.serviceConfig,
+        serviceResult: {
           id: requestData.id,
           success: false,
+          service: requestData.service,
           response: {
             content: `${requestData.service} timed out.`,
             status: 408,
@@ -124,7 +131,7 @@ function cleanupMessages() {
         },
       });
     }
-    activeRequests.delete(id);
+    activeRequests.delete(activeRequestId);
   }
 }
 
@@ -258,17 +265,17 @@ async function waitForServiceResults(
 
   const promises = toWait.map((service) => {
     return new Promise<ChannelResult>((success, error) => {
-      activeRequests.set(requestId, {
+      activeRequests.set(`${requestId}+${service}`, {
         id: requestId,
         channel: (handlerConfig.requestChannel ||
           config.responseChannel) as string,
-        path: path,
-        method: method,
+        path,
+        method,
         service,
+        serviceConfig: handlerConfig.services[service],
         timeoutTicks:
           Date.now() + (handlerConfig.services[service].timeoutMS || 30000),
         startTime: Date.now(),
-        ignoreErrors: handlerConfig.services[service].abortOnError === false,
         onSuccess: success,
         onError: error,
       });
@@ -298,30 +305,30 @@ function mergeIntoResponse(
   if (!collatedResult.aborted) {
     let finalResponse = collatedResult.results.reduce(
       (acc, result) => {
-        if (result.ignore === false) {
-          if (result.result.response) {
-            if (result.result.response.content) {
-              if (typeof result.result.response.content === "object") {
+        if (result.ignore === false && result.serviceConfig.merge !== false) {
+          if (result.serviceResult.response) {
+            if (result.serviceResult.response.content) {
+              if (typeof result.serviceResult.response.content === "object") {
                 acc.content = {
                   ...acc.content,
-                  ...result.result.response.content,
+                  ...result.serviceResult.response.content,
                 };
               } else {
-                acc.content = result.result.response.content;
+                acc.content = result.serviceResult.response.content;
               }
-              if (result.result.response.contentType) {
-                acc.contentType = result.result.response.contentType;
+              if (result.serviceResult.response.contentType) {
+                acc.contentType = result.serviceResult.response.contentType;
               }
             }
-            if (result.result.response.redirect) {
-              acc.redirect = result.result.response.redirect;
+            if (result.serviceResult.response.redirect) {
+              acc.redirect = result.serviceResult.response.redirect;
             }
-            if (result.result.response.status) {
-              acc.status = result.result.response.status;
+            if (result.serviceResult.response.status) {
+              acc.status = result.serviceResult.response.status;
             }
-            if (result.result.response.cookies) {
+            if (result.serviceResult.response.cookies) {
               acc.cookies = (acc.cookies || []).concat(
-                result.result.response.cookies
+                result.serviceResult.response.cookies
               );
             }
           }
@@ -333,7 +340,7 @@ function mergeIntoResponse(
     return finalResponse;
   } else {
     return collatedResult.errorResult.ignore === false
-      ? collatedResult.errorResult.result.response
+      ? collatedResult.errorResult.serviceResult.response
       : {
           status: 500,
           content: "Internal server error",

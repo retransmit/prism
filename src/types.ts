@@ -34,13 +34,19 @@ export type HandlerConfig = {
   requestChannel?: string;
   responseChannel?: string;
   services: {
-    [key: string]: {
-      awaitResponse?: boolean;
-      abortOnError?: boolean;
-      timeoutMS?: number;
-    };
+    [key: string]: ServiceHandlerConfig;
   };
   numRequestChannels?: number;
+};
+
+/*
+  Service Configuration
+*/
+export type ServiceHandlerConfig = {
+  awaitResponse?: boolean;
+  merge?: boolean;
+  abortOnError?: boolean;
+  timeoutMS?: number;
 };
 
 /*
@@ -48,6 +54,7 @@ export type HandlerConfig = {
 */
 export type ServiceResult = {
   id: string;
+  service: string;
   success: boolean;
   response?: HttpResponse;
 };
@@ -59,7 +66,8 @@ export type ChannelResult =
   | {
       time: number;
       ignore: false;
-      result: ServiceResult;
+      serviceConfig: ServiceHandlerConfig,
+      serviceResult: ServiceResult;
     }
   | {
       time: number;
