@@ -42,6 +42,7 @@ export type HandlerConfig = {
   numRequestChannels?: number;
   handlers?: {
     result?: (result: FetchedResult) => Promise<FetchedResult>;
+    merge?: (result: CollatedResult) => Promise<CollatedResult>;
     request?: (ctx: IRouterContext) => Promise<{ handled: boolean }>;
     response?: (
       ctx: IRouterContext,

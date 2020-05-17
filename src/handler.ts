@@ -221,13 +221,18 @@ export function createHandler(method: HttpMethods) {
       // Publish the request on to the redis channel
       publisher.publish(channelId, JSON.stringify(payload));
 
-      const collatedResults: CollatedResult = await waitForServiceResults(
+      const interimCollatedResults: CollatedResult = await waitForServiceResults(
         requestId,
         ctx.path,
         method,
         handlerConfig,
         config
       );
+
+      const collatedResults =
+        handlerConfig.handlers && handlerConfig.handlers.merge
+          ? await handlerConfig.handlers.merge(interimCollatedResults)
+          : interimCollatedResults;
 
       let response = mergeIntoResponse(requestId, collatedResults);
 
