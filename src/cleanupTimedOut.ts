@@ -1,5 +1,5 @@
 import * as configModule from "./config";
-import { RequestData, RouteConfig } from "./types";
+import { TrackedRequest, RouteConfig } from "./types";
 import * as activeRequests from "./activeRequests";
 
 let isCleaningUp = false;
@@ -13,50 +13,50 @@ export default async function cleanupTimedOut() {
     const config = configModule.get();
     const entries = activeRequests.entries();
 
-    const timedOut: [string, RequestData][] = [];
-    for (const [id, requestData] of entries) {
-      if (Date.now() > requestData.timeoutTicks) {
-        timedOut.push([requestData.id, requestData]);
+    const timedOut: [string, TrackedRequest][] = [];
+    for (const [id, trackedRequest] of entries) {
+      if (Date.now() > trackedRequest.timeoutTicks) {
+        timedOut.push([trackedRequest.id, trackedRequest]);
       }
     }
 
-    for (const [activeRequestId, requestData] of timedOut) {
-      const routeConfig = config.routes[requestData.path][
-        requestData.method
+    for (const [activeRequestId, trackedRequest] of timedOut) {
+      const routeConfig = config.routes[trackedRequest.path][
+        trackedRequest.method
       ] as RouteConfig;
       const resultHandler =
         (config.handlers && config.handlers.result) ||
         (routeConfig.handlers && routeConfig.handlers.result);
 
-      if (routeConfig.services[requestData.service].abortOnError === false) {
+      if (routeConfig.services[trackedRequest.service].abortOnError === false) {
         const fetchedResult = {
-          time: Date.now() - requestData.startTime,
+          time: Date.now() - trackedRequest.startTime,
           ignore: true as true,
-          path: requestData.path,
-          method: requestData.method,
-          service: requestData.service,
+          path: trackedRequest.path,
+          method: trackedRequest.method,
+          service: trackedRequest.service,
         };
-        requestData.onSuccess(
+        trackedRequest.onSuccess(
           resultHandler ? await resultHandler(fetchedResult) : fetchedResult
         );
       } else {
         const fetchedResult = {
-          time: Date.now() - requestData.startTime,
+          time: Date.now() - trackedRequest.startTime,
           ignore: false,
-          service: requestData.service,
-          path: requestData.path,
-          method: requestData.method,
+          service: trackedRequest.service,
+          path: trackedRequest.path,
+          method: trackedRequest.method,
           serviceResult: {
-            id: requestData.id,
+            id: trackedRequest.id,
             success: false,
-            service: requestData.service,
+            service: trackedRequest.service,
             response: {
-              content: `${requestData.service} timed out.`,
+              content: `${trackedRequest.service} timed out.`,
               status: 408,
             },
           },
         };
-        requestData.onError(
+        trackedRequest.onError(
           resultHandler ? await resultHandler(fetchedResult) : fetchedResult
         );
       }

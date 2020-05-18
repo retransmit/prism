@@ -3,13 +3,12 @@ import {
   RouteConfig,
   IAppConfig,
   FetchedResult,
-  RequestData,
+  TrackedRequest,
   ServiceHandlerConfig,
 } from "../types";
 
 import * as activeRequests from "../activeRequests";
 import * as configModule from "../config";
-import { getPublisher } from "./clients";
 import { publish } from "./publish";
 /*
   Make Promises for Redis Services

@@ -1,8 +1,8 @@
 import * as configModule from "./config";
-import { RequestData, ServiceResult, RouteConfig } from "./types";
+import { TrackedRequest, ServiceResult, RouteConfig } from "./types";
 
 export async function processResult(
-  activeRequest: RequestData,
+  activeRequest: TrackedRequest,
   routeConfig: RouteConfig,
   serviceResult: ServiceResult
 ) {

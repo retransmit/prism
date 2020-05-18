@@ -21,6 +21,7 @@
     "@types/node": "^13.13.4",
     "@types/redis": "^2.8.20",
     "@types/yargs": "^15.0.4",
+    "got": "^11.1.4",
     "koa": "^2.11.0",
     "koa-bodyparser": "^4.3.0",
     "koa-router": "^8.0.8",

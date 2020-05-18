@@ -1,13 +1,8 @@
 import { IRouterContext } from "koa-router";
 import * as configModule from "./config";
-import {
-  HttpMethods,
-  CollatedResult,
-  FetchedResult,
-  RequestData,
-} from "./types";
+import { HttpMethods, CollatedResult, FetchedResult } from "./types";
 import randomId from "./random";
-import invokeServices from "./redis/invokeServices";
+import invokeRedisServices from "./redis/invokeServices";
 import mergeResponses from "./mergeResponses";
 import { publish } from "./redis/publish";
 
@@ -42,7 +37,7 @@ export function createHandler(method: HttpMethods) {
         },
       };
 
-      const promisesForRedisServices = invokeServices(
+      const promisesForRedisServices = invokeRedisServices(
         payload,
         requestId,
         ctx.path,

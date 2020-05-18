@@ -81,7 +81,7 @@ export type ServiceResult = {
 /*
   Currently active requests
 */
-export type RequestData = (
+export type TrackedRequest = (
   | {
       type: "redis";
       channel: string;
@@ -129,6 +129,17 @@ export type CollatedResult =
       results: FetchedResult[];
     }
   | { aborted: true; errorResult: FetchedResult };
+
+/*
+  Request
+*/
+export type RequestPayload = {
+  path: string;
+  params: string;
+  query: string;
+  body: string;
+  headers: string;
+};
 
 /*
   Can be used to form an HttpResponse
