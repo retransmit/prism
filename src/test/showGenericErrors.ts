@@ -4,14 +4,22 @@ import { doPubSub } from "./utils";
 export default async function (app: { instance: any }) {
   it(`shows generic errors for service`, async () => {
     const config = {
-      requestChannel: "input",
-      responseChannel: "output",
       routes: {
         "/users": {
           POST: {
             services: {
-              userservice: {},
-              messagingservice: {},
+              userservice: {
+                redis: {
+                  requestChannel: "input",
+                  responseChannel: "output",
+                },
+              },
+              messagingservice: {
+                redis: {
+                  requestChannel: "input",
+                  responseChannel: "output",
+                },
+              },
             },
             genericErrors: true,
           },
@@ -61,14 +69,22 @@ export default async function (app: { instance: any }) {
 
   it(`shows generic errors for all services`, async () => {
     const config = {
-      requestChannel: "input",
-      responseChannel: "output",
       routes: {
         "/users": {
           POST: {
             services: {
-              userservice: {},
-              messagingservice: {},
+              userservice: {
+                redis: {
+                  requestChannel: "input",
+                  responseChannel: "output",
+                },
+              },
+              messagingservice: {
+                redis: {
+                  requestChannel: "input",
+                  responseChannel: "output",
+                },
+              },
             },
           },
         },

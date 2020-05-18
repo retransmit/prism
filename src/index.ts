@@ -9,7 +9,8 @@ import { join } from "path";
 import * as config from "./config";
 import { IAppConfig } from "./types";
 
-import { createHandler, init } from "./handler";
+import { createHandler } from "./handler";
+import init from "./redis/init";
 
 const packageJson = require("../package.json");
 
@@ -31,8 +32,8 @@ export async function startWithConfiguration(
   // Set up the config
   config.set(appConfig);
 
-  // Init handlers
-  init();
+  // Init redis
+  await init();
 
   // Set up routes
   const router = new Router();

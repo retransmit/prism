@@ -1,16 +1,12 @@
 # Retransmit
 
-Retransmit is a broker that integrates data from multiple backend microservices and exposes them at HTTP endpoints. For example, GET /users might need to fetch data from the 'user service' as well as the 'friends service'. Retransmit will service the request by contacting both these services and then merging the result as needed.
+Retransmit is a broker that integrates data from multiple backend microservices and exposes them at HTTP endpoints. For example, GET /users might need to fetch data from the 'user service' as well as the 'friends service'. Retransmit will create a response by contacting both services and then merging the result as specified. As of now, retransmit can talk to backend services via HTTP as well as Redis pub-sub. 
+
+Here's a diagram:
+
+[IMAGE]
 
 
-responds to HTTP requests (ie, it acts as a web server) 
-
-
-with data from multiple backend micro-services.
-
-integrates data from multiple micro-services and exposes them at 
-
-makes them available at specified HTTP endpoints. The backend services talk the Retransmit via Redis pub sub.
 
 
 

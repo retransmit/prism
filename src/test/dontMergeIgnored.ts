@@ -4,15 +4,22 @@ import { doPubSub } from "./utils";
 export default async function (app: { instance: any }) {
   it(`does not merge ignored results`, async () => {
     const config = {
-      requestChannel: "input",
-      responseChannel: "output",
       routes: {
         "/users": {
           POST: {
             services: {
-              userservice: {},
+              userservice: {
+                redis: {
+                  requestChannel: "input",
+                  responseChannel: "output",
+                },
+              },
               messagingservice: {
                 merge: false,
+                redis: {
+                  requestChannel: "input",
+                  responseChannel: "output",
+                },
               },
             },
           },

@@ -8,15 +8,13 @@ export type HttpMethods = "GET" | "POST" | "PUT" | "DELETE" | "PATCH";
 */
 export interface IAppConfig {
   cleanupIntervalMS?: number;
-  requestChannel?: string;
-  responseChannel?: string;
   routes: {
     [key: string]: {
-      [key in HttpMethods]?: HandlerConfig;
+      [key in HttpMethods]?: RouteConfig;
     };
   };
   redis?: {
-    options: ClientOpts;
+    options?: ClientOpts;
   };
   handlers?: {
     result?: (result: FetchedResult) => Promise<FetchedResult>;
@@ -33,13 +31,10 @@ export interface IAppConfig {
 /*
   RouteHandler Config
 */
-export type HandlerConfig = {
-  requestChannel?: string;
-  responseChannel?: string;
+export type RouteConfig = {
   services: {
     [key: string]: ServiceHandlerConfig;
   };
-  numRequestChannels?: number;
   handlers?: {
     result?: (result: FetchedResult) => Promise<FetchedResult>;
     merge?: (result: CollatedResult) => Promise<CollatedResult>;
@@ -57,6 +52,15 @@ export type HandlerConfig = {
   Service Configuration
 */
 export type ServiceHandlerConfig = {
+  redis?: {
+    requestChannel: string;
+    responseChannel: string;
+    numRequestChannels?: number;
+  };
+  http?: {
+    url: string;
+    rollbackUrl?: string;
+  };
   awaitResponse?: boolean;
   merge?: boolean;
   abortOnError?: boolean;
@@ -77,10 +81,17 @@ export type ServiceResult = {
 /*
   Currently active requests
 */
-export type RequestData = {
+export type RequestData = (
+  | {
+      type: "redis";
+      channel: string;
+    }
+  | {
+      type: "http";
+    }
+) & {
   id: string;
   path: string;
-  channel: string;
   timeoutTicks: number;
   method: HttpMethods;
   service: string;

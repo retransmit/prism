@@ -5,13 +5,16 @@ import { doPubSub } from "./utils";
 export default async function (app: { instance: any }) {
   function makeConfig(options: { method: HttpMethods }): IAppConfig {
     return {
-      requestChannel: "input",
-      responseChannel: "output",
       routes: {
         "/users": {
           [options.method]: {
             services: {
-              userservice: {},
+              userservice: {
+                redis: {
+                  requestChannel: "input",
+                  responseChannel: "output",
+                },
+              },
             },
           },
         },
