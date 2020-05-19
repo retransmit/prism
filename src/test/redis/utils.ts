@@ -1,6 +1,6 @@
 import request = require("supertest");
-import { IAppConfig, RedisServiceResponse } from "../types";
-import { startWithConfiguration } from "..";
+import { IAppConfig, RedisServiceResponse } from "../../types";
+import { startWithConfiguration } from "../../";
 import { createClient } from "redis";
 
 export async function doPubSub(
@@ -21,7 +21,17 @@ export async function doPubSub(
 
     subscriber.on("message", (channel, message) => {
       json = JSON.parse(message);
-      for (const response of serviceResponses) {
+      for (const staticResponse of serviceResponses) {
+        const response = {
+          ...staticResponse,
+          response: {
+            ...staticResponse.response,
+            content:
+              typeof staticResponse.response.content === "string"
+                ? `${json.data.method}: ${staticResponse.response.content}`
+                : staticResponse.response.content,
+          },
+        };
         publisher.publish(
           "output",
           JSON.stringify({

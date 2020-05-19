@@ -1,9 +1,5 @@
 import * as configModule from "./config";
-import {
-  HttpResponse,
-  RouteConfig,
-  FetchedResponse,
-} from "./types";
+import { HttpResponse, RouteConfig, FetchedResponse } from "./types";
 
 /*
   Merge received results into a final response
@@ -153,6 +149,16 @@ export default function mergeResponses(
             finalResponse.cookies = (finalResponse.cookies || []).concat(
               response.response.cookies
             );
+          }
+
+          /*
+            Headers!
+          */
+          if (response.response.headers) {
+            finalResponse.headers = {
+              ...finalResponse.headers,
+              ...response.response.headers,
+            };
           }
         }
       }

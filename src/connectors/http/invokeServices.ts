@@ -54,17 +54,17 @@ export default function invokeServices(
             new Promise<FetchedResponse>((success, failure) => {
               got(url, options)
                 .then((serverResponse) => {
-                  // success({
-                  //   method: request.method,
-                  //   path: request.path,
-                  //   service,
-                  //   time: Date.now() - timeNow,
-                  //   serviceResult: {
-                  //     id: requestId,
-                  //     service,
-                  //     response: serverResponse,
-                  //   },
-                  // });
+                  success({
+                    id: requestId,
+                    method: request.method,
+                    path: request.path,
+                    service,
+                    time: Date.now() - timeNow,
+                    response: {
+                      headers: serverResponse.headers,
+                      content: serverResponse.body,
+                    },
+                  });
                 })
                 .catch(failure);
             })
@@ -76,5 +76,5 @@ export default function invokeServices(
     }
   }
 
-  return []; // promises;
+  return promises;
 }

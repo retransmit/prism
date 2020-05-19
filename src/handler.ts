@@ -106,6 +106,18 @@ export function createHandler(method: HttpMethods) {
           // Response body
           ctx.body = response.content;
 
+          // Headers of type IncomingHttpHeaders
+          if (response.headers) {
+            Object.keys(response.headers).forEach((field) => {
+              const value = response?.headers
+                ? response?.headers[field]
+                : undefined;
+              if (value) {
+                ctx.response.set(field, value);
+              }
+            });
+          }
+
           // Cookies!
           if (response.cookies) {
             for (const cookie of response.cookies) {

@@ -1,5 +1,6 @@
 import { IRouterContext } from "koa-router";
 import { ClientOpts } from "redis";
+import { IncomingHttpHeaders } from "http2";
 
 export type HttpMethods = "GET" | "POST" | "PUT" | "DELETE" | "PATCH";
 
@@ -147,6 +148,7 @@ export type HttpResponse = {
     maxAge?: number;
     overwrite?: boolean;
   }[];
+  headers?: IncomingHttpHeaders;
   content?: any;
   contentType?: string;
 };

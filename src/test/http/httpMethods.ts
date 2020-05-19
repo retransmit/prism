@@ -1,6 +1,7 @@
 import { HttpMethods, IAppConfig } from "../../types";
 import request = require("supertest");
-import { doPubSub } from "./utils";
+import Koa = require("koa");
+import { startWithConfiguration } from "../..";
 
 export default async function (app: { instance: any }) {
   function makeConfig(options: { method: HttpMethods }): IAppConfig {
@@ -10,10 +11,9 @@ export default async function (app: { instance: any }) {
           [options.method]: {
             services: {
               userservice: {
-                type: "redis" as "redis",
+                type: "http" as "http",
                 config: {
-                  requestChannel: "input",
-                  responseChannel: "output",
+                  url: "http://localhost:6666/users",
                 },
               },
             },
@@ -38,30 +38,15 @@ export default async function (app: { instance: any }) {
     it(`adds ${method} request to the channel`, async () => {
       const config = makeConfig({ method });
 
-      const redisServiceResponse = {
-        id: "temp",
-        service: "userservice",
-        response: {
-          content: "Everything worked.",
-        },
-      };
+      const service = await startWithConfiguration(undefined, config);
+      app.instance = service.listen();
 
-      const result = await doPubSub(
-        app,
-        config,
-        [redisServiceResponse],
-        (success, getJson) => {
-          makeReq(request(app.instance), "/users")
-            .send({ hello: "world" })
-            .set("origin", "http://localhost:3000")
-            .then((x) => success([x, getJson()]));
-        }
-      );
+      const result = await makeReq(request(app.instance), "/users")
+        .send({ hello: "world" })
+        .set("origin", "http://localhost:3000");
 
-      const [response, json] = result;
-      json.data.headers.origin.should.equal("http://localhost:3000");
-      response.status.should.equal(200);
-      response.text.should.equal(`${method}: Everything worked.`);
+      result.status.should.equal(200);
+      result.text.should.equal("Everything worked.");
     });
   });
 }

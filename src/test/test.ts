@@ -4,11 +4,15 @@ import request = require("supertest");
 import { promisify } from "util";
 import Koa = require("koa");
 
-import mergeResults from "./redis/mergeResults";
-import httpMethods from "./redis/httpMethods";
-import dontMergeIgnored from "./redis/dontMergeIgnored";
-import showGenericErrors from "./redis/showGenericErrors";
-import mustNotOverwriteJsonWithString from "./redis/mustNotOverwriteJsonWithString";
+import httpHttpMethods from "./http/httpMethods";
+
+import redisHttpMethods from "./redis/httpMethods";
+import redisMergeResults from "./redis/mergeResults";
+import redisDontMergeIgnored from "./redis/dontMergeIgnored";
+import redisShowGenericErrors from "./redis/showGenericErrors";
+import redisMustNotOverwriteJsonWithString from "./redis/mustNotOverwriteJsonWithString";
+
+import startBackendHttpMockServer from "./http/startBackendHttpMockServer";
 
 function closeServerCb(app: Koa<any, any>, cb: any) {
   (app as any).close(cb);
@@ -33,7 +37,9 @@ function run() {
   describe("retransmit", () => {
     let app: { instance: any } = { instance: undefined };
 
-    before(async function resetEverything() {});
+    before(async function resetEverything() {
+      startBackendHttpMockServer(6666);
+    });
 
     beforeEach(async function resetBeforeEach() {});
 
@@ -42,11 +48,15 @@ function run() {
     });
 
     describe("redis", () => {
-      httpMethods(app);
-      mergeResults(app);
-      dontMergeIgnored(app);
-      mustNotOverwriteJsonWithString(app);
-      showGenericErrors(app);
+      redisHttpMethods(app);
+      redisMergeResults(app);
+      redisDontMergeIgnored(app);
+      redisShowGenericErrors(app);
+      redisMustNotOverwriteJsonWithString(app);
+    });
+
+    describe("http", () => {
+      httpHttpMethods(app);
     });
   });
 }
