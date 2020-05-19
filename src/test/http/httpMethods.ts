@@ -2,6 +2,8 @@ import { HttpMethods, IAppConfig } from "../../types";
 import request = require("supertest");
 import Koa = require("koa");
 import { startWithConfiguration } from "../..";
+import startBackends from "./startBackends";
+import { closeServer } from "../utils";
 
 export default async function (app: { instance: any }) {
   function makeConfig(options: { method: HttpMethods }): IAppConfig {
@@ -41,12 +43,28 @@ export default async function (app: { instance: any }) {
       const service = await startWithConfiguration(undefined, config);
       app.instance = service.listen();
 
+      // Start mock servers.
+      const backendApps = startBackends([
+        {
+          port: 6666,
+          routes: ["GET", "POST", "PUT", "DELETE", "PATCH"].map((method) => ({
+            path: "/users",
+            method,
+            response: `${method}: Everything worked.`,
+          })),
+        },
+      ]);
+
       const result = await makeReq(request(app.instance), "/users")
         .send({ hello: "world" })
         .set("origin", "http://localhost:3000");
 
+      for (const backendApp of backendApps) {
+        await closeServer(backendApp as any);
+      }
+
       result.status.should.equal(200);
-      result.text.should.equal("Everything worked.");
+      result.text.should.equal(`${method}: Everything worked.`);
     });
   });
 }

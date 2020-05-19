@@ -54,6 +54,10 @@ export default function invokeServices(
             new Promise<FetchedResponse>((success, failure) => {
               got(url, options)
                 .then((serverResponse) => {
+                  const isJson =
+                    serverResponse.headers["content-type"]?.indexOf(
+                      "application/json"
+                    ) !== -1;
                   success({
                     id: requestId,
                     method: request.method,
@@ -62,7 +66,9 @@ export default function invokeServices(
                     time: Date.now() - timeNow,
                     response: {
                       headers: serverResponse.headers,
-                      content: serverResponse.body,
+                      content: isJson
+                        ? JSON.parse(serverResponse.body)
+                        : serverResponse.body,
                     },
                   });
                 })
