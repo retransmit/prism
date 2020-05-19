@@ -6,6 +6,7 @@ import {
   TrackedRequest,
   ServiceHandlerConfig,
   RedisRequest,
+  HttpRequest,
 } from "../types";
 
 import * as activeRequests from "./activeRequests";
@@ -16,14 +17,20 @@ import { publish } from "./publish";
 */
 export default function invokeServices(
   requestId: string,
-  request: RedisRequest
+  httpRequest: HttpRequest
 ): Promise<FetchedResult>[] {
   const config = configModule.get();
-  const path = request.data.path;
-  const method = request.data.method;
-  const routeConfig = config.routes[path][method] as RouteConfig;
+  const routeConfig = config.routes[httpRequest.path][
+    httpRequest.method
+  ] as RouteConfig;
 
-  publish(request, path, method);
+  const redisRequest = {
+    id: requestId,
+    type: "request" as "request",
+    data: httpRequest,
+  };
+
+  publish(redisRequest, httpRequest.path, httpRequest.method);
 
   const toWait = Object.keys(routeConfig.services).filter(
     (serviceName) => routeConfig.services[serviceName].awaitResponse !== false
@@ -37,8 +44,8 @@ export default function invokeServices(
         id: requestId,
         type: "redis",
         channel,
-        path,
-        method,
+        path: httpRequest.path,
+        method: httpRequest.method,
         service,
         timeoutTicks:
           Date.now() + (routeConfig.services[service].timeoutMS || 30000),

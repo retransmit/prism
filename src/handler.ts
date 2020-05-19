@@ -3,9 +3,20 @@ import * as configModule from "./config";
 import { HttpMethods, CollatedResult, FetchedResult } from "./types";
 import randomId from "./random";
 import invokeHttpServices from "./http/invokeServices";
+import rollbackHttp from "./http/rollback";
 import invokeRedisServices from "./redis/invokeServices";
+import rollbackRedis from "./redis/rollback";
 import mergeResponses from "./mergeResponses";
 import { publish } from "./redis/publish";
+
+const connectors = [
+  { type: "http", invokeServices: invokeHttpServices, rollback: rollbackHttp },
+  {
+    type: "redis",
+    invokeServices: invokeRedisServices,
+    rollback: rollbackRedis,
+  },
+];
 
 /*
   Make an HTTP request handler
@@ -35,28 +46,13 @@ export function createHandler(method: HttpMethods) {
         headers: ctx.headers,
       };
 
-      const redisRequest = {
-        id: requestId,
-        type: "request" as "request",
-        data: httpRequest,
-      };
-
-      const promisesForRedisServices = invokeRedisServices(
-        requestId,
-        redisRequest
+      const promises: Promise<FetchedResult>[] = connectors.reduce(
+        (acc, provider) =>
+          acc.concat(provider.invokeServices(requestId, httpRequest)),
+        [] as Promise<FetchedResult>[]
       );
 
-      // const promisesForHttpServices = invokeHttpServices(
-      //   requestId,
-      //   httpRequest
-      // );
-
-      // TODO
-      const promisesForAllServices = promisesForRedisServices.concat([]);
-
-      const interimCollatedResults = await waitForPendingResponses(
-        promisesForAllServices
-      );
+      const interimCollatedResults = await waitForPendingResponses(promises);
 
       const collatedResults =
         routeConfig.handlers && routeConfig.handlers.merge
@@ -64,12 +60,9 @@ export function createHandler(method: HttpMethods) {
           : interimCollatedResults;
 
       if (collatedResults.aborted) {
-        const errorPayload = {
-          id: requestId,
-          type: "rollback",
-          data: redisRequest.data,
-        };
-        publish(errorPayload, ctx.path, method);
+        for (const connector of connectors) {
+          connector.rollback(requestId, httpRequest);
+        }
       }
 
       let response = mergeResponses(requestId, collatedResults);
