@@ -1,5 +1,5 @@
 import redis = require("redis");
-import { IAppConfig } from "../types";
+import { IAppConfig } from "../../types";
 
 let subscriber: redis.RedisClient;
 let publisher: redis.RedisClient;

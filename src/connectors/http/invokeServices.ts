@@ -1,7 +1,12 @@
-import { HttpMethods, RouteConfig, FetchedResult, HttpRequest } from "../types";
+import {
+  HttpMethods,
+  RouteConfig,
+  FetchedResult,
+  HttpRequest,
+} from "../../types";
 
 import * as activeRequests from "../redis/activeRequests";
-import * as configModule from "../config";
+import * as configModule from "../../config";
 import got from "got";
 
 /*
@@ -19,37 +24,40 @@ export default function invokeServices(
   // const promises: Promise<FetchedResult>[] = [];
 
   for (const service of Object.keys(routeConfig.services)) {
-    const url = routeConfig.services[service].http?.url;
+    const serviceConfig = routeConfig.services[service];
+    if (serviceConfig.type === "http") {
+      const url = serviceConfig.config.url;
 
-    if (url) {
-      const basicOptions = {
-        searchParams: request.query,
-        method: method,
-        headers: request.headers,
-        timeout: routeConfig.services[service].timeoutMS,
-      };
+      if (url) {
+        const basicOptions = {
+          searchParams: request.query,
+          method: method,
+          headers: request.headers,
+          timeout: routeConfig.services[service].timeoutMS,
+        };
 
-      const options =
-        typeof request.body === "string"
-          ? {
-              ...basicOptions,
-              body: request.body,
-            }
-          : typeof request.body === "object"
-          ? {
-              ...basicOptions,
-              json: request.body,
-            }
-          : basicOptions;
-          
-      if (routeConfig.services[service].awaitResponse !== false) {
-        // promises.push(
-        //   new Promise((success, failure) => {
-        //     got(url, basicOptions);
-        //   })
-        // );
-      } else {
-        got(url, basicOptions);
+        const options =
+          typeof request.body === "string"
+            ? {
+                ...basicOptions,
+                body: request.body,
+              }
+            : typeof request.body === "object"
+            ? {
+                ...basicOptions,
+                json: request.body,
+              }
+            : basicOptions;
+
+        if (routeConfig.services[service].awaitResponse !== false) {
+          // promises.push(
+          //   new Promise((success, failure) => {
+          //     got(url, basicOptions);
+          //   })
+          // );
+        } else {
+          got(url, basicOptions);
+        }
       }
     }
   }

@@ -1,5 +1,5 @@
-import * as configModule from "../config";
-import { TrackedRequest, RouteConfig } from "../types";
+import * as configModule from "../../config";
+import { ActiveRedisRequest, RouteConfig } from "../../types";
 import * as activeRequests from "./activeRequests";
 
 let isCleaningUp = false;
@@ -13,7 +13,7 @@ export default async function cleanupTimedOut() {
     const config = configModule.get();
     const entries = activeRequests.entries();
 
-    const timedOut: [string, TrackedRequest][] = [];
+    const timedOut: [string, ActiveRedisRequest][] = [];
     for (const [id, trackedRequest] of entries) {
       if (Date.now() > trackedRequest.timeoutTicks) {
         timedOut.push([trackedRequest.id, trackedRequest]);
@@ -25,8 +25,7 @@ export default async function cleanupTimedOut() {
         trackedRequest.method
       ] as RouteConfig;
       const resultHandler =
-        (config.handlers && config.handlers.result) ||
-        (routeConfig.handlers && routeConfig.handlers.result);
+        routeConfig.services[trackedRequest.service].handlers?.result;
 
       if (routeConfig.services[trackedRequest.service].abortOnError === false) {
         const fetchedResult = {

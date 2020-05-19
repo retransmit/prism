@@ -9,17 +9,19 @@ export default async function (app: { instance: any }) {
           POST: {
             services: {
               userservice: {
-                redis: {
+                type: "redis" as "redis",
+                config: {
                   requestChannel: "input",
                   responseChannel: "output",
                 },
               },
               messagingservice: {
-                merge: false,
-                redis: {
+                type: "redis" as "redis",
+                config: {
                   requestChannel: "input",
                   responseChannel: "output",
                 },
+                merge: false,
               },
             },
           },

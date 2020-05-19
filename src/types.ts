@@ -17,7 +17,6 @@ export interface IAppConfig {
     options?: ClientOpts;
   };
   handlers?: {
-    result?: (result: FetchedResult) => Promise<FetchedResult>;
     request?: (ctx: IRouterContext) => Promise<{ handled: boolean }>;
     response?: (
       ctx: IRouterContext,
@@ -36,7 +35,6 @@ export type RouteConfig = {
     [key: string]: ServiceHandlerConfig;
   };
   handlers?: {
-    result?: (result: FetchedResult) => Promise<FetchedResult>;
     merge?: (result: CollatedResult) => Promise<CollatedResult>;
     request?: (ctx: IRouterContext) => Promise<{ handled: boolean }>;
     response?: (
@@ -45,27 +43,43 @@ export type RouteConfig = {
     ) => Promise<{ handled: boolean }>;
   };
   genericErrors?: boolean;
-  logError?: (error: string) => Promise<void>;
 };
 
 /*
   Service Configuration
 */
-export type ServiceHandlerConfig = {
-  redis?: {
-    requestChannel: string;
-    responseChannel: string;
-    numRequestChannels?: number;
-  };
-  http?: {
-    url: string;
-    rollbackUrl?: string;
-  };
+export type ServiceHandlerConfig = (
+  | {
+      type: "redis";
+      config: {
+        requestChannel: string;
+        responseChannel: string;
+        numRequestChannels?: number;
+        handlers?: {
+          request?: (request: RedisRequest) => any;
+        };
+      };
+    }
+  | {
+      type: "http";
+      config: {
+        url: string;
+        rollbackUrl?: string;
+        handlers?: {
+          request?: (request: HttpRequest) => any;
+        };
+      };
+    }
+) & {
   awaitResponse?: boolean;
   merge?: boolean;
   abortOnError?: boolean;
   timeoutMS?: number;
   mergeField?: string;
+  handlers?: {
+    result?: (result: FetchedResult) => Promise<FetchedResult>;
+  };
+  logError?: (error: string) => Promise<void>;
 };
 
 /*
@@ -81,15 +95,8 @@ export type ServiceResult = {
 /*
   Currently active requests
 */
-export type TrackedRequest = (
-  | {
-      type: "redis";
-      channel: string;
-    }
-  | {
-      type: "http";
-    }
-) & {
+export type ActiveRedisRequest = {
+  responseChannel: string;
   id: string;
   path: string;
   timeoutTicks: number;
@@ -150,7 +157,7 @@ export type HttpRequest = {
 
 export type RedisRequest = {
   id: string;
-  type: "request";
+  type: string;
   data: HttpRequest;
 };
 

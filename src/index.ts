@@ -10,7 +10,7 @@ import * as config from "./config";
 import { IAppConfig } from "./types";
 
 import { createHandler } from "./handler";
-import init from "./redis/init";
+import init from "./connectors/redis/init";
 
 const packageJson = require("../package.json");
 

@@ -10,7 +10,8 @@ export default async function (app: { instance: any }) {
           [options.method]: {
             services: {
               userservice: {
-                redis: {
+                type: "redis" as "redis",
+                config: {
                   requestChannel: "input",
                   responseChannel: "output",
                 },

@@ -2,12 +2,11 @@ import { IRouterContext } from "koa-router";
 import * as configModule from "./config";
 import { HttpMethods, CollatedResult, FetchedResult } from "./types";
 import randomId from "./random";
-import invokeHttpServices from "./http/invokeServices";
-import rollbackHttp from "./http/rollback";
-import invokeRedisServices from "./redis/invokeServices";
-import rollbackRedis from "./redis/rollback";
+import invokeHttpServices from "./connectors/http/invokeServices";
+import rollbackHttp from "./connectors/http/rollback";
+import invokeRedisServices from "./connectors/redis/invokeServices";
+import rollbackRedis from "./connectors/redis/rollback";
 import mergeResponses from "./mergeResponses";
-import { publish } from "./redis/publish";
 
 const connectors = [
   { type: "http", invokeServices: invokeHttpServices, rollback: rollbackHttp },
