@@ -32,56 +32,24 @@ export default async function processMessage(
         const serviceResult = modifyServiceResponse
           ? {
               ...originalServiceResult,
-              response: await modifyServiceResponse(originalServiceResult.response),
+              response: await modifyServiceResponse(
+                originalServiceResult.response
+              ),
             }
           : originalServiceResult;
 
         const processingTime = Date.now() - activeRequest.startTime;
 
-        if (serviceResult.success) {
-          const fetchedResult = {
-            time: processingTime,
-            ignore: false as false,
-            path: activeRequest.path,
-            method: activeRequest.method,
-            service: activeRequest.service,
-            serviceResult: serviceResult,
-          };
+        const fetchedResult = {
+          time: processingTime,
+          ignore: false as false,
+          path: activeRequest.path,
+          method: activeRequest.method,
+          service: activeRequest.service,
+          serviceResult: serviceResult,
+        };
 
-          activeRequest.onSuccess(fetchedResult);
-        }
-        // serviceResult.success === false
-        else {
-          const routeConfig = config.routes[activeRequest.path][
-            activeRequest.method
-          ] as RouteConfig;
-
-          // Don't abort
-          if (
-            routeConfig.services[activeRequest.service].abortOnError === false
-          ) {
-            const fetchedResult = {
-              time: processingTime,
-              ignore: true as true,
-              path: activeRequest.path,
-              method: activeRequest.method,
-              service: activeRequest.service,
-            };
-            activeRequest.onSuccess(fetchedResult);
-          }
-          // it's ok to abort.
-          else {
-            const fetchedResult = {
-              time: processingTime,
-              ignore: false,
-              path: activeRequest.path,
-              method: activeRequest.method,
-              service: activeRequest.service,
-              serviceResult: serviceResult,
-            };
-            activeRequest.onError(fetchedResult);
-          }
-        }
+        activeRequest.onSuccess(fetchedResult);
       }
     }
   }

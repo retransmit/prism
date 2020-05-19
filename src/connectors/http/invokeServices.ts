@@ -16,6 +16,7 @@ export default function invokeServices(
   requestId: string,
   request: HttpRequest
 ): Promise<FetchedResult>[] {
+  const timeNow = Date.now();
   const config = configModule.get();
   const path = request.path;
   const method = request.method;
@@ -32,7 +33,7 @@ export default function invokeServices(
           searchParams: request.query,
           method: method,
           headers: request.headers,
-          timeout: routeConfig.services[service].timeoutMS,
+          timeout: serviceConfig.timeoutMS,
         };
 
         const options =
@@ -48,18 +49,30 @@ export default function invokeServices(
               }
             : basicOptions;
 
-        if (routeConfig.services[service].awaitResponse !== false) {
+        if (serviceConfig.awaitResponse !== false) {
           promises.push(
-            new Promise((success, failure) => {
-              got(url, basicOptions)
+            new Promise<FetchedResult>((success, failure) => {
+              got(url, options)
                 .then((serverResponse) => {
-                  return {};
+                  // success({
+                  //   ignore: false,
+                  //   method: request.method,
+                  //   path: request.path,
+                  //   service,
+                  //   time: Date.now() - timeNow,
+                  //   serviceResult: {
+                  //     id: requestId,
+                  //     service,
+                  //     success: true,
+                  //     response: serverResponse,
+                  //   },
+                  // });
                 })
                 .catch(failure);
             })
           );
         } else {
-          got(url, basicOptions);
+          got(url, options);
         }
       }
     }

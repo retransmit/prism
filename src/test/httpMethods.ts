@@ -41,7 +41,6 @@ export default async function (app: { instance: any }) {
       const serviceResult: ServiceResult = {
         id: "temp",
         service: "userservice",
-        success: true,
         response: {
           content: "Everything worked.",
         },

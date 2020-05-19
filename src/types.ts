@@ -59,7 +59,7 @@ export type ServiceHandlerConfig = (
       config: {
         url: string;
         rollbackUrl?: string;
-        modifyServiceRequest?: (request: HttpRequest) => any;
+        modifyServiceRequest?: (request: HttpRequest) => HttpRequest;
       };
     }
 ) & {
@@ -78,7 +78,7 @@ export type ServiceHandlerConfig = (
 export type ServiceResult = {
   id: string;
   service: string;
-  success: boolean;
+  //success: boolean;
   response: HttpResponse;
 };
 
@@ -100,22 +100,20 @@ export type ActiveRedisRequest = {
 /*
   Output of processMessages()
 */
-export type FetchedResult =
+export type FetchedResult = (
   | {
-      time: number;
       ignore: false;
-      path: string;
-      method: HttpMethods;
-      service: string;
       serviceResult: ServiceResult;
     }
   | {
-      path: string;
-      method: HttpMethods;
-      service: string;
-      time: number;
       ignore: true;
-    };
+    }
+) & {
+  time: number;
+  path: string;
+  method: HttpMethods;
+  service: string;
+};
 
 /*
   Result of collating results from services
