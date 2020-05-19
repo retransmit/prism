@@ -1,5 +1,5 @@
 import * as configModule from "../../config";
-import { RouteConfig, HttpResponse, RedisServiceResponse } from "../../types";
+import { RouteConfig, HttpResponse, RedisServiceResponse, FetchedResponse } from "../../types";
 import * as activeRequests from "./activeRequests";
 
 export default async function processMessage(
@@ -34,18 +34,16 @@ export default async function processMessage(
 
         const processingTime = Date.now() - activeRequest.startTime;
 
-        const fetchedResult = {
+        const fetchedResponse: FetchedResponse = {
           id: redisResponse.id,
           time: processingTime,
-          ignore: false as false,
           path: activeRequest.path,
           method: activeRequest.method,
           service: activeRequest.service,
-          response,
-          success: true as true,
+          response
         };
 
-        activeRequest.onSuccess(fetchedResult);
+        activeRequest.onResponse(fetchedResponse);
       }
     }
   }

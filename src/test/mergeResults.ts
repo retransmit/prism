@@ -2,7 +2,7 @@ import request = require("supertest");
 import { doPubSub } from "./utils";
 
 export default async function (app: { instance: any }) {
-  it(`merges results`, async () => {
+  it(`merges responses`, async () => {
     const config = {
       routes: {
         "/users": {
@@ -32,7 +32,6 @@ export default async function (app: { instance: any }) {
       {
         id: "temp",
         service: "userservice",
-        success: true,
         response: {
           content: {
             user: 1,
@@ -42,7 +41,6 @@ export default async function (app: { instance: any }) {
       {
         id: "temp",
         service: "messagingservice",
-        success: true,
         response: {
           content: {
             message: "hello world",

@@ -2,7 +2,7 @@ import {
   HttpMethods,
   RouteConfig,
   IAppConfig,
-  FetchedResult,
+  FetchedResponse,
   ActiveRedisRequest,
   ServiceHandlerConfig,
   RedisServiceRequest,

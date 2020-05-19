@@ -29,11 +29,10 @@ export default async function (app: { instance: any }) {
       },
     };
 
-    const serviceResults = [
+    const serviceResponses = [
       {
         id: "temp",
         service: "userservice",
-        success: true,
         response: {
           content: {
             user: 1,
@@ -43,7 +42,6 @@ export default async function (app: { instance: any }) {
       {
         id: "temp",
         service: "messagingservice",
-        success: true,
         response: {
           content: {
             message: "hello world",
@@ -55,7 +53,7 @@ export default async function (app: { instance: any }) {
     const result = await doPubSub(
       app,
       config,
-      serviceResults,
+      serviceResponses,
       (success, getJson) => {
         request(app.instance)
           .post("/users")

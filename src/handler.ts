@@ -1,6 +1,6 @@
 import { IRouterContext } from "koa-router";
 import * as configModule from "./config";
-import { HttpMethods, CollatedResult, FetchedResult } from "./types";
+import { HttpMethods, CollatedResponses, FetchedResponse } from "./types";
 import randomId from "./random";
 import invokeHttpServices from "./connectors/http/invokeServices";
 import rollbackHttp from "./connectors/http/rollback";
@@ -30,8 +30,8 @@ export function createHandler(method: HttpMethods) {
     // If there are custom handlers, try that first.
     const modifyRequest = routeConfig?.modifyRequest || config.modifyRequest;
     if (modifyRequest) {
-      const result = await modifyRequest(ctx);
-      if (result.handled) {
+      const modResult = await modifyRequest(ctx);
+      if (modResult.handled) {
         return;
       }
     }
@@ -46,32 +46,32 @@ export function createHandler(method: HttpMethods) {
         headers: ctx.headers,
       };
 
-      const promises: Promise<FetchedResult>[] = connectors.reduce(
+      const promises: Promise<FetchedResponse>[] = connectors.reduce(
         (acc, provider) =>
           acc.concat(provider.invokeServices(requestId, httpRequest)),
-        [] as Promise<FetchedResult>[]
+        [] as Promise<FetchedResponse>[]
       );
 
-      const interimCollatedResults = await waitForPendingResponses(promises);
+      const interimCollatedResponses = await waitForPendingResponses(promises);
 
-      const collatedResults = routeConfig.mergeResults
-        ? await routeConfig.mergeResults(interimCollatedResults)
-        : interimCollatedResults;
+      const collatedResponses = routeConfig.mergeResponses
+        ? await routeConfig.mergeResponses(interimCollatedResponses)
+        : interimCollatedResponses;
 
-      if (collatedResults.aborted) {
+      if (collatedResponses.aborted) {
         for (const connector of connectors) {
           connector.rollback(requestId, httpRequest);
         }
       }
 
-      let response = mergeResponses(requestId, collatedResults);
+      let response = mergeResponses(requestId, collatedResponses);
 
       // See if there are any custom handlers for final response
       const modifyResponse =
         routeConfig.modifyResponse || config.modifyResponse;
       if (modifyResponse) {
-        const result = await modifyResponse(ctx, response);
-        if (result.handled) {
+        const modResult = await modifyResponse(ctx, response);
+        if (modResult.handled) {
           return;
         }
       }
@@ -133,17 +133,17 @@ export function createHandler(method: HttpMethods) {
   Wait for responses
 */
 async function waitForPendingResponses(
-  promises: Promise<FetchedResult>[]
-): Promise<CollatedResult> {
+  promises: Promise<FetchedResponse>[]
+): Promise<CollatedResponses> {
   try {
     return {
       aborted: false,
-      results: await Promise.all(promises),
+      responses: await Promise.all(promises),
     };
   } catch (ex) {
     return {
       aborted: true,
-      errorResult: ex,
+      errorResponse: ex,
     };
   }
 }

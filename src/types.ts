@@ -37,7 +37,7 @@ export type RouteConfig = {
     ctx: IRouterContext,
     response: any
   ) => Promise<{ handled: boolean }>;
-  mergeResults?: (result: CollatedResult) => Promise<CollatedResult>;
+  mergeResponses?: (responses: CollatedResponses) => Promise<CollatedResponses>;
   genericErrors?: boolean;
 };
 
@@ -83,14 +83,13 @@ export type ActiveRedisRequest = {
   method: HttpMethods;
   service: string;
   startTime: number;
-  onSuccess: (result: FetchedResult) => void;
-  onError: (result: FetchedResult) => void;
+  onResponse: (response: FetchedResponse) => void;
 };
 
 /*
   Output of processMessages()
 */
-export type FetchedResult = {
+export type FetchedResponse = {
   id: string;
   service: string;
   time: number;
@@ -100,14 +99,14 @@ export type FetchedResult = {
 };
 
 /*
-  Result of collating results from services
+  Result of collating responses from services
 */
-export type CollatedResult =
+export type CollatedResponses =
   | {
       aborted: false;
-      results: FetchedResult[];
+      responses: FetchedResponse[];
     }
-  | { aborted: true; errorResult: FetchedResult };
+  | { aborted: true; errorResponse: FetchedResponse };
 
 /*
   Requests and Responses for Redis-based Services

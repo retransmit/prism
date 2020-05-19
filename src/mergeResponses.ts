@@ -1,61 +1,62 @@
 import * as configModule from "./config";
-import { CollatedResult, HttpResponse, RouteConfig } from "./types";
+import { CollatedResponses, HttpResponse, RouteConfig } from "./types";
 
 /*
   Merge received results into a final response
 */
 export default function mergeResponses(
   requestId: string,
-  collatedResults: CollatedResult
+  collatedResponses: CollatedResponses
 ): HttpResponse | undefined {
   const config = configModule.get();
-  if (!collatedResults.aborted) {
+  if (!collatedResponses.aborted) {
     let finalResponse: HttpResponse = { status: 200, content: undefined };
 
-    for (const result of collatedResults.results) {
-      if (typeof result.response !== "undefined") {
-        const routeConfig = config.routes[result.path][
-          result.method
+    for (const response of collatedResponses.responses) {
+      if (typeof response.response !== "undefined") {
+        const routeConfig = config.routes[response.path][
+          response.method
         ] as RouteConfig;
-        if (routeConfig.services[result.service].merge !== false) {
-          if (result.response) {
-            if (result.response.content) {
+        const serviceConfig = routeConfig.services[response.service];
+        if (serviceConfig.merge !== false) {
+          if (response.response) {
+            if (response.response.content) {
               /*
               If the response has already been redirected, you can't write on to it.
             */
               if (finalResponse.redirect) {
                 return {
                   status: 500,
-                  content: `${result.service} is redirecting the response to ${result.response.redirect} but content has already been added to the response.`,
+                  content: `${response.service} is redirecting the response to ${response.response.redirect} but content has already been added to the response.`,
                 };
               } else {
                 /*
                 If current response is not an object and new result is an object, we throw an error. We can't merge an object on to a string.
               */
-                if (typeof result.response.content === "object") {
+                if (typeof response.response.content === "object") {
                   if (typeof finalResponse.content === "undefined") {
-                    finalResponse.content = result.response.content;
+                    finalResponse.content = response.response.content;
                     finalResponse.contentType = "application/json";
                   } else {
                     if (typeof finalResponse.content !== "object") {
                       return {
                         status: 500,
                         content: `Cannot merge multiple types of content. ${
-                          result.service
+                          response.service
                         } is returned a json response while the current response is of type ${typeof finalResponse.content}.`,
                       };
                     } else {
                       const mergeField =
-                        routeConfig.services[result.service].mergeField;
+                        serviceConfig.mergeField;
 
                       finalResponse.content = mergeField
                         ? {
                             ...finalResponse.content,
-                            [mergeField]: result.response.content,
+                            [mergeField]: response.response.content,
                           }
                         : {
                             ...finalResponse.content,
-                            ...result.response.content,
+                            ...response.response.content,
                           };
                       finalResponse.contentType = "application/json";
                     }
@@ -67,15 +68,15 @@ export default function mergeResponses(
                   if (typeof finalResponse.content !== "undefined") {
                     return {
                       status: 500,
-                      content: `${result.service} returned a response which will overwrite current response.`,
+                      content: `${response.service} returned a response which will overwrite current response.`,
                     };
                   } else {
                     const mergeField =
-                      routeConfig.services[result.service].mergeField;
+                      serviceConfig.mergeField;
 
                     finalResponse.content = mergeField
-                      ? { [mergeField]: result.response.content }
-                      : result.response.content;
+                      ? { [mergeField]: response.response.content }
+                      : response.response.content;
                   }
                 }
               }
@@ -83,17 +84,17 @@ export default function mergeResponses(
               /*
               Content type cannot be changed once set.
             */
-              if (result.response.contentType) {
+              if (response.response.contentType) {
                 if (
                   finalResponse.contentType &&
-                  result.response.contentType !== finalResponse.contentType
+                  response.response.contentType !== finalResponse.contentType
                 ) {
                   return {
                     status: 500,
-                    content: `${result.service} returned content type ${result.response.contentType} while the current response has content type ${finalResponse.contentType}.`,
+                    content: `${response.service} returned content type ${response.response.contentType} while the current response has content type ${finalResponse.contentType}.`,
                   };
                 } else {
-                  finalResponse.contentType = result.response.contentType;
+                  finalResponse.contentType = response.response.contentType;
                 }
               }
             }
@@ -101,19 +102,19 @@ export default function mergeResponses(
             /*
             If the response content has already been modified previously, then you cannot redirect. If there's already a pending redirect, you cannot redirect again.
           */
-            if (result.response.redirect) {
+            if (response.response.redirect) {
               if (finalResponse.content) {
                 return {
                   status: 500,
-                  content: `${result.service} is redirecting to ${result.response.redirect} but the current response already has some content.`,
+                  content: `${response.service} is redirecting to ${response.response.redirect} but the current response already has some content.`,
                 };
               } else if (finalResponse.redirect) {
                 return {
                   status: 500,
-                  content: `${result.service} is redirecting to ${result.response.redirect} but the response has already been redirected to ${finalResponse.redirect}.`,
+                  content: `${response.service} is redirecting to ${response.response.redirect} but the response has already been redirected to ${finalResponse.redirect}.`,
                 };
               } else {
-                finalResponse.redirect = result.response.redirect;
+                finalResponse.redirect = response.response.redirect;
               }
             }
 
@@ -122,22 +123,22 @@ export default function mergeResponses(
             If results have differing 2xx codes, send 200.
             If results have 2xx and 4xx (or 3xx or 5xx), that's an error
           */
-            if (result.response.status) {
+            if (response.response.status) {
               if (!finalResponse.status) {
-                finalResponse.status = result.response.status;
+                finalResponse.status = response.response.status;
               } else {
-                if (finalResponse.status !== result.response.status) {
+                if (finalResponse.status !== response.response.status) {
                   if (
                     finalResponse.status >= 200 &&
                     finalResponse.status <= 299 &&
-                    result.response.status >= 200 &&
-                    result.response.status <= 299
+                    response.response.status >= 200 &&
+                    response.response.status <= 299
                   ) {
                     finalResponse.status = 200;
                   } else {
                     return {
                       status: 500,
-                      content: `${result.service} is returning status code ${result.response.status} but the response already has its status set to ${finalResponse.status}.`,
+                      content: `${response.service} is returning status code ${response.response.status} but the response already has its status set to ${finalResponse.status}.`,
                     };
                   }
                 }
@@ -147,9 +148,9 @@ export default function mergeResponses(
             /*
             We concat all cookies.
           */
-            if (result.response.cookies) {
+            if (response.response.cookies) {
               finalResponse.cookies = (finalResponse.cookies || []).concat(
-                result.response.cookies
+                response.response.cookies
               );
             }
           }
@@ -158,6 +159,6 @@ export default function mergeResponses(
     }
     return finalResponse;
   } else {
-    return collatedResults.errorResult.response;
+    return collatedResponses.errorResponse.response;
   }
 }

@@ -33,7 +33,6 @@ export default async function (app: { instance: any }) {
       {
         id: "temp",
         service: "userservice",
-        success: true,
         response: {
           content: {
             user: 1,
@@ -43,7 +42,6 @@ export default async function (app: { instance: any }) {
       {
         id: "temp",
         service: "messagingservice",
-        success: true,
         response: {
           content: "Hello world",
         },
@@ -100,7 +98,6 @@ export default async function (app: { instance: any }) {
       {
         id: "temp",
         service: "userservice",
-        success: true,
         response: {
           content: {
             user: 1,
@@ -110,7 +107,6 @@ export default async function (app: { instance: any }) {
       {
         id: "temp",
         service: "messagingservice",
-        success: true,
         response: {
           content: "Hello world",
         },

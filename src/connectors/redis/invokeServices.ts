@@ -2,7 +2,7 @@ import {
   HttpMethods,
   RouteConfig,
   IAppConfig,
-  FetchedResult,
+  FetchedResponse,
   ActiveRedisRequest,
   ServiceHandlerConfig,
   RedisServiceRequest,
@@ -18,7 +18,7 @@ import { publish } from "./publish";
 export default function invokeServices(
   requestId: string,
   httpRequest: HttpRequest
-): Promise<FetchedResult>[] {
+): Promise<FetchedResponse>[] {
   const config = configModule.get();
   const routeConfig = config.routes[httpRequest.path][
     httpRequest.method
@@ -32,7 +32,7 @@ export default function invokeServices(
 
   publish(redisServiceRequest, httpRequest.path, httpRequest.method);
 
-  const promises: Promise<FetchedResult>[] = [];
+  const promises: Promise<FetchedResponse>[] = [];
 
   for (const service of Object.keys(routeConfig.services)) {
     const serviceConfig = routeConfig.services[service];
@@ -41,7 +41,7 @@ export default function invokeServices(
       serviceConfig.awaitResponse !== false
     ) {
       promises.push(
-        new Promise<FetchedResult>((success, error) => {
+        new Promise<FetchedResponse>((success, error) => {
           activeRequests.set(`${requestId}+${service}`, {
             id: requestId,
             responseChannel: serviceConfig.config.responseChannel,
@@ -49,10 +49,9 @@ export default function invokeServices(
             method: httpRequest.method,
             service,
             timeoutTicks:
-              Date.now() + (routeConfig.services[service].timeoutMS || 30000),
+              Date.now() + (serviceConfig.timeoutMS || 30000),
             startTime: Date.now(),
-            onSuccess: success,
-            onError: error,
+            onResponse: success
           });
         })
       );

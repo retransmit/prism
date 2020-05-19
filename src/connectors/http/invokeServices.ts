@@ -1,7 +1,7 @@
 import {
   HttpMethods,
   RouteConfig,
-  FetchedResult,
+  FetchedResponse,
   HttpRequest,
 } from "../../types";
 
@@ -15,14 +15,14 @@ import got from "got";
 export default function invokeServices(
   requestId: string,
   request: HttpRequest
-): Promise<FetchedResult>[] {
+): Promise<FetchedResponse>[] {
   const timeNow = Date.now();
   const config = configModule.get();
   const path = request.path;
   const method = request.method;
   const routeConfig = config.routes[path][method] as RouteConfig;
 
-  const promises: Promise<FetchedResult>[] = [];
+  const promises: Promise<FetchedResponse>[] = [];
   for (const service of Object.keys(routeConfig.services)) {
     const serviceConfig = routeConfig.services[service];
     if (serviceConfig.type === "http") {
@@ -51,11 +51,10 @@ export default function invokeServices(
 
         if (serviceConfig.awaitResponse !== false) {
           promises.push(
-            new Promise<FetchedResult>((success, failure) => {
+            new Promise<FetchedResponse>((success, failure) => {
               got(url, options)
                 .then((serverResponse) => {
                   // success({
-                  //   ignore: false,
                   //   method: request.method,
                   //   path: request.path,
                   //   service,
@@ -63,7 +62,6 @@ export default function invokeServices(
                   //   serviceResult: {
                   //     id: requestId,
                   //     service,
-                  //     success: true,
                   //     response: serverResponse,
                   //   },
                   // });
