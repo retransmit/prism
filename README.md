@@ -85,7 +85,7 @@ module.exports = {
 };
 ```
 
-The example above defines the "/users" route configuration for GET and POST methods. In this example, when the browser sends a POST request to /users, disspate will add the request information to the queue for further processing by the two services (userService and quotesService) defined above. These services should post the data back into the redis channels after completing their respective operations. Retransmit will collate the requests and send it back to the client as the response.
+The example above defines the "/users" route configuration for GET and POST methods. In this example, when the browser sends a POST request to /users, disspate will add the request information to the queue for further processing by the two services (userService and quotesService) defined above. These services should post the data back into the redis channels after completing their respective operations. Retransmit will collect the requests and send it back to the client as the response.
 
 Retransmit also has an async mode where the request completes immediately with a completion id. Async is enabled by add a query string parameter: /users?async=true. Clients can poll /completion/:completion-id to get the current status or the final result if available.
 

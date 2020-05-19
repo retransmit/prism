@@ -1,6 +1,6 @@
-import { HttpMethods, IAppConfig } from "../types";
+import { HttpMethods, IAppConfig } from "../../types";
 import request = require("supertest");
-import { doPubSub } from "./utils";
+import { doPubSub } from "../utils";
 
 export default async function (app: { instance: any }) {
   function makeConfig(options: { method: HttpMethods }): IAppConfig {

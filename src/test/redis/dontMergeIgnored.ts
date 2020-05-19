@@ -1,8 +1,8 @@
 import request = require("supertest");
-import { doPubSub } from "./utils";
+import { doPubSub } from "../utils";
 
 export default async function (app: { instance: any }) {
-  it(`must not overwrite json content with string content`, async () => {
+  it(`does not merge ignored results`, async () => {
     const config = {
       routes: {
         "/users": {
@@ -20,7 +20,8 @@ export default async function (app: { instance: any }) {
                 config: {
                   requestChannel: "input",
                   responseChannel: "output",
-                }
+                },
+                merge: false,
               },
             },
           },
@@ -28,7 +29,7 @@ export default async function (app: { instance: any }) {
       },
     };
 
-    const serviceResults = [
+    const serviceResponses = [
       {
         id: "temp",
         service: "userservice",
@@ -42,7 +43,9 @@ export default async function (app: { instance: any }) {
         id: "temp",
         service: "messagingservice",
         response: {
-          content: "Hello world",
+          content: {
+            message: "hello world",
+          },
         },
       },
     ];
@@ -50,7 +53,7 @@ export default async function (app: { instance: any }) {
     const result = await doPubSub(
       app,
       config,
-      serviceResults,
+      serviceResponses,
       (success, getJson) => {
         request(app.instance)
           .post("/users")
@@ -62,7 +65,9 @@ export default async function (app: { instance: any }) {
 
     const [response, json] = result;
     json.data.headers.origin.should.equal("http://localhost:3000");
-    response.status.should.equal(500);
-    response.text.should.equal("messagingservice returned a response which will overwrite current response.")
+    response.status.should.equal(200);
+    response.body.should.deepEqual({
+      user: 1,
+    });
   });
 }

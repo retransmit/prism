@@ -4,11 +4,11 @@ import request = require("supertest");
 import { promisify } from "util";
 import Koa = require("koa");
 
-import mergeResults from "./mergeResults";
-import httpMethods from "./httpMethods";
-import dontMergeIgnored from "./dontMergeIgnored";
-import showGenericErrors from "./showGenericErrors";
-import mustNotOverwriteJsonWithString from "./mustNotOverwriteJsonWithString";
+import mergeResults from "./redis/mergeResults";
+import httpMethods from "./redis/httpMethods";
+import dontMergeIgnored from "./redis/dontMergeIgnored";
+import showGenericErrors from "./redis/showGenericErrors";
+import mustNotOverwriteJsonWithString from "./redis/mustNotOverwriteJsonWithString";
 
 function closeServerCb(app: Koa<any, any>, cb: any) {
   (app as any).close(cb);
@@ -41,11 +41,13 @@ function run() {
       await closeServer(app.instance);
     });
 
-    httpMethods(app);
-    mergeResults(app);
-    dontMergeIgnored(app);
-    mustNotOverwriteJsonWithString(app);
-    showGenericErrors(app);
+    describe("redis", () => {
+      httpMethods(app);
+      mergeResults(app);
+      dontMergeIgnored(app);
+      mustNotOverwriteJsonWithString(app);
+      showGenericErrors(app);
+    });
   });
 }
 
