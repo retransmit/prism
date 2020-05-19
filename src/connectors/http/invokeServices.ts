@@ -1,11 +1,9 @@
 import {
-  HttpMethods,
   RouteConfig,
   FetchedResponse,
   HttpRequest,
 } from "../../types";
 
-import * as activeRequests from "../redis/activeRequests";
 import * as configModule from "../../config";
 import got from "got";
 

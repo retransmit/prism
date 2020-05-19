@@ -144,6 +144,22 @@ In the following example, the data coming from userservice is added to the 'user
 }
 ```
 
+You can also choose not to merge data from a certain service with the 'merge' flag in configuration.
+
+```js
+{
+  // parts of config omitted for brevity
+  messagingservice: {
+    type: "redis",
+    config: {
+      requestChannel: "inputs",
+      responseChannel: "outputs",
+    },
+    merge: false
+  },
+}
+```
+
 ## Not waiting for responses
 
 There might be services which you just want to call, and not wait for results. Use the 'awaitResponse' property to configure this.
@@ -162,5 +178,7 @@ There might be services which you just want to call, and not wait for results. U
 }
 ```
 
-## Choosing not to merge data from a Service
+
+
+## Modifying Requests and Responses
 
