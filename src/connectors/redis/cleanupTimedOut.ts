@@ -24,9 +24,7 @@ export default async function cleanupTimedOut() {
       const routeConfig = config.routes[trackedRequest.path][
         trackedRequest.method
       ] as RouteConfig;
-      const resultHandler =
-        routeConfig.services[trackedRequest.service].handlers?.result;
-
+      
       if (routeConfig.services[trackedRequest.service].abortOnError === false) {
         const fetchedResult = {
           time: Date.now() - trackedRequest.startTime,

@@ -26,13 +26,13 @@ export default async function processMessage(
       // Make sure the service responded in the configured channel
       // Otherwise ignore the message.
       if (channel === channelInRequest) {
-        const resultHandler =
-          routeConfig.services[activeRequest.service].handlers?.result;
+        const modifyServiceResponse =
+          routeConfig.services[activeRequest.service].modifyServiceResponse;
 
-        const serviceResult = resultHandler
+        const serviceResult = modifyServiceResponse
           ? {
               ...originalServiceResult,
-              response: await resultHandler(originalServiceResult.response),
+              response: await modifyServiceResponse(originalServiceResult.response),
             }
           : originalServiceResult;
 

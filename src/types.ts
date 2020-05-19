@@ -51,8 +51,7 @@ export type ServiceHandlerConfig = (
         requestChannel: string;
         responseChannel: string;
         numRequestChannels?: number;
-        modifyRequest?: (request: RedisRequest) => any;
-        
+        modifyServiceRequest?: (request: RedisRequest) => any;
       };
     }
   | {
@@ -60,7 +59,7 @@ export type ServiceHandlerConfig = (
       config: {
         url: string;
         rollbackUrl?: string;
-        modifyRequest?: (request: HttpRequest) => any;
+        modifyServiceRequest?: (request: HttpRequest) => any;
       };
     }
 ) & {
@@ -69,9 +68,7 @@ export type ServiceHandlerConfig = (
   abortOnError?: boolean;
   timeoutMS?: number;
   mergeField?: string;
-  handlers?: {
-    result?: (result: HttpResponse) => Promise<HttpResponse>;
-  };
+  modifyServiceResponse?: (result: HttpResponse) => Promise<HttpResponse>;
   logError?: (error: string) => Promise<void>;
 };
 
