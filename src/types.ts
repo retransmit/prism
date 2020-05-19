@@ -51,7 +51,7 @@ export type ServiceHandlerConfig = (
         requestChannel: string;
         responseChannel: string;
         numRequestChannels?: number;
-        modifyServiceRequest?: (request: RedisRequest) => any;
+        modifyServiceRequest?: (request: RedisServiceRequest) => any;
       };
     }
   | {
@@ -70,16 +70,6 @@ export type ServiceHandlerConfig = (
   mergeField?: string;
   modifyServiceResponse?: (result: HttpResponse) => Promise<HttpResponse>;
   logError?: (error: string) => Promise<void>;
-};
-
-/*
-  This is the output of participating services.
-*/
-export type ServiceResult = {
-  id: string;
-  service: string;
-  //success: boolean;
-  response: HttpResponse;
 };
 
 /*
@@ -103,16 +93,18 @@ export type ActiveRedisRequest = {
 export type FetchedResult = (
   | {
       ignore: false;
-      serviceResult: ServiceResult;
+      response: HttpResponse;
     }
   | {
       ignore: true;
     }
 ) & {
+  id: string;
+  success: boolean;
+  service: string;
   time: number;
   path: string;
   method: HttpMethods;
-  service: string;
 };
 
 /*
@@ -143,10 +135,19 @@ export type HttpRequest = {
   };
 };
 
-export type RedisRequest = {
+export type RedisServiceRequest = {
   id: string;
   type: string;
   data: HttpRequest;
+};
+
+/*
+  Response emitted by a Redis Service
+*/
+export type RedisServiceResponse = {
+  id: string;
+  service: string;
+  response: HttpResponse;
 };
 
 /*

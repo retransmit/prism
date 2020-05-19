@@ -24,31 +24,30 @@ export default async function cleanupTimedOut() {
       const routeConfig = config.routes[trackedRequest.path][
         trackedRequest.method
       ] as RouteConfig;
-      
+
       if (routeConfig.services[trackedRequest.service].abortOnError === false) {
         const fetchedResult = {
-          time: Date.now() - trackedRequest.startTime,
+          id: activeRequestId,
           ignore: true as true,
+          time: Date.now() - trackedRequest.startTime,
           path: trackedRequest.path,
           method: trackedRequest.method,
           service: trackedRequest.service,
+          success: true as true,
         };
         trackedRequest.onSuccess(fetchedResult);
       } else {
         const fetchedResult = {
+          id: activeRequestId,
           time: Date.now() - trackedRequest.startTime,
-          ignore: false,
+          ignore: false as false,
+          success: false,
           service: trackedRequest.service,
           path: trackedRequest.path,
           method: trackedRequest.method,
-          serviceResult: {
-            id: trackedRequest.id,
-            success: false,
-            service: trackedRequest.service,
-            response: {
-              content: `${trackedRequest.service} timed out.`,
-              status: 408,
-            },
+          response: {
+            content: `${trackedRequest.service} timed out.`,
+            status: 408,
           },
         };
         trackedRequest.onError(fetchedResult);

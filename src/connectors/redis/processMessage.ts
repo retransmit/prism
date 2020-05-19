@@ -1,5 +1,5 @@
 import * as configModule from "../../config";
-import { ServiceResult, RouteConfig } from "../../types";
+import { RouteConfig, HttpResponse, RedisServiceResponse } from "../../types";
 import * as activeRequests from "./activeRequests";
 
 export default async function processMessage(
@@ -8,10 +8,10 @@ export default async function processMessage(
 ) {
   const config = configModule.get();
 
-  const originalServiceResult = JSON.parse(messageString) as ServiceResult;
+  const redisResponse = JSON.parse(messageString) as RedisServiceResponse;
 
   const activeRequest = activeRequests.get(
-    `${originalServiceResult.id}+${originalServiceResult.service}`
+    `${redisResponse.id}+${redisResponse.service}`
   );
 
   if (activeRequest) {
@@ -26,27 +26,23 @@ export default async function processMessage(
       // Make sure the service responded in the configured channel
       // Otherwise ignore the message.
       if (channel === channelInRequest) {
-        const modifyServiceResponse =
-          routeConfig.services[activeRequest.service].modifyServiceResponse;
+        const modifyServiceResponse = serviceConfig.modifyServiceResponse;
 
-        const serviceResult = modifyServiceResponse
-          ? {
-              ...originalServiceResult,
-              response: await modifyServiceResponse(
-                originalServiceResult.response
-              ),
-            }
-          : originalServiceResult;
+        const response = modifyServiceResponse
+          ? await modifyServiceResponse(redisResponse.response)
+          : redisResponse.response;
 
         const processingTime = Date.now() - activeRequest.startTime;
 
         const fetchedResult = {
+          id: redisResponse.id,
           time: processingTime,
           ignore: false as false,
           path: activeRequest.path,
           method: activeRequest.method,
           service: activeRequest.service,
-          serviceResult: serviceResult,
+          response,
+          success: true as true,
         };
 
         activeRequest.onSuccess(fetchedResult);

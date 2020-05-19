@@ -5,7 +5,7 @@ import {
   FetchedResult,
   ActiveRedisRequest,
   ServiceHandlerConfig,
-  RedisRequest,
+  RedisServiceRequest,
   HttpRequest,
 } from "../../types";
 
@@ -16,11 +16,11 @@ import { publish } from "./publish";
   Make Promises for Redis Services
 */
 export default function rollback(requestId: string, httpRequest: HttpRequest) {
-  const redisRequest = {
+  const redisServiceRequest: RedisServiceRequest = {
     id: requestId,
     type: "rollback",
     data: httpRequest,
   };
 
-  publish(redisRequest, httpRequest.path, httpRequest.method);
+  publish(redisServiceRequest, httpRequest.path, httpRequest.method);
 }

@@ -1,4 +1,4 @@
-import { HttpMethods, IAppConfig, ServiceResult } from "../types";
+import { HttpMethods, IAppConfig } from "../types";
 import request = require("supertest");
 import { doPubSub } from "./utils";
 
@@ -38,7 +38,7 @@ export default async function (app: { instance: any }) {
     it(`adds ${method} request to the channel`, async () => {
       const config = makeConfig({ method });
 
-      const serviceResult: ServiceResult = {
+      const redisServiceResponse = {
         id: "temp",
         service: "userservice",
         response: {
@@ -49,7 +49,7 @@ export default async function (app: { instance: any }) {
       const result = await doPubSub(
         app,
         config,
-        [serviceResult],
+        [redisServiceResponse],
         (success, getJson) => {
           makeReq(request(app.instance), "/users")
             .send({ hello: "world" })

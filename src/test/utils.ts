@@ -1,12 +1,12 @@
 import request = require("supertest");
-import { IAppConfig, ServiceResult } from "../types";
+import { IAppConfig, RedisServiceResponse } from "../types";
 import { startWithConfiguration } from "..";
 import { createClient } from "redis";
 
 export async function doPubSub(
   app: { instance: any },
   config: IAppConfig,
-  serviceResults: ServiceResult[],
+  serviceResponses: RedisServiceResponse[],
   then: (success: Function, getJson: () => any) => void
 ): Promise<[request.Response, any]> {
   const service = await startWithConfiguration(undefined, config);
@@ -21,7 +21,7 @@ export async function doPubSub(
 
     subscriber.on("message", (channel, message) => {
       json = JSON.parse(message);
-      for (const result of serviceResults) {
+      for (const result of serviceResponses) {
         publisher.publish(
           "output",
           JSON.stringify({

@@ -5,7 +5,7 @@ import {
   FetchedResult,
   ActiveRedisRequest,
   ServiceHandlerConfig,
-  RedisRequest,
+  RedisServiceRequest,
   HttpRequest,
 } from "../../types";
 
@@ -24,13 +24,13 @@ export default function invokeServices(
     httpRequest.method
   ] as RouteConfig;
 
-  const redisRequest = {
+  const redisServiceRequest: RedisServiceRequest = {
     id: requestId,
     type: "request" as "request",
     data: httpRequest,
   };
 
-  publish(redisRequest, httpRequest.path, httpRequest.method);
+  publish(redisServiceRequest, httpRequest.path, httpRequest.method);
 
   const promises: Promise<FetchedResult>[] = [];
 

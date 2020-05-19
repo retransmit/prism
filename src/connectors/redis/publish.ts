@@ -3,12 +3,12 @@ import {
   HttpMethods,
   RouteConfig,
   HttpRequest,
-  RedisRequest,
+  RedisServiceRequest,
 } from "../../types";
 import { getPublisher } from "./clients";
 
 export async function publish(
-  request: RedisRequest,
+  request: RedisServiceRequest,
   path: string,
   method: HttpMethods
 ) {

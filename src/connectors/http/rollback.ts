@@ -5,7 +5,7 @@ import {
   FetchedResult,
   ActiveRedisRequest,
   ServiceHandlerConfig,
-  RedisRequest,
+  RedisServiceRequest,
   HttpRequest,
 } from "../../types";
 

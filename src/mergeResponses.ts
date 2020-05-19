@@ -18,46 +18,46 @@ export default function mergeResponses(
           result.method
         ] as RouteConfig;
         if (routeConfig.services[result.service].merge !== false) {
-          if (result.serviceResult.response) {
-            if (result.serviceResult.response.content) {
+          if (result.response) {
+            if (result.response.content) {
               /*
               If the response has already been redirected, you can't write on to it.
             */
               if (finalResponse.redirect) {
                 return {
                   status: 500,
-                  content: `${result.serviceResult.service} is redirecting the response to ${result.serviceResult.response.redirect} but content has already been added to the response.`,
+                  content: `${result.service} is redirecting the response to ${result.response.redirect} but content has already been added to the response.`,
                 };
               } else {
                 /*
                 If current response is not an object and new result is an object, we throw an error. We can't merge an object on to a string.
               */
-                if (typeof result.serviceResult.response.content === "object") {
+                if (typeof result.response.content === "object") {
                   if (typeof finalResponse.content === "undefined") {
                     finalResponse.content =
-                      result.serviceResult.response.content;
+                      result.response.content;
                     finalResponse.contentType = "application/json";
                   } else {
                     if (typeof finalResponse.content !== "object") {
                       return {
                         status: 500,
                         content: `Cannot merge multiple types of content. ${
-                          result.serviceResult.service
+                          result.service
                         } is returned a json response while the current response is of type ${typeof finalResponse.content}.`,
                       };
                     } else {
                       const mergeField =
-                        routeConfig.services[result.serviceResult.service]
+                        routeConfig.services[result.service]
                           .mergeField;
 
                       finalResponse.content = mergeField
                         ? {
                             ...finalResponse.content,
-                            [mergeField]: result.serviceResult.response.content,
+                            [mergeField]: result.response.content,
                           }
                         : {
                             ...finalResponse.content,
-                            ...result.serviceResult.response.content,
+                            ...result.response.content,
                           };
                       finalResponse.contentType = "application/json";
                     }
@@ -69,16 +69,16 @@ export default function mergeResponses(
                   if (typeof finalResponse.content !== "undefined") {
                     return {
                       status: 500,
-                      content: `${result.serviceResult.service} returned a response which will overwrite current response.`,
+                      content: `${result.service} returned a response which will overwrite current response.`,
                     };
                   } else {
                     const mergeField =
-                      routeConfig.services[result.serviceResult.service]
+                      routeConfig.services[result.service]
                         .mergeField;
 
                     finalResponse.content = mergeField
-                      ? { [mergeField]: result.serviceResult.response.content }
-                      : result.serviceResult.response.content;
+                      ? { [mergeField]: result.response.content }
+                      : result.response.content;
                   }
                 }
               }
@@ -86,19 +86,19 @@ export default function mergeResponses(
               /*
               Content type cannot be changed once set.
             */
-              if (result.serviceResult.response.contentType) {
+              if (result.response.contentType) {
                 if (
                   finalResponse.contentType &&
-                  result.serviceResult.response.contentType !==
+                  result.response.contentType !==
                     finalResponse.contentType
                 ) {
                   return {
                     status: 500,
-                    content: `${result.serviceResult.service} returned content type ${result.serviceResult.response.contentType} while the current response has content type ${finalResponse.contentType}.`,
+                    content: `${result.service} returned content type ${result.response.contentType} while the current response has content type ${finalResponse.contentType}.`,
                   };
                 } else {
                   finalResponse.contentType =
-                    result.serviceResult.response.contentType;
+                    result.response.contentType;
                 }
               }
             }
@@ -106,19 +106,19 @@ export default function mergeResponses(
             /*
             If the response content has already been modified previously, then you cannot redirect. If there's already a pending redirect, you cannot redirect again.
           */
-            if (result.serviceResult.response.redirect) {
+            if (result.response.redirect) {
               if (finalResponse.content) {
                 return {
                   status: 500,
-                  content: `${result.serviceResult.service} is redirecting to ${result.serviceResult.response.redirect} but the current response already has some content.`,
+                  content: `${result.service} is redirecting to ${result.response.redirect} but the current response already has some content.`,
                 };
               } else if (finalResponse.redirect) {
                 return {
                   status: 500,
-                  content: `${result.serviceResult.service} is redirecting to ${result.serviceResult.response.redirect} but the response has already been redirected to ${finalResponse.redirect}.`,
+                  content: `${result.service} is redirecting to ${result.response.redirect} but the response has already been redirected to ${finalResponse.redirect}.`,
                 };
               } else {
-                finalResponse.redirect = result.serviceResult.response.redirect;
+                finalResponse.redirect = result.response.redirect;
               }
             }
 
@@ -127,24 +127,24 @@ export default function mergeResponses(
             If results have differing 2xx codes, send 200.
             If results have 2xx and 4xx (or 3xx or 5xx), that's an error
           */
-            if (result.serviceResult.response.status) {
+            if (result.response.status) {
               if (!finalResponse.status) {
-                finalResponse.status = result.serviceResult.response.status;
+                finalResponse.status = result.response.status;
               } else {
                 if (
-                  finalResponse.status !== result.serviceResult.response.status
+                  finalResponse.status !== result.response.status
                 ) {
                   if (
                     finalResponse.status >= 200 &&
                     finalResponse.status <= 299 &&
-                    result.serviceResult.response.status >= 200 &&
-                    result.serviceResult.response.status <= 299
+                    result.response.status >= 200 &&
+                    result.response.status <= 299
                   ) {
                     finalResponse.status = 200;
                   } else {
                     return {
                       status: 500,
-                      content: `${result.serviceResult.service} is returning status code ${result.serviceResult.response.status} but the response already has its status set to ${finalResponse.status}.`,
+                      content: `${result.service} is returning status code ${result.response.status} but the response already has its status set to ${finalResponse.status}.`,
                     };
                   }
                 }
@@ -154,9 +154,9 @@ export default function mergeResponses(
             /*
             We concat all cookies.
           */
-            if (result.serviceResult.response.cookies) {
+            if (result.response.cookies) {
               finalResponse.cookies = (finalResponse.cookies || []).concat(
-                result.serviceResult.response.cookies
+                result.response.cookies
               );
             }
           }
@@ -166,7 +166,7 @@ export default function mergeResponses(
     return finalResponse;
   } else {
     return collatedResults.errorResult.ignore === false
-      ? collatedResults.errorResult.serviceResult.response
+      ? collatedResults.errorResult.response
       : {
           status: 500,
           content: "Internal server error",
