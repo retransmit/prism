@@ -90,21 +90,13 @@ export type ActiveRedisRequest = {
 /*
   Output of processMessages()
 */
-export type FetchedResult = (
-  | {
-      ignore: false;
-      response: HttpResponse;
-    }
-  | {
-      ignore: true;
-    }
-) & {
+export type FetchedResult = {
   id: string;
-  success: boolean;
   service: string;
   time: number;
   path: string;
   method: HttpMethods;
+  response?: HttpResponse;
 };
 
 /*
@@ -118,7 +110,22 @@ export type CollatedResult =
   | { aborted: true; errorResult: FetchedResult };
 
 /*
-  Request
+  Requests and Responses for Redis-based Services
+*/
+export type RedisServiceRequest = {
+  id: string;
+  type: string;
+  data: HttpRequest;
+};
+
+export type RedisServiceResponse = {
+  id: string;
+  service: string;
+  response: HttpResponse;
+};
+
+/*
+  Http Request
 */
 export type HttpRequest = {
   path: string;
@@ -133,21 +140,6 @@ export type HttpRequest = {
   headers: {
     [key: string]: string;
   };
-};
-
-export type RedisServiceRequest = {
-  id: string;
-  type: string;
-  data: HttpRequest;
-};
-
-/*
-  Response emitted by a Redis Service
-*/
-export type RedisServiceResponse = {
-  id: string;
-  service: string;
-  response: HttpResponse;
 };
 
 /*

@@ -13,7 +13,7 @@ export default function mergeResponses(
     let finalResponse: HttpResponse = { status: 200, content: undefined };
 
     for (const result of collatedResults.results) {
-      if (result.ignore === false) {
+      if (typeof result.response !== "undefined") {
         const routeConfig = config.routes[result.path][
           result.method
         ] as RouteConfig;
@@ -34,8 +34,7 @@ export default function mergeResponses(
               */
                 if (typeof result.response.content === "object") {
                   if (typeof finalResponse.content === "undefined") {
-                    finalResponse.content =
-                      result.response.content;
+                    finalResponse.content = result.response.content;
                     finalResponse.contentType = "application/json";
                   } else {
                     if (typeof finalResponse.content !== "object") {
@@ -47,8 +46,7 @@ export default function mergeResponses(
                       };
                     } else {
                       const mergeField =
-                        routeConfig.services[result.service]
-                          .mergeField;
+                        routeConfig.services[result.service].mergeField;
 
                       finalResponse.content = mergeField
                         ? {
@@ -73,8 +71,7 @@ export default function mergeResponses(
                     };
                   } else {
                     const mergeField =
-                      routeConfig.services[result.service]
-                        .mergeField;
+                      routeConfig.services[result.service].mergeField;
 
                     finalResponse.content = mergeField
                       ? { [mergeField]: result.response.content }
@@ -89,16 +86,14 @@ export default function mergeResponses(
               if (result.response.contentType) {
                 if (
                   finalResponse.contentType &&
-                  result.response.contentType !==
-                    finalResponse.contentType
+                  result.response.contentType !== finalResponse.contentType
                 ) {
                   return {
                     status: 500,
                     content: `${result.service} returned content type ${result.response.contentType} while the current response has content type ${finalResponse.contentType}.`,
                   };
                 } else {
-                  finalResponse.contentType =
-                    result.response.contentType;
+                  finalResponse.contentType = result.response.contentType;
                 }
               }
             }
@@ -131,9 +126,7 @@ export default function mergeResponses(
               if (!finalResponse.status) {
                 finalResponse.status = result.response.status;
               } else {
-                if (
-                  finalResponse.status !== result.response.status
-                ) {
+                if (finalResponse.status !== result.response.status) {
                   if (
                     finalResponse.status >= 200 &&
                     finalResponse.status <= 299 &&
@@ -165,11 +158,6 @@ export default function mergeResponses(
     }
     return finalResponse;
   } else {
-    return collatedResults.errorResult.ignore === false
-      ? collatedResults.errorResult.response
-      : {
-          status: 500,
-          content: "Internal server error",
-        };
+    return collatedResults.errorResult.response;
   }
 }
