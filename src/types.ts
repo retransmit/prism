@@ -133,12 +133,25 @@ export type CollatedResult =
 /*
   Request
 */
-export type RequestPayload = {
+export type HttpRequest = {
   path: string;
-  params: string;
-  query: string;
-  body: string;
-  headers: string;
+  method: HttpMethods;
+  params: {
+    [key: string]: string;
+  };
+  query: {
+    [key: string]: string;
+  };
+  body: any;
+  headers: {
+    [key: string]: string;
+  };
+};
+
+export type RedisRequest = {
+  id: string;
+  type: "request";
+  data: HttpRequest;
 };
 
 /*

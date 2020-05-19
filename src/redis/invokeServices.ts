@@ -5,24 +5,25 @@ import {
   FetchedResult,
   TrackedRequest,
   ServiceHandlerConfig,
+  RedisRequest,
 } from "../types";
 
-import * as activeRequests from "../activeRequests";
+import * as activeRequests from "./activeRequests";
 import * as configModule from "../config";
 import { publish } from "./publish";
 /*
   Make Promises for Redis Services
 */
 export default function invokeServices(
-  payload: any,
   requestId: string,
-  path: string,
-  method: HttpMethods
+  request: RedisRequest
 ): Promise<FetchedResult>[] {
   const config = configModule.get();
+  const path = request.data.path;
+  const method = request.data.method;
   const routeConfig = config.routes[path][method] as RouteConfig;
 
-  publish(payload, path, method);
+  publish(request, path, method);
 
   const toWait = Object.keys(routeConfig.services).filter(
     (serviceName) => routeConfig.services[serviceName].awaitResponse !== false

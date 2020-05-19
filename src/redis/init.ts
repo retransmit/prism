@@ -2,7 +2,7 @@ import * as configModule from "../config";
 import { HttpMethods, RouteConfig } from "../types";
 import { createClients, getSubscriber, getPublisher } from "./clients";
 import processMessage from "./processMessage";
-import cleanupTimedOut from "../cleanupTimedOut";
+import cleanupTimedOut from "./cleanupTimedOut";
 
 export default async function init() {
   const config = configModule.get();

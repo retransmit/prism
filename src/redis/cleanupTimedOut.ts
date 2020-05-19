@@ -1,5 +1,5 @@
-import * as configModule from "./config";
-import { TrackedRequest, RouteConfig } from "./types";
+import * as configModule from "../config";
+import { TrackedRequest, RouteConfig } from "../types";
 import * as activeRequests from "./activeRequests";
 
 let isCleaningUp = false;

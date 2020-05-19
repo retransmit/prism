@@ -2,6 +2,7 @@ import { IRouterContext } from "koa-router";
 import * as configModule from "./config";
 import { HttpMethods, CollatedResult, FetchedResult } from "./types";
 import randomId from "./random";
+import invokeHttpServices from "./http/invokeServices";
 import invokeRedisServices from "./redis/invokeServices";
 import mergeResponses from "./mergeResponses";
 import { publish } from "./redis/publish";
@@ -25,24 +26,30 @@ export function createHandler(method: HttpMethods) {
     const routeConfig = config.routes[ctx.path][method];
 
     if (routeConfig) {
-      const payload = {
+      const httpRequest = {
+        path: ctx.path,
+        method: method,
+        params: ctx.params,
+        query: ctx.query,
+        body: ctx.body,
+        headers: ctx.headers,
+      };
+
+      const redisRequest = {
         id: requestId,
-        type: "request",
-        data: {
-          path: ctx.path,
-          params: ctx.params,
-          query: ctx.query,
-          body: ctx.body,
-          headers: ctx.headers,
-        },
+        type: "request" as "request",
+        data: httpRequest,
       };
 
       const promisesForRedisServices = invokeRedisServices(
-        payload,
         requestId,
-        ctx.path,
-        method
+        redisRequest
       );
+
+      // const promisesForHttpServices = invokeHttpServices(
+      //   requestId,
+      //   httpRequest
+      // );
 
       // TODO
       const promisesForAllServices = promisesForRedisServices.concat([]);
@@ -60,7 +67,7 @@ export function createHandler(method: HttpMethods) {
         const errorPayload = {
           id: requestId,
           type: "rollback",
-          data: payload.data,
+          data: redisRequest.data,
         };
         publish(errorPayload, ctx.path, method);
       }

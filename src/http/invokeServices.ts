@@ -1,24 +1,60 @@
-import { HttpMethods, RouteConfig, FetchedResult } from "../types";
+import { HttpMethods, RouteConfig, FetchedResult, HttpRequest } from "../types";
 
-import * as activeRequests from "../activeRequests";
+import * as activeRequests from "../redis/activeRequests";
 import * as configModule from "../config";
-import got = require("got");
+import got from "got";
 
 /*
   Make Promises for Redis Services
 */
 export default function invokeServices(
-  payload: any,
   requestId: string,
-  path: string,
-  method: HttpMethods
+  request: HttpRequest
 ): Promise<FetchedResult>[] {
   const config = configModule.get();
+  const path = request.method;
+  const method = request.method;
   const routeConfig = config.routes[path][method] as RouteConfig;
 
-  
-  // publish(payload, path, method);
+  // const promises: Promise<FetchedResult>[] = [];
 
+  for (const service of Object.keys(routeConfig.services)) {
+    const url = routeConfig.services[service].http?.url;
+
+    if (url) {
+      const basicOptions = {
+        searchParams: request.query,
+        method: method,
+        headers: request.headers,
+        timeout: routeConfig.services[service].timeoutMS,
+      };
+
+      const options =
+        typeof request.body === "string"
+          ? {
+              ...basicOptions,
+              body: request.body,
+            }
+          : typeof request.body === "object"
+          ? {
+              ...basicOptions,
+              json: request.body,
+            }
+          : basicOptions;
+          
+      if (routeConfig.services[service].awaitResponse !== false) {
+        // promises.push(
+        //   new Promise((success, failure) => {
+        //     got(url, basicOptions);
+        //   })
+        // );
+      } else {
+        got(url, basicOptions);
+      }
+    }
+  }
+
+  // publish(payload, path, method);
   const toWait = Object.keys(routeConfig.services).filter(
     (serviceName) => routeConfig.services[serviceName].awaitResponse !== false
   );
