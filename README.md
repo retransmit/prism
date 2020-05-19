@@ -1,82 +1,46 @@
 # Retransmit
 
-Retransmit is a broker that integrates data from multiple backend microservices and exposes them at HTTP endpoints. For example, GET /users might need to fetch data from the 'user service' as well as the 'friends service'. Retransmit will create a response by contacting both services and then merging the result as specified. As of now, retransmit can talk to backend services via HTTP as well as Redis pub-sub. 
+## What is Retransmit?
 
-Here's a diagram:
+Retransmit is a broker that integrates data from multiple backend microservices and exposes them at HTTP endpoints. For example, GET /users might need to fetch data from the 'user service' as well as the 'friends service'. Retransmit will create a response by contacting both services and merging their responses. If any of the requests to backend services fail, retransmit can inform the other services so that a rollback can be performed.
+
+As of now, retransmit can talk to backend services via HTTP as well as Redis pub-sub. Here's a diagram:
 
 [IMAGE]
 
-
-
-
-
-Often a single request needs to be fulfilled by calling multiple services. 
-
-This can be done in two ways: a) By making the client call the two services individually (a bad idea in most situations because one of them could fail), b) have a 
-
-
-
-When a client request (such as an ajax call from a browser) needs to be fulfilled by multile services, it is not ideal to have the client call each service individually - since client networks are unreliable and some of those network calls could fail.
-
-Retransmit tries to solve this problem by acting as a co-ordinator:
-
-- Receive client requests via http
-- Place it on a redis pub-sub channel
-- Wait for responses from participating services
-- Merge the responses
-- Send the merged result back to the client
-- Via config, you can specify which service failures must abort the request
-- When a request is aborted (due to one or more services failing), a message is added to redis so that services can do a compensating rollback
-- Optionally validate a JWT. JWT can also be passed through to the services.
-
 ## Installation
-
-1. Install via npm.
 
 ```sh
 npm i -g retransmit
 ```
 
-2. Create a postgres database and create the tables with scripts found under the 'db' directory.
-
-3. Setup redis.
-
-## Running
-
-You'd use something like this.
+You need to create a configuration file first (given below). And then run retransmit like this.
 
 ```sh
-retransmit -p 8080 -c /path/to/your/config
+retransmit -p PORT -c CONFIG_FILE
 ```
 
-An example directory containing config files (which are JS files) can be found under the 'example-config' directory.
-This is where you specify database connection strings, jwt and oauth keys etc.
+## Configuration
 
-## Requests
+Configuration files are written in JavaScript. A basic configuration file looks like this.
 
-Routes to be handled by disspate are specified in the app configuration file. You can find samples in the example-config directory.
-
-Configuration looks like this:
-
-```typescript
+```js
 module.exports = {
-  //...
   routes: {
     "/users": {
-      POST: {
-        services: {
-          userService: {
-            //...
-          },
-          quotesService: {
-            //...
-          },
-        },
-      },
       GET: {
         services: {
-          userService: {
-            //...
+          userservice: {
+            type: "http",
+            config: {
+              url: "http://localhost:6666/users",
+            },
+          },
+          messagingservice: {
+            type: "http",
+            config: {
+              url: "http://localhost:6667/messages",
+            },
           },
         },
       },
@@ -85,14 +49,118 @@ module.exports = {
 };
 ```
 
-The example above defines the "/users" route configuration for GET and POST methods. In this example, when the browser sends a POST request to /users, disspate will add the request information to the queue for further processing by the two services (userService and quotesService) defined above. These services should post the data back into the redis channels after completing their respective operations. Retransmit will collect the requests and send it back to the client as the response.
+According to the configuration file above, retransmit will accept GET requests on "/users" and pass the call to 'userservice' and 'messagingservice' at their corresponding urls. The data (if in JSON format) sent back by the two services are merged and sent back to the requesting client.
 
-Retransmit also has an async mode where the request completes immediately with a completion id. Async is enabled by add a query string parameter: /users?async=true. Clients can poll /completion/:completion-id to get the current status or the final result if available.
+## Redis Pub-Sub
 
-## Request Logging
+In addition to talking to HTTP backend services, retransmit can talk to services via Redis pub-sub. Retransmit packages the HTTP call information into a JSON format string and publishes it as a message on Redis. The channels on which the message gets published is again part of the configuration.
 
-Optionally you can write all incoming requests to a database. This will be slow.
+Here's a simple example. Note that multiple services can listen on the same channels.
 
-## Scaling Up and Load Balancing
+```js
+module.exports = {
+  routes: {
+    "/users": {
+      GET: {
+        services: {
+          userservice: {
+            type: "redis",
+            config: {
+              requestChannel: "inputs",
+              responseChannel: "outputs",
+            },
+          },
+          messagingservice: {
+            type: "redis",
+            config: {
+              requestChannel: "inputs",
+              responseChannel: "outputs",
+            },
+          },
+        },
+      },
+    },
+  },
+};
+```
 
-Retransmit can optionally push messages into channel names selected in a round-robin fashion - such as user1, user2, user3 etc. This allows individual instances belonging to a cluster to subscribe to channels selectively, thereby enabling a very basic load-balancing mechanism. The numChannels parameter in config (see example-config) defines the number of channels to create of a certain type. Participating services must make sure they subscribe to all these channels.
+Once the request is processed, the response needs to be published on the responseChannel. Retransmit will pickup these responses, merge them, and pass them back to the caller.
+
+Responses posted into the responseChannels need to be in the following format. Retransmil will reconstruct an HTTP response from this information to send back to the client.
+
+```typescript
+type RedisServiceResponse = {
+  id: string;
+  service: string;
+  response: HttpResponse;
+};
+
+type HttpResponse = {
+  status?: number;
+  redirect?: string;
+  cookies?: {
+    name: string;
+    value: string;
+    path?: string;
+    domain?: string;
+    secure?: boolean;
+    httpOnly?: boolean;
+    maxAge?: number;
+    overwrite?: boolean;
+  }[];
+  headers?: IncomingHttpHeaders;
+  content?: any;
+  contentType?: string;
+};
+```
+
+## Merging
+
+Only JSON responses are merged. Merging happens in the order in which the services are defined. So if two services return values for the same field, the value from the first service gets overwritten by that from the second.
+
+To avoid this you could choose not to return that same fields. However, if that's not possible you could specify a mergeField for a service in the configuration file. When a mergeField is defined for a service, values returned by the service go into that field in the final response.
+
+In the following example, the data coming from userservice is added to the 'userData' field and that from messagingservice is added to the 'messagingData' field.
+
+```js
+{
+  // parts of config omitted for brevity
+  userservice: {
+    type: "redis",
+    config: {
+      requestChannel: "inputs",
+      responseChannel: "outputs",
+    },
+    mergeField: "userData"
+  },
+  messagingservice: {
+    type: "redis",
+    config: {
+      requestChannel: "inputs",
+      responseChannel: "outputs",
+    },
+    mergeField: "messagingData"
+  },
+}
+```
+
+## Not waiting for responses
+
+There might be services which you just want to call, and not wait for results. Use the 'awaitResponse' property to configure this.
+
+```js
+{
+  // parts of config omitted for brevity
+  messagingservice: {
+    type: "redis",
+    config: {
+      requestChannel: "inputs",
+      responseChannel: "outputs",
+    },
+    awaitResponse: false
+  },
+}
+```
+
+## Choosing not to merge data from a Service
+

@@ -20,8 +20,8 @@ const argv = yargs.options({
   v: { type: "boolean", alias: "version" },
 }).argv;
 
-export async function startApp(port: number, configDir: string) {
-  const appConfig: IAppConfig = require(join(configDir, "app.js"));
+export async function startApp(port: number, configFile: string) {
+  const appConfig: IAppConfig = require(configFile);
   return await startWithConfiguration(port, appConfig);
 }
 
@@ -91,7 +91,7 @@ if (require.main === module) {
 
     if (!argv.c) {
       console.log(
-        "The configuration directory should be specified with the -c option."
+        "The configuration file should be specified with the -c option."
       );
       process.exit(1);
     }
