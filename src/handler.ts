@@ -1,6 +1,6 @@
 import { IRouterContext } from "koa-router";
 import * as configModule from "./config";
-import { HttpMethods, CollatedResponses, FetchedResponse } from "./types";
+import { HttpMethods, FetchedResponse } from "./types";
 import randomId from "./random";
 import invokeHttpServices from "./connectors/http/invokeServices";
 import rollbackHttp from "./connectors/http/rollback";
@@ -52,19 +52,19 @@ export function createHandler(method: HttpMethods) {
         [] as Promise<FetchedResponse>[]
       );
 
-      const interimCollatedResponses = await waitForPendingResponses(promises);
+      const interimResponses = await Promise.all(promises);
 
-      const collatedResponses = routeConfig.mergeResponses
-        ? await routeConfig.mergeResponses(interimCollatedResponses)
-        : interimCollatedResponses;
+      const fetchedResponses = routeConfig.mergeResponses
+        ? await routeConfig.mergeResponses(interimResponses)
+        : interimResponses;
 
-      if (collatedResponses.aborted) {
+      if (hasErrors(fetchedResponses)) {
         for (const connector of connectors) {
           connector.rollback(requestId, httpRequest);
         }
       }
 
-      let response = mergeResponses(requestId, collatedResponses);
+      let response = mergeResponses(requestId, fetchedResponses);
 
       // See if there are any custom handlers for final response
       const modifyResponse =
@@ -129,21 +129,6 @@ export function createHandler(method: HttpMethods) {
   };
 }
 
-/*
-  Wait for responses
-*/
-async function waitForPendingResponses(
-  promises: Promise<FetchedResponse>[]
-): Promise<CollatedResponses> {
-  try {
-    return {
-      aborted: false,
-      responses: await Promise.all(promises),
-    };
-  } catch (ex) {
-    return {
-      aborted: true,
-      errorResponse: ex,
-    };
-  }
+function hasErrors(responses: FetchedResponse[]) {
+  return responses.some((x) => x.response?.status && x.response?.status >= 400);
 }

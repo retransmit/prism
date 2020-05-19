@@ -21,11 +21,11 @@ export async function doPubSub(
 
     subscriber.on("message", (channel, message) => {
       json = JSON.parse(message);
-      for (const result of serviceResponses) {
+      for (const response of serviceResponses) {
         publisher.publish(
           "output",
           JSON.stringify({
-            ...result,
+            ...response,
             id: json.id,
           })
         );

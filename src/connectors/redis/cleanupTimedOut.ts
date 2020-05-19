@@ -25,7 +25,7 @@ export default async function cleanupTimedOut() {
         trackedRequest.method
       ] as RouteConfig;
 
-      const fetchedResult: FetchedResponse = {
+      const fetchedResponse: FetchedResponse = {
         id: activeRequestId,
         time: Date.now() - trackedRequest.startTime,
         service: trackedRequest.service,
@@ -37,8 +37,7 @@ export default async function cleanupTimedOut() {
         },
       };
 
-      trackedRequest.onResponse(fetchedResult);
-
+      trackedRequest.onResponse(fetchedResponse);
       activeRequests.remove(activeRequestId);
     }
     isCleaningUp = false;

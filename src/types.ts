@@ -37,7 +37,7 @@ export type RouteConfig = {
     ctx: IRouterContext,
     response: any
   ) => Promise<{ handled: boolean }>;
-  mergeResponses?: (responses: CollatedResponses) => Promise<CollatedResponses>;
+  mergeResponses?: (responses: FetchedResponse[]) => Promise<FetchedResponse[]>;
   genericErrors?: boolean;
 };
 
@@ -68,7 +68,7 @@ export type ServiceHandlerConfig = (
   abortOnError?: boolean;
   timeoutMS?: number;
   mergeField?: string;
-  modifyServiceResponse?: (result: HttpResponse) => Promise<HttpResponse>;
+  modifyServiceResponse?: (response: HttpResponse) => Promise<HttpResponse>;
   logError?: (error: string) => Promise<void>;
 };
 
@@ -97,16 +97,6 @@ export type FetchedResponse = {
   method: HttpMethods;
   response?: HttpResponse;
 };
-
-/*
-  Result of collating responses from services
-*/
-export type CollatedResponses =
-  | {
-      aborted: false;
-      responses: FetchedResponse[];
-    }
-  | { aborted: true; errorResponse: FetchedResponse };
 
 /*
   Requests and Responses for Redis-based Services
