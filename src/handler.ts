@@ -24,16 +24,17 @@ export function createHandler(method: HttpMethods) {
   const config = configModule.get();
 
   return async function handler(ctx: IRouterContext) {
+    const requestId = randomId(32);
+    const routeConfig = config.routes[ctx.path][method];
+
     // If there are custom handlers, try that first.
-    if (config.handlers && config.handlers.request) {
-      const result = config.handlers.request(ctx);
-      if ((await result).handled) {
+    const modifyRequest = routeConfig?.modifyRequest || config.modifyRequest;
+    if (modifyRequest) {
+      const result = await modifyRequest(ctx);
+      if (result.handled) {
         return;
       }
     }
-
-    const requestId = randomId(32);
-    const routeConfig = config.routes[ctx.path][method];
 
     if (routeConfig) {
       const httpRequest = {
@@ -53,10 +54,9 @@ export function createHandler(method: HttpMethods) {
 
       const interimCollatedResults = await waitForPendingResponses(promises);
 
-      const collatedResults =
-        routeConfig.handlers && routeConfig.handlers.merge
-          ? await routeConfig.handlers.merge(interimCollatedResults)
-          : interimCollatedResults;
+      const collatedResults = routeConfig.mergeResults
+        ? await routeConfig.mergeResults(interimCollatedResults)
+        : interimCollatedResults;
 
       if (collatedResults.aborted) {
         for (const connector of connectors) {
@@ -67,8 +67,10 @@ export function createHandler(method: HttpMethods) {
       let response = mergeResponses(requestId, collatedResults);
 
       // See if there are any custom handlers for final response
-      if (config.handlers && config.handlers.response) {
-        const result = await config.handlers.response(ctx, response);
+      const modifyResponse =
+        routeConfig.modifyResponse || config.modifyResponse;
+      if (modifyResponse) {
+        const result = await modifyResponse(ctx, response);
         if (result.handled) {
           return;
         }

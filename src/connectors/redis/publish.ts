@@ -27,7 +27,7 @@ export async function publish(
               Math.random() * serviceConfig.config.numRequestChannels
             )}`;
         if (!alreadyPublishedChannels.includes(channelId)) {
-          const requestHandler = serviceConfig.config.handlers?.request;
+          const requestHandler = serviceConfig.config.modifyRequest;
           const requestToSend = requestHandler
             ? requestHandler(request)
             : request;

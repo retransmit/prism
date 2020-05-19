@@ -21,8 +21,7 @@ export default function invokeServices(
   const method = request.method;
   const routeConfig = config.routes[path][method] as RouteConfig;
 
-  // const promises: Promise<FetchedResult>[] = [];
-
+  const promises: Promise<FetchedResult>[] = [];
   for (const service of Object.keys(routeConfig.services)) {
     const serviceConfig = routeConfig.services[service];
     if (serviceConfig.type === "http") {
@@ -50,11 +49,15 @@ export default function invokeServices(
             : basicOptions;
 
         if (routeConfig.services[service].awaitResponse !== false) {
-          // promises.push(
-          //   new Promise((success, failure) => {
-          //     got(url, basicOptions);
-          //   })
-          // );
+          promises.push(
+            new Promise((success, failure) => {
+              got(url, basicOptions)
+                .then((serverResponse) => {
+                  return {};
+                })
+                .catch(failure);
+            })
+          );
         } else {
           got(url, basicOptions);
         }
@@ -62,30 +65,5 @@ export default function invokeServices(
     }
   }
 
-  // publish(payload, path, method);
-  const toWait = Object.keys(routeConfig.services).filter(
-    (serviceName) => routeConfig.services[serviceName].awaitResponse !== false
-  );
-
-  // const promises = toWait.map((service) => {
-  //   const channel = routeConfig.services[service].redis
-  //     ?.responseChannel as string;
-  //   return new Promise<FetchedResult>((success, error) => {
-  //     activeRequests.set(`${requestId}+${service}`, {
-  //       id: requestId,
-  //       type: "redis",
-  //       channel,
-  //       path,
-  //       method,
-  //       service,
-  //       timeoutTicks:
-  //         Date.now() + (routeConfig.services[service].timeoutMS || 30000),
-  //       startTime: Date.now(),
-  //       onSuccess: success,
-  //       onError: error,
-  //     });
-  //   });
-  // });
-
-  return [];
+  return []; // promises;
 }

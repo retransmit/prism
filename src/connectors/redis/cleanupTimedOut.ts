@@ -35,9 +35,7 @@ export default async function cleanupTimedOut() {
           method: trackedRequest.method,
           service: trackedRequest.service,
         };
-        trackedRequest.onSuccess(
-          resultHandler ? await resultHandler(fetchedResult) : fetchedResult
-        );
+        trackedRequest.onSuccess(fetchedResult);
       } else {
         const fetchedResult = {
           time: Date.now() - trackedRequest.startTime,
@@ -55,9 +53,7 @@ export default async function cleanupTimedOut() {
             },
           },
         };
-        trackedRequest.onError(
-          resultHandler ? await resultHandler(fetchedResult) : fetchedResult
-        );
+        trackedRequest.onError(fetchedResult);
       }
       activeRequests.remove(activeRequestId);
     }

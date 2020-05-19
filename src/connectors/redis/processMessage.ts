@@ -8,10 +8,10 @@ export default async function processMessage(
 ) {
   const config = configModule.get();
 
-  const serviceResult = JSON.parse(messageString) as ServiceResult;
+  const originalServiceResult = JSON.parse(messageString) as ServiceResult;
 
   const activeRequest = activeRequests.get(
-    `${serviceResult.id}+${serviceResult.service}`
+    `${originalServiceResult.id}+${originalServiceResult.service}`
   );
 
   if (activeRequest) {
@@ -21,34 +21,42 @@ export default async function processMessage(
 
     const serviceConfig = routeConfig.services[activeRequest.service];
     if (serviceConfig.type === "redis") {
-      const channelInRequest =
-        serviceConfig.config.responseChannel;
+      const channelInRequest = serviceConfig.config.responseChannel;
 
       // Make sure the service responded in the configured channel
       // Otherwise ignore the message.
       if (channel === channelInRequest) {
-        const config = configModule.get();
         const resultHandler =
           routeConfig.services[activeRequest.service].handlers?.result;
+
+        const serviceResult = resultHandler
+          ? {
+              ...originalServiceResult,
+              response: await resultHandler(originalServiceResult.response),
+            }
+          : originalServiceResult;
 
         const processingTime = Date.now() - activeRequest.startTime;
 
         if (serviceResult.success) {
           const fetchedResult = {
             time: processingTime,
-            ignore: false,
+            ignore: false as false,
             path: activeRequest.path,
             method: activeRequest.method,
             service: activeRequest.service,
             serviceResult: serviceResult,
           };
-          activeRequest.onSuccess(
-            resultHandler ? await resultHandler(fetchedResult) : fetchedResult
-          );
-        } else {
+
+          activeRequest.onSuccess(fetchedResult);
+        }
+        // serviceResult.success === false
+        else {
           const routeConfig = config.routes[activeRequest.path][
             activeRequest.method
           ] as RouteConfig;
+
+          // Don't abort
           if (
             routeConfig.services[activeRequest.service].abortOnError === false
           ) {
@@ -59,10 +67,10 @@ export default async function processMessage(
               method: activeRequest.method,
               service: activeRequest.service,
             };
-            activeRequest.onSuccess(
-              resultHandler ? await resultHandler(fetchedResult) : fetchedResult
-            );
-          } else {
+            activeRequest.onSuccess(fetchedResult);
+          }
+          // it's ok to abort.
+          else {
             const fetchedResult = {
               time: processingTime,
               ignore: false,
@@ -71,9 +79,7 @@ export default async function processMessage(
               service: activeRequest.service,
               serviceResult: serviceResult,
             };
-            activeRequest.onError(
-              resultHandler ? await resultHandler(fetchedResult) : fetchedResult
-            );
+            activeRequest.onError(fetchedResult);
           }
         }
       }

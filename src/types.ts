@@ -16,13 +16,11 @@ export interface IAppConfig {
   redis?: {
     options?: ClientOpts;
   };
-  handlers?: {
-    request?: (ctx: IRouterContext) => Promise<{ handled: boolean }>;
-    response?: (
-      ctx: IRouterContext,
-      response: any
-    ) => Promise<{ handled: boolean }>;
-  };
+  modifyRequest?: (ctx: IRouterContext) => Promise<{ handled: boolean }>;
+  modifyResponse?: (
+    ctx: IRouterContext,
+    response: any
+  ) => Promise<{ handled: boolean }>;
   genericErrors?: boolean;
   logError?: (error: string) => Promise<void>;
 }
@@ -34,14 +32,12 @@ export type RouteConfig = {
   services: {
     [key: string]: ServiceHandlerConfig;
   };
-  handlers?: {
-    merge?: (result: CollatedResult) => Promise<CollatedResult>;
-    request?: (ctx: IRouterContext) => Promise<{ handled: boolean }>;
-    response?: (
-      ctx: IRouterContext,
-      response: any
-    ) => Promise<{ handled: boolean }>;
-  };
+  modifyRequest?: (ctx: IRouterContext) => Promise<{ handled: boolean }>;
+  modifyResponse?: (
+    ctx: IRouterContext,
+    response: any
+  ) => Promise<{ handled: boolean }>;
+  mergeResults?: (result: CollatedResult) => Promise<CollatedResult>;
   genericErrors?: boolean;
 };
 
@@ -55,9 +51,8 @@ export type ServiceHandlerConfig = (
         requestChannel: string;
         responseChannel: string;
         numRequestChannels?: number;
-        handlers?: {
-          request?: (request: RedisRequest) => any;
-        };
+        modifyRequest?: (request: RedisRequest) => any;
+        
       };
     }
   | {
@@ -65,9 +60,7 @@ export type ServiceHandlerConfig = (
       config: {
         url: string;
         rollbackUrl?: string;
-        handlers?: {
-          request?: (request: HttpRequest) => any;
-        };
+        modifyRequest?: (request: HttpRequest) => any;
       };
     }
 ) & {
@@ -77,7 +70,7 @@ export type ServiceHandlerConfig = (
   timeoutMS?: number;
   mergeField?: string;
   handlers?: {
-    result?: (result: FetchedResult) => Promise<FetchedResult>;
+    result?: (result: HttpResponse) => Promise<HttpResponse>;
   };
   logError?: (error: string) => Promise<void>;
 };
@@ -89,7 +82,7 @@ export type ServiceResult = {
   id: string;
   service: string;
   success: boolean;
-  response?: HttpResponse;
+  response: HttpResponse;
 };
 
 /*
