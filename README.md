@@ -288,7 +288,7 @@ module.exports = {
 };
 ```
 
-## Error Handling
+## Rolling back on error
 
 When a service fails, retransmit can notify the other services that the request is going to return an error.
 
@@ -331,6 +331,18 @@ module.exports = {
   },
 };
 ```
+
+For Redis, the rollback posts the following data into the same channel into which the request was originally published. The service should take necessary compensating action.
+
+```typescript
+export type RedisServiceRequest = {
+  id: string;
+  type: "rollback";
+  data: HttpRequest;
+};
+```
+
+## Logging errors
 
 The logError handler lets you log errors that happen in the pipeline. It can be specified globally, for all services on a route, or specifically for a service. For error handlers specified globally or for all services in a route, the responses parameter contains repsonses obtained from various services for that request. For a service specific error handler, it contains only a single response. See configuration below.
 

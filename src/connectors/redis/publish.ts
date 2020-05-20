@@ -27,7 +27,14 @@ export async function publish(
           : `${channel}${Math.floor(
               Math.random() * serviceConfig.config.numRequestChannels
             )}`;
+
         if (!alreadyPublishedChannels.includes(channelId)) {
+          const modifyServiceRequest =
+            requestType === "request"
+              ? serviceConfig.config.modifyServiceRequest
+              : requestType === "rollback"
+              ? serviceConfig.config.modifyRollbackRequest
+              : undefined;
           const requestToSend = modifyServiceRequest
             ? modifyServiceRequest(request)
             : request;
