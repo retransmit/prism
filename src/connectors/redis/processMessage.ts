@@ -1,13 +1,11 @@
 import * as configModule from "../../config";
 import {
   RouteConfig,
-  HttpResponse,
   RedisServiceResponse,
   FetchedResponse,
-  HttpRequest,
 } from "../../types";
 import * as activeRequests from "./activeRequests";
-import { isHttpError } from "../../httpUtil";
+import responseIsError from "../../lib/http/responseIsError";
 
 export default async function processMessage(
   channel: string,
@@ -33,7 +31,7 @@ export default async function processMessage(
       // Make sure the service responded in the configured channel
       // Otherwise ignore the message.
       if (channel === channelInRequest) {
-        if (isHttpError(redisResponse.response)) {
+        if (responseIsError(redisResponse.response)) {
           if (serviceConfig.logError) {
             serviceConfig.logError(
               redisResponse.response,

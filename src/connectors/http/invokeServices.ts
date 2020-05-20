@@ -3,14 +3,13 @@ import {
   FetchedResponse,
   HttpRequest,
   HttpResponse,
-  ServiceHandlerConfig,
   HttpServiceHandlerConfig,
 } from "../../types";
 
 import * as configModule from "../../config";
 import got from "got";
-import { Response } from "got/dist/source/core";
-import { isHttpError } from "../../httpUtil";
+import responseIsError from "../../lib/http/responseIsError";
+import { makeHttpResponse } from "./makeHttpResponse";
 
 /*
   Make Promises for Redis Services
@@ -39,7 +38,7 @@ export default function invokeServices(
       );
       const requestCopy = {
         ...request,
-        path: urlWithParamsReplaced
+        path: urlWithParamsReplaced,
       };
 
       const modifiedRequest = serviceConfig.config.modifyServiceRequest
@@ -73,7 +72,7 @@ export default function invokeServices(
               .then(async (serverResponse) => {
                 const httpResponse = makeHttpResponse(serverResponse);
 
-                if (isHttpError(httpResponse)) {
+                if (responseIsError(httpResponse)) {
                   if (serviceConfig.logError) {
                     serviceConfig.logError(httpResponse, modifiedRequest);
                   }
@@ -93,7 +92,7 @@ export default function invokeServices(
               .catch(async (error) => {
                 const httpResponse = makeHttpResponse(error.response);
 
-                if (isHttpError(httpResponse)) {
+                if (responseIsError(httpResponse)) {
                   if (serviceConfig.logError) {
                     serviceConfig.logError(httpResponse, modifiedRequest);
                   }
@@ -116,7 +115,7 @@ export default function invokeServices(
         got(modifiedRequest.path, options).catch(async (error) => {
           const httpResponse = makeHttpResponse(error.response);
 
-          if (isHttpError(httpResponse)) {
+          if (responseIsError(httpResponse)) {
             if (serviceConfig.logError) {
               serviceConfig.logError(httpResponse, modifiedRequest);
             }
@@ -129,21 +128,12 @@ export default function invokeServices(
   return promises;
 }
 
-function makeHttpResponse(serverResponse: Response<string>): HttpResponse {
-  return {
-    headers: serverResponse.headers,
-    content: isJson(serverResponse)
-      ? JSON.parse(serverResponse.body)
-      : serverResponse.body,
-  };
-}
-
 async function makeFetchedResponse(
   requestId: string,
   startTime: number,
   service: string,
   request: HttpRequest,
-  httpResponse: HttpResponse,
+  httpResponse: HttpResponse | undefined,
   serviceConfig: HttpServiceHandlerConfig
 ): Promise<FetchedResponse> {
   const modifiedResponse = serviceConfig.modifyServiceResponse
@@ -159,10 +149,4 @@ async function makeFetchedResponse(
     time: Date.now() - startTime,
     response: modifiedResponse,
   };
-}
-
-function isJson(serverResponse: Response<string>) {
-  return (
-    serverResponse.headers["content-type"]?.indexOf("application/json") !== -1
-  );
 }

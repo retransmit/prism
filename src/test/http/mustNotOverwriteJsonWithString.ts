@@ -20,7 +20,7 @@ export default async function (app: { instance: any }) {
                 type: "http" as "http",
                 config: {
                   url: "http://localhost:6667/messages",
-                }
+                },
               },
             },
           },
@@ -39,7 +39,9 @@ export default async function (app: { instance: any }) {
           path: "/users",
           method,
           response: {
-            user: 1,
+            body: {
+              user: 1,
+            },
           },
         })),
       },
@@ -48,7 +50,7 @@ export default async function (app: { instance: any }) {
         routes: ["GET"].map((method) => ({
           path: "/messages",
           method,
-          response: "hello world",
+          response: { body: "hello world" },
         })),
       },
     ]);
@@ -63,6 +65,8 @@ export default async function (app: { instance: any }) {
     }
 
     response.status.should.equal(500);
-    response.text.should.equal("messagingservice returned a response which will overwrite current response.")
+    response.text.should.equal(
+      "messagingservice returned a response which will overwrite current response."
+    );
   });
 }

@@ -40,7 +40,9 @@ export default async function (app: { instance: any }) {
           path: "/users",
           method,
           response: {
-            user: 1,
+            body: {
+              user: 1,
+            },
           },
         })),
       },
@@ -50,7 +52,9 @@ export default async function (app: { instance: any }) {
           path: "/messages",
           method,
           response: {
-            message: "hello world",
+            body: {
+              message: "hello world",
+            },
           },
         })),
       },

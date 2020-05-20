@@ -1,6 +1,6 @@
 import * as configModule from "./config";
 import { HttpResponse, RouteConfig, FetchedResponse } from "./types";
-import { isHttpError } from "./httpUtil";
+import responseIsError from "./lib/http/responseIsError";
 /*
   Merge received results into a final response
 */
@@ -19,7 +19,7 @@ export default function mergeResponses(
       const serviceConfig = routeConfig.services[fetchedResponse.service];
       if (serviceConfig.merge !== false) {
         if (fetchedResponse.response) {
-          if (isHttpError(fetchedResponse.response)) {
+          if (responseIsError(fetchedResponse.response)) {
             return {
               status: fetchedResponse.response?.status,
               content: fetchedResponse.response?.content,

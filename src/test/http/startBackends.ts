@@ -2,10 +2,14 @@ import Koa = require("koa");
 
 type MockHttpBackendConfig = {
   port: number;
+  beforeResponse?: (ctx: any) => Promise<boolean | undefined>;
   routes: {
     path: string;
     method: string;
-    response: string | { [key: string]: any };
+    response: {
+      status?: number;
+      body: string | { [key: string]: any };
+    };
   }[];
 };
 
@@ -14,13 +18,19 @@ export default function startBackends(configs: MockHttpBackendConfig[]) {
   for (const config of configs) {
     const koa = new Koa();
 
-    // response
-
-    koa.use((ctx) => {
-      for (const route of config.routes) {
-        if (ctx.path === route.path && ctx.method === route.method) {
-          ctx.body = route.response;
-          break;
+    koa.use(async (ctx) => {
+      const handled = config.beforeResponse
+        ? await config.beforeResponse(ctx)
+        : false;
+      if (!handled) {
+        for (const route of config.routes) {
+          if (ctx.path === route.path && ctx.method === route.method) {
+            if (route.response.status) {
+              ctx.status = route.response.status;
+            }
+            ctx.body = route.response.body;
+            break;
+          }
         }
       }
     });

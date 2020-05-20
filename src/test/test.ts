@@ -6,6 +6,7 @@ import httpHttpMethods from "./http/httpMethods";
 import httpMergeResults from "./http/mergeResults";
 import httpDontMergeIgnored from "./http/dontMergeIgnored";
 import httpMustNotOverwriteJsonWithString from "./http/mustNotOverwriteJsonWithString";
+import httpRollsback from "./http/rollsback";
 
 import redisHttpMethods from "./redis/httpMethods";
 import redisMergeResults from "./redis/mergeResults";
@@ -55,6 +56,7 @@ function run() {
       httpMergeResults(app);
       httpDontMergeIgnored(app);
       httpMustNotOverwriteJsonWithString(app);
+      httpRollsback(app);
     });
   });
 }

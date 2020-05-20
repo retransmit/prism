@@ -50,7 +50,7 @@ export default async function (app: { instance: any }) {
           routes: ["GET", "POST", "PUT", "DELETE", "PATCH"].map((method) => ({
             path: "/users",
             method,
-            response: `${method}: Everything worked.`,
+            response: { body: `${method}: Everything worked.` },
           })),
         },
       ]);

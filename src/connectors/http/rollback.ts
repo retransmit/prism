@@ -3,6 +3,8 @@ import got from "got";
 import { RouteConfig, HttpRequest } from "../../types";
 
 import * as configModule from "../../config";
+import responseIsError from "../../lib/http/responseIsError";
+import { makeHttpResponse } from "./makeHttpResponse";
 /*
   Make Promises for Redis Services
 */
@@ -23,9 +25,9 @@ export default function rollback(requestId: string, request: HttpRequest) {
       );
       const requestCopy = {
         ...request,
-        path: urlWithParamsReplaced
+        path: urlWithParamsReplaced,
       };
-      
+
       const modifiedRequest = serviceConfig.config.modifyServiceRequest
         ? serviceConfig.config.modifyServiceRequest(requestCopy)
         : requestCopy;
@@ -50,7 +52,15 @@ export default function rollback(requestId: string, request: HttpRequest) {
             }
           : basicOptions;
 
-      got(modifiedRequest.path, options);
+      got(modifiedRequest.path, options).catch(async (error) => {
+        const httpResponse = makeHttpResponse(error.response);
+
+        if (responseIsError(httpResponse)) {
+          if (serviceConfig.logError) {
+            serviceConfig.logError(httpResponse, modifiedRequest);
+          }
+        }
+      });
     }
   }
 }

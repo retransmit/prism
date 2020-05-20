@@ -57,8 +57,13 @@ export type ServiceHandlerConfigBase = {
   merge?: boolean;
   timeout?: number;
   mergeField?: string;
-  modifyServiceResponse?: (response: HttpResponse) => Promise<HttpResponse>;
-  logError?: (response: HttpResponse, request: HttpRequest) => Promise<void>;
+  modifyServiceResponse?: (
+    response: HttpResponse | undefined
+  ) => Promise<HttpResponse>;
+  logError?: (
+    response: HttpResponse | undefined,
+    request: HttpRequest
+  ) => Promise<void>;
 };
 
 export type RedisServiceHandlerConfig = {
@@ -103,7 +108,7 @@ export type ActiveRedisRequest = {
   Output of processMessages()
 */
 export type FetchedResponse = {
-  type: "http" | "redis",
+  type: "http" | "redis";
   id: string;
   service: string;
   time: number;
