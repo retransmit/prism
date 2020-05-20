@@ -427,3 +427,28 @@ module.exports = {
   },
 };
 ```
+
+## Scaling
+
+Retransmit is horizontally scalable. You can place as many nodes behind a load balancer as you want. 
+
+In addition retransmit has a built-in load balancing feature specific to Redis-based services. 
+
+```js
+module.exports = {
+  "/users": {
+    POST: {
+      services: {
+        messagingservice: {
+          type: "redis",
+          config: {
+            requestChannel: "inputs",
+            responseChannel: "outputs",
+            numRequestChannels: 10
+          },
+        },
+      },
+    },
+  },
+};
+```
