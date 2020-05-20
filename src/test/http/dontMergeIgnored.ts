@@ -4,7 +4,7 @@ import startBackends from "./startBackends";
 import { closeServer } from "../utils";
 
 export default async function (app: { instance: any }) {
-  it(`merges responses`, async () => {
+  it(`does not merge ignored results`, async () => {
     const config = {
       routes: {
         "/users": {
@@ -21,6 +21,7 @@ export default async function (app: { instance: any }) {
                 config: {
                   url: "http://localhost:6667/messages",
                 },
+                merge: false,
               },
             },
           },
@@ -67,7 +68,6 @@ export default async function (app: { instance: any }) {
     response.status.should.equal(200);
     response.body.should.deepEqual({
       user: 1,
-      message: "hello world",
     });
   });
 }

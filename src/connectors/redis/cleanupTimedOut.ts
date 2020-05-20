@@ -14,31 +14,31 @@ export default async function cleanupTimedOut() {
     const entries = activeRequests.entries();
 
     const timedOut: [string, ActiveRedisRequest][] = [];
-    for (const [id, trackedRequest] of entries) {
-      if (Date.now() > trackedRequest.timeoutTicks) {
-        timedOut.push([trackedRequest.id, trackedRequest]);
+    for (const [id, activeRequest] of entries) {
+      if (Date.now() > activeRequest.timeoutTicks) {
+        timedOut.push([activeRequest.id, activeRequest]);
       }
     }
 
-    for (const [activeRequestId, trackedRequest] of timedOut) {
-      const routeConfig = config.routes[trackedRequest.request.path][
-        trackedRequest.request.method
+    for (const [activeRequestId, activeRequest] of timedOut) {
+      const routeConfig = config.routes[activeRequest.request.path][
+        activeRequest.request.method
       ] as RouteConfig;
 
       const fetchedResponse: FetchedResponse = {
         type: "redis",
         id: activeRequestId,
-        time: Date.now() - trackedRequest.startTime,
-        service: trackedRequest.service,
-        path: trackedRequest.request.path,
-        method: trackedRequest.request.method,
+        time: Date.now() - activeRequest.startTime,
+        service: activeRequest.service,
+        path: activeRequest.request.path,
+        method: activeRequest.request.method,
         response: {
-          content: `${trackedRequest.service} timed out.`,
+          content: `${activeRequest.service} timed out.`,
           status: 408,
         },
       };
 
-      trackedRequest.onResponse(fetchedResponse);
+      activeRequest.onResponse(fetchedResponse);
       activeRequests.remove(activeRequestId);
     }
     isCleaningUp = false;

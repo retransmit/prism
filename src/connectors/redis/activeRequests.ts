@@ -6,8 +6,8 @@ export function entries() : IterableIterator<[string, ActiveRedisRequest]> {
   return map.entries();
 }
 
-export function set(id: string, data: ActiveRedisRequest) {
-  map.set(id, data);
+export function set(id: string, trackedRedisRequest: ActiveRedisRequest) {
+  map.set(id, trackedRedisRequest);
 }
 
 export function get(id: string): ActiveRedisRequest | undefined {

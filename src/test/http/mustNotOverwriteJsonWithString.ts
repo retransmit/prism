@@ -4,7 +4,7 @@ import startBackends from "./startBackends";
 import { closeServer } from "../utils";
 
 export default async function (app: { instance: any }) {
-  it(`merges responses`, async () => {
+  it(`must not overwrite json content with string content`, async () => {
     const config = {
       routes: {
         "/users": {
@@ -20,7 +20,7 @@ export default async function (app: { instance: any }) {
                 type: "http" as "http",
                 config: {
                   url: "http://localhost:6667/messages",
-                },
+                }
               },
             },
           },
@@ -48,9 +48,7 @@ export default async function (app: { instance: any }) {
         routes: ["GET"].map((method) => ({
           path: "/messages",
           method,
-          response: {
-            message: "hello world",
-          },
+          response: "hello world",
         })),
       },
     ]);
@@ -64,10 +62,7 @@ export default async function (app: { instance: any }) {
       await closeServer(backendApp as any);
     }
 
-    response.status.should.equal(200);
-    response.body.should.deepEqual({
-      user: 1,
-      message: "hello world",
-    });
+    response.status.should.equal(500);
+    response.text.should.equal("messagingservice returned a response which will overwrite current response.")
   });
 }

@@ -118,7 +118,7 @@ export type FetchedResponse = {
 export type RedisServiceRequest = {
   id: string;
   type: "request" | "rollback";
-  data: HttpRequest;
+  request: HttpRequest;
 };
 
 export type RedisServiceResponse = {

@@ -109,7 +109,7 @@ Retransmit will package an HTTP request in the following format (as JSON) and po
 export type RedisServiceRequest = {
   id: string;
   type: string;
-  data: HttpRequest;
+  request: HttpRequest;
 };
 
 export type HttpRequest = {
@@ -357,7 +357,7 @@ For Redis, the rollback posts the following data into the same channel into whic
 export type RedisServiceRequest = {
   id: string;
   type: "rollback";
-  data: HttpRequest;
+  request: HttpRequest;
 };
 ```
 

@@ -55,7 +55,7 @@ export default async function (app: { instance: any }) {
         },
       ]);
 
-      const result = await makeReq(request(app.instance), "/users")
+      const response = await makeReq(request(app.instance), "/users")
         .send({ hello: "world" })
         .set("origin", "http://localhost:3000");
 
@@ -63,8 +63,8 @@ export default async function (app: { instance: any }) {
         await closeServer(backendApp as any);
       }
 
-      result.status.should.equal(200);
-      result.text.should.equal(`${method}: Everything worked.`);
+      response.status.should.equal(200);
+      response.text.should.equal(`${method}: Everything worked.`);
     });
   });
 }

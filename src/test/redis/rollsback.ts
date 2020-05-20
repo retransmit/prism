@@ -1,8 +1,9 @@
 import request = require("supertest");
 import { doPubSub } from "./utils";
+import * as redis from "redis";
 
 export default async function (app: { instance: any }) {
-  it(`merges responses`, async () => {
+  it(`rolls back`, async () => {
     const config = {
       routes: {
         "/users": {
@@ -20,7 +21,7 @@ export default async function (app: { instance: any }) {
                 config: {
                   requestChannel: "input",
                   responseChannel: "output",
-                }
+                },
               },
             },
           },
@@ -28,7 +29,7 @@ export default async function (app: { instance: any }) {
       },
     };
 
-    const serviceResults = [
+    const serviceResponses = [
       {
         id: "temp",
         service: "userservice",
@@ -42,17 +43,27 @@ export default async function (app: { instance: any }) {
         id: "temp",
         service: "messagingservice",
         response: {
-          content: {
-            message: "hello world",
-          },
+          status: 400,
+          content: "Invalid request",
         },
       },
     ];
 
+    const rollbackPromise = new Promise((success) => {
+      const client = redis.createClient();
+      client.subscribe("input");
+      client.on("message", (channel, message) => {
+        const jsonMessage = JSON.parse(message);
+        if (channel === "input" && jsonMessage.type === "rollback") {
+          success(jsonMessage);
+        }
+      });
+    });
+
     const result = await doPubSub(
       app,
       config,
-      serviceResults,
+      serviceResponses,
       (success, getJson) => {
         request(app.instance)
           .post("/users")
@@ -62,12 +73,14 @@ export default async function (app: { instance: any }) {
       }
     );
 
+    const rollbackMessage: any = await rollbackPromise;
+
     const [response, json] = result;
     json.request.headers.origin.should.equal("http://localhost:3000");
-    response.status.should.equal(200);
-    response.body.should.deepEqual({
-      user: 1,
-      message: "hello world",
-    });
+    response.status.should.equal(400);
+    response.text.should.equal("POST: Invalid request");
+
+    rollbackMessage.type.should.equal("rollback");
+    rollbackMessage.request.path.should.equal("/users");
   });
 }

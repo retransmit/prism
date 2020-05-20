@@ -27,7 +27,7 @@ export default function invokeServices(
   const redisServiceRequest: RedisServiceRequest = {
     id: requestId,
     type: "request" as "request",
-    data: httpRequest,
+    request: httpRequest,
   };
 
   publish(redisServiceRequest, httpRequest.path, httpRequest.method, "request");

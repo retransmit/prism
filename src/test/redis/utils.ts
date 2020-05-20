@@ -28,7 +28,7 @@ export async function doPubSub(
             ...staticResponse.response,
             content:
               typeof staticResponse.response.content === "string"
-                ? `${json.data.method}: ${staticResponse.response.content}`
+                ? `${json.request.method}: ${staticResponse.response.content}`
                 : staticResponse.response.content,
           },
         };

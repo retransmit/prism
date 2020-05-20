@@ -10,7 +10,7 @@ import {
 import * as configModule from "../../config";
 import got from "got";
 import { Response } from "got/dist/source/core";
-import { hasErrors } from "../../httpUtil";
+import { isHttpError } from "../../httpUtil";
 
 /*
   Make Promises for Redis Services
@@ -73,7 +73,7 @@ export default function invokeServices(
               .then(async (serverResponse) => {
                 const httpResponse = makeHttpResponse(serverResponse);
 
-                if (hasErrors(httpResponse)) {
+                if (isHttpError(httpResponse)) {
                   if (serviceConfig.logError) {
                     serviceConfig.logError(httpResponse, modifiedRequest);
                   }
@@ -93,7 +93,7 @@ export default function invokeServices(
               .catch(async (error) => {
                 const httpResponse = makeHttpResponse(error.response);
 
-                if (hasErrors(httpResponse)) {
+                if (isHttpError(httpResponse)) {
                   if (serviceConfig.logError) {
                     serviceConfig.logError(httpResponse, modifiedRequest);
                   }
@@ -116,7 +116,7 @@ export default function invokeServices(
         got(modifiedRequest.path, options).catch(async (error) => {
           const httpResponse = makeHttpResponse(error.response);
 
-          if (hasErrors(httpResponse)) {
+          if (isHttpError(httpResponse)) {
             if (serviceConfig.logError) {
               serviceConfig.logError(httpResponse, modifiedRequest);
             }

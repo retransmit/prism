@@ -7,7 +7,7 @@ import rollbackHttp from "./connectors/http/rollback";
 import invokeRedisServices from "./connectors/redis/invokeServices";
 import rollbackRedis from "./connectors/redis/rollback";
 import mergeResponses from "./mergeResponses";
-import { hasErrors } from "./httpUtil";
+import { isHttpError } from "./httpUtil";
 
 const connectors = [
   { type: "http", invokeServices: invokeHttpServices, rollback: rollbackHttp },
@@ -59,15 +59,9 @@ export function createHandler(method: HttpMethods) {
         ? await routeConfig.mergeResponses(interimResponses)
         : interimResponses;
 
-      if (fetchedResponses.map((x) => x.response).some(hasErrors)) {
-        for (const connector of connectors) {
-          connector.rollback(requestId, httpRequest);
-        }
-      }
-
       let response = mergeResponses(requestId, fetchedResponses);
 
-      if (hasErrors(response)) {
+      if (isHttpError(response)) {
         if (config.logError) {
           config.logError(fetchedResponses, httpRequest);
         }

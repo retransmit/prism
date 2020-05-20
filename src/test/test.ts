@@ -4,14 +4,17 @@ import request = require("supertest");
 
 import httpHttpMethods from "./http/httpMethods";
 import httpMergeResults from "./http/mergeResults";
+import httpDontMergeIgnored from "./http/dontMergeIgnored";
+import httpMustNotOverwriteJsonWithString from "./http/mustNotOverwriteJsonWithString";
 
 import redisHttpMethods from "./redis/httpMethods";
 import redisMergeResults from "./redis/mergeResults";
 import redisDontMergeIgnored from "./redis/dontMergeIgnored";
 import redisShowGenericErrors from "./redis/showGenericErrors";
 import redisMustNotOverwriteJsonWithString from "./redis/mustNotOverwriteJsonWithString";
+import redisRollsback from "./redis/rollsback";
+
 import { closeServer } from "./utils";
-import mergeResponses from "../mergeResponses";
 
 function run() {
   /* Sanity check to make sure we don't accidentally run on the server. */
@@ -40,6 +43,7 @@ function run() {
       redisDontMergeIgnored(app);
       redisShowGenericErrors(app);
       redisMustNotOverwriteJsonWithString(app);
+      redisRollsback(app);
     });
 
     describe("http", () => {
@@ -49,6 +53,8 @@ function run() {
 
       httpHttpMethods(app);
       httpMergeResults(app);
+      httpDontMergeIgnored(app);
+      httpMustNotOverwriteJsonWithString(app);
     });
   });
 }

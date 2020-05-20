@@ -15,14 +15,17 @@ import { publish } from "./publish";
 /*
   Make Promises for Redis Services
 */
-export default function rollback(requestId: string, httpRequest: HttpRequest) {
+export default async function rollback(
+  requestId: string,
+  httpRequest: HttpRequest
+) {
   const redisServiceRequest: RedisServiceRequest = {
     id: requestId,
     type: "rollback",
-    data: httpRequest,
+    request: httpRequest,
   };
 
-  const modifiedRequest = publish(
+  publish(
     redisServiceRequest,
     httpRequest.path,
     httpRequest.method,

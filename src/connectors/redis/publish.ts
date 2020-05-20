@@ -7,7 +7,7 @@ import {
 } from "../../types";
 import { getPublisher } from "./clients";
 
-export async function publish(
+export function publish(
   request: RedisServiceRequest,
   path: string,
   method: HttpMethods,
