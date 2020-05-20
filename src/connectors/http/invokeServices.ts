@@ -31,9 +31,15 @@ export default function invokeServices(
     const serviceConfig = routeConfig.services[service];
 
     if (serviceConfig.type === "http") {
+      const urlWithParamsReplaced = Object.keys(request.params).reduce(
+        (acc, param) => {
+          return acc.replace(`/:${param}`, `/${request.params[param]}`);
+        },
+        serviceConfig.config.url
+      );
       const requestCopy = {
         ...request,
-        path: serviceConfig.config.url,
+        path: urlWithParamsReplaced
       };
 
       const modifiedRequest = serviceConfig.config.modifyServiceRequest

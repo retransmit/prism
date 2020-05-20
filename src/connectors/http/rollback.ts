@@ -15,11 +15,17 @@ export default function rollback(requestId: string, request: HttpRequest) {
   for (const service of Object.keys(routeConfig.services)) {
     const serviceConfig = routeConfig.services[service];
     if (serviceConfig.type === "http" && serviceConfig.config.rollbackUrl) {
+      const urlWithParamsReplaced = Object.keys(request.params).reduce(
+        (acc, param) => {
+          return acc.replace(`/:${param}`, `/${request.params[param]}`);
+        },
+        serviceConfig.config.rollbackUrl
+      );
       const requestCopy = {
         ...request,
-        path: serviceConfig.config.rollbackUrl,
+        path: urlWithParamsReplaced
       };
-
+      
       const modifiedRequest = serviceConfig.config.modifyServiceRequest
         ? serviceConfig.config.modifyServiceRequest(requestCopy)
         : requestCopy;

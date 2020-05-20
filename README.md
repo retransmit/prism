@@ -43,6 +43,27 @@ module.exports = {
         },
       },
     },
+    // You can specify parameters in the url
+    "/users/:id": {
+      GET: {
+        services: {
+          userservice: {
+            type: "http",
+            config: {
+              // And use them like this.
+              url: "http://localhost:6666/users/:id",
+            },
+          },
+          messagingservice: {
+            type: "http",
+            config: {
+              // And use them like this.
+              url: "http://localhost:6667/messages/for/:id",
+            },
+          },
+        },
+      },
+    },
   },
 };
 ```
@@ -428,7 +449,7 @@ module.exports = {
 
 ## Scaling
 
-Retransmit is horizontally scalable. You can place as many nodes behind a load balancer as you want. 
+Retransmit is horizontally scalable. You can place as many nodes behind a load balancer as you want.
 
 In addition Retransmit has a built-in load balancing feature specific to Redis-based services. To do this, your redis service instances should be subscribing to numbered channels rather than a single channel. For example, userservice-instance1 could subscribe to "userinput0", userservice-instance2 could subscribe to "userinput1" etc.
 
@@ -446,7 +467,7 @@ module.exports = {
             responseChannel: "outputs",
             // Specify 10 channels
             // Instances need to subscribe to input0 to inputs9
-            numRequestChannels: 10
+            numRequestChannels: 10,
           },
         },
       },
