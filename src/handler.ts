@@ -1,6 +1,6 @@
 import { IRouterContext } from "koa-router";
 import * as configModule from "./config";
-import { HttpMethods, FetchedResponse } from "./types";
+import { HttpMethods, FetchedResponse, HttpResponse } from "./types";
 import randomId from "./random";
 import invokeHttpServices from "./connectors/http/invokeServices";
 import rollbackHttp from "./connectors/http/rollback";
@@ -58,13 +58,30 @@ export function createHandler(method: HttpMethods) {
         ? await routeConfig.mergeResponses(interimResponses)
         : interimResponses;
 
-      if (hasErrors(fetchedResponses)) {
+      if (fetchedResponses.map(x => x.response).some(hasErrors)) {
+        for (const response of fetchedResponses) {
+          if (hasErrors(response.response)) {
+            const serviceConfig = routeConfig.services[response.service];
+            if (serviceConfig.logError) {
+              serviceConfig.logError(fetchedResponses, httpRequest);
+            }
+          }
+        }
         for (const connector of connectors) {
           connector.rollback(requestId, httpRequest);
         }
       }
 
       let response = mergeResponses(requestId, fetchedResponses);
+
+      if (hasErrors(response)) {
+        if (config.logError) {
+          config.logError(fetchedResponses, httpRequest);
+        }
+        for (const connector of connectors) {
+          connector.rollback(requestId, httpRequest);
+        }
+      }
 
       // See if there are any custom handlers for final response
       const modifyResponse =
@@ -141,6 +158,6 @@ export function createHandler(method: HttpMethods) {
   };
 }
 
-function hasErrors(responses: FetchedResponse[]) {
-  return responses.some((x) => x.response?.status && x.response?.status >= 400);
+function hasErrors(response: HttpResponse | undefined) {
+  return response && response.status && response.status >= 400;
 }

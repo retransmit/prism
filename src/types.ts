@@ -24,8 +24,8 @@ export interface IAppConfig {
   ) => Promise<{ handled: boolean }>;
   genericErrors?: boolean;
   logError?: (
-    error: string,
-    params: { method: string; path: string }
+    responses: FetchedResponse[],
+    request: HttpRequest
   ) => Promise<void>;
 }
 
@@ -43,6 +43,10 @@ export type RouteConfig = {
   ) => Promise<{ handled: boolean }>;
   mergeResponses?: (responses: FetchedResponse[]) => Promise<FetchedResponse[]>;
   genericErrors?: boolean;
+  logError?: (
+    responses: FetchedResponse[],
+    request: HttpRequest
+  ) => Promise<void>;
 };
 
 /*
@@ -74,8 +78,8 @@ export type ServiceHandlerConfig = (
   mergeField?: string;
   modifyServiceResponse?: (response: HttpResponse) => Promise<HttpResponse>;
   logError?: (
-    error: string,
-    params: { method: string; path: string }
+    responses: FetchedResponse[],
+    request: HttpRequest
   ) => Promise<void>;
 };
 

@@ -292,25 +292,37 @@ module.exports = {
 
 ## Error Logging
 
-The logError handler lets you log errors that happen in the pipeline. Again, it can be specified globally for all services or individually for a service.
+The logError handler lets you log errors that happen in the pipeline. It can be specified globally, specifically for a route, or specifically for a service. The responses parameter contains repsonses obtained from various services which can help you trouble shoot the issue.
 
 ```typescript
 module.exports = {
-  // parts of config omitted for brevity
-  messagingservice: {
-    type: "redis",
-    config: {
-      requestChannel: "inputs",
-      responseChannel: "outputs",
-    },
-    /*
-      Signature
-      logError?: (
-        error: string,
-        params: { method: string; path: string }
-      ) => Promise<void>;
-    },
-    */
-   logError?: async (error) => { console.log(error); }
+  "/users": {
+    "POST": {
+      services: messagingservice: {
+        type: "redis",
+        config: {
+          requestChannel: "inputs",
+          responseChannel: "outputs",
+        },
+        logError: async (responses, request) => {
+          console.log("Failed in messagingservice.");
+        },
+      },
+      logError: async (responses, request) => {
+        console.log("A service failed in POST /users.");
+      },    
+    }
+  }
+
+  /*
+    Signature
+    logError?: (
+      responses: FetchedResponse[],
+      request: HttpRequest
+    ) => Promise<void>;
+  */
+  logError: async (responses, request) => {
+    console.log("Something failed somewhere.");
+  },
 };
 ```
