@@ -8,7 +8,6 @@ export type HttpMethods = "GET" | "POST" | "PUT" | "DELETE" | "PATCH";
   Application Config
 */
 export interface IAppConfig {
-  cleanupIntervalMS?: number;
   routes: {
     [key: string]: {
       [key in HttpMethods]?: RouteConfig;
@@ -16,6 +15,7 @@ export interface IAppConfig {
   };
   redis?: {
     options?: ClientOpts;
+    cleanupInterval?: number;
   };
   modifyRequest?: (ctx: IRouterContext) => Promise<{ handled: boolean }>;
   modifyResponse?: (
@@ -52,35 +52,39 @@ export type RouteConfig = {
 /*
   Service Configuration
 */
-export type ServiceHandlerConfig = (
-  | {
-      type: "redis";
-      config: {
-        requestChannel: string;
-        responseChannel: string;
-        numRequestChannels?: number;
-        modifyServiceRequest?: (request: RedisServiceRequest) => Promise<any>;
-      };
-    }
-  | {
-      type: "http";
-      config: {
-        url: string;
-        rollbackUrl?: string;
-        modifyServiceRequest?: (request: HttpRequest) => Promise<HttpRequest>;
-      };
-    }
-) & {
+export type ServiceHandlerConfigBase = {
   awaitResponse?: boolean;
   merge?: boolean;
-  timeoutMS?: number;
+  timeout?: number;
   mergeField?: string;
   modifyServiceResponse?: (response: HttpResponse) => Promise<HttpResponse>;
-  logError?: (
-    response: HttpResponse,
-    request: HttpRequest
-  ) => Promise<void>;
+  logError?: (response: HttpResponse, request: HttpRequest) => Promise<void>;
 };
+
+export type RedisServiceHandlerConfig = {
+  type: "redis";
+  config: {
+    requestChannel: string;
+    responseChannel: string;
+    numRequestChannels?: number;
+    modifyServiceRequest?: (request: RedisServiceRequest) => any;
+    modifyRollbackRequest?: (request: RedisServiceRequest) => any;
+  };
+} & ServiceHandlerConfigBase;
+
+export type HttpServiceHandlerConfig = {
+  type: "http";
+  config: {
+    path: string;
+    rollbackPath?: string;
+    modifyServiceRequest?: (request: HttpRequest) => HttpRequest;
+    modifyRollbackRequest?: (request: HttpRequest) => HttpRequest;
+  };
+} & ServiceHandlerConfigBase;
+
+export type ServiceHandlerConfig =
+  | RedisServiceHandlerConfig
+  | HttpServiceHandlerConfig;
 
 /*
   Currently active requests
@@ -91,7 +95,7 @@ export type ActiveRedisRequest = {
   timeoutTicks: number;
   service: string;
   startTime: number;
-  request: HttpRequest,
+  request: HttpRequest;
   onResponse: (response: FetchedResponse) => void;
 };
 

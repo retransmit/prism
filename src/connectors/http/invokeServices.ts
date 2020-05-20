@@ -3,6 +3,8 @@ import {
   FetchedResponse,
   HttpRequest,
   HttpResponse,
+  ServiceHandlerConfig,
+  HttpServiceHandlerConfig,
 } from "../../types";
 
 import * as configModule from "../../config";
@@ -27,108 +29,127 @@ export default function invokeServices(
 
   for (const service of Object.keys(routeConfig.services)) {
     const serviceConfig = routeConfig.services[service];
+
     if (serviceConfig.type === "http") {
-      function makeHttpResponse(
-        serverResponse: Response<string>
-      ): HttpResponse {
-        return {
-          headers: serverResponse.headers,
-          content: isJson(serverResponse)
-            ? JSON.parse(serverResponse.body)
-            : serverResponse.body,
-        };
-      }
+      const requestCopy = {
+        ...request,
+        path: serviceConfig.config.path,
+      };
 
-      async function makeFetchedResponse(
-        httpResponse: HttpResponse
-      ): Promise<FetchedResponse> {
-        const finalHttpResponse = serviceConfig.modifyServiceResponse
-          ? await serviceConfig.modifyServiceResponse(httpResponse)
-          : httpResponse;
+      const modifiedRequest = serviceConfig.config.modifyServiceRequest
+        ? serviceConfig.config.modifyServiceRequest(requestCopy)
+        : requestCopy;
 
-        return {
-          id: requestId,
-          method: request.method,
-          path: request.path,
-          service,
-          time: Date.now() - timeNow,
-          response: finalHttpResponse,
-        };
-      }
+      const basicOptions = {
+        searchParams: modifiedRequest.query,
+        method: method,
+        headers: modifiedRequest.headers,
+        timeout: serviceConfig.timeout,
+      };
 
-      const url = serviceConfig.config.url;
-
-      if (url) {
-        const basicOptions = {
-          searchParams: request.query,
-          method: method,
-          headers: request.headers,
-          timeout: serviceConfig.timeoutMS,
-        };
-
-        const options =
-          typeof request.body === "string"
-            ? {
-                ...basicOptions,
-                body: request.body,
-              }
-            : typeof request.body === "object"
-            ? {
-                ...basicOptions,
-                json: request.body,
-              }
-            : basicOptions;
-
-        if (serviceConfig.awaitResponse !== false) {
-          promises.push(
-            new Promise<FetchedResponse>((success) => {
-              got(url, options)
-                .then(async (serverResponse) => {
-                  const httpResponse = makeHttpResponse(serverResponse);
-
-                  if (hasErrors(httpResponse)) {
-                    if (serviceConfig.logError) {
-                      serviceConfig.logError(httpResponse, request);
-                    }
-                  }
-
-                  const fetchedResponse = await makeFetchedResponse(
-                    httpResponse
-                  );
-                  success(fetchedResponse);
-                })
-                .catch(async (error) => {
-                  const httpResponse = makeHttpResponse(error.response);
-
-                  if (hasErrors(httpResponse)) {
-                    if (serviceConfig.logError) {
-                      serviceConfig.logError(httpResponse, request);
-                    }
-                  }
-
-                  const fetchedResponse = await makeFetchedResponse(
-                    httpResponse
-                  );
-                  success(fetchedResponse);
-                });
-            })
-          );
-        } else {
-          got(url, options).catch(async (error) => {
-            const httpResponse = makeHttpResponse(error.response);
-
-            if (hasErrors(httpResponse)) {
-              if (serviceConfig.logError) {
-                serviceConfig.logError(httpResponse, request);
-              }
+      const options =
+        typeof modifiedRequest.body === "string"
+          ? {
+              ...basicOptions,
+              body: modifiedRequest.body,
             }
-          });
-        }
+          : typeof modifiedRequest.body === "object"
+          ? {
+              ...basicOptions,
+              json: modifiedRequest.body,
+            }
+          : basicOptions;
+
+      if (serviceConfig.awaitResponse !== false) {
+        promises.push(
+          new Promise<FetchedResponse>((success) => {
+            got(modifiedRequest.path, options)
+              .then(async (serverResponse) => {
+                const httpResponse = makeHttpResponse(serverResponse);
+
+                if (hasErrors(httpResponse)) {
+                  if (serviceConfig.logError) {
+                    serviceConfig.logError(httpResponse, modifiedRequest);
+                  }
+                }
+
+                const fetchedResponse = await makeFetchedResponse(
+                  requestId,
+                  timeNow,
+                  service,
+                  request,
+                  httpResponse,
+                  serviceConfig
+                );
+                success(fetchedResponse);
+              })
+              .catch(async (error) => {
+                const httpResponse = makeHttpResponse(error.response);
+
+                if (hasErrors(httpResponse)) {
+                  if (serviceConfig.logError) {
+                    serviceConfig.logError(httpResponse, modifiedRequest);
+                  }
+                }
+
+                const fetchedResponse = await makeFetchedResponse(
+                  requestId,
+                  timeNow,
+                  service,
+                  request,
+                  httpResponse,
+                  serviceConfig
+                );
+                success(fetchedResponse);
+              });
+          })
+        );
+      } else {
+        got(modifiedRequest.path, options).catch(async (error) => {
+          const httpResponse = makeHttpResponse(error.response);
+
+          if (hasErrors(httpResponse)) {
+            if (serviceConfig.logError) {
+              serviceConfig.logError(httpResponse, modifiedRequest);
+            }
+          }
+        });
       }
     }
   }
 
   return promises;
+}
+
+function makeHttpResponse(serverResponse: Response<string>): HttpResponse {
+  return {
+    headers: serverResponse.headers,
+    content: isJson(serverResponse)
+      ? JSON.parse(serverResponse.body)
+      : serverResponse.body,
+  };
+}
+
+async function makeFetchedResponse(
+  requestId: string,
+  startTime: number,
+  service: string,
+  request: HttpRequest,
+  httpResponse: HttpResponse,
+  serviceConfig: HttpServiceHandlerConfig
+): Promise<FetchedResponse> {
+  const modifiedResponse = serviceConfig.modifyServiceResponse
+    ? await serviceConfig.modifyServiceResponse(httpResponse)
+    : httpResponse;
+
+  return {
+    id: requestId,
+    method: request.method,
+    path: request.path,
+    service,
+    time: Date.now() - startTime,
+    response: modifiedResponse,
+  };
 }
 
 function isJson(serverResponse: Response<string>) {

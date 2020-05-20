@@ -15,7 +15,7 @@ export default async function (app: { instance: any }) {
               userservice: {
                 type: "http" as "http",
                 config: {
-                  url: "http://localhost:6666/users",
+                  path: "http://localhost:6666/users",
                 },
               },
             },

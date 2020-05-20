@@ -48,7 +48,7 @@ export default function invokeServices(
             request: httpRequest,
             service,
             timeoutTicks:
-              Date.now() + (serviceConfig.timeoutMS || 30000),
+              Date.now() + (serviceConfig.timeout || 30000),
             startTime: Date.now(),
             onResponse: success
           });

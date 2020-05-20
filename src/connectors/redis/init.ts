@@ -33,11 +33,10 @@ export default async function init() {
     }
 
     subscriber.on("message", processMessage);
-  
-    // Some services may never respond. Fail them.
-    setInterval(cleanupTimedOut, config.cleanupIntervalMS || 10000);
-  }
 
+    // Some services may never respond. Fail them.
+    setInterval(cleanupTimedOut, config.redis?.cleanupInterval || 10000);
+  }
 }
 
 function isRedisBeingUsed(): boolean {

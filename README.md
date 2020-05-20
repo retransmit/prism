@@ -1,7 +1,5 @@
 # Retransmit
 
-## What is Retransmit?
-
 Retransmit is a broker that integrates data from multiple backend microservices and exposes them at HTTP endpoints. For example, GET /users might need to fetch data from the 'user service' as well as the 'friends service'. Retransmit will create a response by contacting both services and merging their responses. If any of the requests to backend services fail, retransmit can inform the other services so that a rollback can be performed.
 
 As of now, retransmit can talk to backend services via HTTP as well as Redis pub-sub. Here's a diagram:
@@ -33,13 +31,13 @@ module.exports = {
           userservice: {
             type: "http",
             config: {
-              url: "http://localhost:6666/users",
+              path: "http://localhost:6666/users",
             },
           },
           messagingservice: {
             type: "http",
             config: {
-              url: "http://localhost:6667/messages",
+              path: "http://localhost:6667/messages",
             },
           },
         },
@@ -290,11 +288,52 @@ module.exports = {
 };
 ```
 
-## Error Logging
+## Error Handling
 
-The logError handler lets you log errors that happen in the pipeline. It can be specified globally, specifically for a route, or specifically for a service. The responses parameter contains repsonses obtained from various services which can help you trouble shoot the issue.
+When a service fails, retransmit can notify the other services that the request is going to return an error. 
 
-```typescript
+For Http Services, the rollbackUrl specified in the configuration is called with the same request data. If modifyRollbackRequest is specified, you could change the url, method and parameters for the rollback call.
+
+```js
+module.exports = {
+  routes: {
+    "/users": {
+      POST: {
+        services: {
+          userservice: {
+            type: "http",
+            config: {
+              path: "http://localhost:6666/users",
+              // Rollback url to call
+              rollbackpath: "http://localhost:6666/users/remove"
+            },
+          },
+          accountsservice: {
+            type: "http",
+            config: {
+              path: "http://localhost:6666/users",
+            },
+            modifyRollbackRequest: ()
+          },
+          messagingservice: {
+            // omitted...
+          },
+        },
+      },
+    },
+  },
+};
+```
+
+
+
+
+For redis pub-sub based services, a 
+
+
+The logError handler lets you log errors that happen in the pipeline. It can be specified globally, for all services on a route, or specifically for a service. For error handlers specified globally or for all services in a route, the responses parameter contains repsonses obtained from various services for that request. For a service specific error handler, it contains only a single response. See configuration below.
+
+```js
 module.exports = {
   "/users": {
     "POST": {
@@ -317,7 +356,7 @@ module.exports = {
       },
       logError: async (responses, request) => {
         console.log("A service failed in POST /users.");
-      },    
+      },
     }
   }
 
@@ -330,6 +369,48 @@ module.exports = {
   */
   logError: async (responses, request) => {
     console.log("Something failed somewhere.");
+  },
+};
+```
+
+## Other Options
+
+- timeout: Can be specified for each service. In milliseconds.
+- awaitResponse: Can be specified for each service. Setting this to false makes retransmit not wait for the response.
+- merge: Can be specified for each service. Settings this to false makes retransmit not merge the response.
+
+```js
+module.exports = {
+  "/users": {
+    POST: {
+      services: {
+        messagingservice: {
+          type: "redis",
+          config: {
+            requestChannel: "inputs",
+            responseChannel: "outputs",
+          },
+          // Timeout defaults to 30s
+          timeout: 100000,
+        },
+        notificationservice: {
+          type: "http",
+          config: {
+            path: "http://notify.example.com/users",
+          },
+          // Do not wait for this response
+          awaitResponse: false,
+        },
+        accountservice: {
+          type: "http",
+          config: {
+            path: "http://accounts.example.com/online",
+          },
+          // Do not merge the response from this service
+          merge: false
+        },
+      },
+    },
   },
 };
 ```

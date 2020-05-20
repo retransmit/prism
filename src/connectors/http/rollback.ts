@@ -6,36 +6,45 @@ import * as configModule from "../../config";
 /*
   Make Promises for Redis Services
 */
-export default function rollback(requestId: string, httpRequest: HttpRequest) {
+export default function rollback(requestId: string, request: HttpRequest) {
   const config = configModule.get();
-  const routeConfig = config.routes[httpRequest.path][
-    httpRequest.method
+  const routeConfig = config.routes[request.path][
+    request.method
   ] as RouteConfig;
 
   for (const service of Object.keys(routeConfig.services)) {
     const serviceConfig = routeConfig.services[service];
-    if (serviceConfig.type === "http" && serviceConfig.config.rollbackUrl) {
+    if (serviceConfig.type === "http" && serviceConfig.config.rollbackPath) {
+      const requestCopy = {
+        ...request,
+        path: serviceConfig.config.rollbackPath,
+      };
+
+      const modifiedRequest = serviceConfig.config.modifyServiceRequest
+        ? serviceConfig.config.modifyServiceRequest(requestCopy)
+        : requestCopy;
+
       const basicOptions = {
-        searchParams: httpRequest.query,
-        method: httpRequest.method,
-        headers: httpRequest.headers,
-        timeout: serviceConfig.timeoutMS,
+        searchParams: modifiedRequest.query,
+        method: modifiedRequest.method,
+        headers: modifiedRequest.headers,
+        timeout: serviceConfig.timeout,
       };
 
       const options =
-        typeof httpRequest.body === "string"
+        typeof modifiedRequest.body === "string"
           ? {
               ...basicOptions,
-              body: httpRequest.body,
+              body: modifiedRequest.body,
             }
-          : typeof httpRequest.body === "object"
+          : typeof modifiedRequest.body === "object"
           ? {
               ...basicOptions,
-              json: httpRequest.body,
+              json: modifiedRequest.body,
             }
           : basicOptions;
 
-      got(serviceConfig.config.rollbackUrl, options);
+      got(modifiedRequest.path, options);
     }
   }
 }
