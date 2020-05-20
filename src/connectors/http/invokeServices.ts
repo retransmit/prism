@@ -73,6 +73,7 @@ export default function invokeServices(
                   }
                 }
 
+                // Use the original request here - not modifiedRequest
                 const fetchedResponse = await makeFetchedResponse(
                   requestId,
                   timeNow,
@@ -92,6 +93,7 @@ export default function invokeServices(
                   }
                 }
 
+                // Use the original request here - not modifiedRequest
                 const fetchedResponse = await makeFetchedResponse(
                   requestId,
                   timeNow,
@@ -143,6 +145,7 @@ async function makeFetchedResponse(
     : httpResponse;
 
   return {
+    type: "http",
     id: requestId,
     method: request.method,
     path: request.path,

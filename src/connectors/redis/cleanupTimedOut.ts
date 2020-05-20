@@ -26,6 +26,7 @@ export default async function cleanupTimedOut() {
       ] as RouteConfig;
 
       const fetchedResponse: FetchedResponse = {
+        type: "redis",
         id: activeRequestId,
         time: Date.now() - trackedRequest.startTime,
         service: trackedRequest.service,

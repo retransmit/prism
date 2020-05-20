@@ -103,6 +103,7 @@ export type ActiveRedisRequest = {
   Output of processMessages()
 */
 export type FetchedResponse = {
+  type: "http" | "redis",
   id: string;
   service: string;
   time: number;

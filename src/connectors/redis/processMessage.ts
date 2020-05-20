@@ -51,6 +51,7 @@ export default async function processMessage(
         const processingTime = Date.now() - activeRequest.startTime;
 
         const fetchedResponse: FetchedResponse = {
+          type: "redis",
           id: redisResponse.id,
           time: processingTime,
           path: activeRequest.request.path,
