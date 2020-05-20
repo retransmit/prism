@@ -33,7 +33,7 @@ export default function invokeServices(
     if (serviceConfig.type === "http") {
       const requestCopy = {
         ...request,
-        path: serviceConfig.config.path,
+        path: serviceConfig.config.url,
       };
 
       const modifiedRequest = serviceConfig.config.modifyServiceRequest

@@ -31,13 +31,13 @@ module.exports = {
           userservice: {
             type: "http",
             config: {
-              path: "http://localhost:6666/users",
+              url: "http://localhost:6666/users",
             },
           },
           messagingservice: {
             type: "http",
             config: {
-              path: "http://localhost:6667/messages",
+              url: "http://localhost:6667/messages",
             },
           },
         },
@@ -303,21 +303,21 @@ module.exports = {
           userservice: {
             type: "http",
             config: {
-              path: "http://localhost:6666/users",
+              url: "http://localhost:6666/users",
               // Rollback url to call
-              rollbackpath: "http://localhost:6666/users/remove",
+              rollbackUrl: "http://localhost:6666/users/remove",
             },
           },
           accountsservice: {
             type: "http",
             config: {
-              path: "http://localhost:6666/accounts",
+              url: "http://localhost:6666/accounts",
             },
             // The rollback call goes as an HTTP PUT to a different url.
             modifyRollbackRequest: (req) => {
               return {
                 ...req,
-                path: "http://localhost:6666/users/remove",
+                url: "http://localhost:6666/users/remove",
                 method: "PUT",
               };
             },
@@ -409,7 +409,7 @@ module.exports = {
         notificationservice: {
           type: "http",
           config: {
-            path: "http://notify.example.com/users",
+            url: "http://notify.example.com/users",
           },
           // Do not wait for this response
           awaitResponse: false,
@@ -417,7 +417,7 @@ module.exports = {
         accountservice: {
           type: "http",
           config: {
-            path: "http://accounts.example.com/online",
+            url: "http://accounts.example.com/online",
           },
           // Do not merge the response from this service
           merge: false,

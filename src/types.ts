@@ -75,8 +75,8 @@ export type RedisServiceHandlerConfig = {
 export type HttpServiceHandlerConfig = {
   type: "http";
   config: {
-    path: string;
-    rollbackPath?: string;
+    url: string;
+    rollbackUrl?: string;
     modifyServiceRequest?: (request: HttpRequest) => HttpRequest;
     modifyRollbackRequest?: (request: HttpRequest) => HttpRequest;
   };
