@@ -432,7 +432,9 @@ module.exports = {
 
 Retransmit is horizontally scalable. You can place as many nodes behind a load balancer as you want. 
 
-In addition retransmit has a built-in load balancing feature specific to Redis-based services. 
+In addition retransmit has a built-in load balancing feature specific to Redis-based services. To do this, your redis service instances should be subscribing to numbered channels rather than a common channel. For example, service-instance1 could subscribe to "userinput0", and service-instance2 could subscribe to "userinput1" etc.
+
+Then, by specifiying the numRequestChannels option in a redis service's configuration, you can get retransmit to randomly choose on a channel for posting the incoming request. Note that the channels need to be numbered from 0 onwards.
 
 ```js
 module.exports = {
@@ -444,6 +446,8 @@ module.exports = {
           config: {
             requestChannel: "inputs",
             responseChannel: "outputs",
+            // Specify 10 channels
+            // Instances need to subscribe to input0 to inputs9
             numRequestChannels: 10
           },
         },
@@ -452,3 +456,8 @@ module.exports = {
   },
 };
 ```
+
+## About
+
+This software has an MIT license. You can freely use it in commercial work under the terms of the license.
+For paid support (or other consulting gigs), contact me on jeswinpk@agilehead.com
