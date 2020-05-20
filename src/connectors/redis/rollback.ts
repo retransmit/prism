@@ -22,5 +22,10 @@ export default function rollback(requestId: string, httpRequest: HttpRequest) {
     data: httpRequest,
   };
 
-  publish(redisServiceRequest, httpRequest.path, httpRequest.method);
+  const modifiedRequest = publish(
+    redisServiceRequest,
+    httpRequest.path,
+    httpRequest.method,
+    "rollback"
+  );
 }

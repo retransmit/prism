@@ -30,7 +30,7 @@ export default function invokeServices(
     data: httpRequest,
   };
 
-  publish(redisServiceRequest, httpRequest.path, httpRequest.method);
+  publish(redisServiceRequest, httpRequest.path, httpRequest.method, "request");
 
   const promises: Promise<FetchedResponse>[] = [];
 

@@ -290,7 +290,7 @@ module.exports = {
 
 ## Error Handling
 
-When a service fails, retransmit can notify the other services that the request is going to return an error. 
+When a service fails, retransmit can notify the other services that the request is going to return an error.
 
 For Http Services, the rollbackUrl specified in the configuration is called with the same request data. If modifyRollbackRequest is specified, you could change the url, method and parameters for the rollback call.
 
@@ -305,15 +305,22 @@ module.exports = {
             config: {
               path: "http://localhost:6666/users",
               // Rollback url to call
-              rollbackpath: "http://localhost:6666/users/remove"
+              rollbackpath: "http://localhost:6666/users/remove",
             },
           },
           accountsservice: {
             type: "http",
             config: {
-              path: "http://localhost:6666/users",
+              path: "http://localhost:6666/accounts",
             },
-            modifyRollbackRequest: ()
+            // The rollback call goes as an HTTP PUT to a different url.
+            modifyRollbackRequest: (req) => {
+              return {
+                ...req,
+                path: "http://localhost:6666/users/remove",
+                method: "PUT",
+              };
+            },
           },
           messagingservice: {
             // omitted...
@@ -324,12 +331,6 @@ module.exports = {
   },
 };
 ```
-
-
-
-
-For redis pub-sub based services, a 
-
 
 The logError handler lets you log errors that happen in the pipeline. It can be specified globally, for all services on a route, or specifically for a service. For error handlers specified globally or for all services in a route, the responses parameter contains repsonses obtained from various services for that request. For a service specific error handler, it contains only a single response. See configuration below.
 
@@ -407,7 +408,7 @@ module.exports = {
             path: "http://accounts.example.com/online",
           },
           // Do not merge the response from this service
-          merge: false
+          merge: false,
         },
       },
     },

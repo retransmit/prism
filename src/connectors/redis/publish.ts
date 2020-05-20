@@ -10,7 +10,8 @@ import { getPublisher } from "./clients";
 export async function publish(
   request: RedisServiceRequest,
   path: string,
-  method: HttpMethods
+  method: HttpMethods,
+  requestType: "request" | "rollback"
 ) {
   const config = configModule.get();
   const routeConfig = config.routes[path][method] as RouteConfig;
@@ -27,10 +28,10 @@ export async function publish(
               Math.random() * serviceConfig.config.numRequestChannels
             )}`;
         if (!alreadyPublishedChannels.includes(channelId)) {
-          const requestHandler = serviceConfig.config.modifyServiceRequest;
-          const requestToSend = requestHandler
-            ? requestHandler(request)
+          const requestToSend = modifyServiceRequest
+            ? modifyServiceRequest(request)
             : request;
+
           getPublisher().publish(channelId, JSON.stringify(requestToSend));
           alreadyPublishedChannels.push(channelId);
         }
