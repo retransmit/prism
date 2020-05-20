@@ -23,7 +23,10 @@ export interface IAppConfig {
     response: any
   ) => Promise<{ handled: boolean }>;
   genericErrors?: boolean;
-  logError?: (error: string) => Promise<void>;
+  logError?: (
+    error: string,
+    params: { method: string; path: string }
+  ) => Promise<void>;
 }
 
 /*
@@ -70,7 +73,10 @@ export type ServiceHandlerConfig = (
   timeoutMS?: number;
   mergeField?: string;
   modifyServiceResponse?: (response: HttpResponse) => Promise<HttpResponse>;
-  logError?: (error: string) => Promise<void>;
+  logError?: (
+    error: string,
+    params: { method: string; path: string }
+  ) => Promise<void>;
 };
 
 /*

@@ -84,6 +84,31 @@ module.exports = {
 };
 ```
 
+Retransmit will package an HTTP request in the following format (as JSON) and post it into the requestChannel. The receiving services need to parse the message as JSON and do subsequent processing.
+
+```typescript
+export type RedisServiceRequest = {
+  id: string;
+  type: string;
+  data: HttpRequest;
+};
+
+export type HttpRequest = {
+  path: string;
+  method: HttpMethods;
+  params: {
+    [key: string]: string;
+  };
+  query: {
+    [key: string]: string;
+  };
+  body: any;
+  headers: {
+    [key: string]: string;
+  };
+};
+```
+
 Once the request is processed, the response needs to be published on the responseChannel. Retransmit will pickup these responses, merge them, and pass them back to the caller.
 
 Responses posted into the responseChannels need to be in the following format. Retransmil will reconstruct an HTTP response from this information to send back to the client.
@@ -114,6 +139,18 @@ type HttpResponse = {
 };
 ```
 
+Redis connection parameters can be specified in the config file.
+
+```js
+module.exports = {
+  // parts of config omitted for brevity
+  redis: {
+    host: "localhost",
+    port: 13422,
+  },
+};
+```
+
 ## Merging
 
 Only JSON responses are merged. Merging happens in the order in which the services are defined. So if two services return values for the same field, the value from the first service gets overwritten by that from the second.
@@ -123,7 +160,7 @@ To avoid this you could choose not to return that same fields. However, if that'
 In the following example, the data coming from userservice is added to the 'userData' field and that from messagingservice is added to the 'messagingData' field.
 
 ```js
-{
+module.exports = {
   // parts of config omitted for brevity
   userservice: {
     type: "redis",
@@ -131,7 +168,7 @@ In the following example, the data coming from userservice is added to the 'user
       requestChannel: "inputs",
       responseChannel: "outputs",
     },
-    mergeField: "userData"
+    mergeField: "userData",
   },
   messagingservice: {
     type: "redis",
@@ -139,9 +176,9 @@ In the following example, the data coming from userservice is added to the 'user
       requestChannel: "inputs",
       responseChannel: "outputs",
     },
-    mergeField: "messagingData"
+    mergeField: "messagingData",
   },
-}
+};
 ```
 
 You can also choose not to merge data from a certain service with the 'merge' flag in configuration.
@@ -178,7 +215,102 @@ There might be services which you just want to call, and not wait for results. U
 }
 ```
 
-
-
 ## Modifying Requests and Responses
 
+Retransmit gives you several options to modify requests and responses flying throught it.
+
+The modifyRequest hook allows you to edit an incoming web request before it is processed by retransmit. If you would like to handle it yourself and bypass retransmit, simply pass `{ handled: true }` as the return value of modifyRequest.
+
+Similarly, modifyResponse does the same thing for responses. It lets you modify the response that will be returned by retransmit. If you want retransmit to do no further processing and want to handle it yourself, pass `{ handled: true }` as the return value of modifyResponse.
+
+```typescript
+/*
+  Application Config
+*/
+module.exports = {
+  routes: {
+    userservice: {
+      type: "redis";
+      config: {
+        requestChannel: "inputs";
+        responseChannel: "outputs";
+      };
+      mergeField: "userData";
+    };
+  };
+  /*
+    Signature of modifyRequest
+    modifyRequest?: (ctx: IRouterContext) => Promise<{ handled: boolean }>;
+  */
+  modifyRequest: async (ctx) => { ctx.body = "Works!"; return { handled: true }; }
+  /*
+    Same thing for responses
+
+    modifyResponse?: (
+      ctx: IRouterContext,
+      response: any
+    ) => Promise<{ handled: boolean }>;
+  */
+  modifyResponse: async (ctx) => { ctx.body = "Handled!"; return { handled: true } }
+}
+```
+
+Retransmit also lets you override requests and responses individually for each services. They work just the same as the global modifiers we just discussed, but apply to individual services. Here's where you specify it.
+
+```typescript
+module.exports = {
+  // parts of config omitted for brevity
+  messagingservice: {
+    type: "redis",
+    config: {
+      requestChannel: "inputs",
+      responseChannel: "outputs",
+    },
+    /*
+      Signature of modifyRequest
+      modifyRequest?: (ctx: IRouterContext) => Promise<{ handled: boolean }>;
+    */
+    modifyRequest: async (ctx) => {
+      ctx.body = "Works!";
+      return { handled: true };
+    },
+    /*
+      Same thing for responses
+
+      modifyResponse?: (
+        ctx: IRouterContext,
+        response: any
+      ) => Promise<{ handled: boolean }>;
+    */
+    modifyResponse: async (ctx) => {
+      ctx.body = "Handled!";
+      return { handled: true };
+    },
+  },
+};
+```
+
+## Error Logging
+
+The logError handler lets you log errors that happen in the pipeline. Again, it can be specified globally for all services or individually for a service.
+
+```typescript
+module.exports = {
+  // parts of config omitted for brevity
+  messagingservice: {
+    type: "redis",
+    config: {
+      requestChannel: "inputs",
+      responseChannel: "outputs",
+    },
+    /*
+      Signature
+      logError?: (
+        error: string,
+        params: { method: string; path: string }
+      ) => Promise<void>;
+    },
+    */
+   logError?: async (error) => { console.log(error); }
+};
+```
