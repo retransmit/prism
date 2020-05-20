@@ -4,7 +4,7 @@ Retransmit is a broker that integrates data from multiple backend microservices 
 
 As of now, retransmit can talk to backend services via HTTP as well as Redis pub-sub. Here's a diagram:
 
-[IMAGE]
+![Retransmit Diagram](https://github.com/jeswin/retransmit/blob/master/retransmit.png?raw=true)
 
 ## Installation
 
