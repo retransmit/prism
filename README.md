@@ -304,7 +304,14 @@ module.exports = {
           requestChannel: "inputs",
           responseChannel: "outputs",
         },
-        logError: async (responses, request) => {
+        /*
+          Note the difference. Contains only one response.
+          logError?: (
+            response: HttpResponse,
+            request: HttpRequest
+          ) => Promise<void>;
+        */
+        logError: async (response, request) => {
           console.log("Failed in messagingservice.");
         },
       },

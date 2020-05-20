@@ -59,7 +59,7 @@ export type ServiceHandlerConfig = (
         requestChannel: string;
         responseChannel: string;
         numRequestChannels?: number;
-        modifyServiceRequest?: (request: RedisServiceRequest) => any;
+        modifyServiceRequest?: (request: RedisServiceRequest) => Promise<any>;
       };
     }
   | {
@@ -67,18 +67,17 @@ export type ServiceHandlerConfig = (
       config: {
         url: string;
         rollbackUrl?: string;
-        modifyServiceRequest?: (request: HttpRequest) => HttpRequest;
+        modifyServiceRequest?: (request: HttpRequest) => Promise<HttpRequest>;
       };
     }
 ) & {
   awaitResponse?: boolean;
   merge?: boolean;
-  abortOnError?: boolean;
   timeoutMS?: number;
   mergeField?: string;
   modifyServiceResponse?: (response: HttpResponse) => Promise<HttpResponse>;
   logError?: (
-    responses: FetchedResponse[],
+    response: HttpResponse,
     request: HttpRequest
   ) => Promise<void>;
 };
@@ -89,11 +88,10 @@ export type ServiceHandlerConfig = (
 export type ActiveRedisRequest = {
   responseChannel: string;
   id: string;
-  path: string;
   timeoutTicks: number;
-  method: HttpMethods;
   service: string;
   startTime: number;
+  request: HttpRequest,
   onResponse: (response: FetchedResponse) => void;
 };
 

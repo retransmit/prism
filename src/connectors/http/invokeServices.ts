@@ -2,10 +2,13 @@ import {
   RouteConfig,
   FetchedResponse,
   HttpRequest,
+  HttpResponse,
 } from "../../types";
 
 import * as configModule from "../../config";
 import got from "got";
+import { Response } from "got/dist/source/core";
+import { hasErrors } from "../../httpUtil";
 
 /*
   Make Promises for Redis Services
@@ -21,9 +24,38 @@ export default function invokeServices(
   const routeConfig = config.routes[path][method] as RouteConfig;
 
   const promises: Promise<FetchedResponse>[] = [];
+
   for (const service of Object.keys(routeConfig.services)) {
     const serviceConfig = routeConfig.services[service];
     if (serviceConfig.type === "http") {
+      function makeHttpResponse(
+        serverResponse: Response<string>
+      ): HttpResponse {
+        return {
+          headers: serverResponse.headers,
+          content: isJson(serverResponse)
+            ? JSON.parse(serverResponse.body)
+            : serverResponse.body,
+        };
+      }
+
+      async function makeFetchedResponse(
+        httpResponse: HttpResponse
+      ): Promise<FetchedResponse> {
+        const finalHttpResponse = serviceConfig.modifyServiceResponse
+          ? await serviceConfig.modifyServiceResponse(httpResponse)
+          : httpResponse;
+
+        return {
+          id: requestId,
+          method: request.method,
+          path: request.path,
+          service,
+          time: Date.now() - timeNow,
+          response: finalHttpResponse,
+        };
+      }
+
       const url = serviceConfig.config.url;
 
       if (url) {
@@ -49,36 +81,58 @@ export default function invokeServices(
 
         if (serviceConfig.awaitResponse !== false) {
           promises.push(
-            new Promise<FetchedResponse>((success, failure) => {
+            new Promise<FetchedResponse>((success) => {
               got(url, options)
-                .then((serverResponse) => {
-                  const isJson =
-                    serverResponse.headers["content-type"]?.indexOf(
-                      "application/json"
-                    ) !== -1;
-                  success({
-                    id: requestId,
-                    method: request.method,
-                    path: request.path,
-                    service,
-                    time: Date.now() - timeNow,
-                    response: {
-                      headers: serverResponse.headers,
-                      content: isJson
-                        ? JSON.parse(serverResponse.body)
-                        : serverResponse.body,
-                    },
-                  });
+                .then(async (serverResponse) => {
+                  const httpResponse = makeHttpResponse(serverResponse);
+
+                  if (hasErrors(httpResponse)) {
+                    if (serviceConfig.logError) {
+                      serviceConfig.logError(httpResponse, request);
+                    }
+                  }
+
+                  const fetchedResponse = await makeFetchedResponse(
+                    httpResponse
+                  );
+                  success(fetchedResponse);
                 })
-                .catch(failure);
+                .catch(async (error) => {
+                  const httpResponse = makeHttpResponse(error.response);
+
+                  if (hasErrors(httpResponse)) {
+                    if (serviceConfig.logError) {
+                      serviceConfig.logError(httpResponse, request);
+                    }
+                  }
+
+                  const fetchedResponse = await makeFetchedResponse(
+                    httpResponse
+                  );
+                  success(fetchedResponse);
+                });
             })
           );
         } else {
-          got(url, options);
+          got(url, options).catch(async (error) => {
+            const httpResponse = makeHttpResponse(error.response);
+
+            if (hasErrors(httpResponse)) {
+              if (serviceConfig.logError) {
+                serviceConfig.logError(httpResponse, request);
+              }
+            }
+          });
         }
       }
     }
   }
 
   return promises;
+}
+
+function isJson(serverResponse: Response<string>) {
+  return (
+    serverResponse.headers["content-type"]?.indexOf("application/json") !== -1
+  );
 }

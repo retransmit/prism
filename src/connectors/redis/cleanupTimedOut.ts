@@ -21,16 +21,16 @@ export default async function cleanupTimedOut() {
     }
 
     for (const [activeRequestId, trackedRequest] of timedOut) {
-      const routeConfig = config.routes[trackedRequest.path][
-        trackedRequest.method
+      const routeConfig = config.routes[trackedRequest.request.path][
+        trackedRequest.request.method
       ] as RouteConfig;
 
       const fetchedResponse: FetchedResponse = {
         id: activeRequestId,
         time: Date.now() - trackedRequest.startTime,
         service: trackedRequest.service,
-        path: trackedRequest.path,
-        method: trackedRequest.method,
+        path: trackedRequest.request.path,
+        method: trackedRequest.request.method,
         response: {
           content: `${trackedRequest.service} timed out.`,
           status: 408,

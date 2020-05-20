@@ -1,6 +1,13 @@
 import * as configModule from "../../config";
-import { RouteConfig, HttpResponse, RedisServiceResponse, FetchedResponse } from "../../types";
+import {
+  RouteConfig,
+  HttpResponse,
+  RedisServiceResponse,
+  FetchedResponse,
+  HttpRequest,
+} from "../../types";
 import * as activeRequests from "./activeRequests";
+import { hasErrors } from "../../httpUtil";
 
 export default async function processMessage(
   channel: string,
@@ -15,8 +22,8 @@ export default async function processMessage(
   );
 
   if (activeRequest) {
-    const routeConfig = config.routes[activeRequest.path][
-      activeRequest.method
+    const routeConfig = config.routes[activeRequest.request.path][
+      activeRequest.request.method
     ] as RouteConfig;
 
     const serviceConfig = routeConfig.services[activeRequest.service];
@@ -26,6 +33,15 @@ export default async function processMessage(
       // Make sure the service responded in the configured channel
       // Otherwise ignore the message.
       if (channel === channelInRequest) {
+        if (hasErrors(redisResponse.response)) {
+          if (serviceConfig.logError) {
+            serviceConfig.logError(
+              redisResponse.response,
+              activeRequest.request
+            );
+          }
+        }
+
         const modifyServiceResponse = serviceConfig.modifyServiceResponse;
 
         const response = modifyServiceResponse
@@ -37,10 +53,10 @@ export default async function processMessage(
         const fetchedResponse: FetchedResponse = {
           id: redisResponse.id,
           time: processingTime,
-          path: activeRequest.path,
-          method: activeRequest.method,
+          path: activeRequest.request.path,
+          method: activeRequest.request.method,
           service: activeRequest.service,
-          response
+          response,
         };
 
         activeRequest.onResponse(fetchedResponse);

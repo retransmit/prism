@@ -7,6 +7,7 @@ import rollbackHttp from "./connectors/http/rollback";
 import invokeRedisServices from "./connectors/redis/invokeServices";
 import rollbackRedis from "./connectors/redis/rollback";
 import mergeResponses from "./mergeResponses";
+import { hasErrors } from "./httpUtil";
 
 const connectors = [
   { type: "http", invokeServices: invokeHttpServices, rollback: rollbackHttp },
@@ -58,15 +59,7 @@ export function createHandler(method: HttpMethods) {
         ? await routeConfig.mergeResponses(interimResponses)
         : interimResponses;
 
-      if (fetchedResponses.map(x => x.response).some(hasErrors)) {
-        for (const response of fetchedResponses) {
-          if (hasErrors(response.response)) {
-            const serviceConfig = routeConfig.services[response.service];
-            if (serviceConfig.logError) {
-              serviceConfig.logError(fetchedResponses, httpRequest);
-            }
-          }
-        }
+      if (fetchedResponses.map((x) => x.response).some(hasErrors)) {
         for (const connector of connectors) {
           connector.rollback(requestId, httpRequest);
         }
@@ -156,8 +149,4 @@ export function createHandler(method: HttpMethods) {
       ctx.body = "Not found.";
     }
   };
-}
-
-function hasErrors(response: HttpResponse | undefined) {
-  return response && response.status && response.status >= 400;
 }

@@ -45,8 +45,7 @@ export default function invokeServices(
           activeRequests.set(`${requestId}+${service}`, {
             id: requestId,
             responseChannel: serviceConfig.config.responseChannel,
-            path: httpRequest.path,
-            method: httpRequest.method,
+            request: httpRequest,
             service,
             timeoutTicks:
               Date.now() + (serviceConfig.timeoutMS || 30000),
