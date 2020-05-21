@@ -2,18 +2,18 @@ import "mocha";
 import "should";
 import request = require("supertest");
 
-import httpHttpMethods from "./http/httpMethods";
-import httpMergeResults from "./http/mergeResults";
-import httpDontMergeIgnored from "./http/dontMergeIgnored";
-import httpMustNotOverwriteJsonWithString from "./http/mustNotOverwriteJsonWithString";
-import httpRollsback from "./http/rollsback";
+import httpHttpMethods from "./integration/http/httpMethods";
+import httpMergeResults from "./integration/http/mergeResults";
+import httpDontMergeIgnored from "./integration/http/dontMergeIgnored";
+import httpMustNotOverwriteJsonWithString from "./integration/http/mustNotOverwriteJsonWithString";
+import httpRollsback from "./integration/http/rollsback";
 
-import redisHttpMethods from "./redis/httpMethods";
-import redisMergeResults from "./redis/mergeResults";
-import redisDontMergeIgnored from "./redis/dontMergeIgnored";
-import redisShowGenericErrors from "./redis/showGenericErrors";
-import redisMustNotOverwriteJsonWithString from "./redis/mustNotOverwriteJsonWithString";
-import redisRollsback from "./redis/rollsback";
+import redisHttpMethods from "./integration/redis/httpMethods";
+import redisMergeResults from "./integration/redis/mergeResults";
+import redisDontMergeIgnored from "./integration/redis/dontMergeIgnored";
+import redisShowGenericErrors from "./integration/redis/showGenericErrors";
+import redisMustNotOverwriteJsonWithString from "./integration/redis/mustNotOverwriteJsonWithString";
+import redisRollsback from "./integration/redis/rollsback";
 
 import { closeServer } from "./utils";
 

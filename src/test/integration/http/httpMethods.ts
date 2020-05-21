@@ -1,9 +1,9 @@
-import { HttpMethods, IAppConfig } from "../../types";
+import { HttpMethods, IAppConfig } from "../../../types";
 import request = require("supertest");
 import Koa = require("koa");
-import { startWithConfiguration } from "../..";
+import { startWithConfiguration } from "../../..";
 import startBackends from "./startBackends";
-import { closeServer } from "../utils";
+import { closeServer } from "../../utils";
 
 export default async function (app: { instance: any }) {
   function makeConfig(options: { method: HttpMethods }): IAppConfig {

@@ -1,4 +1,4 @@
-import { HttpMethods, IAppConfig } from "../../types";
+import { HttpMethods, IAppConfig } from "../../../types";
 import request = require("supertest");
 import { doPubSub } from "./utils";
 

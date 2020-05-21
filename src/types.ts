@@ -1,6 +1,7 @@
 import { IRouterContext } from "koa-router";
 import { ClientOpts } from "redis";
 import { IncomingHttpHeaders } from "http2";
+import ClientRequestContext from "./clients/ClientRequestContext";
 
 export type HttpMethods = "GET" | "POST" | "PUT" | "DELETE" | "PATCH";
 
@@ -17,16 +18,17 @@ export interface IAppConfig {
     options?: ClientOpts;
     cleanupInterval?: number;
   };
-  modifyRequest?: (ctx: IRouterContext) => Promise<{ handled: boolean }>;
+  modifyRequest?: (ctx: ClientRequestContext) => Promise<{ handled: boolean }>;
   modifyResponse?: (
-    ctx: IRouterContext,
+    ctx: ClientRequestContext,
     response: any
   ) => Promise<{ handled: boolean }>;
   genericErrors?: boolean;
   logError?: (
     responses: FetchedResponse[],
     request: HttpRequest
-  ) => Promise<void>;  
+  ) => Promise<void>;
+  websockets?: {};
 }
 
 /*
@@ -36,9 +38,9 @@ export type RouteConfig = {
   services: {
     [key: string]: ServiceHandlerConfig;
   };
-  modifyRequest?: (ctx: IRouterContext) => Promise<{ handled: boolean }>;
+  modifyRequest?: (ctx: ClientRequestContext) => Promise<{ handled: boolean }>;
   modifyResponse?: (
-    ctx: IRouterContext,
+    ctx: ClientRequestContext,
     response: any
   ) => Promise<{ handled: boolean }>;
   mergeResponses?: (responses: FetchedResponse[]) => Promise<FetchedResponse[]>;
@@ -152,8 +154,21 @@ export type HttpRequest = {
 };
 
 /*
+  Web Socket Request
+*/
+export type WebSocketRequest = {
+  path: string;
+  method: HttpMethods;
+  body: any;
+}
+
+/*
   Can be used to form an HttpResponse
 */
+export type CookieOpts = {
+
+};
+
 export type HttpResponse = {
   status?: number;
   redirect?: string;
@@ -171,3 +186,8 @@ export type HttpResponse = {
   content?: any;
   contentType?: string;
 };
+
+export type WebSocketResponse = {
+  content?: any
+}
+

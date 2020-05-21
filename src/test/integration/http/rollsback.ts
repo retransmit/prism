@@ -1,7 +1,7 @@
 import request = require("supertest");
-import { startWithConfiguration } from "../..";
+import { startWithConfiguration } from "../../..";
 import startBackends from "./startBackends";
-import { closeServer } from "../utils";
+import { closeServer } from "../../utils";
 import { Server } from "net";
 
 export default async function (app: { instance: any }) {

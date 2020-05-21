@@ -6,8 +6,7 @@ As of now, Retransmit can talk to backend services via HTTP as well as Redis pub
 
 ![Retransmit Diagram](https://user-images.githubusercontent.com/241048/82422447-140c0b80-9aa0-11ea-9caa-2b9c65839029.png)
 
-For clients connecting via WebSockets, Retransmit can stream data coming from Redis pub-sub backends (explained further down). 
-
+For clients connecting via WebSockets, Retransmit can stream data coming from Redis pub-sub backends (explained further down). You can also connect to http backends via WebSockets, but they can only send a single response. More on this later.
 
 ## Installation
 
@@ -18,7 +17,7 @@ npm i -g retransmit
 You need to create a configuration file first (given below). And then run Retransmit like this.
 
 ```sh
-retransmit -p PORT -c CONFIG_FILE
+Retransmit -p PORT -c CONFIG_FILE
 ```
 
 ## Configuration
@@ -134,7 +133,7 @@ export type HttpRequest = {
 
 Once the request is processed, the response needs to be published to the responseChannel mentioned in the request. Retransmit will pickup these responses, merge them, and pass them back to the caller. Retransmit will reconstruct an HTTP response from this information to send back to the client.
 
-Responses posted back to be in the format given below. 
+Responses posted back to be in the format given below.
 
 ```typescript
 type RedisServiceResponse = {
@@ -173,11 +172,6 @@ module.exports = {
   },
 };
 ```
-
-## Streaming Responses and Events via Web Sockets
-
-Clients opening a Web Socket connection with retransmit can receive streaming event data from backend services. 
-
 ## Merging
 
 Only JSON responses are merged. Merging happens in the order in which the services are defined. So if two services return values for the same field, the value from the first service gets overwritten by that from the second.
@@ -414,6 +408,21 @@ module.exports = {
   },
 };
 ```
+
+## Streaming Responses via Web Sockets
+
+Clients opening a Web Socket connection with Retransmit can receive streaming event data from backend services. 
+
+
+
+The client has to request data in the following format via WebSockets.
+
+```js
+```
+
+Retransmit will contact each backend service defined for that route and forward the responses back to the client. Responses to requests coming in via Web Sockets are not merged, unlike those coming as regular HTTP requests. The client should parse each response individually and perform subsequent actions.
+
+Regular HTTP service backends are limited to sending a single response to a request coming in via a WebSocket. However, Redis-based services can keep sending data to connected clients by posting messages on the channels defined in the config.
 
 ## Other Options
 

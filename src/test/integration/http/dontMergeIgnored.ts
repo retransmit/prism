@@ -1,10 +1,10 @@
 import request = require("supertest");
-import { startWithConfiguration } from "../..";
+import { startWithConfiguration } from "../../..";
 import startBackends from "./startBackends";
-import { closeServer } from "../utils";
+import { closeServer } from "../../utils";
 
 export default async function (app: { instance: any }) {
-  it(`must not overwrite json content with string content`, async () => {
+  it(`does not merge ignored results`, async () => {
     const config = {
       routes: {
         "/users": {
@@ -21,6 +21,7 @@ export default async function (app: { instance: any }) {
                 config: {
                   url: "http://localhost:6667/messages",
                 },
+                merge: false,
               },
             },
           },
@@ -50,7 +51,11 @@ export default async function (app: { instance: any }) {
         routes: ["GET"].map((method) => ({
           path: "/messages",
           method,
-          response: { body: "hello world" },
+          response: {
+            body: {
+              message: "hello world",
+            },
+          },
         })),
       },
     ]);
@@ -64,9 +69,9 @@ export default async function (app: { instance: any }) {
       await closeServer(backendApp as any);
     }
 
-    response.status.should.equal(500);
-    response.text.should.equal(
-      "messagingservice returned a response which will overwrite current response."
-    );
+    response.status.should.equal(200);
+    response.body.should.deepEqual({
+      user: 1,
+    });
   });
 }
