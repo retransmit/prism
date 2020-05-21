@@ -16,6 +16,7 @@ export default async function cleanupTimedOut() {
     const timedOut: [string, ActiveRedisRequest][] = [];
     for (const [id, activeRequest] of entries) {
       if (Date.now() > activeRequest.timeoutTicks) {
+        activeRequests.remove(id);
         timedOut.push([activeRequest.id, activeRequest]);
       }
     }
@@ -39,7 +40,6 @@ export default async function cleanupTimedOut() {
       };
 
       activeRequest.onResponse(fetchedResponse);
-      activeRequests.remove(activeRequestId);
     }
     isCleaningUp = false;
   }

@@ -14,12 +14,14 @@ export default async function processMessage(
   const config = configModule.get();
 
   const redisResponse = JSON.parse(messageString) as RedisServiceResponse;
-
-  const activeRequest = activeRequests.get(
-    `${redisResponse.id}+${redisResponse.service}`
-  );
+  
+  const activeRequestId = `${redisResponse.id}+${redisResponse.service}`;
+  const activeRequest = activeRequests.get(activeRequestId);
 
   if (activeRequest) {
+    // We're going to process it. So remove it.
+    activeRequests.remove(activeRequestId);
+
     const routeConfig = config.routes[activeRequest.request.path][
       activeRequest.request.method
     ] as RouteConfig;
