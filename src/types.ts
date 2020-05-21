@@ -123,6 +123,7 @@ export type FetchedResponse = {
 export type RedisServiceRequest = {
   id: string;
   type: "request" | "rollback";
+  responseChannel: string;
   request: HttpRequest;
 };
 

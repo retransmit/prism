@@ -24,13 +24,7 @@ export default function invokeServices(
     httpRequest.method
   ] as RouteConfig;
 
-  const redisServiceRequest: RedisServiceRequest = {
-    id: requestId,
-    type: "request" as "request",
-    request: httpRequest,
-  };
-
-  publish(redisServiceRequest, httpRequest.path, httpRequest.method, "request");
+  publish(requestId, httpRequest, "request");
 
   const promises: Promise<FetchedResponse>[] = [];
 
@@ -47,10 +41,9 @@ export default function invokeServices(
             responseChannel: serviceConfig.config.responseChannel,
             request: httpRequest,
             service,
-            timeoutTicks:
-              Date.now() + (serviceConfig.timeout || 30000),
+            timeoutTicks: Date.now() + (serviceConfig.timeout || 30000),
             startTime: Date.now(),
-            onResponse: success
+            onResponse: success,
           });
         })
       );

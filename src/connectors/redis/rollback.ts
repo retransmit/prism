@@ -19,16 +19,5 @@ export default async function rollback(
   requestId: string,
   httpRequest: HttpRequest
 ) {
-  const redisServiceRequest: RedisServiceRequest = {
-    id: requestId,
-    type: "rollback",
-    request: httpRequest,
-  };
-
-  publish(
-    redisServiceRequest,
-    httpRequest.path,
-    httpRequest.method,
-    "rollback"
-  );
+  publish(requestId, httpRequest, "rollback");
 }

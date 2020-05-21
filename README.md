@@ -1,10 +1,13 @@
 # Retransmit
 
-Retransmit is a broker that integrates data from multiple backend microservices and exposes them at HTTP endpoints. For example, GET /users might need to fetch data from the 'user service' as well as the 'friends service'. Retransmit will create a response by contacting both services and merging their responses. If any of the requests to backend services fail, Retransmit can inform the other services so that a rollback can be performed.
+Retransmit is a broker that integrates data from multiple backend microservices and exposes them at HTTP endpoints or via WebSockets. For example, GET /users might need to fetch data from the 'user service' as well as the 'friends service'. Retransmit will create a response by contacting both services and merging their responses. If any of the requests to backend services fail, Retransmit can inform the other services so that a rollback can be performed.
 
-As of now, Retransmit can talk to backend services via HTTP as well as Redis pub-sub. Here's a diagram:
+As of now, Retransmit can talk to backend services via HTTP as well as Redis pub-sub (which has streaming super powers). Here's a diagram:
 
 ![Retransmit Diagram](https://user-images.githubusercontent.com/241048/82422447-140c0b80-9aa0-11ea-9caa-2b9c65839029.png)
+
+For clients connecting via WebSockets, Retransmit can stream data coming from Redis pub-sub backends (explained further down). 
+
 
 ## Installation
 
@@ -108,7 +111,8 @@ Retransmit will package an HTTP request in the following format (as JSON) and po
 ```typescript
 export type RedisServiceRequest = {
   id: string;
-  type: string;
+  type: "request" | "rollback";
+  responseChannel: string;
   request: HttpRequest;
 };
 
@@ -128,7 +132,9 @@ export type HttpRequest = {
 };
 ```
 
-Once the request is processed, the response needs to be published on the responseChannel. Retransmit will pickup these responses, merge them, and pass them back to the caller. Responses posted into the responseChannels need to be in the following format. Retransmit will reconstruct an HTTP response from this information to send back to the client.
+Once the request is processed, the response needs to be published to the responseChannel mentioned in the request. Retransmit will pickup these responses, merge them, and pass them back to the caller. Retransmit will reconstruct an HTTP response from this information to send back to the client.
+
+Responses posted back to be in the format given below. 
 
 ```typescript
 type RedisServiceResponse = {
@@ -167,6 +173,10 @@ module.exports = {
   },
 };
 ```
+
+## Streaming Responses and Events via Web Sockets
+
+
 
 ## Merging
 

@@ -8,18 +8,26 @@ import {
 import { getPublisher } from "./clients";
 
 export function publish(
-  request: RedisServiceRequest,
-  path: string,
-  method: HttpMethods,
+  requestId: string,
+  request: HttpRequest,
   requestType: "request" | "rollback"
 ) {
   const config = configModule.get();
-  const routeConfig = config.routes[path][method] as RouteConfig;
+  const routeConfig = config.routes[request.path][
+    request.method
+  ] as RouteConfig;
 
   const alreadyPublishedChannels: string[] = [];
+
   for (const service of Object.keys(routeConfig.services)) {
     const serviceConfig = routeConfig.services[service];
     if (serviceConfig.type === "redis") {
+      const redisRequest: RedisServiceRequest = {
+        id: requestId,
+        request: request,
+        responseChannel: serviceConfig.config.requestChannel,
+        type: requestType,
+      };
       const channel = serviceConfig.config.requestChannel;
       if (channel) {
         const channelId = !serviceConfig.config.numRequestChannels
@@ -35,9 +43,10 @@ export function publish(
               : requestType === "rollback"
               ? serviceConfig.config.modifyRollbackRequest
               : undefined;
+
           const requestToSend = modifyServiceRequest
-            ? modifyServiceRequest(request)
-            : request;
+            ? modifyServiceRequest(redisRequest)
+            : redisRequest;
 
           getPublisher().publish(channelId, JSON.stringify(requestToSend));
           alreadyPublishedChannels.push(channelId);

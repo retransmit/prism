@@ -42,6 +42,7 @@ export default async function (app: { instance: any }) {
         id: "temp",
         service: "userservice",
         response: {
+          method,
           content: "Everything worked.",
         },
       };
