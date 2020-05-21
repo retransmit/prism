@@ -1,15 +1,15 @@
 import { HttpMethods } from "../types";
 
 export default abstract class ClientRequestContext {
-  abstract getRequestPath(): string;
+  abstract getPath(): string;
 
-  abstract getRequestParams(): {
+  abstract getParams(): {
     [key: string]: string;
   };
 
-  abstract getRequestMethod(): HttpMethods;
+  abstract getMethod(): HttpMethods;
 
-  abstract getRequestQuery(): {
+  abstract getQuery(): {
     [key: string]: string;
   };
 

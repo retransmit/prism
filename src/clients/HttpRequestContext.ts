@@ -10,19 +10,19 @@ export default class HttpRequestContext extends ClientRequestContext {
     this.ctx = ctx;
   }
 
-  getRequestPath(): string {
+  getPath(): string {
     return this.ctx.path;
   }
 
-  getRequestParams(): { [key: string]: string } {
+  getParams(): { [key: string]: string } {
     return this.ctx.params;
   }
 
-  getRequestMethod(): HttpMethods {
+  getMethod(): HttpMethods {
     return this.ctx.method as HttpMethods;
   }
 
-  getRequestQuery(): { [key: string]: string } {
+  getQuery(): { [key: string]: string } {
     return this.ctx.query;
   }
 

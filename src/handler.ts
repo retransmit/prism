@@ -38,7 +38,7 @@ export async function handler(ctx: ClientRequestContext, method: HttpMethods) {
   const config = configModule.get();
 
   const requestId = randomId(32);
-  const routeConfig = config.routes[ctx.getRequestPath()][method];
+  const routeConfig = config.routes[ctx.getPath()][method];
 
   // If there are custom handlers, try that first.
   const modifyRequest = routeConfig?.modifyRequest || config.modifyRequest;
@@ -51,10 +51,10 @@ export async function handler(ctx: ClientRequestContext, method: HttpMethods) {
 
   if (routeConfig) {
     const httpRequest = {
-      path: ctx.getRequestPath(),
+      path: ctx.getPath(),
       method,
-      params: ctx.getRequestParams(),
-      query: ctx.getRequestQuery(),
+      params: ctx.getParams(),
+      query: ctx.getQuery(),
       body: ctx.getRequestBody(),
       headers: ctx.getRequestHeaders(),
     };

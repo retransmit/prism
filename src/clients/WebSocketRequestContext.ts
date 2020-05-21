@@ -1,16 +1,16 @@
 import ClientRequestContext from "./ClientRequestContext";
 
 export default class WebSocketRequestContext extends ClientRequestContext {
-  getRequestPath(): string {
+  getPath(): string {
     throw new Error("Method not implemented.");
   }
-  getRequestParams(): { [key: string]: string } {
+  getParams(): { [key: string]: string } {
     throw new Error("Method not implemented.");
   }
-  getRequestMethod(): import("../types").HttpMethods {
+  getMethod(): import("../types").HttpMethods {
     throw new Error("Method not implemented.");
   }
-  getRequestQuery(): { [key: string]: string } {
+  getQuery(): { [key: string]: string } {
     throw new Error("Method not implemented.");
   }
   getRequestHeaders(): { [key: string]: string } {
