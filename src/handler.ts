@@ -47,11 +47,12 @@ export function createHandler(method: HttpMethods) {
         headers: ctx.headers,
       };
 
-      const promises: Promise<FetchedResponse>[] = connectors.reduce(
-        (acc, provider) =>
-          acc.concat(provider.invokeServices(requestId, httpRequest)),
-        [] as Promise<FetchedResponse>[]
-      );
+      let promises: Promise<FetchedResponse>[] = [];
+      for (const connector of connectors) {
+        promises = promises.concat(
+          await connector.invokeServices(requestId, httpRequest)
+        );
+      }
 
       const interimResponses = await Promise.all(promises);
 

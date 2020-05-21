@@ -26,7 +26,7 @@ export interface IAppConfig {
   logError?: (
     responses: FetchedResponse[],
     request: HttpRequest
-  ) => Promise<void>;
+  ) => Promise<void>;  
 }
 
 /*
@@ -72,8 +72,8 @@ export type RedisServiceHandlerConfig = {
     requestChannel: string;
     responseChannel: string;
     numRequestChannels?: number;
-    modifyServiceRequest?: (request: RedisServiceRequest) => any;
-    modifyRollbackRequest?: (request: RedisServiceRequest) => any;
+    modifyServiceRequest?: (request: RedisServiceRequest) => Promise<any>;
+    modifyRollbackRequest?: (request: RedisServiceRequest) => Promise<any>;
   };
 } & ServiceHandlerConfigBase;
 
@@ -82,8 +82,8 @@ export type HttpServiceHandlerConfig = {
   config: {
     url: string;
     rollbackUrl?: string;
-    modifyServiceRequest?: (request: HttpRequest) => HttpRequest;
-    modifyRollbackRequest?: (request: HttpRequest) => HttpRequest;
+    modifyServiceRequest?: (request: HttpRequest) => Promise<HttpRequest>;
+    modifyRollbackRequest?: (request: HttpRequest) => Promise<HttpRequest>;
   };
 } & ServiceHandlerConfigBase;
 

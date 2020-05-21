@@ -176,7 +176,7 @@ module.exports = {
 
 ## Streaming Responses and Events via Web Sockets
 
-
+Clients opening a Web Socket connection with retransmit can receive streaming event data from backend services. 
 
 ## Merging
 

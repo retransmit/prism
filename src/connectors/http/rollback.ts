@@ -8,7 +8,10 @@ import { makeHttpResponse } from "./makeHttpResponse";
 /*
   Make Promises for Redis Services
 */
-export default function rollback(requestId: string, request: HttpRequest) {
+export default async function rollback(
+  requestId: string,
+  request: HttpRequest
+) {
   const config = configModule.get();
   const routeConfig = config.routes[request.path][
     request.method
@@ -29,7 +32,7 @@ export default function rollback(requestId: string, request: HttpRequest) {
       };
 
       const modifiedRequest = serviceConfig.config.modifyServiceRequest
-        ? serviceConfig.config.modifyServiceRequest(requestCopy)
+        ? await serviceConfig.config.modifyServiceRequest(requestCopy)
         : requestCopy;
 
       const basicOptions = {

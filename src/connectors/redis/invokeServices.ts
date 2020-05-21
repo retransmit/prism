@@ -15,10 +15,10 @@ import { publish } from "./publish";
 /*
   Make Promises for Redis Services
 */
-export default function invokeServices(
+export default async function invokeServices(
   requestId: string,
   httpRequest: HttpRequest
-): Promise<FetchedResponse>[] {
+): Promise<Promise<FetchedResponse>[]> {
   const config = configModule.get();
   const routeConfig = config.routes[httpRequest.path][
     httpRequest.method

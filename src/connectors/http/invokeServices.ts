@@ -14,10 +14,10 @@ import { makeHttpResponse } from "./makeHttpResponse";
 /*
   Make Promises for Redis Services
 */
-export default function invokeServices(
+export default async function invokeServices(
   requestId: string,
   request: HttpRequest
-): Promise<FetchedResponse>[] {
+): Promise<Promise<FetchedResponse>[]> {
   const timeNow = Date.now();
   const config = configModule.get();
   const path = request.path;
@@ -42,7 +42,7 @@ export default function invokeServices(
       };
 
       const modifiedRequest = serviceConfig.config.modifyServiceRequest
-        ? serviceConfig.config.modifyServiceRequest(requestCopy)
+        ? await serviceConfig.config.modifyServiceRequest(requestCopy)
         : requestCopy;
 
       const basicOptions = {
