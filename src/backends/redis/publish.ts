@@ -37,15 +37,15 @@ export function publish(
             )}`;
 
         if (!alreadyPublishedChannels.includes(channelId)) {
-          const modifyServiceRequest =
+          const onServiceRequest =
             requestType === "request"
-              ? serviceConfig.config.modifyServiceRequest
+              ? serviceConfig.config.onServiceRequest
               : requestType === "rollback"
-              ? serviceConfig.config.modifyRollbackRequest
+              ? serviceConfig.config.onRollbackRequest
               : undefined;
 
-          const requestToSend = modifyServiceRequest
-            ? modifyServiceRequest(redisRequest)
+          const requestToSend = onServiceRequest
+            ? onServiceRequest(redisRequest)
             : redisRequest;
 
           getPublisher().publish(channelId, JSON.stringify(requestToSend));

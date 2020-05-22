@@ -18,17 +18,16 @@ export interface IAppConfig {
     options?: ClientOpts;
     cleanupInterval?: number;
   };
-  modifyRequest?: (ctx: ClientRequestContext) => Promise<{ handled: boolean }>;
-  modifyResponse?: (
+  onRequest?: (ctx: ClientRequestContext) => Promise<{ handled: boolean }>;
+  onResponse?: (
     ctx: ClientRequestContext,
     response: any
   ) => Promise<{ handled: boolean }>;
   genericErrors?: boolean;
-  logError?: (
+  onError?: (
     responses: FetchedResponse[],
     request: HttpRequest
   ) => Promise<void>;
-  websockets?: {};
 }
 
 /*
@@ -38,14 +37,14 @@ export type RouteConfig = {
   services: {
     [key: string]: ServiceHandlerConfig;
   };
-  modifyRequest?: (ctx: ClientRequestContext) => Promise<{ handled: boolean }>;
-  modifyResponse?: (
+  onRequest?: (ctx: ClientRequestContext) => Promise<{ handled: boolean }>;
+  onResponse?: (
     ctx: ClientRequestContext,
     response: any
   ) => Promise<{ handled: boolean }>;
   mergeResponses?: (responses: FetchedResponse[]) => Promise<FetchedResponse[]>;
   genericErrors?: boolean;
-  logError?: (
+  onError?: (
     responses: FetchedResponse[],
     request: HttpRequest
   ) => Promise<void>;
@@ -59,10 +58,10 @@ export type ServiceHandlerConfigBase = {
   merge?: boolean;
   timeout?: number;
   mergeField?: string;
-  modifyServiceResponse?: (
+  onServiceResponse?: (
     response: HttpResponse | undefined
   ) => Promise<HttpResponse>;
-  logError?: (
+  onError?: (
     response: HttpResponse | undefined,
     request: HttpRequest
   ) => Promise<void>;
@@ -74,8 +73,8 @@ export type RedisServiceHandlerConfig = {
     requestChannel: string;
     responseChannel: string;
     numRequestChannels?: number;
-    modifyServiceRequest?: (request: RedisServiceRequest) => Promise<any>;
-    modifyRollbackRequest?: (request: RedisServiceRequest) => Promise<any>;
+    onServiceRequest?: (request: RedisServiceRequest) => Promise<any>;
+    onRollbackRequest?: (request: RedisServiceRequest) => Promise<any>;
   };
 } & ServiceHandlerConfigBase;
 
@@ -84,8 +83,8 @@ export type HttpServiceHandlerConfig = {
   config: {
     url: string;
     rollbackUrl?: string;
-    modifyServiceRequest?: (request: HttpRequest) => Promise<HttpRequest>;
-    modifyRollbackRequest?: (request: HttpRequest) => Promise<HttpRequest>;
+    onServiceRequest?: (request: HttpRequest) => Promise<HttpRequest>;
+    onRollbackRequest?: (request: HttpRequest) => Promise<HttpRequest>;
   };
 } & ServiceHandlerConfigBase;
 

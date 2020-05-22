@@ -41,8 +41,8 @@ export default async function invokeServices(
         path: urlWithParamsReplaced,
       };
 
-      const modifiedRequest = serviceConfig.config.modifyServiceRequest
-        ? await serviceConfig.config.modifyServiceRequest(requestCopy)
+      const modifiedRequest = serviceConfig.config.onServiceRequest
+        ? await serviceConfig.config.onServiceRequest(requestCopy)
         : requestCopy;
 
       const basicOptions = {
@@ -73,8 +73,8 @@ export default async function invokeServices(
                 const httpResponse = makeHttpResponse(serverResponse);
 
                 if (responseIsError(httpResponse)) {
-                  if (serviceConfig.logError) {
-                    serviceConfig.logError(httpResponse, modifiedRequest);
+                  if (serviceConfig.onError) {
+                    serviceConfig.onError(httpResponse, modifiedRequest);
                   }
                 }
 
@@ -93,8 +93,8 @@ export default async function invokeServices(
                 const httpResponse = makeHttpResponse(error.response);
 
                 if (responseIsError(httpResponse)) {
-                  if (serviceConfig.logError) {
-                    serviceConfig.logError(httpResponse, modifiedRequest);
+                  if (serviceConfig.onError) {
+                    serviceConfig.onError(httpResponse, modifiedRequest);
                   }
                 }
 
@@ -116,8 +116,8 @@ export default async function invokeServices(
           const httpResponse = makeHttpResponse(error.response);
 
           if (responseIsError(httpResponse)) {
-            if (serviceConfig.logError) {
-              serviceConfig.logError(httpResponse, modifiedRequest);
+            if (serviceConfig.onError) {
+              serviceConfig.onError(httpResponse, modifiedRequest);
             }
           }
         });
@@ -136,8 +136,8 @@ async function makeFetchedResponse(
   httpResponse: HttpResponse | undefined,
   serviceConfig: HttpServiceHandlerConfig
 ): Promise<FetchedResponse> {
-  const modifiedResponse = serviceConfig.modifyServiceResponse
-    ? await serviceConfig.modifyServiceResponse(httpResponse)
+  const modifiedResponse = serviceConfig.onServiceResponse
+    ? await serviceConfig.onServiceResponse(httpResponse)
     : httpResponse;
 
   return {

@@ -243,9 +243,9 @@ There might be services which you just want to call, and not wait for results. U
 
 Retransmit gives you several hooks to modify requests and responses flying through it.
 
-The modifyRequest hook allows you to edit an incoming web request before it is processed by Retransmit. If you would like to handle it yourself and bypass Retransmit, simply pass `{ handled: true }` as the return value of modifyRequest.
+The onRequest hook allows you to edit an incoming web request before it is processed by Retransmit. If you would like to handle it yourself and bypass Retransmit, simply pass `{ handled: true }` as the return value of onRequest.
 
-Similarly, modifyResponse does the same thing for responses. It lets you modify the response that will be returned by Retransmit. If you want Retransmit to do no further processing and want to handle it yourself, pass `{ handled: true }` as the return value of modifyResponse.
+Similarly, onResponse does the same thing for responses. It lets you modify the response that will be returned by Retransmit. If you want Retransmit to do no further processing and want to handle it yourself, pass `{ handled: true }` as the return value of onResponse.
 
 ```typescript
 /*
@@ -263,23 +263,23 @@ module.exports = {
     };
   };
   /*
-    Signature of modifyRequest
-    modifyRequest?: (ctx: ClientRequestContext) => Promise<{ handled: boolean }>;
+    Signature of onRequest
+    onRequest?: (ctx: ClientRequestContext) => Promise<{ handled: boolean }>;
   */
-  modifyRequest: async (ctx) => { ctx.body = "Works!"; return { handled: true }; }
+  onRequest: async (ctx) => { ctx.body = "Works!"; return { handled: true }; }
   /*
     Same thing for responses
 
-    modifyResponse?: (
+    onResponse?: (
       ctx: ClientRequestContext,
       response: any
     ) => Promise<{ handled: boolean }>;
   */
-  modifyResponse: async (ctx) => { ctx.body = "Handled!"; return { handled: true } }
+  onResponse: async (ctx) => { ctx.body = "Handled!"; return { handled: true } }
 }
 ```
 
-The context (ctx in the example above) passed into the hooks is a ClientRequestContext instance have the following methods.
+The context (ctx in the example above) passed into the hooks is a ClientRequestContext instance having the following methods.
 
 ```typescript
 abstract class ClientRequestContext {
@@ -343,22 +343,22 @@ module.exports = {
       responseChannel: "outputs",
     },
     /*
-      Signature of modifyRequest
-      modifyRequest?: (ctx: ClientRequestContext) => Promise<{ handled: boolean }>;
+      Signature of onRequest
+      onRequest?: (ctx: ClientRequestContext) => Promise<{ handled: boolean }>;
     */
-    modifyRequest: async (ctx) => {
+    onRequest: async (ctx) => {
       ctx.body = "Works!";
       return { handled: true };
     },
     /*
       Same thing for responses
 
-      modifyResponse?: (
+      onResponse?: (
         ctx: ClientRequestContext,
         response: any
       ) => Promise<{ handled: boolean }>;
     */
-    modifyResponse: async (ctx) => {
+    onResponse: async (ctx) => {
       ctx.body = "Handled!";
       return { handled: true };
     },
@@ -368,18 +368,9 @@ module.exports = {
 
 ## Authentication
 
-The modifyRequest hook can be used to Authentication.
-
-Retransmit gives you several options to modify requests and responses flying through it.
-
-The modifyRequest hook allows you to edit an incoming web request before it is processed by Retransmit. If you would like to handle it yourself and bypass Retransmit, simply pass `{ handled: true }` as the return value of modifyRequest.
-
-Similarly, modifyResponse does the same thing for responses. It lets you modify the response that will be returned by Retransmit. If you want Retransmit to do no further processing and want to handle it yourself, pass `{ handled: true }` as the return value of modifyResponse.
+The onRequest hook can be used to Authentication.
 
 ```typescript
-/*
-  Application Config
-*/
 module.exports = {
   routes: {
     userservice: {
@@ -391,7 +382,7 @@ module.exports = {
       mergeField: "userData";
     };
   };
-  modifyRequest: async (ctx) => {
+  onRequest: async (ctx) => {
     const headers = ctx.getRequestHeaders();
     const isAuthenticated = headers["token"] === "very_very_secret";
     if (!isAuthenticated) {
@@ -459,7 +450,7 @@ export type RedisServiceRequest = {
 
 ## Logging errors
 
-The logError handler lets you log errors that happen in the pipeline. It can be specified globally, or for all services on a route, or specifically for a service. For error handlers specified globally or for all services in a route, the responses parameter contains repsonses obtained from various services for that request. For a service specific error handler, it contains only a single response. See configuration below.
+The onError handler lets you log errors that happen in the pipeline. It can be specified globally, or for all services on a route, or specifically for a service. For error handlers specified globally or for all services in a route, the responses parameter contains repsonses obtained from various services for that request. For a service specific error handler, it contains only a single response. See configuration below.
 
 ```js
 module.exports = {
@@ -473,16 +464,16 @@ module.exports = {
         },
         /*
           Note the difference. Contains only one response.
-          logError?: (
+          onError?: (
             response: HttpResponse,
             request: HttpRequest
           ) => Promise<void>;
         */
-        logError: async (response, request) => {
+        onError: async (response, request) => {
           console.log("Failed in messagingservice.");
         },
       },
-      logError: async (responses, request) => {
+      onError: async (responses, request) => {
         console.log("A service failed in POST /users.");
       },
     }
@@ -490,12 +481,12 @@ module.exports = {
 
   /*
     Signature
-    logError?: (
+    onError?: (
       responses: FetchedResponse[],
       request: HttpRequest
     ) => Promise<void>;
   */
-  logError: async (responses, request) => {
+  onError: async (responses, request) => {
     console.log("Something failed somewhere.");
   },
 };

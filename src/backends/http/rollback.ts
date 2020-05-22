@@ -31,8 +31,8 @@ export default async function rollback(
         path: urlWithParamsReplaced,
       };
 
-      const modifiedRequest = serviceConfig.config.modifyServiceRequest
-        ? await serviceConfig.config.modifyServiceRequest(requestCopy)
+      const modifiedRequest = serviceConfig.config.onServiceRequest
+        ? await serviceConfig.config.onServiceRequest(requestCopy)
         : requestCopy;
 
       const basicOptions = {
@@ -59,8 +59,8 @@ export default async function rollback(
         const httpResponse = makeHttpResponse(error.response);
 
         if (responseIsError(httpResponse)) {
-          if (serviceConfig.logError) {
-            serviceConfig.logError(httpResponse, modifiedRequest);
+          if (serviceConfig.onError) {
+            serviceConfig.onError(httpResponse, modifiedRequest);
           }
         }
       });

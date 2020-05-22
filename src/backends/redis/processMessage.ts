@@ -34,18 +34,18 @@ export default async function processMessage(
       // Otherwise ignore the message.
       if (channel === channelInRequest) {
         if (responseIsError(redisResponse.response)) {
-          if (serviceConfig.logError) {
-            serviceConfig.logError(
+          if (serviceConfig.onError) {
+            serviceConfig.onError(
               redisResponse.response,
               activeRequest.request
             );
           }
         }
 
-        const modifyServiceResponse = serviceConfig.modifyServiceResponse;
+        const onServiceResponse = serviceConfig.onServiceResponse;
 
-        const response = modifyServiceResponse
-          ? await modifyServiceResponse(redisResponse.response)
+        const response = onServiceResponse
+          ? await onServiceResponse(redisResponse.response)
           : redisResponse.response;
 
         const processingTime = Date.now() - activeRequest.startTime;

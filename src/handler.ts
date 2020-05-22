@@ -41,9 +41,9 @@ export async function handler(ctx: ClientRequestContext, method: HttpMethods) {
   const routeConfig = config.routes[ctx.getPath()][method];
 
   // If there are custom handlers, try that first.
-  const modifyRequest = routeConfig?.modifyRequest || config.modifyRequest;
-  if (modifyRequest) {
-    const modResult = await modifyRequest(ctx);
+  const onRequest = routeConfig?.onRequest || config.onRequest;
+  if (onRequest) {
+    const modResult = await onRequest(ctx);
     if (modResult.handled) {
       return;
     }
@@ -75,8 +75,8 @@ export async function handler(ctx: ClientRequestContext, method: HttpMethods) {
     let response = mergeResponses(requestId, fetchedResponses);
 
     if (responseIsError(response)) {
-      if (config.logError) {
-        config.logError(fetchedResponses, httpRequest);
+      if (config.onError) {
+        config.onError(fetchedResponses, httpRequest);
       }
       for (const connector of connectors) {
         connector.rollback(requestId, httpRequest);
@@ -84,9 +84,9 @@ export async function handler(ctx: ClientRequestContext, method: HttpMethods) {
     }
 
     // See if there are any custom handlers for final response
-    const modifyResponse = routeConfig.modifyResponse || config.modifyResponse;
-    if (modifyResponse) {
-      const modResult = await modifyResponse(ctx, response);
+    const onResponse = routeConfig.onResponse || config.onResponse;
+    if (onResponse) {
+      const modResult = await onResponse(ctx, response);
       if (modResult.handled) {
         return;
       }
