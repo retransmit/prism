@@ -142,22 +142,24 @@ type RedisServiceResponse = {
   response: HttpResponse;
 };
 
-type HttpResponse = {
+export type HttpResponse = {
   status?: number;
   redirect?: string;
-  cookies?: {
-    name: string;
-    value: string;
-    path?: string;
-    domain?: string;
-    secure?: boolean;
-    httpOnly?: boolean;
-    maxAge?: number;
-    overwrite?: boolean;
-  }[];
+  cookies?: HttpCookie[];
   headers?: IncomingHttpHeaders;
   content?: any;
   contentType?: string;
+};
+
+export type HttpCookie = {
+  name: string;
+  value: string;
+  path?: string;
+  domain?: string;
+  secure?: boolean;
+  httpOnly?: boolean;
+  maxAge?: number;
+  overwrite?: boolean;
 };
 ```
 
@@ -172,6 +174,7 @@ module.exports = {
   },
 };
 ```
+
 ## Merging
 
 Only JSON responses are merged. Merging happens in the order in which the services are defined. So if two services return values for the same field, the value from the first service gets overwritten by that from the second.
@@ -238,7 +241,7 @@ There might be services which you just want to call, and not wait for results. U
 
 ## Modifying Requests and Responses
 
-Retransmit gives you several options to modify requests and responses flying through it.
+Retransmit gives you several hooks to modify requests and responses flying through it.
 
 The modifyRequest hook allows you to edit an incoming web request before it is processed by Retransmit. If you would like to handle it yourself and bypass Retransmit, simply pass `{ handled: true }` as the return value of modifyRequest.
 
@@ -261,18 +264,70 @@ module.exports = {
   };
   /*
     Signature of modifyRequest
-    modifyRequest?: (ctx: IRouterContext) => Promise<{ handled: boolean }>;
+    modifyRequest?: (ctx: ClientRequestContext) => Promise<{ handled: boolean }>;
   */
   modifyRequest: async (ctx) => { ctx.body = "Works!"; return { handled: true }; }
   /*
     Same thing for responses
 
     modifyResponse?: (
-      ctx: IRouterContext,
+      ctx: ClientRequestContext,
       response: any
     ) => Promise<{ handled: boolean }>;
   */
   modifyResponse: async (ctx) => { ctx.body = "Handled!"; return { handled: true } }
+}
+```
+
+The context (ctx in the example above) passed into the hooks is a ClientRequestContext instance have the following methods.
+
+```typescript
+abstract class ClientRequestContext {
+  abstract getPath(): string;
+
+  abstract getParams(): {
+    [key: string]: string;
+  };
+
+  abstract getMethod(): HttpMethods;
+
+  abstract getQuery(): {
+    [key: string]: string;
+  };
+
+  abstract getRequestHeaders(): {
+    [key: string]: string;
+  };
+
+  abstract getRequestBody(): any;
+
+  abstract getResponseStatus(): number;
+  abstract setResponseStatus(status: number): void;
+
+  abstract getResponseBody(): any;
+  abstract setResponseBody(value: any): void;
+
+  abstract getResponseHeader(field: string): string;
+  abstract setResponseHeader(field: string, value: string | string[]): void;
+
+  abstract getResponseType(): string;
+  abstract setResponseType(type: string): void;
+
+  abstract getCookie(name: string): string | undefined;
+  abstract setCookie(
+    name: string,
+    value: string,
+    opts?: {
+      path?: string;
+      domain?: string;
+      secure?: boolean;
+      httpOnly?: boolean;
+      maxAge?: number;
+      overwrite?: boolean;
+    }
+  ): void;
+
+  abstract redirect(where: string): void;
 }
 ```
 
@@ -289,7 +344,7 @@ module.exports = {
     },
     /*
       Signature of modifyRequest
-      modifyRequest?: (ctx: IRouterContext) => Promise<{ handled: boolean }>;
+      modifyRequest?: (ctx: ClientRequestContext) => Promise<{ handled: boolean }>;
     */
     modifyRequest: async (ctx) => {
       ctx.body = "Works!";
@@ -299,7 +354,7 @@ module.exports = {
       Same thing for responses
 
       modifyResponse?: (
-        ctx: IRouterContext,
+        ctx: ClientRequestContext,
         response: any
       ) => Promise<{ handled: boolean }>;
     */
@@ -309,6 +364,43 @@ module.exports = {
     },
   },
 };
+```
+
+## Authentication
+
+The modifyRequest hook can be used to Authentication.
+
+Retransmit gives you several options to modify requests and responses flying through it.
+
+The modifyRequest hook allows you to edit an incoming web request before it is processed by Retransmit. If you would like to handle it yourself and bypass Retransmit, simply pass `{ handled: true }` as the return value of modifyRequest.
+
+Similarly, modifyResponse does the same thing for responses. It lets you modify the response that will be returned by Retransmit. If you want Retransmit to do no further processing and want to handle it yourself, pass `{ handled: true }` as the return value of modifyResponse.
+
+```typescript
+/*
+  Application Config
+*/
+module.exports = {
+  routes: {
+    userservice: {
+      type: "redis";
+      config: {
+        requestChannel: "inputs";
+        responseChannel: "outputs";
+      };
+      mergeField: "userData";
+    };
+  };
+  modifyRequest: async (ctx) => {
+    const headers = ctx.getRequestHeaders();
+    const isAuthenticated = headers["token"] === "very_very_secret";
+    if (!isAuthenticated) {
+      ctx.setStatus(401);
+      ctx.setResponseBody("No cookie for you.")
+      return { handled: true };
+    }
+  }
+}
 ```
 
 ## Rolling back on error
@@ -411,9 +503,7 @@ module.exports = {
 
 ## Streaming Responses via Web Sockets
 
-Clients opening a Web Socket connection with Retransmit can receive streaming event data from backend services. 
-
-
+Clients opening a Web Socket connection with Retransmit can receive streaming event data from backend services.
 
 The client has to request data in the following format via WebSockets.
 

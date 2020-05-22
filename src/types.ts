@@ -160,34 +160,34 @@ export type WebSocketRequest = {
   path: string;
   method: HttpMethods;
   body: any;
-}
+};
 
 /*
   Can be used to form an HttpResponse
 */
-export type CookieOpts = {
-
-};
-
 export type HttpResponse = {
   status?: number;
   redirect?: string;
-  cookies?: {
-    name: string;
-    value: string;
-    path?: string;
-    domain?: string;
-    secure?: boolean;
-    httpOnly?: boolean;
-    maxAge?: number;
-    overwrite?: boolean;
-  }[];
+  cookies?: HttpCookie[];
   headers?: IncomingHttpHeaders;
   content?: any;
   contentType?: string;
 };
 
-export type WebSocketResponse = {
-  content?: any
-}
+export type HttpCookie = {
+  name: string;
+  value: string;
+  path?: string;
+  domain?: string;
+  secure?: boolean;
+  httpOnly?: boolean;
+  maxAge?: number;
+  overwrite?: boolean;
+};
 
+/*
+  A web sockets response
+*/
+export type WebSocketResponse = {
+  content?: any;
+};
