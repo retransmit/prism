@@ -3,7 +3,7 @@ import {
   FetchedResponse,
   HttpRequest,
   HttpResponse,
-  HttpServiceHandlerConfig,
+  HttpServiceConfig,
 } from "../../types";
 
 import * as configModule from "../../config";
@@ -134,7 +134,7 @@ async function makeFetchedResponse(
   service: string,
   request: HttpRequest,
   httpResponse: HttpResponse | undefined,
-  serviceConfig: HttpServiceHandlerConfig
+  serviceConfig: HttpServiceConfig
 ): Promise<FetchedResponse> {
   const modifiedResponse = serviceConfig.onServiceResponse
     ? await serviceConfig.onServiceResponse(httpResponse)

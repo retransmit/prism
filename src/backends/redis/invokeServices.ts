@@ -4,7 +4,7 @@ import {
   IAppConfig,
   FetchedResponse,
   ActiveRedisRequest,
-  ServiceHandlerConfig,
+  ServiceConfig,
   RedisServiceRequest,
   HttpRequest,
 } from "../../types";

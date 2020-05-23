@@ -1,16 +1,5 @@
-import {
-  HttpMethods,
-  RouteConfig,
-  IAppConfig,
-  FetchedResponse,
-  ActiveRedisRequest,
-  ServiceHandlerConfig,
-  RedisServiceRequest,
-  HttpRequest,
-} from "../../types";
+import { HttpRequest } from "../../types";
 
-import * as activeRequests from "./activeRequests";
-import * as configModule from "../../config";
 import { publish } from "./publish";
 /*
   Make Promises for Redis Services

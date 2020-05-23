@@ -1,8 +1,12 @@
-import { IRouterContext } from "koa-router";
 import { ClientOpts } from "redis";
 import { IncomingHttpHeaders } from "http2";
-import HttpRequestContext from "./clients/HttpRequestContext";
-
+import HttpRequestContext from "../clients/HttpRequestContext";
+import { ServiceConfig } from "./ServiceConfig";
+export {
+  HttpServiceConfig,
+  RedisServiceConfig,
+  ServiceConfig,
+} from "./ServiceConfig";
 export type HttpMethods = "GET" | "POST" | "PUT" | "DELETE" | "PATCH";
 
 /*
@@ -47,7 +51,7 @@ export interface IAppConfig {
 */
 export type RouteConfig = {
   services: {
-    [key: string]: ServiceHandlerConfig;
+    [key: string]: ServiceConfig;
   };
   onRequest?: (ctx: HttpRequestContext) => Promise<{ handled: boolean }>;
   onResponse?: (
@@ -61,48 +65,6 @@ export type RouteConfig = {
     request: HttpRequest
   ) => Promise<void>;
 };
-
-/*
-  Service Configuration
-*/
-export type ServiceHandlerConfigBase = {
-  awaitResponse?: boolean;
-  merge?: boolean;
-  timeout?: number;
-  mergeField?: string;
-  onServiceResponse?: (
-    response: HttpResponse | undefined
-  ) => Promise<HttpResponse>;
-  onError?: (
-    response: HttpResponse | undefined,
-    request: HttpRequest
-  ) => Promise<void>;
-};
-
-export type RedisServiceHandlerConfig = {
-  type: "redis";
-  config: {
-    requestChannel: string;
-    responseChannel: string;
-    numRequestChannels?: number;
-    onServiceRequest?: (request: RedisServiceRequest) => Promise<any>;
-    onRollbackRequest?: (request: RedisServiceRequest) => Promise<any>;
-  };
-} & ServiceHandlerConfigBase;
-
-export type HttpServiceHandlerConfig = {
-  type: "http";
-  config: {
-    url: string;
-    rollbackUrl?: string;
-    onServiceRequest?: (request: HttpRequest) => Promise<HttpRequest>;
-    onRollbackRequest?: (request: HttpRequest) => Promise<HttpRequest>;
-  };
-} & ServiceHandlerConfigBase;
-
-export type ServiceHandlerConfig =
-  | RedisServiceHandlerConfig
-  | HttpServiceHandlerConfig;
 
 /*
   Currently active requests
@@ -186,23 +148,3 @@ export type HttpCookie = {
   maxAge?: number;
   overwrite?: boolean;
 };
-
-/*
-  Web Socket Route Config
-*/
-export type WebSocketRouteConfig = {
-  services: {
-    [key: string]: ServiceHandlerConfig;
-  };
-  onRequest?: (ctx: HttpRequestContext) => Promise<{ handled: boolean }>;
-  onResponse?: (
-    ctx: HttpRequestContext,
-    response: any
-  ) => Promise<{ handled: boolean }>;
-  mergeResponses?: (responses: FetchedResponse[]) => Promise<FetchedResponse[]>;
-  genericErrors?: boolean;
-  onError?: (
-    responses: FetchedResponse[],
-    request: HttpRequest
-  ) => Promise<void>;
-}
