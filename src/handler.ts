@@ -38,10 +38,10 @@ export async function handler(ctx: ClientRequestContext, method: HttpMethods) {
   const config = configModule.get();
 
   const requestId = randomId(32);
-  const routeConfig = config.routes[ctx.getPath()][method];
+  const routeConfig = config.http.routes[ctx.getPath()][method];
 
   // If there are custom handlers, try that first.
-  const onRequest = routeConfig?.onRequest || config.onRequest;
+  const onRequest = routeConfig?.onRequest || config.http.onRequest;
   if (onRequest) {
     const modResult = await onRequest(ctx);
     if (modResult.handled) {
@@ -75,8 +75,8 @@ export async function handler(ctx: ClientRequestContext, method: HttpMethods) {
     let response = mergeResponses(requestId, fetchedResponses);
 
     if (responseIsError(response)) {
-      if (config.onError) {
-        config.onError(fetchedResponses, httpRequest);
+      if (config.http.onError) {
+        config.http.onError(fetchedResponses, httpRequest);
       }
       for (const connector of connectors) {
         connector.rollback(requestId, httpRequest);
@@ -84,7 +84,7 @@ export async function handler(ctx: ClientRequestContext, method: HttpMethods) {
     }
 
     // See if there are any custom handlers for final response
-    const onResponse = routeConfig.onResponse || config.onResponse;
+    const onResponse = routeConfig.onResponse || config.http.onResponse;
     if (onResponse) {
       const modResult = await onResponse(ctx, response);
       if (modResult.handled) {
@@ -98,7 +98,7 @@ export async function handler(ctx: ClientRequestContext, method: HttpMethods) {
         response.status &&
         response.status >= 500 &&
         response.status <= 599 &&
-        (routeConfig.genericErrors || config.genericErrors)
+        (routeConfig.genericErrors || config.http.genericErrors)
       ) {
         ctx.setResponseStatus(500);
         ctx.setResponseBody(`Internal Server Error.`);

@@ -13,7 +13,7 @@ export default async function rollback(
   request: HttpRequest
 ) {
   const config = configModule.get();
-  const routeConfig = config.routes[request.path][
+  const routeConfig = config.http.routes[request.path][
     request.method
   ] as RouteConfig;
 

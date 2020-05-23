@@ -13,7 +13,7 @@ export function publish(
   requestType: "request" | "rollback"
 ) {
   const config = configModule.get();
-  const routeConfig = config.routes[request.path][
+  const routeConfig = config.http.routes[request.path][
     request.method
   ] as RouteConfig;
 

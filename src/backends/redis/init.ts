@@ -15,9 +15,9 @@ export default async function init() {
 
     // Setup subscriptions
     const alreadySubscribed: string[] = [];
-    for (const route in config.routes) {
-      for (const method in config.routes[route]) {
-        const routeConfig = config.routes[route][
+    for (const route in config.http.routes) {
+      for (const method in config.http.routes[route]) {
+        const routeConfig = config.http.routes[route][
           method as HttpMethods
         ] as RouteConfig;
         for (const service in routeConfig.services) {
@@ -42,9 +42,9 @@ export default async function init() {
 function isRedisBeingUsed(): boolean {
   const config = configModule.get();
 
-  for (const route in config.routes) {
-    for (const method in config.routes[route]) {
-      const routeConfig = config.routes[route][
+  for (const route in config.http.routes) {
+    for (const method in config.http.routes[route]) {
+      const routeConfig = config.http.routes[route][
         method as HttpMethods
       ] as RouteConfig;
       for (const service in routeConfig.services) {

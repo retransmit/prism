@@ -34,29 +34,31 @@ function run() {
   describe("retransmit", () => {
     let app: { instance: any } = { instance: undefined };
 
-    describe("redis", () => {
-      afterEach(async function resetAfterEach() {
-        await closeServer(app.instance);
+    describe("integration", () => {
+      describe("redis", () => {
+        afterEach(async function resetAfterEach() {
+          await closeServer(app.instance);
+        });
+
+        redisHttpMethods(app);
+        redisMergeResults(app);
+        redisDontMergeIgnored(app);
+        redisShowGenericErrors(app);
+        redisMustNotOverwriteJsonWithString(app);
+        redisRollsback(app);
       });
 
-      redisHttpMethods(app);
-      redisMergeResults(app);
-      redisDontMergeIgnored(app);
-      redisShowGenericErrors(app);
-      redisMustNotOverwriteJsonWithString(app);
-      redisRollsback(app);
-    });
+      describe("http", () => {
+        afterEach(async function resetAfterEach() {
+          await closeServer(app.instance);
+        });
 
-    describe("http", () => {
-      afterEach(async function resetAfterEach() {
-        await closeServer(app.instance);
+        httpHttpMethods(app);
+        httpMergeResults(app);
+        httpDontMergeIgnored(app);
+        httpMustNotOverwriteJsonWithString(app);
+        httpRollsback(app);
       });
-
-      httpHttpMethods(app);
-      httpMergeResults(app);
-      httpDontMergeIgnored(app);
-      httpMustNotOverwriteJsonWithString(app);
-      httpRollsback(app);
     });
   });
 }

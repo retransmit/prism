@@ -8,14 +8,16 @@ import { closeServer } from "../../utils";
 export default async function (app: { instance: any }) {
   function makeConfig(options: { method: HttpMethods }): IAppConfig {
     return {
-      routes: {
-        "/users": {
-          [options.method]: {
-            services: {
-              userservice: {
-                type: "http" as "http",
-                config: {
-                  url: "http://localhost:6666/users",
+      http: {
+        routes: {
+          "/users": {
+            [options.method]: {
+              services: {
+                userservice: {
+                  type: "http" as "http",
+                  config: {
+                    url: "http://localhost:6666/users",
+                  },
                 },
               },
             },

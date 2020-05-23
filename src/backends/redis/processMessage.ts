@@ -22,7 +22,7 @@ export default async function processMessage(
     // We're going to process it. So remove it.
     activeRequests.remove(activeRequestId);
 
-    const routeConfig = config.routes[activeRequest.request.path][
+    const routeConfig = config.http.routes[activeRequest.request.path][
       activeRequest.request.method
     ] as RouteConfig;
 

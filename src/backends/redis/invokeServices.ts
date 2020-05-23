@@ -20,7 +20,7 @@ export default async function invokeServices(
   httpRequest: HttpRequest
 ): Promise<Promise<FetchedResponse>[]> {
   const config = configModule.get();
-  const routeConfig = config.routes[httpRequest.path][
+  const routeConfig = config.http.routes[httpRequest.path][
     httpRequest.method
   ] as RouteConfig;
 

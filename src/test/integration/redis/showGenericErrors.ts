@@ -4,26 +4,28 @@ import { doPubSub } from "./utils";
 export default async function (app: { instance: any }) {
   it(`shows generic errors for service`, async () => {
     const config = {
-      routes: {
-        "/users": {
-          POST: {
-            services: {
-              userservice: {
-                type: "redis" as "redis",
-                config: {
-                  requestChannel: "input",
-                  responseChannel: "output",
+      http: {
+        routes: {
+          "/users": {
+            POST: {
+              services: {
+                userservice: {
+                  type: "redis" as "redis",
+                  config: {
+                    requestChannel: "input",
+                    responseChannel: "output",
+                  },
+                },
+                messagingservice: {
+                  type: "redis" as "redis",
+                  config: {
+                    requestChannel: "input",
+                    responseChannel: "output",
+                  },
                 },
               },
-              messagingservice: {
-                type: "redis" as "redis",
-                config: {
-                  requestChannel: "input",
-                  responseChannel: "output",
-                }
-              },
+              genericErrors: true,
             },
-            genericErrors: true,
           },
         },
       },
@@ -69,29 +71,31 @@ export default async function (app: { instance: any }) {
 
   it(`shows generic errors for all services`, async () => {
     const config = {
-      routes: {
-        "/users": {
-          POST: {
-            services: {
-              userservice: {
-                type: "redis" as "redis",
-                config: {
-                  requestChannel: "input",
-                  responseChannel: "output",
+      http: {
+        routes: {
+          "/users": {
+            POST: {
+              services: {
+                userservice: {
+                  type: "redis" as "redis",
+                  config: {
+                    requestChannel: "input",
+                    responseChannel: "output",
+                  },
                 },
-              },
-              messagingservice: {
-                type: "redis" as "redis",
-                config: {
-                  requestChannel: "input",
-                  responseChannel: "output",
+                messagingservice: {
+                  type: "redis" as "redis",
+                  config: {
+                    requestChannel: "input",
+                    responseChannel: "output",
+                  },
                 },
               },
             },
           },
         },
+        genericErrors: true,
       },
-      genericErrors: true,
     };
 
     const serviceResults = [

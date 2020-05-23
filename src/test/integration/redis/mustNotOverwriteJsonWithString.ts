@@ -4,27 +4,29 @@ import { doPubSub } from "./utils";
 export default async function (app: { instance: any }) {
   it(`must not overwrite json content with string content`, async () => {
     const config = {
-      routes: {
-        "/users": {
-          POST: {
-            services: {
-              userservice: {
-                type: "redis" as "redis",
-                config: {
-                  requestChannel: "input",
-                  responseChannel: "output",
+      http: {
+        routes: {
+          "/users": {
+            POST: {
+              services: {
+                userservice: {
+                  type: "redis" as "redis",
+                  config: {
+                    requestChannel: "input",
+                    responseChannel: "output",
+                  },
                 },
-              },
-              messagingservice: {
-                type: "redis" as "redis",
-                config: {
-                  requestChannel: "input",
-                  responseChannel: "output",
-                }
+                messagingservice: {
+                  type: "redis" as "redis",
+                  config: {
+                    requestChannel: "input",
+                    responseChannel: "output",
+                  }
+                },
               },
             },
           },
-        },
+        }
       },
     };
 

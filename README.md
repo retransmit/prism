@@ -26,41 +26,43 @@ Configuration files are written in JavaScript. A basic configuration file looks 
 
 ```js
 module.exports = {
-  routes: {
-    "/users": {
-      GET: {
-        services: {
-          userservice: {
-            type: "http",
-            config: {
-              url: "http://localhost:6666/users",
+  http: {
+    routes: {
+      "/users": {
+        GET: {
+          services: {
+            userservice: {
+              type: "http",
+              config: {
+                url: "http://localhost:6666/users",
+              },
             },
-          },
-          messagingservice: {
-            type: "http",
-            config: {
-              url: "http://localhost:6667/messages",
+            messagingservice: {
+              type: "http",
+              config: {
+                url: "http://localhost:6667/messages",
+              },
             },
           },
         },
       },
-    },
-    // You can specify parameters in the url
-    "/users/:id": {
-      GET: {
-        services: {
-          userservice: {
-            type: "http",
-            config: {
-              // And use them like this.
-              url: "http://localhost:6666/users/:id",
+      // You can specify parameters in the url
+      "/users/:id": {
+        GET: {
+          services: {
+            userservice: {
+              type: "http",
+              config: {
+                // And use them like this.
+                url: "http://localhost:6666/users/:id",
+              },
             },
-          },
-          messagingservice: {
-            type: "http",
-            config: {
-              // And use them like this.
-              url: "http://localhost:6667/messages/for/:id",
+            messagingservice: {
+              type: "http",
+              config: {
+                // And use them like this.
+                url: "http://localhost:6667/messages/for/:id",
+              },
             },
           },
         },
@@ -80,22 +82,24 @@ Here's a simple example. Note that multiple services can listen on the same chan
 
 ```js
 module.exports = {
-  routes: {
-    "/users": {
-      GET: {
-        services: {
-          userservice: {
-            type: "redis",
-            config: {
-              requestChannel: "inputs",
-              responseChannel: "outputs",
+  http: {
+    routes: {
+      "/users": {
+        GET: {
+          services: {
+            userservice: {
+              type: "redis",
+              config: {
+                requestChannel: "inputs",
+                responseChannel: "outputs",
+              },
             },
-          },
-          messagingservice: {
-            type: "redis",
-            config: {
-              requestChannel: "inputs",
-              responseChannel: "outputs",
+            messagingservice: {
+              type: "redis",
+              config: {
+                requestChannel: "inputs",
+                responseChannel: "outputs",
+              },
             },
           },
         },
@@ -133,7 +137,7 @@ export type HttpRequest = {
 
 Once the request is processed, the response needs to be published to the responseChannel mentioned in the request. Retransmit will pickup these responses, merge them, and pass them back to the caller. Retransmit will reconstruct an HTTP response from this information to send back to the client.
 
-Responses posted back to be in the format given below.
+Responses posted back must be in the format given below.
 
 ```typescript
 type RedisServiceResponse = {
@@ -142,6 +146,7 @@ type RedisServiceResponse = {
   response: HttpResponse;
 };
 
+// where response is...
 export type HttpResponse = {
   status?: number;
   redirect?: string;
@@ -151,6 +156,7 @@ export type HttpResponse = {
   contentType?: string;
 };
 
+// and cookie is...
 export type HttpCookie = {
   name: string;
   value: string;
@@ -163,7 +169,7 @@ export type HttpCookie = {
 };
 ```
 
-Redis connection parameters can be specified in the config file.
+Redis connection parameters can be specified in the config file. If not specified, Retransmit will connect to localhost on the default redis port.
 
 ```js
 module.exports = {
@@ -252,22 +258,27 @@ Similarly, onResponse does the same thing for responses. It lets you modify the 
   Application Config
 */
 module.exports = {
-  routes: {
-    userservice: {
-      type: "redis";
-      config: {
-        requestChannel: "inputs";
-        responseChannel: "outputs";
-      };
-      mergeField: "userData";
-    };
-  };
-  /*
+  http: {
+    routes: {
+      services: {
+        userservice: {
+          config: {
+            requestChannel: "inputs",
+            responseChannel: "outputs",
+          },
+          mergeField: "userData",
+        },
+      },
+    },
+    /*
     Signature of onRequest
     onRequest?: (ctx: ClientRequestContext) => Promise<{ handled: boolean }>;
   */
-  onRequest: async (ctx) => { ctx.body = "Works!"; return { handled: true }; }
-  /*
+    onRequest: async (ctx) => {
+      ctx.body = "Works!";
+      return { handled: true };
+    },
+    /*
     Same thing for responses
 
     onResponse?: (
@@ -275,8 +286,12 @@ module.exports = {
       response: any
     ) => Promise<{ handled: boolean }>;
   */
-  onResponse: async (ctx) => { ctx.body = "Handled!"; return { handled: true } }
-}
+    onResponse: async (ctx) => {
+      ctx.body = "Handled!";
+      return { handled: true };
+    },
+  },
+};
 ```
 
 The context (ctx in the example above) passed into the hooks is a ClientRequestContext instance having the following methods.
@@ -372,26 +387,34 @@ The onRequest hook can be used to Authentication.
 
 ```typescript
 module.exports = {
-  routes: {
-    userservice: {
-      type: "redis";
-      config: {
-        requestChannel: "inputs";
-        responseChannel: "outputs";
-      };
-      mergeField: "userData";
-    };
-  };
-  onRequest: async (ctx) => {
-    const headers = ctx.getRequestHeaders();
-    const isAuthenticated = headers["token"] === "very_very_secret";
-    if (!isAuthenticated) {
-      ctx.setStatus(401);
-      ctx.setResponseBody("No cookie for you.")
-      return { handled: true };
-    }
-  }
-}
+  http: {
+    routes: {
+      "/users": {
+        POST: {
+          services: {
+            userservice: {
+              type: "redis",
+              config: {
+                requestChannel: "inputs",
+                responseChannel: "outputs",
+              },
+              mergeField: "userData",
+            },
+          },
+        },
+      },
+    },
+    onRequest: async (ctx) => {
+      const headers = ctx.getRequestHeaders();
+      const isAuthenticated = headers["token"] === "very_very_secret";
+      if (!isAuthenticated) {
+        ctx.setStatus(401);
+        ctx.setResponseBody("No cookie for you.");
+        return { handled: true };
+      }
+    },
+  },
+};
 ```
 
 ## Rolling back on error
@@ -402,34 +425,36 @@ For Http Services, the rollbackUrl specified in the configuration is called with
 
 ```js
 module.exports = {
-  routes: {
-    "/users": {
-      POST: {
-        services: {
-          userservice: {
-            type: "http",
-            config: {
-              url: "http://localhost:6666/users",
-              // Rollback url to call
-              rollbackUrl: "http://localhost:6666/users/remove",
+  http: {
+    routes: {
+      "/users": {
+        POST: {
+          services: {
+            userservice: {
+              type: "http",
+              config: {
+                url: "http://localhost:6666/users",
+                // Rollback url to call
+                rollbackUrl: "http://localhost:6666/users/remove",
+              },
             },
-          },
-          accountsservice: {
-            type: "http",
-            config: {
-              url: "http://localhost:6666/accounts",
+            accountsservice: {
+              type: "http",
+              config: {
+                url: "http://localhost:6666/accounts",
+              },
+              // The rollback call goes as an HTTP PUT to a different url.
+              modifyRollbackRequest: (req) => {
+                return {
+                  ...req,
+                  url: "http://localhost:6666/users/remove",
+                  method: "PUT",
+                };
+              },
             },
-            // The rollback call goes as an HTTP PUT to a different url.
-            modifyRollbackRequest: (req) => {
-              return {
-                ...req,
-                url: "http://localhost:6666/users/remove",
-                method: "PUT",
-              };
+            messagingservice: {
+              // omitted...
             },
-          },
-          messagingservice: {
-            // omitted...
           },
         },
       },
@@ -454,40 +479,45 @@ The onError handler lets you log errors that happen in the pipeline. It can be s
 
 ```js
 module.exports = {
-  "/users": {
-    "POST": {
-      services: messagingservice: {
-        type: "redis",
-        config: {
-          requestChannel: "inputs",
-          responseChannel: "outputs",
-        },
-        /*
+  http: {
+    routes: {
+      "/users": {
+        POST: {
+          services: {
+            messagingservice: {
+              type: "redis",
+              config: {
+                requestChannel: "inputs",
+                responseChannel: "outputs",
+              },
+              /*
           Note the difference. Contains only one response.
           onError?: (
             response: HttpResponse,
             request: HttpRequest
           ) => Promise<void>;
         */
-        onError: async (response, request) => {
-          console.log("Failed in messagingservice.");
+              onError: async (response, request) => {
+                console.log("Failed in messagingservice.");
+              },
+            },
+          },
+          onError: async (responses, request) => {
+            console.log("A service failed in POST /users.");
+          },
         },
       },
-      onError: async (responses, request) => {
-        console.log("A service failed in POST /users.");
-      },
-    }
-  }
-
-  /*
+    },
+    /*
     Signature
     onError?: (
       responses: FetchedResponse[],
       request: HttpRequest
     ) => Promise<void>;
   */
-  onError: async (responses, request) => {
-    console.log("Something failed somewhere.");
+    onError: async (responses, request) => {
+      console.log("Something failed somewhere.");
+    },
   },
 };
 ```
@@ -513,33 +543,37 @@ Regular HTTP service backends are limited to sending a single response to a requ
 
 ```js
 module.exports = {
-  "/users": {
-    POST: {
-      services: {
-        messagingservice: {
-          type: "redis",
-          config: {
-            requestChannel: "inputs",
-            responseChannel: "outputs",
+  http: {
+    routes: {
+      "/users": {
+        POST: {
+          services: {
+            messagingservice: {
+              type: "redis",
+              config: {
+                requestChannel: "inputs",
+                responseChannel: "outputs",
+              },
+              // Timeout defaults to 30s
+              timeout: 100000,
+            },
+            notificationservice: {
+              type: "http",
+              config: {
+                url: "http://notify.example.com/users",
+              },
+              // Do not wait for this response
+              awaitResponse: false,
+            },
+            accountservice: {
+              type: "http",
+              config: {
+                url: "http://accounts.example.com/online",
+              },
+              // Do not merge the response from this service
+              merge: false,
+            },
           },
-          // Timeout defaults to 30s
-          timeout: 100000,
-        },
-        notificationservice: {
-          type: "http",
-          config: {
-            url: "http://notify.example.com/users",
-          },
-          // Do not wait for this response
-          awaitResponse: false,
-        },
-        accountservice: {
-          type: "http",
-          config: {
-            url: "http://accounts.example.com/online",
-          },
-          // Do not merge the response from this service
-          merge: false,
         },
       },
     },
@@ -557,17 +591,21 @@ Then, by specifiying the numRequestChannels option in the redis service's config
 
 ```js
 module.exports = {
-  "/users": {
-    POST: {
-      services: {
-        messagingservice: {
-          type: "redis",
-          config: {
-            requestChannel: "inputs",
-            responseChannel: "outputs",
-            // Specify 10 channels
-            // Instances need to subscribe to input0 to inputs9
-            numRequestChannels: 10,
+  http: {
+    routes: {
+      "/users": {
+        POST: {
+          services: {
+            messagingservice: {
+              type: "redis",
+              config: {
+                requestChannel: "inputs",
+                responseChannel: "outputs",
+                // Specify 10 channels
+                // Instances need to subscribe to input0 to inputs9
+                numRequestChannels: 10,
+              },
+            },
           },
         },
       },

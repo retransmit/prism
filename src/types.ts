@@ -9,25 +9,32 @@ export type HttpMethods = "GET" | "POST" | "PUT" | "DELETE" | "PATCH";
   Application Config
 */
 export interface IAppConfig {
-  routes: {
+  http: {
+    routes: {
+      [key: string]: {
+        [key in HttpMethods]?: RouteConfig;
+      };
+    };
+    onRequest?: (ctx: ClientRequestContext) => Promise<{ handled: boolean }>;
+    onResponse?: (
+      ctx: ClientRequestContext,
+      response: any
+    ) => Promise<{ handled: boolean }>;
+    genericErrors?: boolean;
+    onError?: (
+      responses: FetchedResponse[],
+      request: HttpRequest
+    ) => Promise<void>;
+  };
+  websockets?: {
     [key: string]: {
-      [key in HttpMethods]?: RouteConfig;
+      onRequest?: (ctx: WebSocketRequest) => Promise<{ handled: boolean }>;
     };
   };
   redis?: {
     options?: ClientOpts;
     cleanupInterval?: number;
   };
-  onRequest?: (ctx: ClientRequestContext) => Promise<{ handled: boolean }>;
-  onResponse?: (
-    ctx: ClientRequestContext,
-    response: any
-  ) => Promise<{ handled: boolean }>;
-  genericErrors?: boolean;
-  onError?: (
-    responses: FetchedResponse[],
-    request: HttpRequest
-  ) => Promise<void>;
 }
 
 /*

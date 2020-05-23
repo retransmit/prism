@@ -6,20 +6,22 @@ import { closeServer } from "../../utils";
 export default async function (app: { instance: any }) {
   it(`merges responses`, async () => {
     const config = {
-      routes: {
-        "/users": {
-          GET: {
-            services: {
-              userservice: {
-                type: "http" as "http",
-                config: {
-                  url: "http://localhost:6666/users",
+      http: {
+        routes: {
+          "/users": {
+            GET: {
+              services: {
+                userservice: {
+                  type: "http" as "http",
+                  config: {
+                    url: "http://localhost:6666/users",
+                  },
                 },
-              },
-              messagingservice: {
-                type: "http" as "http",
-                config: {
-                  url: "http://localhost:6667/messages",
+                messagingservice: {
+                  type: "http" as "http",
+                  config: {
+                    url: "http://localhost:6667/messages",
+                  },
                 },
               },
             },

@@ -22,7 +22,7 @@ export default async function cleanupTimedOut() {
     }
 
     for (const [activeRequestId, activeRequest] of timedOut) {
-      const routeConfig = config.routes[activeRequest.request.path][
+      const routeConfig = config.http.routes[activeRequest.request.path][
         activeRequest.request.method
       ] as RouteConfig;
 

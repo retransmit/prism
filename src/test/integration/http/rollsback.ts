@@ -7,21 +7,23 @@ import { Server } from "net";
 export default async function (app: { instance: any }) {
   it(`rolls back`, async () => {
     const config = {
-      routes: {
-        "/users": {
-          POST: {
-            services: {
-              userservice: {
-                type: "http" as "http",
-                config: {
-                  url: "http://localhost:6666/users",
-                  rollbackUrl: "http://localhost:6666/users/remove",
+      http: {
+        routes: {
+          "/users": {
+            POST: {
+              services: {
+                userservice: {
+                  type: "http" as "http",
+                  config: {
+                    url: "http://localhost:6666/users",
+                    rollbackUrl: "http://localhost:6666/users/remove",
+                  },
                 },
-              },
-              messagingservice: {
-                type: "http" as "http",
-                config: {
-                  url: "http://localhost:6667/messages",
+                messagingservice: {
+                  type: "http" as "http",
+                  config: {
+                    url: "http://localhost:6667/messages",
+                  },
                 },
               },
             },

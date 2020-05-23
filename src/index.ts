@@ -4,9 +4,8 @@ import Koa = require("koa");
 import Router = require("koa-router");
 import bodyParser = require("koa-bodyparser");
 import yargs = require("yargs");
-import { join } from "path";
 
-import * as config from "./config";
+import * as configModule from "./config";
 import { IAppConfig } from "./types";
 
 import { createHandler } from "./handler";
@@ -30,7 +29,7 @@ export async function startWithConfiguration(
   appConfig: IAppConfig
 ) {
   // Set up the config
-  config.set(appConfig);
+  configModule.set(appConfig);
 
   // Init redis
   await init();
@@ -38,10 +37,10 @@ export async function startWithConfiguration(
   // Set up routes
   const router = new Router();
 
-  const routes = config.get().routes;
-
-  for (const route in appConfig.routes) {
-    const routeConfig = routes[route];
+  const config = configModule.get();
+  
+  for (const route in config.http.routes) {
+    const routeConfig = config.http.routes[route];
 
     if (routeConfig["GET"]) {
       router.get(route, createHandler("GET"));

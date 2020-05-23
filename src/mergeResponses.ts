@@ -13,7 +13,7 @@ export default function mergeResponses(
 
   for (const fetchedResponse of responses) {
     if (typeof fetchedResponse.response !== "undefined") {
-      const routeConfig = config.routes[fetchedResponse.path][
+      const routeConfig = config.http.routes[fetchedResponse.path][
         fetchedResponse.method
       ] as RouteConfig;
       const serviceConfig = routeConfig.services[fetchedResponse.service];
