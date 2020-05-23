@@ -272,7 +272,7 @@ module.exports = {
     },
     /*
     Signature of onRequest
-    onRequest?: (ctx: ClientRequestContext) => Promise<{ handled: boolean }>;
+    onRequest?: (ctx: HttpRequestContext) => Promise<{ handled: boolean }>;
   */
     onRequest: async (ctx) => {
       ctx.body = "Works!";
@@ -282,7 +282,7 @@ module.exports = {
     Same thing for responses
 
     onResponse?: (
-      ctx: ClientRequestContext,
+      ctx: HttpRequestContext,
       response: any
     ) => Promise<{ handled: boolean }>;
   */
@@ -294,10 +294,10 @@ module.exports = {
 };
 ```
 
-The context (ctx in the example above) passed into the hooks is a ClientRequestContext instance having the following methods.
+The context (ctx in the example above) passed into the hooks is a HttpRequestContext instance having the following methods.
 
 ```typescript
-abstract class ClientRequestContext {
+abstract class HttpRequestContext {
   abstract getPath(): string;
 
   abstract getParams(): {
@@ -359,7 +359,7 @@ module.exports = {
     },
     /*
       Signature of onRequest
-      onRequest?: (ctx: ClientRequestContext) => Promise<{ handled: boolean }>;
+      onRequest?: (ctx: HttpRequestContext) => Promise<{ handled: boolean }>;
     */
     onRequest: async (ctx) => {
       ctx.body = "Works!";
@@ -369,7 +369,7 @@ module.exports = {
       Same thing for responses
 
       onResponse?: (
-        ctx: ClientRequestContext,
+        ctx: HttpRequestContext,
         response: any
       ) => Promise<{ handled: boolean }>;
     */

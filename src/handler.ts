@@ -13,7 +13,6 @@ import invokeRedisServices from "./backends/redis/invokeServices";
 import rollbackRedis from "./backends/redis/rollback";
 import mergeResponses from "./mergeResponses";
 import responseIsError from "./lib/http/responseIsError";
-import ClientRequestContext from "./clients/ClientRequestContext";
 import HttpRequestContext from "./clients/HttpRequestContext";
 
 const connectors = [
@@ -34,7 +33,7 @@ export function createHandler(method: HttpMethods) {
   };
 }
 
-export async function handler(ctx: ClientRequestContext, method: HttpMethods) {
+export async function handler(ctx: HttpRequestContext, method: HttpMethods) {
   const config = configModule.get();
 
   const requestId = randomId(32);

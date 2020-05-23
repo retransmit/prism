@@ -1,7 +1,7 @@
 import { IRouterContext } from "koa-router";
 import { ClientOpts } from "redis";
 import { IncomingHttpHeaders } from "http2";
-import ClientRequestContext from "./clients/ClientRequestContext";
+import HttpRequestContext from "./clients/HttpRequestContext";
 
 export type HttpMethods = "GET" | "POST" | "PUT" | "DELETE" | "PATCH";
 
@@ -15,9 +15,9 @@ export interface IAppConfig {
         [key in HttpMethods]?: RouteConfig;
       };
     };
-    onRequest?: (ctx: ClientRequestContext) => Promise<{ handled: boolean }>;
+    onRequest?: (ctx: HttpRequestContext) => Promise<{ handled: boolean }>;
     onResponse?: (
-      ctx: ClientRequestContext,
+      ctx: HttpRequestContext,
       response: any
     ) => Promise<{ handled: boolean }>;
     genericErrors?: boolean;
@@ -27,9 +27,14 @@ export interface IAppConfig {
     ) => Promise<void>;
   };
   websockets?: {
-    [key: string]: {
-      onRequest?: (ctx: WebSocketRequest) => Promise<{ handled: boolean }>;
+    routes: {
+      [key: string]: {
+        services: {
+          onRequest?: (ctx: HttpRequest) => Promise<{ handled: boolean }>;
+        };
+      };
     };
+    onRequest?: (ctx: HttpRequest) => Promise<{ handled: boolean }>;
   };
   redis?: {
     options?: ClientOpts;
@@ -44,9 +49,9 @@ export type RouteConfig = {
   services: {
     [key: string]: ServiceHandlerConfig;
   };
-  onRequest?: (ctx: ClientRequestContext) => Promise<{ handled: boolean }>;
+  onRequest?: (ctx: HttpRequestContext) => Promise<{ handled: boolean }>;
   onResponse?: (
-    ctx: ClientRequestContext,
+    ctx: HttpRequestContext,
     response: any
   ) => Promise<{ handled: boolean }>;
   mergeResponses?: (responses: FetchedResponse[]) => Promise<FetchedResponse[]>;
@@ -160,15 +165,6 @@ export type HttpRequest = {
 };
 
 /*
-  Web Socket Request
-*/
-export type WebSocketRequest = {
-  path: string;
-  method: HttpMethods;
-  body: any;
-};
-
-/*
   Can be used to form an HttpResponse
 */
 export type HttpResponse = {
@@ -192,8 +188,21 @@ export type HttpCookie = {
 };
 
 /*
-  A web sockets response
+  Web Socket Route Config
 */
-export type WebSocketResponse = {
-  content?: any;
-};
+export type WebSocketRouteConfig = {
+  services: {
+    [key: string]: ServiceHandlerConfig;
+  };
+  onRequest?: (ctx: HttpRequestContext) => Promise<{ handled: boolean }>;
+  onResponse?: (
+    ctx: HttpRequestContext,
+    response: any
+  ) => Promise<{ handled: boolean }>;
+  mergeResponses?: (responses: FetchedResponse[]) => Promise<FetchedResponse[]>;
+  genericErrors?: boolean;
+  onError?: (
+    responses: FetchedResponse[],
+    request: HttpRequest
+  ) => Promise<void>;
+}

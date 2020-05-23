@@ -1,12 +1,10 @@
-import ClientRequestContext from "./ClientRequestContext";
 import { IRouterContext } from "koa-router";
 import { HttpMethods } from "../types";
 
-export default class HttpRequestContext extends ClientRequestContext {
+export default class HttpRequestContext {
   #ctx: IRouterContext;
 
   constructor(ctx: IRouterContext) {
-    super();
     this.#ctx = ctx;
   }
 
