@@ -1,17 +1,15 @@
 import { IRouterContext } from "koa-router";
-import * as configModule from "./config";
-import {
-  HttpMethods,
-} from "./types";
-import randomId from "./random";
-import invokeHttpServices from "./requestHandlers/http/backends/http/invokeServices";
-import rollbackHttp from "./requestHandlers/http/backends/http/rollback";
-import invokeRedisServices from "./requestHandlers/http/backends/redis/invokeServices";
-import rollbackRedis from "./requestHandlers/http/backends/redis/rollback";
+import * as configModule from "../../config";
+import { HttpMethods } from "../../types";
+import randomId from "../../lib/random";
+import invokeHttpServices from "./backends/http/invokeServices";
+import rollbackHttp from "./backends/http/rollback";
+import invokeRedisServices from "./backends/redis/invokeServices";
+import rollbackRedis from "./backends/redis/rollback";
 import mergeResponses from "./mergeResponses";
-import responseIsError from "./lib/http/responseIsError";
-import HttpRequestContext from "./requestHandlers/http/RequestContext";
-import { FetchedHttpResponse } from "./types/HttpRequests";
+import responseIsError from "../../lib/http/responseIsError";
+import HttpRequestContext from "./RequestContext";
+import { FetchedHttpResponse } from "../../types/HttpRequests";
 
 const connectors = [
   { type: "http", invokeServices: invokeHttpServices, rollback: rollbackHttp },
@@ -60,9 +58,7 @@ export async function handler(ctx: HttpRequestContext, method: HttpMethods) {
       headers: ctx.getRequestHeaders(),
     };
 
-    let promises: Promise<
-      InvokeServiceResult
-    >[] = [];
+    let promises: Promise<InvokeServiceResult>[] = [];
     for (const connector of connectors) {
       promises = promises.concat(
         connector.invokeServices(requestId, httpRequest)

@@ -1,6 +1,5 @@
 import { HttpResponse, HttpRequest, HttpMethods } from ".";
 import HttpRequestContext from "../requestHandlers/http/RequestContext";
-import { InvokeServiceResult } from "../handler";
 
 /*
   RouteHandler Config

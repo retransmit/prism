@@ -8,7 +8,7 @@ import yargs = require("yargs");
 import * as configModule from "./config";
 import { IAppConfig } from "./types";
 
-import { createHandler } from "./handler";
+import { createHandler } from "./requestHandlers/http/handler";
 import init from "./requestHandlers/http/backends/redis/init";
 
 const packageJson = require("../package.json");
