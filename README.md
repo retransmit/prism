@@ -262,11 +262,11 @@ module.exports = {
     routes: {
       services: {
         userservice: {
+          type: "redis",
           config: {
             requestChannel: "inputs",
             responseChannel: "outputs",
           },
-          mergeField: "userData",
         },
       },
     },
@@ -524,16 +524,97 @@ module.exports = {
 
 ## Streaming Responses via Web Sockets
 
-Clients opening a Web Socket connection with Retransmit can receive streaming event data from backend services.
+Clients opening a Web Socket connection with Retransmit can receive streaming event data from backend services, as well as communicate with them asynchronously.
 
-The client has to request data in the following format via WebSockets.
+This configuration lets clients open an WebSocket connection to "/liveupdates" and get streaming responses from the quoteservice and the alertservice.
 
-```js
+```typescript
+/*
+  Application Config
+*/
+module.exports = {
+  websockets: {
+    routes: {
+      "/liveupdates": {
+        services: {
+          quoteservice: {
+            type: "redis",
+            config: {
+              requestChannel: "inputs",
+              responseChannel: "outputs",
+            },
+          },
+          alertservice: {
+            type: "http",
+            config: {
+              url: "http://localhost:6454/alerts",
+              pollingInterval: 10000,
+            },
+          },
+        },
+      },
+    },
+  },
+};
 ```
 
-Retransmit will contact each backend service defined for that route and forward the responses back to the client. Responses to requests coming in via Web Sockets are not merged, unlike those coming as regular HTTP requests. The client should parse each response individually and perform subsequent actions.
+Here's an example of how to use Retransmit WebSockets from a web client.
 
-Regular HTTP service backends are limited to sending a single response to a request coming in via a WebSocket. However, Redis-based services can keep sending data to connected clients by posting messages on the channels defined in the config.
+```js
+const mySocket = new WebSocket("wss://www.example.com/liveupdates");
+exampleSocket.send(
+  JSON.stringify({
+    action: "GET_QUOTE",
+    stock: "GOOG",
+  })
+);
+```
+
+Doing WebSockets with Redis Services is easy. For the example above, the Redis Service will receive the following message (as a string) if subscribed to the configured requestChannel.
+
+```json
+{
+  "id": "sl98sndflksdlfksomeid",
+  "type": "request",
+  "responseChannel": "outputs",
+  "request": {
+    "body": {
+      "action": "GET_QUOTE",
+      "stock": "GOOG"
+    }
+  }
+}
+```
+
+Sending responses is also fairly simple - just keep pushing messages in the following format to the responseChannel (which you received in the request above) and Retransmit will stream them to the client.
+
+```json
+{
+  "id": "sl98sndflksdlfksomeid",
+  "service": "quoteservice",
+  "response": {
+    "quotes": [
+      { "ticker": "GOOG", "price": 1410.4 }
+    ]
+  }
+}
+```
+
+WebSocket requests to Http Services come as an Http POST to the configured Url. The response is sent back to the WebSocket client. In addition, by specifying a pollingInterval, Retransmit can check for newer updates from the Http Service and send those responses to the WebSocket client.
+
+// TODO example.
+
+## Handling Disconnect Events
+
+// TODO
+
+## Authentication for WebSockets
+
+Authentication for WebSocket clients happen during the time of establishing the connection.
+
+## Modifying Requests and Responses
+
+// TODO
 
 ## Other Options
 

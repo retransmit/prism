@@ -23,7 +23,7 @@ export type WebSocketRouteConfig = {
 /*
   Service Configuration.
 */
-export type WebSocketServiceConfigBase = {
+export type WebSocketHandlerConfigBase = {
   onServiceResponse?: (
     response: HttpResponse | undefined
   ) => Promise<HttpResponse>;
@@ -33,7 +33,7 @@ export type WebSocketServiceConfigBase = {
   ) => Promise<void>;
 };
 
-export type RedisWebSocketServiceConfig = {
+export type RedisServiceWebSocketHandlerConfig = {
   type: "redis";
   config: {
     requestChannel: string;
@@ -41,9 +41,9 @@ export type RedisWebSocketServiceConfig = {
     numRequestChannels?: number;
     onServiceRequest?: (request: RedisServiceHttpRequest) => Promise<any>;
   };
-} & WebSocketServiceConfigBase;
+} & WebSocketHandlerConfigBase;
 
-export type HttpWebSocketServiceConfig = {
+export type HttpServiceWebSocketHandlerConfig = {
   type: "http";
   pollingInterval: number;
   config: {
@@ -52,8 +52,8 @@ export type HttpWebSocketServiceConfig = {
     onDisconnectUrl: string;
     onServiceRequest?: (request: HttpRequest) => Promise<HttpRequest>;
   };
-} & WebSocketServiceConfigBase;
+} & WebSocketHandlerConfigBase;
 
-export type WebSocketServiceConfig =
-  | RedisWebSocketServiceConfig
-  | HttpWebSocketServiceConfig;
+export type WebSocketHandlerConfig =
+  | RedisServiceWebSocketHandlerConfig
+  | HttpServiceWebSocketHandlerConfig;
