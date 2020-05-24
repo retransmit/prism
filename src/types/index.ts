@@ -39,7 +39,7 @@ export interface IAppConfig {
         };
       };
     };
-    onRequest?: (ctx: HttpRequest) => Promise<{ handled: boolean }>;
+    onRequest?: (ctx: HttpRequest)   => Promise<{ handled: boolean }>;
   };
   redis?: {
     options?: ClientOpts;
