@@ -7,48 +7,88 @@ import {
   ServiceConfig,
   RedisServiceRequest,
   HttpRequest,
+  RedisServiceConfig,
 } from "../../types";
 
 import * as activeRequests from "./activeRequests";
 import * as configModule from "../../config";
-import { publish } from "./publish";
+import { getPublisher } from "./clients";
+import { InvokeServiceResult } from "../../handler";
+import { getChannelForService } from "./getChannelForService";
+
 /*
   Make Promises for Redis Services
 */
-export default async function invokeServices(
+export default function invokeServices(
   requestId: string,
   httpRequest: HttpRequest
-): Promise<Promise<FetchedResponse>[]> {
+): Promise<InvokeServiceResult>[] {
   const config = configModule.get();
   const routeConfig = config.http.routes[httpRequest.path][
     httpRequest.method
   ] as RouteConfig;
 
-  publish(requestId, httpRequest, "request");
+  // publish(requestId, httpRequest, "request");
 
-  const promises: Promise<FetchedResponse>[] = [];
+  const alreadyPublishedChannels: string[] = [];
 
-  for (const service of Object.keys(routeConfig.services)) {
-    const serviceConfig = routeConfig.services[service];
-    if (
-      serviceConfig.type === "redis" &&
-      serviceConfig.awaitResponse !== false
-    ) {
-      promises.push(
-        new Promise<FetchedResponse>((success, error) => {
-          activeRequests.set(`${requestId}+${service}`, {
+  return Object.keys(routeConfig.services)
+    .map(
+      (service) =>
+        [service, routeConfig.services[service]] as [string, ServiceConfig]
+    )
+    .filter(isRedisServiceConfig)
+    .map(
+      ([service, serviceConfig]) =>
+        new Promise(async (success) => {
+          const redisRequest: RedisServiceRequest = {
             id: requestId,
-            responseChannel: serviceConfig.config.responseChannel,
             request: httpRequest,
-            service,
-            timeoutTicks: Date.now() + (serviceConfig.timeout || 30000),
-            startTime: Date.now(),
-            onResponse: success,
-          });
-        })
-      );
-    }
-  }
+            responseChannel: serviceConfig.config.responseChannel,
+            type: "request",
+          };
 
-  return promises;
+          const onRequestResult = serviceConfig.config.onRequest
+            ? await serviceConfig.config.onRequest(redisRequest)
+            : { handled: false as false, request: redisRequest };
+
+          const requestChannel = getChannelForService(serviceConfig);
+          if (onRequestResult.handled) {
+            success({ skip: true });
+          } else {
+            if (serviceConfig.awaitResponse === false) {
+              if (!alreadyPublishedChannels.includes(requestChannel)) {
+                getPublisher().publish(
+                  requestChannel,
+                  JSON.stringify(onRequestResult.request)
+                );
+              }
+              success({ skip: true });
+            } else {
+              if (!alreadyPublishedChannels.includes(requestChannel)) {
+                alreadyPublishedChannels.push(requestChannel);
+                getPublisher().publish(
+                  requestChannel,
+                  JSON.stringify(onRequestResult.request)
+                );
+              }
+              activeRequests.set(`${requestId}+${service}`, {
+                id: requestId,
+                responseChannel: serviceConfig.config.responseChannel,
+                request: httpRequest,
+                service,
+                timeoutTicks: Date.now() + (serviceConfig.timeout || 30000),
+                startTime: Date.now(),
+                onResponse: success,
+              });
+            }
+          }
+        })
+    );
+}
+
+function isRedisServiceConfig(
+  x: [string, ServiceConfig]
+): x is [string, RedisServiceConfig] {
+  return x[1].type === "redis";
 }

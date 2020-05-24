@@ -39,7 +39,10 @@ export default async function cleanupTimedOut() {
         },
       };
 
-      activeRequest.onResponse(fetchedResponse);
+      activeRequest.onResponse({
+        skip: false,
+        response: fetchedResponse,
+      });
     }
     isCleaningUp = false;
   }

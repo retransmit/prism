@@ -8,9 +8,7 @@ export type ServiceConfigBase = {
   merge?: boolean;
   timeout?: number;
   mergeField?: string;
-  onServiceResponse?: (
-    response: HttpResponse | undefined
-  ) => Promise<HttpResponse>;
+  onResponse?: (response: HttpResponse | undefined) => Promise<HttpResponse>;
   onError?: (
     response: HttpResponse | undefined,
     request: HttpRequest
@@ -23,8 +21,23 @@ export type RedisServiceConfig = {
     requestChannel: string;
     responseChannel: string;
     numRequestChannels?: number;
-    onServiceRequest?: (request: RedisServiceRequest) => Promise<any>;
-    onRollbackRequest?: (request: RedisServiceRequest) => Promise<any>;
+    onRequest?: (
+      request: RedisServiceRequest
+    ) => Promise<
+      | {
+          handled: true;
+          response: HttpResponse;
+        }
+      | { handled: false; request: RedisServiceRequest }
+    >;
+    onRollbackRequest?: (
+      request: RedisServiceRequest
+    ) => Promise<
+      | {
+          handled: true;
+        }
+      | { handled: false; request: RedisServiceRequest }
+    >;
   };
 } & ServiceConfigBase;
 
@@ -33,11 +46,24 @@ export type HttpServiceConfig = {
   config: {
     url: string;
     rollbackUrl?: string;
-    onServiceRequest?: (request: HttpRequest) => Promise<HttpRequest>;
-    onRollbackRequest?: (request: HttpRequest) => Promise<HttpRequest>;
+    onRequest?: (
+      request: HttpRequest
+    ) => Promise<
+      | {
+          handled: true;
+          response: HttpResponse;
+        }
+      | { handled: false; request: HttpRequest }
+    >;
+    onRollbackRequest?: (
+      request: HttpRequest
+    ) => Promise<
+      | {
+          handled: true;
+        }
+      | { handled: false; request: HttpRequest }
+    >;
   };
 } & ServiceConfigBase;
 
-export type ServiceConfig =
-  | RedisServiceConfig
-  | HttpServiceConfig;
+export type ServiceConfig = RedisServiceConfig | HttpServiceConfig;

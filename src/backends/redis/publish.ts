@@ -39,7 +39,7 @@ export function publish(
         if (!alreadyPublishedChannels.includes(channelId)) {
           const onServiceRequest =
             requestType === "request"
-              ? serviceConfig.config.onServiceRequest
+              ? serviceConfig.config.onRequest
               : requestType === "rollback"
               ? serviceConfig.config.onRollbackRequest
               : undefined;

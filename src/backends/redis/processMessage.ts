@@ -14,7 +14,7 @@ export default async function processMessage(
   const config = configModule.get();
 
   const redisResponse = JSON.parse(messageString) as RedisServiceResponse;
-  
+
   const activeRequestId = `${redisResponse.id}+${redisResponse.service}`;
   const activeRequest = activeRequests.get(activeRequestId);
 
@@ -42,7 +42,7 @@ export default async function processMessage(
           }
         }
 
-        const onServiceResponse = serviceConfig.onServiceResponse;
+        const onServiceResponse = serviceConfig.onResponse;
 
         const response = onServiceResponse
           ? await onServiceResponse(redisResponse.response)
@@ -60,7 +60,10 @@ export default async function processMessage(
           response,
         };
 
-        activeRequest.onResponse(fetchedResponse);
+        activeRequest.onResponse({
+          skip: false,
+          response: fetchedResponse,
+        });
       }
     }
   }

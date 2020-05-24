@@ -24,6 +24,10 @@ const connectors = [
   },
 ];
 
+export type InvokeServiceResult =
+  | { skip: true }
+  | { skip: false; response: FetchedResponse };
+
 /*
   Make an HTTP request handler
 */
@@ -58,18 +62,29 @@ export async function handler(ctx: HttpRequestContext, method: HttpMethods) {
       headers: ctx.getRequestHeaders(),
     };
 
-    let promises: Promise<FetchedResponse>[] = [];
+    let promises: Promise<
+      InvokeServiceResult
+    >[] = [];
     for (const connector of connectors) {
       promises = promises.concat(
-        await connector.invokeServices(requestId, httpRequest)
+        connector.invokeServices(requestId, httpRequest)
       );
     }
 
     const interimResponses = await Promise.all(promises);
 
+    function responseIsNotSkipped(
+      x: InvokeServiceResult
+    ): x is { skip: false; response: FetchedResponse } {
+      return !x.skip;
+    }
+    const validResponses = interimResponses
+      .filter(responseIsNotSkipped)
+      .map((x) => x.response);
+
     const fetchedResponses = routeConfig.mergeResponses
-      ? await routeConfig.mergeResponses(interimResponses)
-      : interimResponses;
+      ? await routeConfig.mergeResponses(validResponses)
+      : validResponses;
 
     let response = mergeResponses(requestId, fetchedResponses);
 

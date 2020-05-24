@@ -5,8 +5,10 @@ import { RouteConfig, HttpRequest } from "../../types";
 import * as configModule from "../../config";
 import responseIsError from "../../lib/http/responseIsError";
 import { makeHttpResponse } from "./makeHttpResponse";
+
 /*
-  Make Promises for Redis Services
+  Make Promises for Http Services
+  Make sure you don't await on this.
 */
 export default async function rollback(
   requestId: string,
@@ -31,39 +33,41 @@ export default async function rollback(
         path: urlWithParamsReplaced,
       };
 
-      const modifiedRequest = serviceConfig.config.onServiceRequest
-        ? await serviceConfig.config.onServiceRequest(requestCopy)
-        : requestCopy;
+      const modifiedRequest = serviceConfig.config.onRollbackRequest
+        ? await serviceConfig.config.onRollbackRequest(requestCopy)
+        : { handled: false as false, request: requestCopy };
 
-      const basicOptions = {
-        searchParams: modifiedRequest.query,
-        method: modifiedRequest.method,
-        headers: modifiedRequest.headers,
-        timeout: serviceConfig.timeout,
-      };
+      if (!modifiedRequest.handled) {
+        const basicOptions = {
+          searchParams: modifiedRequest.request.query,
+          method: modifiedRequest.request.method,
+          headers: modifiedRequest.request.headers,
+          timeout: serviceConfig.timeout,
+        };
 
-      const options =
-        typeof modifiedRequest.body === "string"
-          ? {
-              ...basicOptions,
-              body: modifiedRequest.body,
+        const options =
+          typeof modifiedRequest.request.body === "string"
+            ? {
+                ...basicOptions,
+                body: modifiedRequest.request.body,
+              }
+            : typeof modifiedRequest.request.body === "object"
+            ? {
+                ...basicOptions,
+                json: modifiedRequest.request.body,
+              }
+            : basicOptions;
+
+        got(modifiedRequest.request.path, options).catch(async (error) => {
+          const httpResponse = makeHttpResponse(error.response);
+
+          if (responseIsError(httpResponse)) {
+            if (serviceConfig.onError) {
+              serviceConfig.onError(httpResponse, modifiedRequest.request);
             }
-          : typeof modifiedRequest.body === "object"
-          ? {
-              ...basicOptions,
-              json: modifiedRequest.body,
-            }
-          : basicOptions;
-
-      got(modifiedRequest.path, options).catch(async (error) => {
-        const httpResponse = makeHttpResponse(error.response);
-
-        if (responseIsError(httpResponse)) {
-          if (serviceConfig.onError) {
-            serviceConfig.onError(httpResponse, modifiedRequest);
           }
-        }
-      });
+        });
+      }
     }
   }
 }

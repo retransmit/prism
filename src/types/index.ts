@@ -2,6 +2,7 @@ import { ClientOpts } from "redis";
 import { IncomingHttpHeaders } from "http2";
 import HttpRequestContext from "../clients/HttpRequestContext";
 import { ServiceConfig } from "./ServiceConfig";
+import { InvokeServiceResult } from "../handler";
 export {
   HttpServiceConfig,
   RedisServiceConfig,
@@ -76,7 +77,9 @@ export type ActiveRedisRequest = {
   service: string;
   startTime: number;
   request: HttpRequest;
-  onResponse: (response: FetchedResponse) => void;
+  onResponse: (
+    result: InvokeServiceResult
+  ) => void;
 };
 
 /*

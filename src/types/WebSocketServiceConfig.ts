@@ -9,22 +9,21 @@ export type WebSocketRouteConfig = {
   services: {
     [key: string]: ServiceConfig;
   };
-  onConnect: (ctx: WebSocketRequestContext) => Promise<{ handled: boolean }>;
-  onRequest?: (ctx: WebSocketRequestContext) => Promise<{ handled: boolean }>;
+  onConnect: (ctx: WebSocketRequestContext) => Promise<{ drop: boolean }>;
+  onDisconnect: (ctx: WebSocketRequestContext) => Promise<{}>;
+  onRequest?: (
+    ctx: WebSocketRequestContext
+  ) => Promise<{ drop?: boolean; handled: boolean }>;
   onResponse?: (
     ctx: WebSocketRequestContext,
     response: any
-  ) => Promise<{ handled: boolean }>;
+  ) => Promise<{ drop?: boolean; handled: boolean }>;
 };
 
 /*
   Service Configuration.
 */
 export type WebSocketServiceConfigBase = {
-  awaitResponse?: boolean;
-  merge?: boolean;
-  timeout?: number;
-  mergeField?: string;
   onServiceResponse?: (
     response: HttpResponse | undefined
   ) => Promise<HttpResponse>;
@@ -41,17 +40,17 @@ export type RedisWebSocketServiceConfig = {
     responseChannel: string;
     numRequestChannels?: number;
     onServiceRequest?: (request: RedisServiceRequest) => Promise<any>;
-    onRollbackRequest?: (request: RedisServiceRequest) => Promise<any>;
   };
 } & WebSocketServiceConfigBase;
 
 export type HttpWebSocketServiceConfig = {
   type: "http";
+  pollingInterval: number;
   config: {
     url: string;
-    rollbackUrl?: string;
+    onConnectUrl: string;
+    onDisconnectUrl: string;
     onServiceRequest?: (request: HttpRequest) => Promise<HttpRequest>;
-    onRollbackRequest?: (request: HttpRequest) => Promise<HttpRequest>;
   };
 } & WebSocketServiceConfigBase;
 
