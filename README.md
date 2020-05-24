@@ -562,7 +562,7 @@ Here's an example of how to use Retransmit WebSockets from a web client.
 
 ```js
 const mySocket = new WebSocket("wss://www.example.com/liveupdates");
-exampleSocket.send(
+mySocket.send(
   JSON.stringify({
     action: "GET_QUOTE",
     stock: "GOOG",
@@ -698,4 +698,4 @@ module.exports = {
 ## About
 
 This software has an MIT license. You can freely use it in commercial work under the terms of the license.
-For paid support (or other consulting gigs), contact me on jeswinpk@agilehead.com
+For paid support (or other consulting gigs and training), contact me on jeswinpk@agilehead.com
