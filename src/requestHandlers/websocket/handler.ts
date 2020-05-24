@@ -5,29 +5,20 @@ import WebSocket from "ws";
 
 import * as configModule from "../../config";
 import randomId from "../../lib/random";
-// import invokeHttpServices from "./backends/http/invokeServices";
-// import rollbackHttp from "./backends/http/rollback";
-// import invokeRedisServices from "./backends/redis/invokeServices";
-// import rollbackRedis from "./backends/redis/rollback";
-// import mergeResponses from "./mergeResponses";
-import responseIsError from "../../lib/http/responseIsError";
-import HttpRequestContext from "./RequestContext";
-import {
-  FetchedHttpResponse,
-  InvokeServiceResult,
-} from "../../types/httpRequests";
 import WebSocketRequestContext from "./RequestContext";
 import activeConnections from "./activeConnections";
 import { WebSocketRouteConfig } from "../../types/webSocketRequests";
 
-// const connectors = [
-//   { type: "http", invokeServices: invokeHttpServices, rollback: rollbackHttp },
-//   {
-//     type: "redis",
-//     invokeServices: invokeRedisServices,
-//     rollback: rollbackRedis,
-//   },
-// ];
+import handleHttpMessage from "./backends/http/handleMessage";
+import handleRedisMessage from "./backends/redis/handleMessage";
+
+const connectors = [
+  { type: "http", handleMessage: handleHttpMessage },
+  {
+    type: "redis",
+    handleMessage: handleRedisMessage,
+  },
+];
 
 /*
   Make an HTTP request handler
@@ -61,7 +52,7 @@ export function init() {
             websocket: ws,
           });
 
-          ws.on("message", async function message(msg: string) {
+          ws.on("message", async function message(message: string) {
             const conn = activeConnections.get(requestId);
 
             // This should never happen.
@@ -72,7 +63,7 @@ export function init() {
               // treat the first message as the onConnect argument.
               if (routeConfig.onConnect && !conn.initialized) {
                 const onConnectResult = await routeConfig.onConnect(
-                  JSON.parse(msg)
+                  JSON.parse(message)
                 );
 
                 if (onConnectResult.drop) {
@@ -84,7 +75,9 @@ export function init() {
               }
               // Regular message. Pass this on...
               else {
-                
+                for (const connector of connectors) {
+                  connector.handleMessage(requestId, message, route);
+                }
               }
             }
           });

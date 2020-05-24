@@ -1,6 +1,6 @@
 import { IRouterContext } from "koa-router";
 import * as configModule from "../../config";
-import { HttpMethods } from "../../types";
+import { HttpMethods, HttpProxyConfig } from "../../types";
 import randomId from "../../lib/random";
 import invokeHttpServices from "./backends/http/invokeServices";
 import rollbackHttp from "./backends/http/rollback";
@@ -9,7 +9,10 @@ import rollbackRedis from "./backends/redis/rollback";
 import mergeResponses from "./mergeResponses";
 import responseIsError from "../../lib/http/responseIsError";
 import HttpRequestContext from "./RequestContext";
-import { FetchedHttpResponse, InvokeServiceResult } from "../../types/httpRequests";
+import {
+  FetchedHttpResponse,
+  InvokeServiceResult,
+} from "../../types/httpRequests";
 
 const connectors = [
   { type: "http", invokeServices: invokeHttpServices, rollback: rollbackHttp },
@@ -24,19 +27,26 @@ const connectors = [
   Make an HTTP request handler
 */
 export default function createHandler(method: HttpMethods) {
+  const config = configModule.get();
   return async function httpHandler(ctx: IRouterContext) {
-    return await handler(new HttpRequestContext(ctx), method);
+    return await handler(
+      new HttpRequestContext(ctx),
+      method,
+      config.http as HttpProxyConfig
+    );
   };
 }
 
-async function handler(ctx: HttpRequestContext, method: HttpMethods) {
-  const config = configModule.get();
-
+async function handler(
+  ctx: HttpRequestContext,
+  method: HttpMethods,
+  httpConfig: HttpProxyConfig
+) {
   const requestId = randomId(32);
-  const routeConfig = config.http.routes[ctx.getPath()][method];
+  const routeConfig = httpConfig.routes[ctx.getPath()][method];
 
   // If there are custom handlers, try that first.
-  const onRequest = routeConfig?.onRequest || config.http.onRequest;
+  const onRequest = routeConfig?.onRequest || httpConfig.onRequest;
   if (onRequest) {
     const modResult = await onRequest(ctx);
     if (modResult.handled) {
@@ -57,7 +67,7 @@ async function handler(ctx: HttpRequestContext, method: HttpMethods) {
     let promises: Promise<InvokeServiceResult>[] = [];
     for (const connector of connectors) {
       promises = promises.concat(
-        connector.invokeServices(requestId, httpRequest)
+        connector.invokeServices(requestId, httpRequest, httpConfig)
       );
     }
 
@@ -76,19 +86,19 @@ async function handler(ctx: HttpRequestContext, method: HttpMethods) {
       ? await routeConfig.mergeResponses(validResponses)
       : validResponses;
 
-    let response = mergeResponses(requestId, fetchedResponses);
+    let response = mergeResponses(requestId, fetchedResponses, httpConfig);
 
     if (responseIsError(response)) {
-      if (config.http.onError) {
-        config.http.onError(fetchedResponses, httpRequest);
+      if (httpConfig.onError) {
+        httpConfig.onError(fetchedResponses, httpRequest);
       }
       for (const connector of connectors) {
-        connector.rollback(requestId, httpRequest);
+        connector.rollback(requestId, httpRequest, httpConfig);
       }
     }
 
     // See if there are any custom handlers for final response
-    const onResponse = routeConfig.onResponse || config.http.onResponse;
+    const onResponse = routeConfig.onResponse || httpConfig.onResponse;
     if (onResponse) {
       const modResult = await onResponse(ctx, response);
       if (modResult.handled) {
@@ -102,7 +112,7 @@ async function handler(ctx: HttpRequestContext, method: HttpMethods) {
         response.status &&
         response.status >= 500 &&
         response.status <= 599 &&
-        (routeConfig.genericErrors || config.http.genericErrors)
+        (routeConfig.genericErrors || httpConfig.genericErrors)
       ) {
         ctx.setResponseStatus(500);
         ctx.setResponseBody(`Internal Server Error.`);

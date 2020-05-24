@@ -19,24 +19,35 @@ import createWebSocketRequestHandler, {
   upgrade as wsUpgrade,
 } from "./requestHandlers/websocket/handler";
 import init from "./requestHandlers/http/backends/redis/init";
+import random from "./lib/random";
 
 const packageJson = require("../package.json");
 
 const argv = yargs.options({
   c: { type: "string", alias: "config" },
+  i: { type: "string", alias: "instance" },
   p: { type: "number", default: 8080, alias: "port" },
   v: { type: "boolean", alias: "version" },
 }).argv;
 
-export async function startApp(port: number, configFile: string) {
+export async function startApp(
+  port: number,
+  instanceId: string,
+  configFile: string
+) {
   const appConfig: IAppConfig = require(configFile);
-  return await startWithConfiguration(port, appConfig);
+  return await startWithConfiguration(port, instanceId, appConfig);
 }
 
 export async function startWithConfiguration(
   port: number | undefined,
+  instanceId: string,
   appConfig: IAppConfig
 ) {
+  if (!appConfig.instanceId) {
+    appConfig.instanceId = instanceId;
+  }
+
   // Set up the config
   configModule.set(appConfig);
 
@@ -48,27 +59,29 @@ export async function startWithConfiguration(
 
   const config = configModule.get();
 
-  for (const route of Object.keys(config.http.routes)) {
-    const routeConfig = config.http.routes[route];
+  if (config.http) {
+    for (const route of Object.keys(config.http.routes)) {
+      const routeConfig = config.http.routes[route];
 
-    if (routeConfig["GET"]) {
-      router.get(route, createHttpRequestHandler("GET"));
-    }
+      if (routeConfig["GET"]) {
+        router.get(route, createHttpRequestHandler("GET"));
+      }
 
-    if (routeConfig["POST"]) {
-      router.post(route, createHttpRequestHandler("POST"));
-    }
+      if (routeConfig["POST"]) {
+        router.post(route, createHttpRequestHandler("POST"));
+      }
 
-    if (routeConfig["PUT"]) {
-      router.put(route, createHttpRequestHandler("PUT"));
-    }
+      if (routeConfig["PUT"]) {
+        router.put(route, createHttpRequestHandler("PUT"));
+      }
 
-    if (routeConfig["DELETE"]) {
-      router.del(route, createHttpRequestHandler("DELETE"));
-    }
+      if (routeConfig["DELETE"]) {
+        router.del(route, createHttpRequestHandler("DELETE"));
+      }
 
-    if (routeConfig["PATCH"]) {
-      router.patch(route, createHttpRequestHandler("PATCH"));
+      if (routeConfig["PATCH"]) {
+        router.patch(route, createHttpRequestHandler("PATCH"));
+      }
     }
   }
 
@@ -118,8 +131,9 @@ if (require.main === module) {
 
     const configDir = argv.c;
     const port = argv.p;
+    const instanceId = argv.i || random(16);
 
-    startApp(port, configDir);
+    startApp(port, instanceId, configDir);
     console.log(`listening on port ${port}`);
   }
 }

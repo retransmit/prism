@@ -8,6 +8,7 @@ import { closeServer } from "../../utils";
 export default async function (app: { instance: any }) {
   function makeConfig(options: { method: HttpMethods }): IAppConfig {
     return {
+      instanceId: "testinstance",
       http: {
         routes: {
           "/users": {
@@ -42,7 +43,11 @@ export default async function (app: { instance: any }) {
     it(`adds ${method} request to the channel`, async () => {
       const config = makeConfig({ method });
 
-      const server = await startWithConfiguration(undefined, config);
+      const server = await startWithConfiguration(
+        undefined,
+        "testinstance",
+        config
+      );
       app.instance = server;
 
       // Start mock servers.

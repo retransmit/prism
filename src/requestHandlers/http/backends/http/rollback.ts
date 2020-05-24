@@ -1,6 +1,6 @@
 import got from "got";
 
-import { HttpRequest } from "../../../../types";
+import { HttpRequest, HttpProxyConfig } from "../../../../types";
 
 import * as configModule from "../../../../config";
 import responseIsError from "../../../../lib/http/responseIsError";
@@ -13,10 +13,11 @@ import { RouteConfig } from "../../../../types/httpRequests";
 */
 export default async function rollback(
   requestId: string,
-  request: HttpRequest
+  request: HttpRequest,
+  httpConfig: HttpProxyConfig
 ) {
   const config = configModule.get();
-  const routeConfig = config.http.routes[request.path][
+  const routeConfig = httpConfig.routes[request.path][
     request.method
   ] as RouteConfig;
 

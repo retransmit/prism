@@ -5,6 +5,7 @@ import { doPubSub } from "./utils";
 export default async function (app: { instance: any }) {
   function makeConfig(options: { method: HttpMethods }): IAppConfig {
     return {
+      instanceId: "testinstance",
       http: {
         routes: {
           "/users": {

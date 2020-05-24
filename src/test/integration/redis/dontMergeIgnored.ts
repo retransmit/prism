@@ -4,6 +4,7 @@ import { doPubSub } from "./utils";
 export default async function (app: { instance: any }) {
   it(`does not merge ignored results`, async () => {
     const config = {
+      instanceId: "testinstance",
       http: {
         routes: {
           "/users": {

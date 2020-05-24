@@ -1,8 +1,11 @@
-import { HttpRequest } from "../../../../types";
+import { HttpRequest, HttpProxyConfig } from "../../../../types";
 import * as configModule from "../../../../config";
 import { getChannelForService } from "./getChannelForService";
 import { getPublisher } from "./clients";
-import { RouteConfig, RedisServiceHttpRequest } from "../../../../types/httpRequests";
+import {
+  RouteConfig,
+  RedisServiceHttpRequest,
+} from "../../../../types/httpRequests";
 
 /*
   Make Promises for Redis Services.
@@ -10,10 +13,11 @@ import { RouteConfig, RedisServiceHttpRequest } from "../../../../types/httpRequ
 */
 export default async function rollback(
   requestId: string,
-  httpRequest: HttpRequest
+  httpRequest: HttpRequest,
+  httpConfig: HttpProxyConfig
 ) {
   const config = configModule.get();
-  const routeConfig = config.http.routes[httpRequest.path][
+  const routeConfig = httpConfig.routes[httpRequest.path][
     httpRequest.method
   ] as RouteConfig;
 
@@ -25,7 +29,7 @@ export default async function rollback(
       const redisRequest: RedisServiceHttpRequest = {
         id: requestId,
         request: httpRequest,
-        responseChannel: serviceConfig.config.requestChannel,
+        responseChannel: `${serviceConfig.config.responseChannel}.${config.instanceId}`,
         type: "rollback",
       };
 
@@ -38,7 +42,7 @@ export default async function rollback(
 
         if (!onRollbackRequestResult.handled) {
           alreadyPublishedChannels.push(requestChannel);
-          
+
           getPublisher().publish(
             requestChannel,
             JSON.stringify(onRollbackRequestResult.request)

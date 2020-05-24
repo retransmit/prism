@@ -5,6 +5,7 @@ import * as redis from "redis";
 export default async function (app: { instance: any }) {
   it(`rolls back`, async () => {
     const config = {
+      instanceId: "testinstance",
       http: {
         routes: {
           "/users": {

@@ -3,6 +3,7 @@ import {
   HttpResponse,
   HttpServiceHttpHandlerConfig,
   HttpHandlerConfig,
+  HttpProxyConfig,
 } from "../../../../types";
 
 import * as configModule from "../../../../config";
@@ -12,17 +13,18 @@ import { makeHttpResponse } from "./makeHttpResponse";
 import { RouteConfig, FetchedHttpResponse, InvokeServiceResult } from "../../../../types/httpRequests";
 
 /*
-  Make Promises for Redis Services
+  Make Promises for Http Services
 */
 export default function invokeServices(
   requestId: string,
-  request: HttpRequest
+  request: HttpRequest,
+  httpConfig: HttpProxyConfig
 ): Promise<InvokeServiceResult>[] {
   const timeNow = Date.now();
   const config = configModule.get();
   const path = request.path;
   const method = request.method;
-  const routeConfig = config.http.routes[path][method] as RouteConfig;
+  const routeConfig = httpConfig.routes[path][method] as RouteConfig;
 
   const promises: Promise<InvokeServiceResult>[] = [];
 

@@ -10,7 +10,11 @@ export async function doPubSub(
   serviceResponses: RedisServiceHttpResponse[],
   then: (success: Function, getJson: () => any) => void
 ): Promise<[request.Response, any]> {
-  const server = await startWithConfiguration(undefined, config);
+  const server = await startWithConfiguration(
+    undefined,
+    "testinstance",
+    config
+  );
   app.instance = server;
 
   const subscriber = createClient();
@@ -34,7 +38,7 @@ export async function doPubSub(
           },
         };
         publisher.publish(
-          "output",
+          "output.testinstance",
           JSON.stringify({
             ...response,
             id: json.id,

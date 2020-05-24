@@ -31,7 +31,7 @@ export type InvokeServiceResult =
   | { skip: false; response: FetchedHttpResponse };
 
 /*
-  Output of processMessages()
+  Output of processMessage()
 */
 export type FetchedHttpResponse = {
   type: "http" | "redis";

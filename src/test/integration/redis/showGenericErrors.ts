@@ -4,6 +4,7 @@ import { doPubSub } from "./utils";
 export default async function (app: { instance: any }) {
   it(`shows generic errors for service`, async () => {
     const config = {
+      instanceId: "testinstance",
       http: {
         routes: {
           "/users": {
@@ -71,6 +72,7 @@ export default async function (app: { instance: any }) {
 
   it(`shows generic errors for all services`, async () => {
     const config = {
+      instanceId: "testinstance",
       http: {
         routes: {
           "/users": {

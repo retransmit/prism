@@ -4,6 +4,7 @@ import { doPubSub } from "./utils";
 export default async function (app: { instance: any }) {
   it(`must not overwrite json content with string content`, async () => {
     const config = {
+      instanceId: "testinstance",
       http: {
         routes: {
           "/users": {

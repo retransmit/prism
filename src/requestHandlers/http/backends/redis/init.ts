@@ -11,42 +11,76 @@ export default async function init() {
   if (isRedisBeingUsed()) {
     await createClients(config.redis?.options);
 
-    const subscriber = getSubscriber();
-
     // Setup subscriptions
     const alreadySubscribed: string[] = [];
-    for (const route in config.http.routes) {
-      for (const method in config.http.routes[route]) {
-        const routeConfig = config.http.routes[route][
-          method as HttpMethods
-        ] as RouteConfig;
+
+    if (config.http) {
+      const httpClientSubscriber = getSubscriber();
+      httpClientSubscriber.on("message", processMessage(config.http));
+      for (const route in config.http.routes) {
+        for (const method in config.http.routes[route]) {
+          const routeConfig = config.http.routes[route][
+            method as HttpMethods
+          ] as RouteConfig;
+          for (const service in routeConfig.services) {
+            const serviceConfig = routeConfig.services[service];
+            if (serviceConfig.type === "redis") {
+              const channel = `${serviceConfig.config.responseChannel}.${config.instanceId}`;
+              if (!alreadySubscribed.includes(channel)) {
+                httpClientSubscriber.subscribe(channel);
+              }
+            }
+          }
+        }
+      }
+
+      // Some services may never respond. Fail them.
+      setInterval(
+        cleanupTimedOut(config.http),
+        config.redis?.cleanupInterval || 10000
+      );
+    }
+
+    if (config.websockets) {
+      const websocketSubscriber = getSubscriber();
+      for (const route in config.websockets.routes) {
+        const routeConfig = config.websockets.routes[route];
         for (const service in routeConfig.services) {
           const serviceConfig = routeConfig.services[service];
           if (serviceConfig.type === "redis") {
-            const channel = serviceConfig.config.responseChannel;
+            const channel = `${serviceConfig.config.responseChannel}.${config.instanceId}`;
             if (!alreadySubscribed.includes(channel)) {
-              subscriber.subscribe(channel);
+              websocketSubscriber.subscribe(channel);
             }
           }
         }
       }
     }
-
-    subscriber.on("message", processMessage);
-
-    // Some services may never respond. Fail them.
-    setInterval(cleanupTimedOut, config.redis?.cleanupInterval || 10000);
   }
 }
 
 function isRedisBeingUsed(): boolean {
   const config = configModule.get();
 
-  for (const route in config.http.routes) {
-    for (const method in config.http.routes[route]) {
-      const routeConfig = config.http.routes[route][
-        method as HttpMethods
-      ] as RouteConfig;
+  if (config.http) {
+    for (const route in config.http.routes) {
+      for (const method in config.http.routes[route]) {
+        const routeConfig = config.http.routes[route][
+          method as HttpMethods
+        ] as RouteConfig;
+        for (const service in routeConfig.services) {
+          const servicesConfig = routeConfig.services[service];
+          if (servicesConfig.type === "redis") {
+            return true;
+          }
+        }
+      }
+    }
+  }
+
+  if (config.websockets) {
+    for (const route in config.websockets.routes) {
+      const routeConfig = config.websockets.routes[route];
       for (const service in routeConfig.services) {
         const servicesConfig = routeConfig.services[service];
         if (servicesConfig.type === "redis") {

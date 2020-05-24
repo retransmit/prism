@@ -7,7 +7,8 @@ export {
   HttpServiceHttpHandlerConfig,
   RedisServiceHttpHandlerConfig,
   HttpHandlerConfig,
-} from "./httpRequests";1
+} from "./httpRequests";
+1;
 
 export type HttpMethods = "GET" | "POST" | "PUT" | "DELETE" | "PATCH";
 
@@ -15,34 +16,39 @@ export type HttpMethods = "GET" | "POST" | "PUT" | "DELETE" | "PATCH";
   Application Config
 */
 export interface IAppConfig {
-  http: {
-    routes: {
-      [key: string]: {
-        [key in HttpMethods]?: RouteConfig;
-      };
-    };
-    onRequest?: (ctx: HttpRequestContext) => Promise<{ handled: boolean }>;
-    onResponse?: (
-      ctx: HttpRequestContext,
-      response: any
-    ) => Promise<{ handled: boolean }>;
-    genericErrors?: boolean;
-    onError?: (
-      responses: FetchedHttpResponse[],
-      request: HttpRequest
-    ) => Promise<void>;
-  };
-  websockets?: {
-    routes: {
-      [key: string]: WebSocketRouteConfig
-    };
-    onRequest?: (ctx: HttpRequest) => Promise<{ handled: boolean }>;
-  };
+  instanceId: string;
+  http?: HttpProxyConfig;
+  websockets?: WebSocketProxyConfig;
   redis?: {
     options?: ClientOpts;
     cleanupInterval?: number;
   };
 }
+
+export type HttpProxyConfig = {
+  routes: {
+    [key: string]: {
+      [key in HttpMethods]?: RouteConfig;
+    };
+  };
+  onRequest?: (ctx: HttpRequestContext) => Promise<{ handled: boolean }>;
+  onResponse?: (
+    ctx: HttpRequestContext,
+    response: any
+  ) => Promise<{ handled: boolean }>;
+  genericErrors?: boolean;
+  onError?: (
+    responses: FetchedHttpResponse[],
+    request: HttpRequest
+  ) => Promise<void>;
+};
+
+export type WebSocketProxyConfig = {
+  routes: {
+    [key: string]: WebSocketRouteConfig;
+  };
+  onRequest?: (ctx: HttpRequest) => Promise<{ handled: boolean }>;
+};
 
 /*
   Http Requests and Responses

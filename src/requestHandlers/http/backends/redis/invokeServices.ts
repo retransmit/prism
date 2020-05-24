@@ -2,23 +2,29 @@ import {
   HttpHandlerConfig,
   HttpRequest,
   RedisServiceHttpHandlerConfig,
+  HttpProxyConfig,
 } from "../../../../types";
 
 import activeRequests from "./activeRequests";
 import * as configModule from "../../../../config";
 import { getPublisher } from "./clients";
 import { getChannelForService } from "./getChannelForService";
-import { RouteConfig, RedisServiceHttpRequest, InvokeServiceResult } from "../../../../types/httpRequests";
+import {
+  RouteConfig,
+  RedisServiceHttpRequest,
+  InvokeServiceResult,
+} from "../../../../types/httpRequests";
 
 /*
   Make Promises for Redis Services
 */
 export default function invokeServices(
   requestId: string,
-  httpRequest: HttpRequest
+  httpRequest: HttpRequest,
+  httpConfig: HttpProxyConfig
 ): Promise<InvokeServiceResult>[] {
   const config = configModule.get();
-  const routeConfig = config.http.routes[httpRequest.path][
+  const routeConfig = httpConfig.routes[httpRequest.path][
     httpRequest.method
   ] as RouteConfig;
 
@@ -38,7 +44,7 @@ export default function invokeServices(
           const redisRequest: RedisServiceHttpRequest = {
             id: requestId,
             request: httpRequest,
-            responseChannel: serviceConfig.config.responseChannel,
+            responseChannel: `${serviceConfig.config.responseChannel}.${config.instanceId}`,
             type: "request",
           };
 
@@ -60,7 +66,7 @@ export default function invokeServices(
               }
               activeRequests.set(`${requestId}+${service}`, {
                 id: requestId,
-                responseChannel: serviceConfig.config.responseChannel,
+                responseChannel: `${serviceConfig.config.responseChannel}.${config.instanceId}`,
                 request: httpRequest,
                 service,
                 timeoutAt: Date.now() + (serviceConfig.timeout || 30000),
