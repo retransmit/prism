@@ -20,10 +20,6 @@ const connectors = [
   },
 ];
 
-export type InvokeServiceResult =
-  | { skip: true }
-  | { skip: false; response: FetchedHttpResponse };
-
 /*
   Make an HTTP request handler
 */

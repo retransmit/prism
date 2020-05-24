@@ -24,6 +24,13 @@ export type RouteConfig = {
 };
 
 /*
+  Result of Service Invocation
+*/
+export type InvokeServiceResult =
+  | { skip: true }
+  | { skip: false; response: FetchedHttpResponse };
+
+/*
   Output of processMessages()
 */
 export type FetchedHttpResponse = {
