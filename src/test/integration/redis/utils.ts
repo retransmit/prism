@@ -10,8 +10,8 @@ export async function doPubSub(
   serviceResponses: RedisServiceHttpResponse[],
   then: (success: Function, getJson: () => any) => void
 ): Promise<[request.Response, any]> {
-  const service = await startWithConfiguration(undefined, config);
-  app.instance = service.listen();
+  const server = await startWithConfiguration(undefined, config);
+  app.instance = server;
 
   const subscriber = createClient();
   const publisher = createClient();

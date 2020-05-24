@@ -31,8 +31,8 @@ export default async function (app: { instance: any }) {
       },
     };
 
-    const service = await startWithConfiguration(undefined, config);
-    app.instance = service.listen();
+    const server = await startWithConfiguration(undefined, config);
+    app.instance = server;
 
     // Start mock servers.
     const backendApps = startBackends([

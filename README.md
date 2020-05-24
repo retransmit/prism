@@ -419,7 +419,7 @@ module.exports = {
 
 ## Rolling back on error
 
-When a service fails, Retransmit can notify the other services that the request is going to return an error.
+When a service fails, Retransmit can notify the other services that an error has occured - so that they can rollback changes if necessary.
 
 For Http Services, the rollbackUrl specified in the configuration is called with the same request data. If modifyRollbackRequest is specified, you could change the url, method and parameters for the rollback call.
 

@@ -4,12 +4,19 @@ import Koa = require("koa");
 import Router = require("koa-router");
 import bodyParser = require("koa-bodyparser");
 import yargs = require("yargs");
+import ws = require("ws");
+import url = require("url");
 
 import * as configModule from "./config";
 import { IAppConfig } from "./types";
 
-import { createHandler } from "./requestHandlers/http/handler";
+import createHttpRequestHandler from "./requestHandlers/http/handler";
+import createWebSocketRequestHandler from "./requestHandlers/websocket/handler";
 import init from "./requestHandlers/http/backends/redis/init";
+import { IncomingMessage } from "http";
+import { OutgoingMessage } from "http";
+import { createServer } from "http";
+import { ServerResponse } from "http";
 
 const packageJson = require("../package.json");
 
@@ -38,44 +45,71 @@ export async function startWithConfiguration(
   const router = new Router();
 
   const config = configModule.get();
-  
-  for (const route in config.http.routes) {
+
+  for (const route of Object.keys(config.http.routes)) {
     const routeConfig = config.http.routes[route];
 
     if (routeConfig["GET"]) {
-      router.get(route, createHandler("GET"));
+      router.get(route, createHttpRequestHandler("GET"));
     }
 
     if (routeConfig["POST"]) {
-      router.post(route, createHandler("POST"));
+      router.post(route, createHttpRequestHandler("POST"));
     }
 
     if (routeConfig["PUT"]) {
-      router.put(route, createHandler("PUT"));
+      router.put(route, createHttpRequestHandler("PUT"));
     }
 
     if (routeConfig["DELETE"]) {
-      router.del(route, createHandler("DELETE"));
+      router.del(route, createHttpRequestHandler("DELETE"));
     }
 
     if (routeConfig["PATCH"]) {
-      router.patch(route, createHandler("PATCH"));
+      router.patch(route, createHttpRequestHandler("PATCH"));
     }
   }
 
   // Start app
-  var app = new Koa();
+  const app = new Koa();
   app.use(bodyParser());
   app.use(router.routes());
   app.use(router.allowedMethods());
 
-  if (port) {
-    app.listen(port);
-  } else {
-    app.listen();
+  function httpRequestHandler(req: IncomingMessage, res: ServerResponse) {
+    app.callback()(req, res);
   }
 
-  return app;
+  const httpServer = createServer(httpRequestHandler);
+
+  if (port) {
+    httpServer.listen(port);
+  } else {
+    httpServer.listen();
+  }
+
+  return httpServer;
+
+  //WS routes =
+  // const server = port ? app.listen(port) : app.listen();
+
+  // if (config.websockets) {
+  //   const wss = new ws.Server({ server });
+
+  //   wss.on("connection", function connection(ws) {
+  //     ws.on("message", function incoming(message) {
+  //       console.log("received: %s", message);
+  //     });
+  //     ws.send("something");
+  //   });
+
+  //   for (const route of Object.keys(config.websockets.routes)) {
+  //     const routeConfig = config.websockets.routes[route];
+  //     router.all(route, createWebSocketRequestHandler());
+  //   }
+  // }
+
+  // return app;
 }
 
 if (require.main === module) {

@@ -32,8 +32,8 @@ export default async function (app: { instance: any }) {
       },
     };
 
-    const service = await startWithConfiguration(undefined, config);
-    app.instance = service.listen();
+    const server = await startWithConfiguration(undefined, config);
+    app.instance = server;
 
     let calledRollback = false;
     let backendApps: Server[] = [];

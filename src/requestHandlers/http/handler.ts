@@ -23,13 +23,13 @@ const connectors = [
 /*
   Make an HTTP request handler
 */
-export function createHandler(method: HttpMethods) {
+export default function createHandler(method: HttpMethods) {
   return async function httpHandler(ctx: IRouterContext) {
     return await handler(new HttpRequestContext(ctx), method);
   };
 }
 
-export async function handler(ctx: HttpRequestContext, method: HttpMethods) {
+async function handler(ctx: HttpRequestContext, method: HttpMethods) {
   const config = configModule.get();
 
   const requestId = randomId(32);

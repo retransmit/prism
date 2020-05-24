@@ -2,6 +2,7 @@ import { ClientOpts } from "redis";
 import { IncomingHttpHeaders } from "http2";
 import HttpRequestContext from "../requestHandlers/http/RequestContext";
 import { FetchedHttpResponse, RouteConfig } from "./httpRequests";
+import { WebSocketRouteConfig } from "./webSocketRequests";
 export {
   HttpServiceHttpHandlerConfig,
   RedisServiceHttpHandlerConfig,
@@ -33,11 +34,7 @@ export interface IAppConfig {
   };
   websockets?: {
     routes: {
-      [key: string]: {
-        services: {
-          onRequest?: (ctx: HttpRequest) => Promise<{ handled: boolean }>;
-        };
-      };
+      [key: string]: WebSocketRouteConfig
     };
     onRequest?: (ctx: HttpRequest) => Promise<{ handled: boolean }>;
   };

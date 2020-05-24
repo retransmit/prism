@@ -20,6 +20,7 @@
     "@types/koa-router": "^7.4.0",
     "@types/node": "^13.13.4",
     "@types/redis": "^2.8.20",
+    "@types/ws": "^7.2.4",
     "@types/yargs": "^15.0.4",
     "got": "^11.1.4",
     "koa": "^2.11.0",
@@ -27,6 +28,7 @@
     "koa-router": "^8.0.8",
     "node-redis": "^0.1.7",
     "redis": "^3.0.2",
+    "ws": "^7.3.0",
     "yargs": "^15.3.1"
   },
   "devDependencies": {
