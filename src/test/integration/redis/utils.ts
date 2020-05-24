@@ -1,12 +1,13 @@
 import request = require("supertest");
-import { IAppConfig, RedisServiceResponse } from "../../../types";
+import { IAppConfig } from "../../../types";
 import { startWithConfiguration } from "../../..";
 import { createClient } from "redis";
+import { RedisServiceHttpResponse } from "../../../types/HttpRequests";
 
 export async function doPubSub(
   app: { instance: any },
   config: IAppConfig,
-  serviceResponses: RedisServiceResponse[],
+  serviceResponses: RedisServiceHttpResponse[],
   then: (success: Function, getJson: () => any) => void
 ): Promise<[request.Response, any]> {
   const service = await startWithConfiguration(undefined, config);

@@ -1,9 +1,7 @@
 import {
-  RouteConfig,
-  ServiceConfig,
-  RedisServiceRequest,
+  HttpHandlerConfig,
   HttpRequest,
-  RedisServiceConfig,
+  RedisServiceHttpHandlerConfig,
 } from "../../../../types";
 
 import activeRequests from "./activeRequests";
@@ -11,6 +9,7 @@ import * as configModule from "../../../../config";
 import { getPublisher } from "./clients";
 import { InvokeServiceResult } from "../../../../handler";
 import { getChannelForService } from "./getChannelForService";
+import { RouteConfig, RedisServiceHttpRequest } from "../../../../types/HttpRequests";
 
 /*
   Make Promises for Redis Services
@@ -31,13 +30,13 @@ export default function invokeServices(
   return Object.keys(routeConfig.services)
     .map(
       (service) =>
-        [service, routeConfig.services[service]] as [string, ServiceConfig]
+        [service, routeConfig.services[service]] as [string, HttpHandlerConfig]
     )
     .filter(isRedisServiceConfig)
     .map(
       ([service, serviceConfig]) =>
         new Promise(async (success) => {
-          const redisRequest: RedisServiceRequest = {
+          const redisRequest: RedisServiceHttpRequest = {
             id: requestId,
             request: httpRequest,
             responseChannel: serviceConfig.config.responseChannel,
@@ -84,7 +83,7 @@ export default function invokeServices(
 }
 
 function isRedisServiceConfig(
-  x: [string, ServiceConfig]
-): x is [string, RedisServiceConfig] {
+  x: [string, HttpHandlerConfig]
+): x is [string, RedisServiceHttpHandlerConfig] {
   return x[1].type === "redis";
 }

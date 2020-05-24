@@ -1,10 +1,8 @@
 import {
-  RouteConfig,
-  FetchedResponse,
   HttpRequest,
   HttpResponse,
-  HttpServiceConfig,
-  ServiceConfig,
+  HttpServiceHttpHandlerConfig,
+  HttpHandlerConfig,
 } from "../../../../types";
 
 import * as configModule from "../../../../config";
@@ -12,6 +10,7 @@ import got from "got";
 import responseIsError from "../../../../lib/http/responseIsError";
 import { makeHttpResponse } from "./makeHttpResponse";
 import { InvokeServiceResult } from "../../../../handler";
+import { RouteConfig, FetchedHttpResponse } from "../../../../types/HttpRequests";
 
 /*
   Make Promises for Redis Services
@@ -31,7 +30,7 @@ export default function invokeServices(
   return Object.keys(routeConfig.services)
     .map(
       (service) =>
-        [service, routeConfig.services[service]] as [string, ServiceConfig]
+        [service, routeConfig.services[service]] as [string, HttpHandlerConfig]
     )
     .filter(isHttpServiceConfig)
     .map(
@@ -150,8 +149,8 @@ export default function invokeServices(
 }
 
 function isHttpServiceConfig(
-  x: [string, ServiceConfig]
-): x is [string, HttpServiceConfig] {
+  x: [string, HttpHandlerConfig]
+): x is [string, HttpServiceHttpHandlerConfig] {
   return x[1].type === "http";
 }
 
@@ -161,8 +160,8 @@ async function makeFetchedResponse(
   service: string,
   request: HttpRequest,
   httpResponse: HttpResponse | undefined,
-  serviceConfig: HttpServiceConfig
-): Promise<FetchedResponse> {
+  serviceConfig: HttpServiceHttpHandlerConfig
+): Promise<FetchedHttpResponse> {
   const modifiedResponse = serviceConfig.onResponse
     ? await serviceConfig.onResponse(httpResponse)
     : httpResponse;

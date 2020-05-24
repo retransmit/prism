@@ -1,5 +1,5 @@
-import { ActiveRedisRequest } from "../../../../types";
+import { ActiveRedisHttpRequest } from "../../../../types/HttpRequests";
 
-const map = new Map<string, ActiveRedisRequest>();
+const map = new Map<string, ActiveRedisHttpRequest>();
 
 export default map;

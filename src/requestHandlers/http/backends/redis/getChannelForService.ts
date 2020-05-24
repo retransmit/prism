@@ -1,7 +1,7 @@
-import { RedisServiceConfig } from "../../../../types";
+import { RedisServiceHttpHandlerConfig } from "../../../../types";
 
 export function getChannelForService(
-  serviceConfig: RedisServiceConfig
+  serviceConfig: RedisServiceHttpHandlerConfig
 ): string {
   const channel = serviceConfig.config.requestChannel;
 

@@ -1,7 +1,8 @@
-import { HttpRequest, RouteConfig, RedisServiceRequest } from "../../../../types";
+import { HttpRequest } from "../../../../types";
 import * as configModule from "../../../../config";
 import { getChannelForService } from "./getChannelForService";
 import { getPublisher } from "./clients";
+import { RouteConfig, RedisServiceHttpRequest } from "../../../../types/HttpRequests";
 
 /*
   Make Promises for Redis Services.
@@ -21,7 +22,7 @@ export default async function rollback(
   for (const service of Object.keys(routeConfig.services)) {
     const serviceConfig = routeConfig.services[service];
     if (serviceConfig.type === "redis") {
-      const redisRequest: RedisServiceRequest = {
+      const redisRequest: RedisServiceHttpRequest = {
         id: requestId,
         request: httpRequest,
         responseChannel: serviceConfig.config.requestChannel,

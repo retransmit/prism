@@ -1,11 +1,7 @@
 import * as configModule from "../../../../config";
-import {
-  RouteConfig,
-  RedisServiceResponse,
-  FetchedResponse,
-} from "../../../../types";
 import activeRequests from "./activeRequests";
 import responseIsError from "../../../../lib/http/responseIsError";
+import { RedisServiceHttpResponse, RouteConfig, FetchedHttpResponse } from "../../../../types/HttpRequests";
 
 export default async function processMessage(
   channel: string,
@@ -13,7 +9,7 @@ export default async function processMessage(
 ) {
   const config = configModule.get();
 
-  const redisResponse = JSON.parse(messageString) as RedisServiceResponse;
+  const redisResponse = JSON.parse(messageString) as RedisServiceHttpResponse;
 
   const activeRequestId = `${redisResponse.id}+${redisResponse.service}`;
   const activeRequest = activeRequests.get(activeRequestId);
@@ -50,7 +46,7 @@ export default async function processMessage(
 
         const processingTime = Date.now() - activeRequest.startTime;
 
-        const fetchedResponse: FetchedResponse = {
+        const fetchedResponse: FetchedHttpResponse = {
           type: "redis",
           id: redisResponse.id,
           time: processingTime,

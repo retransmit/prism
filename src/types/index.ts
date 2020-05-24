@@ -1,13 +1,13 @@
 import { ClientOpts } from "redis";
 import { IncomingHttpHeaders } from "http2";
-import HttpRequestContext from "../requestHandlers/http/HttpRequestContext";
-import { ServiceConfig } from "./ServiceConfig";
-import { InvokeServiceResult } from "../handler";
+import HttpRequestContext from "../requestHandlers/http/RequestContext";
+import { FetchedHttpResponse, RouteConfig } from "./HttpRequests";
 export {
-  HttpServiceConfig,
-  RedisServiceConfig,
-  ServiceConfig,
-} from "./ServiceConfig";
+  HttpServiceHttpHandlerConfig,
+  RedisServiceHttpHandlerConfig,
+  HttpHandlerConfig,
+} from "./HttpRequests";1
+
 export type HttpMethods = "GET" | "POST" | "PUT" | "DELETE" | "PATCH";
 
 /*
@@ -27,7 +27,7 @@ export interface IAppConfig {
     ) => Promise<{ handled: boolean }>;
     genericErrors?: boolean;
     onError?: (
-      responses: FetchedResponse[],
+      responses: FetchedHttpResponse[],
       request: HttpRequest
     ) => Promise<void>;
   };
@@ -48,70 +48,7 @@ export interface IAppConfig {
 }
 
 /*
-  RouteHandler Config
-*/
-export type RouteConfig = {
-  services: {
-    [key: string]: ServiceConfig;
-  };
-  onRequest?: (ctx: HttpRequestContext) => Promise<{ handled: boolean }>;
-  onResponse?: (
-    ctx: HttpRequestContext,
-    response: any
-  ) => Promise<{ handled: boolean }>;
-  mergeResponses?: (responses: FetchedResponse[]) => Promise<FetchedResponse[]>;
-  genericErrors?: boolean;
-  onError?: (
-    responses: FetchedResponse[],
-    request: HttpRequest
-  ) => Promise<void>;
-};
-
-/*
-  Currently active requests
-*/
-export type ActiveRedisRequest = {
-  // keepAlive: boolean;
-  responseChannel: string;
-  id: string;
-  timeoutAt: number;
-  service: string;
-  startTime: number;
-  request: HttpRequest;
-  onResponse: (result: InvokeServiceResult) => void;
-};
-
-/*
-  Output of processMessages()
-*/
-export type FetchedResponse = {
-  type: "http" | "redis";
-  id: string;
-  service: string;
-  time: number;
-  path: string;
-  method: HttpMethods;
-  response?: HttpResponse;
-};
-
-/*
-  Requests and Responses for Redis-based Services
-*/
-export type RedisServiceRequest = {
-  id: string;
-  type: "request" | "rollback";
-  responseChannel: string;
-  request: HttpRequest;
-};
-
-export type RedisServiceResponse = {
-  id: string;
-  service: string;
-  response: HttpResponse;
-};
-
-/*
-  Http Request
+  Http Requests and Responses
 */
 export type HttpRequest = {
   path: string;
@@ -128,9 +65,6 @@ export type HttpRequest = {
   };
 };
 
-/*
-  Can be used to form an HttpResponse
-*/
 export type HttpResponse = {
   status?: number;
   redirect?: string;

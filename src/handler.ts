@@ -2,9 +2,6 @@ import { IRouterContext } from "koa-router";
 import * as configModule from "./config";
 import {
   HttpMethods,
-  FetchedResponse,
-  HttpResponse,
-  IAppConfig,
 } from "./types";
 import randomId from "./random";
 import invokeHttpServices from "./requestHandlers/http/backends/http/invokeServices";
@@ -13,7 +10,8 @@ import invokeRedisServices from "./requestHandlers/http/backends/redis/invokeSer
 import rollbackRedis from "./requestHandlers/http/backends/redis/rollback";
 import mergeResponses from "./mergeResponses";
 import responseIsError from "./lib/http/responseIsError";
-import HttpRequestContext from "./requestHandlers/http/HttpRequestContext";
+import HttpRequestContext from "./requestHandlers/http/RequestContext";
+import { FetchedHttpResponse } from "./types/HttpRequests";
 
 const connectors = [
   { type: "http", invokeServices: invokeHttpServices, rollback: rollbackHttp },
@@ -26,7 +24,7 @@ const connectors = [
 
 export type InvokeServiceResult =
   | { skip: true }
-  | { skip: false; response: FetchedResponse };
+  | { skip: false; response: FetchedHttpResponse };
 
 /*
   Make an HTTP request handler
@@ -75,7 +73,7 @@ export async function handler(ctx: HttpRequestContext, method: HttpMethods) {
 
     function responseIsNotSkipped(
       x: InvokeServiceResult
-    ): x is { skip: false; response: FetchedResponse } {
+    ): x is { skip: false; response: FetchedHttpResponse } {
       return !x.skip;
     }
     const validResponses = interimResponses

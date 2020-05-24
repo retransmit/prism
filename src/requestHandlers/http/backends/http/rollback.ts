@@ -1,10 +1,11 @@
 import got from "got";
 
-import { RouteConfig, HttpRequest } from "../../../../types";
+import { HttpRequest } from "../../../../types";
 
 import * as configModule from "../../../../config";
 import responseIsError from "../../../../lib/http/responseIsError";
 import { makeHttpResponse } from "./makeHttpResponse";
+import { RouteConfig } from "../../../../types/HttpRequests";
 
 /*
   Make Promises for Http Services

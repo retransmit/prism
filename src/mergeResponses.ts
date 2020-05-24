@@ -1,12 +1,13 @@
 import * as configModule from "./config";
-import { HttpResponse, RouteConfig, FetchedResponse } from "./types";
+import { HttpResponse } from "./types";
 import responseIsError from "./lib/http/responseIsError";
+import { FetchedHttpResponse, RouteConfig } from "./types/HttpRequests";
 /*
   Merge received results into a final response
 */
 export default function mergeResponses(
   requestId: string,
-  responses: FetchedResponse[]
+  responses: FetchedHttpResponse[]
 ): HttpResponse | undefined {
   const config = configModule.get();
   let finalResponse: HttpResponse = { status: 200, content: undefined };
