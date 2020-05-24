@@ -1,5 +1,5 @@
 import { HttpRequest } from "../../../../types";
-import { InvokeServiceResult } from "../../../http/handler";
+import { InvokeServiceResult } from "../../../../types/HttpRequests";
 
 export type ActiveHttpRequest = {
   // keepAlive: boolean;

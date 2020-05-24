@@ -7,9 +7,8 @@ import {
 import activeRequests from "./activeRequests";
 import * as configModule from "../../../../config";
 import { getPublisher } from "./clients";
-import { InvokeServiceResult } from "../../../http/handler";
 import { getChannelForService } from "./getChannelForService";
-import { RouteConfig, RedisServiceHttpRequest } from "../../../../types/HttpRequests";
+import { RouteConfig, RedisServiceHttpRequest, InvokeServiceResult } from "../../../../types/HttpRequests";
 
 /*
   Make Promises for Redis Services

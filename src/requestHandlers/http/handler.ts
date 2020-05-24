@@ -9,7 +9,7 @@ import rollbackRedis from "./backends/redis/rollback";
 import mergeResponses from "./mergeResponses";
 import responseIsError from "../../lib/http/responseIsError";
 import HttpRequestContext from "./RequestContext";
-import { FetchedHttpResponse } from "../../types/HttpRequests";
+import { FetchedHttpResponse, InvokeServiceResult } from "../../types/HttpRequests";
 
 const connectors = [
   { type: "http", invokeServices: invokeHttpServices, rollback: rollbackHttp },
