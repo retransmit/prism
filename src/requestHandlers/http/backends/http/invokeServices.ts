@@ -9,7 +9,7 @@ import * as configModule from "../../../../config";
 import got from "got";
 import responseIsError from "../../../../lib/http/responseIsError";
 import { makeHttpResponse } from "./makeHttpResponse";
-import { RouteConfig, FetchedHttpResponse, InvokeServiceResult } from "../../../../types/HttpRequests";
+import { RouteConfig, FetchedHttpResponse, InvokeServiceResult } from "../../../../types/httpRequests";
 
 /*
   Make Promises for Redis Services

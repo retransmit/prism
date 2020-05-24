@@ -1,7 +1,7 @@
 import * as configModule from "../../../../config";
 import activeRequests from "./activeRequests";
 import responseIsError from "../../../../lib/http/responseIsError";
-import { RedisServiceHttpResponse, RouteConfig, FetchedHttpResponse } from "../../../../types/HttpRequests";
+import { RedisServiceHttpResponse, RouteConfig, FetchedHttpResponse } from "../../../../types/httpRequests";
 
 export default async function processMessage(
   channel: string,

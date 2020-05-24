@@ -1,12 +1,12 @@
 import { ClientOpts } from "redis";
 import { IncomingHttpHeaders } from "http2";
 import HttpRequestContext from "../requestHandlers/http/RequestContext";
-import { FetchedHttpResponse, RouteConfig } from "./HttpRequests";
+import { FetchedHttpResponse, RouteConfig } from "./httpRequests";
 export {
   HttpServiceHttpHandlerConfig,
   RedisServiceHttpHandlerConfig,
   HttpHandlerConfig,
-} from "./HttpRequests";1
+} from "./httpRequests";1
 
 export type HttpMethods = "GET" | "POST" | "PUT" | "DELETE" | "PATCH";
 

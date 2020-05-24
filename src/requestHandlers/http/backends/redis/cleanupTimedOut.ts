@@ -1,6 +1,6 @@
 import * as configModule from "../../../../config";
 import activeRequests, { ActiveHttpRequest } from "./activeRequests";
-import { RouteConfig, FetchedHttpResponse } from "../../../../types/HttpRequests";
+import { RouteConfig, FetchedHttpResponse } from "../../../../types/httpRequests";
 
 let isCleaningUp = false;
 

@@ -3,7 +3,7 @@ import { HttpMethods } from "../../../../types";
 import { createClients, getSubscriber, getPublisher } from "./clients";
 import processMessage from "./processMessage";
 import cleanupTimedOut from "./cleanupTimedOut";
-import { RouteConfig } from "../../../../types/HttpRequests";
+import { RouteConfig } from "../../../../types/httpRequests";
 
 export default async function init() {
   const config = configModule.get();

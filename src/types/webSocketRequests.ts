@@ -1,4 +1,4 @@
-import { HttpHandlerConfig, RedisServiceHttpRequest } from "./HttpRequests";
+import { HttpHandlerConfig, RedisServiceHttpRequest } from "./httpRequests";
 import { HttpResponse, HttpRequest } from ".";
 import WebSocketRequestContext from "../requestHandlers/websocket/RequestContext";
 

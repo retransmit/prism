@@ -2,7 +2,7 @@ import { HttpRequest } from "../../../../types";
 import * as configModule from "../../../../config";
 import { getChannelForService } from "./getChannelForService";
 import { getPublisher } from "./clients";
-import { RouteConfig, RedisServiceHttpRequest } from "../../../../types/HttpRequests";
+import { RouteConfig, RedisServiceHttpRequest } from "../../../../types/httpRequests";
 
 /*
   Make Promises for Redis Services.

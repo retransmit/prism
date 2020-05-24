@@ -5,7 +5,7 @@ import { HttpRequest } from "../../../../types";
 import * as configModule from "../../../../config";
 import responseIsError from "../../../../lib/http/responseIsError";
 import { makeHttpResponse } from "./makeHttpResponse";
-import { RouteConfig } from "../../../../types/HttpRequests";
+import { RouteConfig } from "../../../../types/httpRequests";
 
 /*
   Make Promises for Http Services
