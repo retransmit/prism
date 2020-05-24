@@ -1,4 +1,4 @@
-import { HttpResponse } from "../../types";
+import { HttpResponse } from "../../../../types";
 import { Response } from "got/dist/source/core";
 import { isJson } from "./isJson";
 

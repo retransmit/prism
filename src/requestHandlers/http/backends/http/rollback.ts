@@ -1,9 +1,9 @@
 import got from "got";
 
-import { RouteConfig, HttpRequest } from "../../types";
+import { RouteConfig, HttpRequest } from "../../../../types";
 
-import * as configModule from "../../config";
-import responseIsError from "../../lib/http/responseIsError";
+import * as configModule from "../../../../config";
+import responseIsError from "../../../../lib/http/responseIsError";
 import { makeHttpResponse } from "./makeHttpResponse";
 
 /*

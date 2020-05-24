@@ -1,6 +1,6 @@
-import * as configModule from "../../config";
-import { ActiveRedisRequest, RouteConfig, FetchedResponse } from "../../types";
-import * as activeRequests from "./activeRequests";
+import * as configModule from "../../../../config";
+import { ActiveRedisRequest, RouteConfig, FetchedResponse } from "../../../../types";
+import activeRequests from "./activeRequests";
 
 let isCleaningUp = false;
 
@@ -15,8 +15,8 @@ export default async function cleanupTimedOut() {
 
     const timedOut: [string, ActiveRedisRequest][] = [];
     for (const [id, activeRequest] of entries) {
-      if (Date.now() > activeRequest.timeoutTicks) {
-        activeRequests.remove(id);
+      if (Date.now() > activeRequest.timeoutAt) {
+        activeRequests.delete(id);
         timedOut.push([activeRequest.id, activeRequest]);
       }
     }

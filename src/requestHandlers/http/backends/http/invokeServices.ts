@@ -5,13 +5,13 @@ import {
   HttpResponse,
   HttpServiceConfig,
   ServiceConfig,
-} from "../../types";
+} from "../../../../types";
 
-import * as configModule from "../../config";
+import * as configModule from "../../../../config";
 import got from "got";
-import responseIsError from "../../lib/http/responseIsError";
+import responseIsError from "../../../../lib/http/responseIsError";
 import { makeHttpResponse } from "./makeHttpResponse";
-import { InvokeServiceResult } from "../../handler";
+import { InvokeServiceResult } from "../../../../handler";
 
 /*
   Make Promises for Redis Services

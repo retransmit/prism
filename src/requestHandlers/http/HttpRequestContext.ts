@@ -1,5 +1,5 @@
 import { IRouterContext } from "koa-router";
-import { HttpMethods } from "../types";
+import { HttpMethods } from "../../types";
 
 export default class HttpRequestContext {
   #ctx: IRouterContext;

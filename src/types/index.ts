@@ -1,6 +1,6 @@
 import { ClientOpts } from "redis";
 import { IncomingHttpHeaders } from "http2";
-import HttpRequestContext from "../clients/HttpRequestContext";
+import HttpRequestContext from "../requestHandlers/http/HttpRequestContext";
 import { ServiceConfig } from "./ServiceConfig";
 import { InvokeServiceResult } from "../handler";
 export {
@@ -39,7 +39,7 @@ export interface IAppConfig {
         };
       };
     };
-    onRequest?: (ctx: HttpRequest)   => Promise<{ handled: boolean }>;
+    onRequest?: (ctx: HttpRequest) => Promise<{ handled: boolean }>;
   };
   redis?: {
     options?: ClientOpts;
@@ -71,15 +71,14 @@ export type RouteConfig = {
   Currently active requests
 */
 export type ActiveRedisRequest = {
+  // keepAlive: boolean;
   responseChannel: string;
   id: string;
-  timeoutTicks: number;
+  timeoutAt: number;
   service: string;
   startTime: number;
   request: HttpRequest;
-  onResponse: (
-    result: InvokeServiceResult
-  ) => void;
+  onResponse: (result: InvokeServiceResult) => void;
 };
 
 /*

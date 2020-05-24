@@ -1,19 +1,15 @@
 import {
-  HttpMethods,
   RouteConfig,
-  IAppConfig,
-  FetchedResponse,
-  ActiveRedisRequest,
   ServiceConfig,
   RedisServiceRequest,
   HttpRequest,
   RedisServiceConfig,
-} from "../../types";
+} from "../../../../types";
 
-import * as activeRequests from "./activeRequests";
-import * as configModule from "../../config";
+import activeRequests from "./activeRequests";
+import * as configModule from "../../../../config";
 import { getPublisher } from "./clients";
-import { InvokeServiceResult } from "../../handler";
+import { InvokeServiceResult } from "../../../../handler";
 import { getChannelForService } from "./getChannelForService";
 
 /*
@@ -56,15 +52,7 @@ export default function invokeServices(
           if (onRequestResult.handled) {
             success({ skip: true });
           } else {
-            if (serviceConfig.awaitResponse === false) {
-              if (!alreadyPublishedChannels.includes(requestChannel)) {
-                getPublisher().publish(
-                  requestChannel,
-                  JSON.stringify(onRequestResult.request)
-                );
-              }
-              success({ skip: true });
-            } else {
+            if (serviceConfig.awaitResponse !== false) {
               if (!alreadyPublishedChannels.includes(requestChannel)) {
                 alreadyPublishedChannels.push(requestChannel);
                 getPublisher().publish(
@@ -77,10 +65,18 @@ export default function invokeServices(
                 responseChannel: serviceConfig.config.responseChannel,
                 request: httpRequest,
                 service,
-                timeoutTicks: Date.now() + (serviceConfig.timeout || 30000),
+                timeoutAt: Date.now() + (serviceConfig.timeout || 30000),
                 startTime: Date.now(),
                 onResponse: success,
               });
+            } else {
+              if (!alreadyPublishedChannels.includes(requestChannel)) {
+                getPublisher().publish(
+                  requestChannel,
+                  JSON.stringify(onRequestResult.request)
+                );
+              }
+              success({ skip: true });
             }
           }
         })

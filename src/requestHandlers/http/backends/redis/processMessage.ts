@@ -1,11 +1,11 @@
-import * as configModule from "../../config";
+import * as configModule from "../../../../config";
 import {
   RouteConfig,
   RedisServiceResponse,
   FetchedResponse,
-} from "../../types";
-import * as activeRequests from "./activeRequests";
-import responseIsError from "../../lib/http/responseIsError";
+} from "../../../../types";
+import activeRequests from "./activeRequests";
+import responseIsError from "../../../../lib/http/responseIsError";
 
 export default async function processMessage(
   channel: string,
@@ -20,7 +20,7 @@ export default async function processMessage(
 
   if (activeRequest) {
     // We're going to process it. So remove it.
-    activeRequests.remove(activeRequestId);
+    activeRequests.delete(activeRequestId);
 
     const routeConfig = config.http.routes[activeRequest.request.path][
       activeRequest.request.method

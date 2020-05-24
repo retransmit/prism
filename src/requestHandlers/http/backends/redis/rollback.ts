@@ -1,5 +1,5 @@
-import { HttpRequest, RouteConfig, RedisServiceRequest } from "../../types";
-import * as configModule from "../../config";
+import { HttpRequest, RouteConfig, RedisServiceRequest } from "../../../../types";
+import * as configModule from "../../../../config";
 import { getChannelForService } from "./getChannelForService";
 import { getPublisher } from "./clients";
 

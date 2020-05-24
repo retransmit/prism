@@ -7,13 +7,13 @@ import {
   IAppConfig,
 } from "./types";
 import randomId from "./random";
-import invokeHttpServices from "./backends/http/invokeServices";
-import rollbackHttp from "./backends/http/rollback";
-import invokeRedisServices from "./backends/redis/invokeServices";
-import rollbackRedis from "./backends/redis/rollback";
+import invokeHttpServices from "./requestHandlers/http/backends/http/invokeServices";
+import rollbackHttp from "./requestHandlers/http/backends/http/rollback";
+import invokeRedisServices from "./requestHandlers/http/backends/redis/invokeServices";
+import rollbackRedis from "./requestHandlers/http/backends/redis/rollback";
 import mergeResponses from "./mergeResponses";
 import responseIsError from "./lib/http/responseIsError";
-import HttpRequestContext from "./clients/HttpRequestContext";
+import HttpRequestContext from "./requestHandlers/http/HttpRequestContext";
 
 const connectors = [
   { type: "http", invokeServices: invokeHttpServices, rollback: rollbackHttp },

@@ -1,5 +1,5 @@
-import * as configModule from "../../config";
-import { HttpMethods, RouteConfig } from "../../types";
+import * as configModule from "../../../../config";
+import { HttpMethods, RouteConfig } from "../../../../types";
 import { createClients, getSubscriber, getPublisher } from "./clients";
 import processMessage from "./processMessage";
 import cleanupTimedOut from "./cleanupTimedOut";

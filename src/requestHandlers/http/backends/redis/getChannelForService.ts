@@ -1,4 +1,4 @@
-import { RedisServiceConfig } from "../../types";
+import { RedisServiceConfig } from "../../../../types";
 
 export function getChannelForService(
   serviceConfig: RedisServiceConfig

@@ -9,7 +9,7 @@ import * as configModule from "./config";
 import { IAppConfig } from "./types";
 
 import { createHandler } from "./handler";
-import init from "./backends/redis/init";
+import init from "./requestHandlers/http/backends/redis/init";
 
 const packageJson = require("../package.json");
 

@@ -1,6 +1,6 @@
 import { ServiceConfig } from "./ServiceConfig";
 import { HttpResponse, HttpRequest, RedisServiceRequest } from ".";
-import WebSocketRequestContext from "../clients/WebSocketRequestContext";
+import WebSocketRequestContext from "../requestHandlers/websocket/WebSocketRequestContext";
 
 /*
   Web Socket Route Config
