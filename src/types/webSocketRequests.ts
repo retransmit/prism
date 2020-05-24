@@ -9,7 +9,7 @@ export type WebSocketRouteConfig = {
   services: {
     [key: string]: HttpHandlerConfig;
   };
-  onConnect: (ctx: WebSocketRequestContext) => Promise<{ drop: boolean }>;
+  onConnect: (data: any) => Promise<{ drop: boolean }>;
   onDisconnect: (ctx: WebSocketRequestContext) => Promise<{}>;
   onRequest?: (
     ctx: WebSocketRequestContext

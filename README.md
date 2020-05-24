@@ -548,6 +548,7 @@ module.exports = {
             type: "http",
             config: {
               url: "http://localhost:6454/alerts",
+              disconnectUrl: "http://localhost:6454/disconnect",
               pollingInterval: 10000,
             },
           },

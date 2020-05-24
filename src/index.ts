@@ -6,17 +6,19 @@ import bodyParser = require("koa-bodyparser");
 import yargs = require("yargs");
 import ws = require("ws");
 import url = require("url");
+import { IncomingMessage } from "http";
+import { createServer } from "http";
+import { ServerResponse } from "http";
 
 import * as configModule from "./config";
 import { IAppConfig } from "./types";
 
 import createHttpRequestHandler from "./requestHandlers/http/handler";
-import createWebSocketRequestHandler from "./requestHandlers/websocket/handler";
+import createWebSocketRequestHandler, {
+  init as wsInit,
+  upgrade as wsUpgrade,
+} from "./requestHandlers/websocket/handler";
 import init from "./requestHandlers/http/backends/redis/init";
-import { IncomingMessage } from "http";
-import { OutgoingMessage } from "http";
-import { createServer } from "http";
-import { ServerResponse } from "http";
 
 const packageJson = require("../package.json");
 
@@ -71,16 +73,22 @@ export async function startWithConfiguration(
   }
 
   // Start app
-  const app = new Koa();
-  app.use(bodyParser());
-  app.use(router.routes());
-  app.use(router.allowedMethods());
+  const koaApp = new Koa();
+  koaApp.use(bodyParser());
+  koaApp.use(router.routes());
+  koaApp.use(router.allowedMethods());
+  const koaRequestHandler = koaApp.callback();
 
   function httpRequestHandler(req: IncomingMessage, res: ServerResponse) {
-    app.callback()(req, res);
+    koaRequestHandler(req, res);
   }
 
   const httpServer = createServer(httpRequestHandler);
+
+  if (config.websockets) {
+    wsInit();
+    httpServer.on("upgrade", wsUpgrade);
+  }
 
   if (port) {
     httpServer.listen(port);
@@ -89,27 +97,6 @@ export async function startWithConfiguration(
   }
 
   return httpServer;
-
-  //WS routes =
-  // const server = port ? app.listen(port) : app.listen();
-
-  // if (config.websockets) {
-  //   const wss = new ws.Server({ server });
-
-  //   wss.on("connection", function connection(ws) {
-  //     ws.on("message", function incoming(message) {
-  //       console.log("received: %s", message);
-  //     });
-  //     ws.send("something");
-  //   });
-
-  //   for (const route of Object.keys(config.websockets.routes)) {
-  //     const routeConfig = config.websockets.routes[route];
-  //     router.all(route, createWebSocketRequestHandler());
-  //   }
-  // }
-
-  // return app;
 }
 
 if (require.main === module) {

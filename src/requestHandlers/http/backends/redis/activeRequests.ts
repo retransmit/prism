@@ -2,7 +2,6 @@ import { HttpRequest } from "../../../../types";
 import { InvokeServiceResult } from "../../../../types/httpRequests";
 
 export type ActiveHttpRequest = {
-  // keepAlive: boolean;
   responseChannel: string;
   id: string;
   timeoutAt: number;

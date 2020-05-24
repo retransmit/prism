@@ -12,7 +12,6 @@ export default async function init() {
     await createClients(config.redis?.options);
 
     const subscriber = getSubscriber();
-    const publisher = getPublisher();
 
     // Setup subscriptions
     const alreadySubscribed: string[] = [];

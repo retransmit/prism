@@ -23,14 +23,6 @@ function run() {
     throw new Error("Tests can only be run with NODE_ENV=development.");
   }
 
-  if (!process.env.CONFIG_DIR) {
-    throw new Error(
-      "The configuration directory should be specified in process.env.CONFIG_DIR"
-    );
-  }
-
-  const configDir = process.env.CONFIG_DIR;
-
   describe("retransmit", () => {
     let app: { instance: any } = { instance: undefined };
 
