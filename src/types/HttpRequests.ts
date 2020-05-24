@@ -25,20 +25,6 @@ export type RouteConfig = {
 };
 
 /*
-  Currently active requests
-*/
-export type ActiveRedisHttpRequest = {
-  // keepAlive: boolean;
-  responseChannel: string;
-  id: string;
-  timeoutAt: number;
-  service: string;
-  startTime: number;
-  request: HttpRequest;
-  onResponse: (result: InvokeServiceResult) => void;
-};
-
-/*
   Output of processMessages()
 */
 export type FetchedHttpResponse = {
