@@ -7,7 +7,7 @@ import {
 
 import activeRequests from "./activeRequests";
 import * as configModule from "../../../../config";
-import { getPublisher } from "./clients";
+import { getPublisher } from "../../../../lib/redis/clients";
 import { getChannelForService } from "./getChannelForService";
 import {
   RouteConfig,

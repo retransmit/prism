@@ -1,7 +1,7 @@
 import { HttpRequest, HttpProxyConfig } from "../../../../types";
 import * as configModule from "../../../../config";
 import { getChannelForService } from "./getChannelForService";
-import { getPublisher } from "./clients";
+import { getPublisher } from "../../../../lib/redis/clients";
 import {
   RouteConfig,
   RedisServiceHttpRequest,

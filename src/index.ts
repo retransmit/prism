@@ -18,7 +18,9 @@ import createWebSocketRequestHandler, {
   init as wsInit,
   upgrade as wsUpgrade,
 } from "./requestHandlers/websocket/handler";
-import init from "./requestHandlers/http/backends/redis/init";
+import { init as redisInit } from "./lib/redis/clients";
+import httpRedisServiceInit from "./requestHandlers/http/backends/redis/init";
+import websocketRedisServiceInit from "./requestHandlers/http/backends/redis/init";
 import random from "./lib/random";
 
 const packageJson = require("../package.json");
@@ -52,7 +54,9 @@ export async function startWithConfiguration(
   configModule.set(appConfig);
 
   // Init redis
-  await init();
+  redisInit();
+  await httpRedisServiceInit();
+  await websocketRedisServiceInit();
 
   // Set up routes
   const router = new Router();
