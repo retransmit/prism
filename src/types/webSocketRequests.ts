@@ -1,4 +1,3 @@
-import { HttpHandlerConfig, RedisServiceHttpRequest } from "./httpRequests";
 import { HttpResponse, HttpRequest } from ".";
 import WebSocketRequestContext from "../requestHandlers/websocket/RequestContext";
 
@@ -7,10 +6,10 @@ import WebSocketRequestContext from "../requestHandlers/websocket/RequestContext
 */
 export type WebSocketRouteConfig = {
   services: {
-    [key: string]: HttpHandlerConfig;
+    [key: string]: WebSocketHandlerConfig;
   };
-  onConnect: (data: any) => Promise<{ drop: boolean }>;
-  onDisconnect: (ctx: WebSocketRequestContext) => Promise<{}>;
+  onConnect: (message: string) => Promise<{ drop: boolean }>;
+  onDisconnect: (ctx: WebSocketRequestContext) => Promise<void>;
   onRequest?: (
     ctx: WebSocketRequestContext
   ) => Promise<{ drop?: boolean; handled: boolean }>;
@@ -39,7 +38,8 @@ export type RedisServiceWebSocketHandlerConfig = {
     requestChannel: string;
     responseChannel: string;
     numRequestChannels?: number;
-    onServiceRequest?: (request: RedisServiceHttpRequest) => Promise<any>;
+    onMessage?: (message: string) => Promise<string>;
+    onResponse?: (message: string) => Promise<string>;
   };
 } & WebSocketHandlerConfigBase;
 
@@ -57,3 +57,18 @@ export type HttpServiceWebSocketHandlerConfig = {
 export type WebSocketHandlerConfig =
   | RedisServiceWebSocketHandlerConfig
   | HttpServiceWebSocketHandlerConfig;
+
+/*
+  Requests and Responses for Redis-based Services
+*/
+export type RedisServiceHttpRequest = {
+  id: string;
+  responseChannel: string;
+  request: string;
+};
+
+export type RedisServiceHttpResponse = {
+  id: string;
+  service: string;
+  response: string;
+};

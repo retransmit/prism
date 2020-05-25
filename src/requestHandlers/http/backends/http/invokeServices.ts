@@ -10,7 +10,7 @@ import * as configModule from "../../../../config";
 import got from "got";
 import responseIsError from "../../../../lib/http/responseIsError";
 import { makeHttpResponse } from "./makeHttpResponse";
-import { RouteConfig, FetchedHttpResponse, InvokeServiceResult } from "../../../../types/httpRequests";
+import { HttpRouteConfig, FetchedHttpHandlerResponse, InvokeServiceResult } from "../../../../types/httpRequests";
 
 /*
   Make Promises for Http Services
@@ -24,7 +24,7 @@ export default function invokeServices(
   const config = configModule.get();
   const path = request.path;
   const method = request.method;
-  const routeConfig = httpConfig.routes[path][method] as RouteConfig;
+  const routeConfig = httpConfig.routes[path][method] as HttpRouteConfig;
 
   const promises: Promise<InvokeServiceResult>[] = [];
 
@@ -162,7 +162,7 @@ async function makeFetchedResponse(
   request: HttpRequest,
   httpResponse: HttpResponse | undefined,
   serviceConfig: HttpServiceHttpHandlerConfig
-): Promise<FetchedHttpResponse> {
+): Promise<FetchedHttpHandlerResponse> {
   const modifiedResponse = serviceConfig.onResponse
     ? await serviceConfig.onResponse(httpResponse)
     : httpResponse;

@@ -8,9 +8,9 @@ import {
 import activeRequests from "./activeRequests";
 import * as configModule from "../../../../config";
 import { getPublisher } from "../../../../lib/redis/clients";
-import { getChannelForService } from "./getChannelForService";
+import { getChannelForService } from "../../../../lib/redis/getChannelForService";
 import {
-  RouteConfig,
+  HttpRouteConfig,
   RedisServiceHttpRequest,
   InvokeServiceResult,
 } from "../../../../types/httpRequests";
@@ -26,7 +26,7 @@ export default function invokeServices(
   const config = configModule.get();
   const routeConfig = httpConfig.routes[httpRequest.path][
     httpRequest.method
-  ] as RouteConfig;
+  ] as HttpRouteConfig;
 
   // publish(requestId, httpRequest, "request");
 
@@ -52,7 +52,10 @@ export default function invokeServices(
             ? await serviceConfig.config.onRequest(redisRequest)
             : { handled: false as false, request: redisRequest };
 
-          const requestChannel = getChannelForService(serviceConfig);
+          const requestChannel = getChannelForService(
+            serviceConfig.config.requestChannel,
+            serviceConfig.config.numRequestChannels
+          );
           if (onRequestResult.handled) {
             success({ skip: true });
           } else {

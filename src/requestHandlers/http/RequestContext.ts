@@ -92,4 +92,16 @@ export default class HttpRequestContext {
   redirect(where: string): void {
     this.#ctx.redirect(where);
   }
+
+  getIPAddress() {
+    this.#ctx.ip;
+  }
+
+  getHost() {
+    this.#ctx.host;
+  }
+
+  getHostName() {
+    this.#ctx.hostname;
+  }
 }

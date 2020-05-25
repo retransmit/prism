@@ -73,9 +73,7 @@ function setupWebSocketHandling(
         // If not initialized and there's an onConnect,
         // treat the first message as the onConnect argument.
         if (routeConfig.onConnect && !conn.initialized) {
-          const onConnectResult = await routeConfig.onConnect(
-            JSON.parse(message)
-          );
+          const onConnectResult = await routeConfig.onConnect(message);
 
           if (onConnectResult.drop) {
             activeConnections.delete(requestId);

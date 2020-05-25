@@ -3,7 +3,7 @@ import { HttpMethods, HttpProxyConfig } from "../../../../types";
 import { getSubscriber } from "../../../../lib/redis/clients";
 import processMessage from "./processMessage";
 import cleanupTimedOut from "./cleanupTimedOut";
-import { RouteConfig } from "../../../../types/httpRequests";
+import { HttpRouteConfig } from "../../../../types/httpRequests";
 
 export default async function init() {
   const config = configModule.get();
@@ -19,7 +19,7 @@ export default async function init() {
         for (const method in config.http.routes[route]) {
           const routeConfig = config.http.routes[route][
             method as HttpMethods
-          ] as RouteConfig;
+          ] as HttpRouteConfig;
           for (const service in routeConfig.services) {
             const serviceConfig = routeConfig.services[service];
             if (serviceConfig.type === "redis") {
@@ -46,7 +46,7 @@ function isRedisBeingUsedForHttpRequests(httpConfig: HttpProxyConfig): boolean {
     for (const method in httpConfig.routes[route]) {
       const routeConfig = httpConfig.routes[route][
         method as HttpMethods
-      ] as RouteConfig;
+      ] as HttpRouteConfig;
       for (const service in routeConfig.services) {
         const servicesConfig = routeConfig.services[service];
         if (servicesConfig.type === "redis") {

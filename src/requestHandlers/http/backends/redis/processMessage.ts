@@ -3,8 +3,8 @@ import activeRequests from "./activeRequests";
 import responseIsError from "../../../../lib/http/responseIsError";
 import {
   RedisServiceHttpResponse,
-  RouteConfig,
-  FetchedHttpResponse,
+  HttpRouteConfig,
+  FetchedHttpHandlerResponse,
 } from "../../../../types/httpRequests";
 import { HttpProxyConfig } from "../../../../types";
 
@@ -25,7 +25,7 @@ export default function processMessage(httpConfig: HttpProxyConfig) {
 
       const routeConfig = httpConfig.routes[activeRequest.request.path][
         activeRequest.request.method
-      ] as RouteConfig;
+      ] as HttpRouteConfig;
 
       const serviceConfig = routeConfig.services[activeRequest.service];
       if (serviceConfig.type === "redis") {
@@ -51,7 +51,7 @@ export default function processMessage(httpConfig: HttpProxyConfig) {
 
           const processingTime = Date.now() - activeRequest.startTime;
 
-          const fetchedResponse: FetchedHttpResponse = {
+          const fetchedResponse: FetchedHttpHandlerResponse = {
             type: "redis",
             id: redisResponse.id,
             time: processingTime,

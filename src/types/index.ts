@@ -1,7 +1,7 @@
 import { ClientOpts } from "redis";
 import { IncomingHttpHeaders } from "http2";
 import HttpRequestContext from "../requestHandlers/http/RequestContext";
-import { FetchedHttpResponse, RouteConfig } from "./httpRequests";
+import { FetchedHttpHandlerResponse, HttpRouteConfig } from "./httpRequests";
 import { WebSocketRouteConfig } from "./webSocketRequests";
 export {
   HttpServiceHttpHandlerConfig,
@@ -28,7 +28,7 @@ export interface IAppConfig {
 export type HttpProxyConfig = {
   routes: {
     [key: string]: {
-      [key in HttpMethods]?: RouteConfig;
+      [key in HttpMethods]?: HttpRouteConfig;
     };
   };
   onRequest?: (ctx: HttpRequestContext) => Promise<{ handled: boolean }>;
@@ -38,7 +38,7 @@ export type HttpProxyConfig = {
   ) => Promise<{ handled: boolean }>;
   genericErrors?: boolean;
   onError?: (
-    responses: FetchedHttpResponse[],
+    responses: FetchedHttpHandlerResponse[],
     request: HttpRequest
   ) => Promise<void>;
 };

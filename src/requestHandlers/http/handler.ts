@@ -10,7 +10,7 @@ import mergeResponses from "./mergeResponses";
 import responseIsError from "../../lib/http/responseIsError";
 import HttpRequestContext from "./RequestContext";
 import {
-  FetchedHttpResponse,
+  FetchedHttpHandlerResponse,
   InvokeServiceResult,
 } from "../../types/httpRequests";
 
@@ -75,7 +75,7 @@ async function handler(
 
     function responseIsNotSkipped(
       x: InvokeServiceResult
-    ): x is { skip: false; response: FetchedHttpResponse } {
+    ): x is { skip: false; response: FetchedHttpHandlerResponse } {
       return !x.skip;
     }
     const validResponses = interimResponses

@@ -4,6 +4,8 @@ import {
   RedisServiceWebSocketHandlerConfig,
 } from "../../../../types/webSocketRequests";
 import { WebSocketProxyConfig } from "../../../../types";
+import { getPublisher } from "../../../../lib/redis/clients";
+import { getChannelForService } from "../../../../lib/redis/getChannelForService";
 
 export default function handleMessage(
   requestId: string,
@@ -13,13 +15,23 @@ export default function handleMessage(
 ) {
   const routeConfig = websocketConfig.routes[route];
 
-  const redisServices = Object.keys(routeConfig.services).filter(
-    (service) => routeConfig.services[service].type === "redis"
-  );
+  for (const service of Object.keys(routeConfig.services)) {
+    const serviceConfig = routeConfig.services[service];
 
-  for (const service of redisServices) {
-    const serviceConfig = routeConfig.services[
-      service
-    ] as RedisServiceWebSocketHandlerConfig;
+    if (serviceConfig.type === "redis") {
+      const requestChannel = getChannelForService(
+        serviceConfig.config.requestChannel,
+        serviceConfig.config.numRequestChannels
+      );
+
+      const alreadyPublishedChannels: string[] = [];
+
+      if (serviceConfig.type === "redis") {
+        if (!alreadyPublishedChannels.includes(requestChannel)) {
+          alreadyPublishedChannels.push(requestChannel);
+          getPublisher().publish(requestChannel, "");
+        }
+      }
+    }
   }
 }

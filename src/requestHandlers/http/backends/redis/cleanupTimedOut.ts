@@ -1,7 +1,7 @@
 import activeRequests, { ActiveHttpRequest } from "./activeRequests";
 import {
-  RouteConfig,
-  FetchedHttpResponse,
+  HttpRouteConfig,
+  FetchedHttpHandlerResponse,
 } from "../../../../types/httpRequests";
 import { HttpProxyConfig } from "../../../../types";
 
@@ -27,9 +27,9 @@ export default function cleanupTimedOut(httpConfig: HttpProxyConfig) {
       for (const [activeRequestId, activeRequest] of timedOut) {
         const routeConfig = httpConfig.routes[activeRequest.request.path][
           activeRequest.request.method
-        ] as RouteConfig;
+        ] as HttpRouteConfig;
 
-        const fetchedResponse: FetchedHttpResponse = {
+        const fetchedResponse: FetchedHttpHandlerResponse = {
           type: "redis",
           id: activeRequestId,
           time: Date.now() - activeRequest.startTime,

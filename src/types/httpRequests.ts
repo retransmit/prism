@@ -4,7 +4,7 @@ import HttpRequestContext from "../requestHandlers/http/RequestContext";
 /*
   RouteHandler Config
 */
-export type RouteConfig = {
+export type HttpRouteConfig = {
   services: {
     [key: string]: HttpHandlerConfig;
   };
@@ -14,11 +14,11 @@ export type RouteConfig = {
     response: any
   ) => Promise<{ handled: boolean }>;
   mergeResponses?: (
-    responses: FetchedHttpResponse[]
-  ) => Promise<FetchedHttpResponse[]>;
+    responses: FetchedHttpHandlerResponse[]
+  ) => Promise<FetchedHttpHandlerResponse[]>;
   genericErrors?: boolean;
   onError?: (
-    responses: FetchedHttpResponse[],
+    responses: FetchedHttpHandlerResponse[],
     request: HttpRequest
   ) => Promise<void>;
 };
@@ -28,12 +28,12 @@ export type RouteConfig = {
 */
 export type InvokeServiceResult =
   | { skip: true }
-  | { skip: false; response: FetchedHttpResponse };
+  | { skip: false; response: FetchedHttpHandlerResponse };
 
 /*
   Output of processMessage()
 */
-export type FetchedHttpResponse = {
+export type FetchedHttpHandlerResponse = {
   type: "http" | "redis";
   id: string;
   service: string;

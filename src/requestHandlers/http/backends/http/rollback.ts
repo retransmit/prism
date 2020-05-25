@@ -5,7 +5,7 @@ import { HttpRequest, HttpProxyConfig } from "../../../../types";
 import * as configModule from "../../../../config";
 import responseIsError from "../../../../lib/http/responseIsError";
 import { makeHttpResponse } from "./makeHttpResponse";
-import { RouteConfig } from "../../../../types/httpRequests";
+import { HttpRouteConfig } from "../../../../types/httpRequests";
 
 /*
   Make Promises for Http Services
@@ -19,7 +19,7 @@ export default async function rollback(
   const config = configModule.get();
   const routeConfig = httpConfig.routes[request.path][
     request.method
-  ] as RouteConfig;
+  ] as HttpRouteConfig;
 
   for (const service of Object.keys(routeConfig.services)) {
     const serviceConfig = routeConfig.services[service];

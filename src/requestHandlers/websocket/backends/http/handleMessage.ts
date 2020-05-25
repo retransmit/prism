@@ -7,5 +7,13 @@ export default function handleMessage(
   route: string,
   websocketConfig: WebSocketProxyConfig
 ) {
-  
+  const routeConfig = websocketConfig.routes[route];
+
+  for (const service of Object.keys(routeConfig.services)) {
+    const serviceConfig = routeConfig.services[service];
+
+    if (serviceConfig.type === "http") {
+      
+    }
+  }
 }
