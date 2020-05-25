@@ -1,7 +1,8 @@
-import WebSocket from "ws"
+import WebSocket from "ws";
 
 export type ActiveWebSocketConnection = {
   initialized: boolean;
+  route: string;
   websocket: WebSocket;
 };
 

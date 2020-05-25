@@ -24,33 +24,38 @@ export type WebSocketRouteConfig = {
 */
 export type WebSocketHandlerConfigBase = {
   onResponse?: (
-    response: HttpResponse | undefined
-  ) => Promise<HttpResponse>;
-  onError?: (
-    response: HttpResponse | undefined,
-    request: HttpRequest
-  ) => Promise<void>;
+    response: WebSocketResponse
+  ) => Promise<WebSocketResponse>;
 };
 
 export type RedisServiceWebSocketHandlerConfig = {
   type: "redis";
+  onRequest?: (
+    request: WebSocketRequest
+  ) => Promise<
+    | { handled: true; response: WebSocketResponse }
+    | { handled: false; request: WebSocketRequest }
+  >;
   config: {
     requestChannel: string;
     responseChannel: string;
     numRequestChannels?: number;
-    onMessage?: (message: string) => Promise<string>;
-    onResponse?: (message: string) => Promise<string>;
   };
 } & WebSocketHandlerConfigBase;
 
 export type HttpServiceWebSocketHandlerConfig = {
   type: "http";
   pollingInterval: number;
+  onRequest?: (
+    request: WebSocketRequest
+  ) => Promise<
+    | { handled: true; response: WebSocketResponse }
+    | { handled: false; request: HttpRequest }
+  >;
   config: {
     url: string;
     onConnectUrl: string;
     onDisconnectUrl: string;
-    onRequest?: (request: HttpRequest) => Promise<HttpRequest>;
   };
 } & WebSocketHandlerConfigBase;
 
@@ -59,16 +64,35 @@ export type WebSocketHandlerConfig =
   | HttpServiceWebSocketHandlerConfig;
 
 /*
-  Requests and Responses for Redis-based Services
+  Requests and Responses for Http Services
 */
-export type RedisServiceHttpRequest = {
+export type HttpServiceWebSocketRequest = {
   id: string;
   responseChannel: string;
   request: string;
 };
 
-export type RedisServiceHttpResponse = {
+export type HttpServiceWebSocketResponse = {
   id: string;
+  service: string;
+  response: string;
+};
+
+/*
+  Requests and Responses for Redis-based Services
+*/
+export type WebSocketRequest = {
+  id: string;
+  type: "connect" | "message" | "disconnect";
+  route: string;
+  responseChannel: string;
+  request: string;
+};
+
+export type WebSocketResponse = {
+  id: string;
+  type: "message" | "disconnect";
+  route: string,
   service: string;
   response: string;
 };

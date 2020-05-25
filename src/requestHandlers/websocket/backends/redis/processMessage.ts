@@ -1,0 +1,62 @@
+import * as configModule from "../../../../config";
+import { WebSocketProxyConfig } from "../../../../types";
+import {
+  WebSocketResponse,
+  WebSocketRequest,
+  WebSocketHandlerConfig,
+  RedisServiceWebSocketHandlerConfig,
+} from "../../../../types/webSocketRequests";
+import activeConnections from "../../activeConnections";
+import disconnect from "../../disconnect";
+import respond from "../../respond";
+import { getPublisher } from "../../../../lib/redis/clients";
+import { getChannelForService } from "../../../../lib/redis/getChannelForService";
+
+export default function processMessage(websocketConfig: WebSocketProxyConfig) {
+  return async function processMessageImpl(
+    channel: string,
+    messageString: string
+  ) {
+    const config = configModule.get();
+    const redisResponse = JSON.parse(messageString) as WebSocketResponse;
+
+    const conn = activeConnections.get(redisResponse.id);
+
+    if (conn) {
+      const serviceConfig =
+        websocketConfig.routes[conn.route].services[redisResponse.service];
+
+      if (redisResponse.type === "disconnect") {
+        const onResponseResult = serviceConfig.onResponse
+          ? await serviceConfig.onResponse(redisResponse)
+          : redisResponse;
+
+        respond(onResponseResult, redisResponse.service, conn, websocketConfig);
+      } else {
+        const onResponseResult = serviceConfig.onResponse
+          ? await serviceConfig.onResponse(redisResponse)
+          : redisResponse;
+
+        respond(onResponseResult, redisResponse.service, conn, websocketConfig);
+      }
+    } else {
+      const serviceConfig = websocketConfig.routes[redisResponse.route]
+        .services[redisResponse.service] as RedisServiceWebSocketHandlerConfig;
+
+      const redisRequest: WebSocketRequest = {
+        id: redisResponse.id,
+        type: "disconnect",
+        route: redisResponse.route,
+        request: "CLIENT_HAS_DISCONNECTED",
+        responseChannel: `${serviceConfig.config.responseChannel}.${config.instanceId}`,
+      };
+
+      const requestChannel = getChannelForService(
+        serviceConfig.config.requestChannel,
+        serviceConfig.config.numRequestChannels
+      );
+
+      getPublisher().publish(requestChannel, JSON.stringify(redisRequest));
+    }
+  };
+}

@@ -160,7 +160,7 @@ async function makeFetchedResponse(
   startTime: number,
   service: string,
   request: HttpRequest,
-  httpResponse: HttpResponse | undefined,
+  httpResponse: HttpResponse,
   serviceConfig: HttpServiceHttpHandlerConfig
 ): Promise<FetchedHttpHandlerResponse> {
   const modifiedResponse = serviceConfig.onResponse

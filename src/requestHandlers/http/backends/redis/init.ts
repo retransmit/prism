@@ -15,6 +15,7 @@ export default async function init() {
     if (isRedisBeingUsedForHttpRequests(config.http)) {
       const httpClientSubscriber = getSubscriber();
       httpClientSubscriber.on("message", processMessage(config.http));
+      
       for (const route in config.http.routes) {
         for (const method in config.http.routes[route]) {
           const routeConfig = config.http.routes[route][

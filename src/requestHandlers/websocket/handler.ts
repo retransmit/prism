@@ -12,6 +12,7 @@ import { WebSocketRouteConfig } from "../../types/webSocketRequests";
 import handleHttpMessage from "./backends/http/handleMessage";
 import handleRedisMessage from "./backends/redis/handleMessage";
 import { WebSocketProxyConfig } from "../../types";
+import connect from "./connect";
 
 const connectors = [
   { type: "http", handleMessage: handleHttpMessage },
@@ -60,6 +61,7 @@ function setupWebSocketHandling(
     const requestId = randomId();
     activeConnections.set(requestId, {
       initialized: false,
+      route,
       websocket: ws,
     });
 
@@ -80,12 +82,19 @@ function setupWebSocketHandling(
             ws.terminate();
           } else {
             conn.initialized = true;
+            connect(conn, websocketConfig);
           }
         }
         // Regular message. Pass this on...
         else {
           for (const connector of connectors) {
-            connector.handleMessage(requestId, message, route, websocketConfig);
+            connector.handleMessage(
+              requestId,
+              message,
+              route,
+              conn,
+              websocketConfig
+            );
           }
         }
       }

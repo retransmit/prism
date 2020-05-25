@@ -1,6 +1,7 @@
 import * as configModule from "../../../../config";
 import { getSubscriber } from "../../../../lib/redis/clients";
 import { WebSocketProxyConfig } from "../../../../types";
+import processMessage from "./processMessage";
 
 export default async function init() {
   const config = configModule.get();
@@ -11,6 +12,8 @@ export default async function init() {
   if (config.websockets) {
     if (isRedisBeingUsedForWebSockets(config.websockets)) {
       const websocketSubscriber = getSubscriber();
+      websocketSubscriber.on("message", processMessage(config.websockets));
+      
       for (const route in config.websockets.routes) {
         const routeConfig = config.websockets.routes[route];
         for (const service in routeConfig.services) {

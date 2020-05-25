@@ -67,7 +67,7 @@ export type HttpHandlerConfigBase = {
   merge?: boolean;
   timeout?: number;
   mergeField?: string;
-  onResponse?: (response: HttpResponse | undefined) => Promise<HttpResponse>;
+  onResponse?: (response: HttpResponse) => Promise<HttpResponse>;
   onError?: (
     response: HttpResponse | undefined,
     request: HttpRequest

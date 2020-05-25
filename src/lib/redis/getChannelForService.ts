@@ -1,5 +1,3 @@
-import { RedisServiceHttpHandlerConfig } from "../../types";
-
 export function getChannelForService(
   channel: string,
   numRequestChannels: number | undefined
