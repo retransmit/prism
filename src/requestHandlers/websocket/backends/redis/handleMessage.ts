@@ -3,27 +3,23 @@ import {
   WebSocketRouteConfig,
   RedisServiceWebSocketHandlerConfig,
 } from "../../../../types/webSocketRequests";
+import { WebSocketProxyConfig } from "../../../../types";
 
 export default function handleMessage(
   requestId: string,
   message: string,
-  route: string
+  route: string,
+  websocketConfig: WebSocketProxyConfig
 ) {
-  const config = configModule.get();
+  const routeConfig = websocketConfig.routes[route];
 
-  if (config.websockets) {
-    const routeConfig = config.websockets.routes[route];
+  const redisServices = Object.keys(routeConfig.services).filter(
+    (service) => routeConfig.services[service].type === "redis"
+  );
 
-    const redisServices = Object.keys(routeConfig.services).filter(
-      (service) => routeConfig.services[service].type === "redis"
-    );
-
-    for (const service of redisServices) {
-      const serviceConfig = routeConfig.services[
-        service
-      ] as RedisServiceWebSocketHandlerConfig;
-
-      
-    }
+  for (const service of redisServices) {
+    const serviceConfig = routeConfig.services[
+      service
+    ] as RedisServiceWebSocketHandlerConfig;
   }
 }

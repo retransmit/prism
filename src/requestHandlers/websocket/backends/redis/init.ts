@@ -1,14 +1,15 @@
 import * as configModule from "../../../../config";
 import { getSubscriber } from "../../../../lib/redis/clients";
+import { WebSocketProxyConfig } from "../../../../types";
 
 export default async function init() {
   const config = configModule.get();
 
-  if (isRedisBeingUsedForWebSockets()) {
-    // Setup subscriptions
-    const alreadySubscribed: string[] = [];
+  // Setup subscriptions
+  const alreadySubscribed: string[] = [];
 
-    if (config.websockets) {
+  if (config.websockets) {
+    if (isRedisBeingUsedForWebSockets(config.websockets)) {
       const websocketSubscriber = getSubscriber();
       for (const route in config.websockets.routes) {
         const routeConfig = config.websockets.routes[route];
@@ -26,17 +27,15 @@ export default async function init() {
   }
 }
 
-function isRedisBeingUsedForWebSockets(): boolean {
-  const config = configModule.get();
-
-  if (config.websockets) {
-    for (const route in config.websockets.routes) {
-      const routeConfig = config.websockets.routes[route];
-      for (const service in routeConfig.services) {
-        const servicesConfig = routeConfig.services[service];
-        if (servicesConfig.type === "redis") {
-          return true;
-        }
+function isRedisBeingUsedForWebSockets(
+  websocketConfig: WebSocketProxyConfig
+): boolean {
+  for (const route in websocketConfig.routes) {
+    const routeConfig = websocketConfig.routes[route];
+    for (const service in routeConfig.services) {
+      const servicesConfig = routeConfig.services[service];
+      if (servicesConfig.type === "redis") {
+        return true;
       }
     }
   }

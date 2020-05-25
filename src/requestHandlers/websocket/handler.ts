@@ -11,6 +11,7 @@ import { WebSocketRouteConfig } from "../../types/webSocketRequests";
 
 import handleHttpMessage from "./backends/http/handleMessage";
 import handleRedisMessage from "./backends/redis/handleMessage";
+import { WebSocketProxyConfig } from "../../types";
 
 const connectors = [
   { type: "http", handleMessage: handleHttpMessage },
@@ -35,56 +36,63 @@ const websocketServers: {
 
 export function init() {
   const config = configModule.get();
-  if (config.websockets) {
-    for (const route of Object.keys(config.websockets.routes)) {
-      const routeConfig = config.websockets.routes[route];
+  const websocketConfig = config.websockets;
+  if (websocketConfig) {
+    for (const route of Object.keys(websocketConfig.routes)) {
+      const routeConfig = websocketConfig.routes[route];
       const wss = new WebSocket.Server({ noServer: true });
       websocketServers[route] = wss;
-
-      (function (route: string, routeConfig: WebSocketRouteConfig) {
-        wss.on("connection", async function connection(
-          ws: WebSocket,
-          request: IncomingMessage
-        ) {
-          const requestId = randomId();
-          activeConnections.set(requestId, {
-            initialized: false,
-            websocket: ws,
-          });
-
-          ws.on("message", async function message(message: string) {
-            const conn = activeConnections.get(requestId);
-
-            // This should never happen.
-            if (!conn) {
-              ws.terminate();
-            } else {
-              // If not initialized and there's an onConnect,
-              // treat the first message as the onConnect argument.
-              if (routeConfig.onConnect && !conn.initialized) {
-                const onConnectResult = await routeConfig.onConnect(
-                  JSON.parse(message)
-                );
-
-                if (onConnectResult.drop) {
-                  activeConnections.delete(requestId);
-                  ws.terminate();
-                } else {
-                  conn.initialized = true;
-                }
-              }
-              // Regular message. Pass this on...
-              else {
-                for (const connector of connectors) {
-                  connector.handleMessage(requestId, message, route);
-                }
-              }
-            }
-          });
-        });
-      })(route, routeConfig);
+      setupWebSocketHandling(wss, route, routeConfig, websocketConfig);
     }
   }
+}
+
+function setupWebSocketHandling(
+  wss: WebSocket.Server,
+  route: string,
+  routeConfig: WebSocketRouteConfig,
+  websocketConfig: WebSocketProxyConfig
+) {
+  wss.on("connection", async function connection(
+    ws: WebSocket,
+    request: IncomingMessage
+  ) {
+    const requestId = randomId();
+    activeConnections.set(requestId, {
+      initialized: false,
+      websocket: ws,
+    });
+
+    ws.on("message", async function message(message: string) {
+      const conn = activeConnections.get(requestId);
+
+      // This should never happen.
+      if (!conn) {
+        ws.terminate();
+      } else {
+        // If not initialized and there's an onConnect,
+        // treat the first message as the onConnect argument.
+        if (routeConfig.onConnect && !conn.initialized) {
+          const onConnectResult = await routeConfig.onConnect(
+            JSON.parse(message)
+          );
+
+          if (onConnectResult.drop) {
+            activeConnections.delete(requestId);
+            ws.terminate();
+          } else {
+            conn.initialized = true;
+          }
+        }
+        // Regular message. Pass this on...
+        else {
+          for (const connector of connectors) {
+            connector.handleMessage(requestId, message, route, websocketConfig);
+          }
+        }
+      }
+    });
+  });
 }
 
 export function upgrade(

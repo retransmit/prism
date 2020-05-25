@@ -1,5 +1,5 @@
 import * as configModule from "../../../../config";
-import { HttpMethods } from "../../../../types";
+import { HttpMethods, HttpProxyConfig } from "../../../../types";
 import { getSubscriber } from "../../../../lib/redis/clients";
 import processMessage from "./processMessage";
 import cleanupTimedOut from "./cleanupTimedOut";
@@ -8,11 +8,11 @@ import { RouteConfig } from "../../../../types/httpRequests";
 export default async function init() {
   const config = configModule.get();
 
-  if (isRedisBeingUsedForHttpRequests()) {
-    // Setup subscriptions
-    const alreadySubscribed: string[] = [];
+  // Setup subscriptions
+  const alreadySubscribed: string[] = [];
 
-    if (config.http) {
+  if (config.http) {
+    if (isRedisBeingUsedForHttpRequests(config.http)) {
       const httpClientSubscriber = getSubscriber();
       httpClientSubscriber.on("message", processMessage(config.http));
       for (const route in config.http.routes) {
@@ -41,20 +41,16 @@ export default async function init() {
   }
 }
 
-function isRedisBeingUsedForHttpRequests(): boolean {
-  const config = configModule.get();
-
-  if (config.http) {
-    for (const route in config.http.routes) {
-      for (const method in config.http.routes[route]) {
-        const routeConfig = config.http.routes[route][
-          method as HttpMethods
-        ] as RouteConfig;
-        for (const service in routeConfig.services) {
-          const servicesConfig = routeConfig.services[service];
-          if (servicesConfig.type === "redis") {
-            return true;
-          }
+function isRedisBeingUsedForHttpRequests(httpConfig: HttpProxyConfig): boolean {
+  for (const route in httpConfig.routes) {
+    for (const method in httpConfig.routes[route]) {
+      const routeConfig = httpConfig.routes[route][
+        method as HttpMethods
+      ] as RouteConfig;
+      for (const service in routeConfig.services) {
+        const servicesConfig = routeConfig.services[service];
+        if (servicesConfig.type === "redis") {
+          return true;
         }
       }
     }
