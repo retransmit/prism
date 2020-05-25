@@ -23,7 +23,7 @@ export type WebSocketRouteConfig = {
   Service Configuration.
 */
 export type WebSocketHandlerConfigBase = {
-  onServiceResponse?: (
+  onResponse?: (
     response: HttpResponse | undefined
   ) => Promise<HttpResponse>;
   onError?: (
@@ -50,7 +50,7 @@ export type HttpServiceWebSocketHandlerConfig = {
     url: string;
     onConnectUrl: string;
     onDisconnectUrl: string;
-    onServiceRequest?: (request: HttpRequest) => Promise<HttpRequest>;
+    onRequest?: (request: HttpRequest) => Promise<HttpRequest>;
   };
 } & WebSocketHandlerConfigBase;
 

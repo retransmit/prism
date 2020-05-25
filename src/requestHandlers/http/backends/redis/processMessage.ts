@@ -43,10 +43,8 @@ export default function processMessage(httpConfig: HttpProxyConfig) {
             }
           }
 
-          const onServiceResponse = serviceConfig.onResponse;
-
-          const response = onServiceResponse
-            ? await onServiceResponse(redisResponse.response)
+          const response = serviceConfig.onResponse
+            ? await serviceConfig.onResponse(redisResponse.response)
             : redisResponse.response;
 
           const processingTime = Date.now() - activeRequest.startTime;

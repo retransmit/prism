@@ -28,8 +28,6 @@ export default function invokeServices(
     httpRequest.method
   ] as HttpRouteConfig;
 
-  // publish(requestId, httpRequest, "request");
-
   const alreadyPublishedChannels: string[] = [];
 
   return Object.keys(routeConfig.services)
@@ -48,17 +46,33 @@ export default function invokeServices(
             type: "request",
           };
 
+          const timeBeforeOnRequestResult = Date.now();
           const onRequestResult = serviceConfig.config.onRequest
             ? await serviceConfig.config.onRequest(redisRequest)
             : { handled: false as false, request: redisRequest };
 
-          const requestChannel = getChannelForService(
-            serviceConfig.config.requestChannel,
-            serviceConfig.config.numRequestChannels
-          );
           if (onRequestResult.handled) {
-            success({ skip: true });
+            if (serviceConfig.awaitResponse !== false) {
+              success({
+                skip: false,
+                response: {
+                  type: "redis",
+                  id: requestId,
+                  method: httpRequest.method,
+                  path: httpRequest.path,
+                  service,
+                  time: Date.now() - timeBeforeOnRequestResult,
+                  response: onRequestResult.response,
+                },
+              });
+            } else {
+              success({ skip: true });
+            }
           } else {
+            const requestChannel = getChannelForService(
+              serviceConfig.config.requestChannel,
+              serviceConfig.config.numRequestChannels
+            );
             if (serviceConfig.awaitResponse !== false) {
               if (!alreadyPublishedChannels.includes(requestChannel)) {
                 alreadyPublishedChannels.push(requestChannel);
