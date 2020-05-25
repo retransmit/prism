@@ -9,16 +9,16 @@ import WebSocketRequestContext from "./RequestContext";
 import activeConnections from "./activeConnections";
 import { WebSocketRouteConfig } from "../../types/webSocketRequests";
 
-import handleHttpMessage from "./backends/http/handleMessage";
-import handleRedisMessage from "./backends/redis/handleMessage";
+import sendToHttpService from "./backends/http/sendToService";
+import sendToRedisService from "./backends/redis/sendToService";
 import { WebSocketProxyConfig } from "../../types";
 import connect from "./connect";
 
 const connectors = [
-  { type: "http", handleMessage: handleHttpMessage },
+  { type: "http", sendToService: sendToHttpService },
   {
     type: "redis",
-    handleMessage: handleRedisMessage,
+    sendToService: sendToRedisService,
   },
 ];
 
@@ -87,8 +87,18 @@ function setupWebSocketHandling(
         }
         // Regular message. Pass this on...
         else {
+          const onRequestHandlers =
+            websocketConfig.onRequest ||
+            websocketConfig.routes[route].onRequest;
+
+          const messageToSend = onRequestHandlers
+            ? await onRequestHandlers(message)
+            : { handled: false as false, request: {
+              
+            } };
+
           for (const connector of connectors) {
-            connector.handleMessage(
+            connector.sendToService(
               requestId,
               message,
               route,

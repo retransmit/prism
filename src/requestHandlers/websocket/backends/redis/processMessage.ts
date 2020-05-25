@@ -3,11 +3,9 @@ import { WebSocketProxyConfig } from "../../../../types";
 import {
   WebSocketResponse,
   WebSocketRequest,
-  WebSocketHandlerConfig,
   RedisServiceWebSocketHandlerConfig,
 } from "../../../../types/webSocketRequests";
 import activeConnections from "../../activeConnections";
-import disconnect from "../../disconnect";
 import respond from "../../respond";
 import { getPublisher } from "../../../../lib/redis/clients";
 import { getChannelForService } from "../../../../lib/redis/getChannelForService";
@@ -26,19 +24,11 @@ export default function processMessage(websocketConfig: WebSocketProxyConfig) {
       const serviceConfig =
         websocketConfig.routes[conn.route].services[redisResponse.service];
 
-      if (redisResponse.type === "disconnect") {
-        const onResponseResult = serviceConfig.onResponse
-          ? await serviceConfig.onResponse(redisResponse)
-          : redisResponse;
+      const onResponseResult = serviceConfig.onResponse
+        ? await serviceConfig.onResponse(redisResponse)
+        : redisResponse;
 
-        respond(onResponseResult, redisResponse.service, conn, websocketConfig);
-      } else {
-        const onResponseResult = serviceConfig.onResponse
-          ? await serviceConfig.onResponse(redisResponse)
-          : redisResponse;
-
-        respond(onResponseResult, redisResponse.service, conn, websocketConfig);
-      }
+      respond(onResponseResult, redisResponse.service, conn, websocketConfig);
     } else {
       const serviceConfig = websocketConfig.routes[redisResponse.route]
         .services[redisResponse.service] as RedisServiceWebSocketHandlerConfig;

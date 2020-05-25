@@ -1,9 +1,7 @@
-import WebSocket from "ws";
-import { WebSocketRouteConfig } from "../../../../types/webSocketRequests";
 import { WebSocketProxyConfig } from "../../../../types";
 import { ActiveWebSocketConnection } from "../../activeConnections";
 
-export default function handleMessage(
+export default function sendToService(
   requestId: string,
   message: string,
   route: string,

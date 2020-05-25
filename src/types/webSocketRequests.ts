@@ -8,24 +8,21 @@ export type WebSocketRouteConfig = {
   services: {
     [key: string]: WebSocketHandlerConfig;
   };
-  onConnect: (message: string) => Promise<{ drop: boolean }>;
-  onDisconnect: (ctx: WebSocketRequestContext) => Promise<void>;
+  onConnect?: (message: string) => Promise<{ drop: boolean }>;
+  onDisconnect?: (ctx: WebSocketRequestContext) => Promise<void>;
   onRequest?: (
-    ctx: WebSocketRequestContext
-  ) => Promise<{ drop?: boolean; handled: boolean }>;
-  onResponse?: (
-    ctx: WebSocketRequestContext,
-    response: any
-  ) => Promise<{ drop?: boolean; handled: boolean }>;
+    message: string
+  ) => Promise<
+    { handled: true; request: WebSocketRequest } | { handled: false }
+  >;
+  onResponse?: (response: WebSocketResponse) => Promise<WebSocketRequest>;
 };
 
 /*
   Service Configuration.
 */
 export type WebSocketHandlerConfigBase = {
-  onResponse?: (
-    response: WebSocketResponse
-  ) => Promise<WebSocketResponse>;
+  onResponse?: (response: WebSocketResponse) => Promise<WebSocketResponse>;
 };
 
 export type RedisServiceWebSocketHandlerConfig = {
@@ -92,7 +89,7 @@ export type WebSocketRequest = {
 export type WebSocketResponse = {
   id: string;
   type: "message" | "disconnect";
-  route: string,
+  route: string;
   service: string;
   response: string;
 };

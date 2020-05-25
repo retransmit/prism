@@ -4,11 +4,10 @@ import { getPublisher } from "../../../../lib/redis/clients";
 import { getChannelForService } from "../../../../lib/redis/getChannelForService";
 import { WebSocketRequest } from "../../../../types/webSocketRequests";
 import * as configModule from "../../../../config";
-import disconnect from "../../disconnect";
 import { ActiveWebSocketConnection } from "../../activeConnections";
 import respond from "../../respond";
 
-export default async function handleMessage(
+export default async function sendToService(
   requestId: string,
   message: string,
   route: string,
@@ -43,7 +42,7 @@ export default async function handleMessage(
           : { handled: false as false, request: message };
 
         if (onRequestResult.handled) {
-          respond(onRequestResult.response, service, conn, websocketConfig)
+          respond(onRequestResult.response, service, conn, websocketConfig);
         } else {
           if (!alreadyPublishedChannels.includes(requestChannel)) {
             alreadyPublishedChannels.push(requestChannel);
