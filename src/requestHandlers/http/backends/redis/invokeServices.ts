@@ -42,7 +42,7 @@ export default function invokeServices(
           const redisRequest: RedisServiceHttpRequest = {
             id: requestId,
             request: httpRequest,
-            responseChannel: `${serviceConfig.config.responseChannel}.${config.instanceId}`,
+            responseChannel: `${httpConfig.redis?.responseChannel}.${config.instanceId}`,
             type: "request",
           };
 
@@ -83,7 +83,6 @@ export default function invokeServices(
               }
               activeRequests.set(`${requestId}+${service}`, {
                 id: requestId,
-                responseChannel: `${serviceConfig.config.responseChannel}.${config.instanceId}`,
                 request: httpRequest,
                 service,
                 timeoutAt: Date.now() + (serviceConfig.timeout || 30000),

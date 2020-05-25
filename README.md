@@ -90,20 +90,21 @@ module.exports = {
             userservice: {
               type: "redis",
               config: {
-                requestChannel: "inputs",
-                responseChannel: "outputs",
+                requestChannel: "input",
               },
             },
             messagingservice: {
               type: "redis",
               config: {
-                requestChannel: "inputs",
-                responseChannel: "outputs",
+                requestChannel: "input",
               },
             },
           },
         },
       },
+    },
+    redis: {
+      responseChannel: "output",
     },
   },
 };
@@ -195,16 +196,14 @@ module.exports = {
   userservice: {
     type: "redis",
     config: {
-      requestChannel: "inputs",
-      responseChannel: "outputs",
+      requestChannel: "input",
     },
     mergeField: "userData",
   },
   messagingservice: {
     type: "redis",
     config: {
-      requestChannel: "inputs",
-      responseChannel: "outputs",
+      requestChannel: "input",
     },
     mergeField: "messagingData",
   },
@@ -219,8 +218,7 @@ You can also choose not to merge data from a certain service with the 'merge' fl
   messagingservice: {
     type: "redis",
     config: {
-      requestChannel: "inputs",
-      responseChannel: "outputs",
+      requestChannel: "inputs"
     },
     merge: false
   },
@@ -237,8 +235,7 @@ There might be services which you just want to call, and not wait for results. U
   messagingservice: {
     type: "redis",
     config: {
-      requestChannel: "inputs",
-      responseChannel: "outputs",
+      requestChannel: "inputs"
     },
     awaitResponse: false
   },
@@ -264,11 +261,13 @@ module.exports = {
         userservice: {
           type: "redis",
           config: {
-            requestChannel: "inputs",
-            responseChannel: "outputs",
+            requestChannel: "input",
           },
         },
       },
+    },
+    redis: {
+      responseChannel: "output",
     },
     /*
     Signature of onRequest
@@ -354,8 +353,7 @@ module.exports = {
   messagingservice: {
     type: "redis",
     config: {
-      requestChannel: "inputs",
-      responseChannel: "outputs",
+      requestChannel: "input",
     },
     /*
       Signature of onRequest
@@ -395,14 +393,16 @@ module.exports = {
             userservice: {
               type: "redis",
               config: {
-                requestChannel: "inputs",
-                responseChannel: "outputs",
+                requestChannel: "input",
               },
               mergeField: "userData",
             },
           },
         },
       },
+    },
+    redis: {
+      responseChannel: "output",
     },
     onRequest: async (ctx) => {
       const headers = ctx.getRequestHeaders();
@@ -487,8 +487,8 @@ module.exports = {
             messagingservice: {
               type: "redis",
               config: {
-                requestChannel: "inputs",
-                responseChannel: "outputs",
+                requestChannel: "input",
+                responseChannel: "output",
               },
               /*
           Note the difference. Contains only one response.
@@ -540,8 +540,8 @@ module.exports = {
           quoteservice: {
             type: "redis",
             config: {
-              requestChannel: "inputs",
-              responseChannel: "outputs",
+              requestChannel: "input",
+              responseChannel: "output",
             },
           },
           alertservice: {
@@ -594,9 +594,7 @@ Sending responses is also fairly simple - just keep pushing messages in the foll
   "id": "sl98sndflksdlfksomeid",
   "service": "quoteservice",
   "response": {
-    "quotes": [
-      { "ticker": "GOOG", "price": 1410.4 }
-    ]
+    "quotes": [{ "ticker": "GOOG", "price": 1410.4 }]
   }
 }
 ```
@@ -633,8 +631,7 @@ module.exports = {
             messagingservice: {
               type: "redis",
               config: {
-                requestChannel: "inputs",
-                responseChannel: "outputs",
+                requestChannel: "input",
               },
               // Timeout defaults to 30s
               timeout: 100000,
@@ -659,6 +656,9 @@ module.exports = {
         },
       },
     },
+    redis: {
+      responseChannel: "output",
+    },
   },
 };
 ```
@@ -681,8 +681,7 @@ module.exports = {
             messagingservice: {
               type: "redis",
               config: {
-                requestChannel: "inputs",
-                responseChannel: "outputs",
+                requestChannel: "input",
                 // Specify 10 channels
                 // Instances need to subscribe to input0 to inputs9
                 numRequestChannels: 10,
@@ -691,6 +690,9 @@ module.exports = {
           },
         },
       },
+    },
+    redis: {
+      responseChannel: "output",
     },
   },
 };

@@ -2,7 +2,6 @@ import { HttpRequest } from "../../../../types";
 import { InvokeServiceResult } from "../../../../types/httpRequests";
 
 export type ActiveHttpRequest = {
-  responseChannel: string;
   id: string;
   timeoutAt: number;
   service: string;

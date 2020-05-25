@@ -2,7 +2,7 @@ import { ClientOpts } from "redis";
 import { IncomingHttpHeaders } from "http2";
 import { FetchedHttpHandlerResponse, HttpRouteConfig } from "./httpRequests";
 import { WebSocketRouteConfig, WebSocketResponse } from "./webSocketRequests";
-import WebSocketRequestContext from "../requestHandlers/websocket/RequestContext";
+
 export {
   HttpServiceHttpHandlerConfig,
   RedisServiceHttpHandlerConfig,
@@ -21,7 +21,6 @@ export interface IAppConfig {
   websockets?: WebSocketProxyConfig;
   redis?: {
     options?: ClientOpts;
-    cleanupInterval?: number;
   };
 }
 
@@ -30,6 +29,10 @@ export type HttpProxyConfig = {
     [key: string]: {
       [key in HttpMethods]?: HttpRouteConfig;
     };
+  };
+  redis?: {
+    responseChannel: string;
+    cleanupInterval?: number;
   };
   onRequest?: (
     request: HttpRequest
@@ -52,12 +55,17 @@ export type WebSocketProxyConfig = {
   routes: {
     [key: string]: WebSocketRouteConfig;
   };
+  redis?: {
+    responseChannel: string;
+    cleanupInterval?: number;
+  };
   onConnect?: (message: string) => Promise<{ drop: boolean }>;
-  onDisconnect?: (ctx: WebSocketRequestContext) => Promise<void>;
+  onDisconnect?: () => Promise<void>;
   onRequest?: (
     message: string
   ) => Promise<
-    { handled: true; request: WebSocketResponse } | { handled: false }
+    | { handled: true; response: WebSocketResponse }
+    | { handled: false; request: string }
   >;
   onResponse?: (response: WebSocketResponse) => Promise<WebSocketResponse>;
 };

@@ -1,5 +1,4 @@
-import { HttpResponse, HttpRequest } from ".";
-import WebSocketRequestContext from "../requestHandlers/websocket/RequestContext";
+import { HttpRequest } from ".";
 
 /*
   Web Socket Route Config
@@ -9,7 +8,7 @@ export type WebSocketRouteConfig = {
     [key: string]: WebSocketHandlerConfig;
   };
   onConnect?: (message: string) => Promise<{ drop: boolean }>;
-  onDisconnect?: (ctx: WebSocketRequestContext) => Promise<void>;
+  onDisconnect?: () => Promise<void>;
   onRequest?: (
     message: string
   ) => Promise<
@@ -35,7 +34,6 @@ export type RedisServiceWebSocketHandlerConfig = {
   >;
   config: {
     requestChannel: string;
-    responseChannel: string;
     numRequestChannels?: number;
   };
 } & WebSocketHandlerConfigBase;
@@ -65,7 +63,6 @@ export type WebSocketHandlerConfig =
 */
 export type HttpServiceWebSocketRequest = {
   id: string;
-  responseChannel: string;
   request: string;
 };
 

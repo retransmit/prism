@@ -9,39 +9,18 @@ export default async function init() {
   // Setup subscriptions
   const alreadySubscribed: string[] = [];
 
-  if (config.websockets) {
-    if (isRedisBeingUsedForWebSockets(config.websockets)) {
-      const websocketSubscriber = getSubscriber();
-      websocketSubscriber.on("message", processMessage(config.websockets));
-      
-      for (const route in config.websockets.routes) {
-        const routeConfig = config.websockets.routes[route];
-        for (const service in routeConfig.services) {
-          const serviceConfig = routeConfig.services[service];
-          if (serviceConfig.type === "redis") {
-            const channel = `${serviceConfig.config.responseChannel}.${config.instanceId}`;
-            if (!alreadySubscribed.includes(channel)) {
-              websocketSubscriber.subscribe(channel);
-            }
-          }
-        }
-      }
-    }
+  if (config.websockets?.redis) {
+    const websocketClientSubscriber = getSubscriber();
+    websocketClientSubscriber.on("message", processMessage(config.websockets));
+    websocketClientSubscriber.subscribe(
+      `${config.websockets.redis.responseChannel}.${config.instanceId}`
+    );
+
+    // Some services may never respond. Fail them.
+    // setInterval(
+    //   cleanupTimedOut(config.websockets),
+    //   config.websockets.redis.cleanupInterval || 10000
+    // );
   }
 }
 
-function isRedisBeingUsedForWebSockets(
-  websocketConfig: WebSocketProxyConfig
-): boolean {
-  for (const route in websocketConfig.routes) {
-    const routeConfig = websocketConfig.routes[route];
-    for (const service in routeConfig.services) {
-      const servicesConfig = routeConfig.services[service];
-      if (servicesConfig.type === "redis") {
-        return true;
-      }
-    }
-  }
-
-  return false;
-}

@@ -14,20 +14,21 @@ export default async function (app: { instance: any }) {
                   type: "redis" as "redis",
                   config: {
                     requestChannel: "input",
-                    responseChannel: "output",
                   },
                 },
                 messagingservice: {
                   type: "redis" as "redis",
                   config: {
                     requestChannel: "input",
-                    responseChannel: "output",
-                  }
+                  },
                 },
               },
             },
           },
-        }
+        },
+        redis: {
+          responseChannel: "output",
+        },
       },
     };
 

@@ -29,7 +29,7 @@ export default function processMessage(httpConfig: HttpProxyConfig) {
 
       const serviceConfig = routeConfig.services[activeRequest.service];
       if (serviceConfig.type === "redis") {
-        const channelInRequest = `${serviceConfig.config.responseChannel}.${config.instanceId}`;
+        const channelInRequest = `${httpConfig.redis?.responseChannel}.${config.instanceId}`;
 
         // Make sure the service responded in the configured channel
         // Otherwise ignore the message.

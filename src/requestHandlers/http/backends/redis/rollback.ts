@@ -29,7 +29,7 @@ export default async function rollback(
       const redisRequest: RedisServiceHttpRequest = {
         id: requestId,
         request: httpRequest,
-        responseChannel: `${serviceConfig.config.responseChannel}.${config.instanceId}`,
+        responseChannel: `${httpConfig.redis?.responseChannel}.${config.instanceId}`,
         type: "rollback",
       };
 

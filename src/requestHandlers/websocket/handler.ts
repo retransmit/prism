@@ -5,9 +5,11 @@ import WebSocket from "ws";
 
 import * as configModule from "../../config";
 import randomId from "../../lib/random";
-import WebSocketRequestContext from "./RequestContext";
 import activeConnections from "./activeConnections";
-import { WebSocketRouteConfig } from "../../types/webSocketRequests";
+import {
+  WebSocketRouteConfig,
+  WebSocketRequest,
+} from "../../types/webSocketRequests";
 
 import sendToHttpService from "./backends/http/sendToService";
 import sendToRedisService from "./backends/redis/sendToService";
@@ -27,7 +29,7 @@ const connectors = [
 */
 export default function createHandler() {
   return async function websocketHandler(ctx: IRouterContext) {
-    return await handler(new WebSocketRequestContext(ctx));
+    return await handler(ctx);
   };
 }
 
@@ -54,6 +56,7 @@ function setupWebSocketHandling(
   routeConfig: WebSocketRouteConfig,
   websocketConfig: WebSocketProxyConfig
 ) {
+  const config = configModule.get();
   wss.on("connection", async function connection(
     ws: WebSocket,
     request: IncomingMessage
@@ -93,9 +96,16 @@ function setupWebSocketHandling(
 
           const messageToSend = onRequestHandlers
             ? await onRequestHandlers(message)
-            : { handled: false as false, request: {
-              
-            } };
+            : {
+                handled: false as false,
+                request: {
+                  id: requestId,
+                  type: "message",
+                  route,
+                  responseChannel: `${websocketConfig.redis?.responseChannel}.${config.instanceId}`,
+                  request: message,
+                } as WebSocketRequest,
+              };
 
           for (const connector of connectors) {
             connector.sendToService(
@@ -131,7 +141,7 @@ export function upgrade(
   }
 }
 
-async function handler(ctx: WebSocketRequestContext) {
+async function handler(ctx: IRouterContext) {
   const config = configModule.get();
   const requestId = randomId(32);
 }

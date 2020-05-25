@@ -53,8 +53,8 @@ export type FetchedHttpHandlerResponse = {
 export type RedisServiceHttpRequest = {
   id: string;
   type: string;
-  responseChannel: string;
   request: HttpRequest;
+  responseChannel: string;
 };
 
 export type RedisServiceHttpResponse = {
@@ -82,7 +82,6 @@ export type RedisServiceHttpHandlerConfig = {
   type: "redis";
   config: {
     requestChannel: string;
-    responseChannel: string;
     numRequestChannels?: number;
     onRequest?: (
       request: RedisServiceHttpRequest

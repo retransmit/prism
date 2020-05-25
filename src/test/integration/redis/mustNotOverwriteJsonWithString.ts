@@ -14,20 +14,21 @@ export default async function (app: { instance: any }) {
                   type: "redis" as "redis",
                   config: {
                     requestChannel: "input",
-                    responseChannel: "output",
                   },
                 },
                 messagingservice: {
                   type: "redis" as "redis",
                   config: {
                     requestChannel: "input",
-                    responseChannel: "output",
-                  }
+                  },
                 },
               },
             },
           },
-        }
+        },
+        redis: {
+          responseChannel: "output",
+        },
       },
     };
 
@@ -66,6 +67,8 @@ export default async function (app: { instance: any }) {
     const [response, json] = result;
     json.request.headers.origin.should.equal("http://localhost:3000");
     response.status.should.equal(500);
-    response.text.should.equal("messagingservice returned a response which will overwrite current response.")
+    response.text.should.equal(
+      "messagingservice returned a response which will overwrite current response."
+    );
   });
 }
