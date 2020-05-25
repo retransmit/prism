@@ -10,7 +10,11 @@ import * as configModule from "../../../../config";
 import got from "got";
 import responseIsError from "../../../../lib/http/responseIsError";
 import { makeHttpResponse } from "./makeHttpResponse";
-import { HttpRouteConfig, FetchedHttpHandlerResponse, InvokeServiceResult } from "../../../../types/httpRequests";
+import {
+  HttpRouteConfig,
+  FetchedHttpHandlerResponse,
+  InvokeServiceResult,
+} from "../../../../types/httpRequests";
 
 /*
   Make Promises for Http Services
@@ -114,7 +118,12 @@ export default function invokeServices(
                   success({ skip: false, response: fetchedResponse });
                 })
                 .catch(async (error) => {
-                  const httpResponse = makeHttpResponse(error.response);
+                  const httpResponse = error.response
+                    ? makeHttpResponse(error.response)
+                    : {
+                        status: 400,
+                        content: error.message,
+                      };
 
                   if (responseIsError(httpResponse)) {
                     if (serviceConfig.onError) {
@@ -135,7 +144,12 @@ export default function invokeServices(
                 });
             } else {
               got(requestToSend.path, options).catch(async (error) => {
-                const httpResponse = makeHttpResponse(error.response);
+                const httpResponse = error.response
+                  ? makeHttpResponse(error.response)
+                  : {
+                      status: 400,
+                      content: error.message,
+                    };
 
                 if (responseIsError(httpResponse)) {
                   if (serviceConfig.onError) {

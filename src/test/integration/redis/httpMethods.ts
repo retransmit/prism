@@ -21,7 +21,7 @@ export default async function (app: { instance: any }) {
               },
             },
           },
-        }
+        },
       },
     };
   }
@@ -55,10 +55,14 @@ export default async function (app: { instance: any }) {
         config,
         [redisServiceResponse],
         (success, getJson) => {
-          makeReq(request(app.instance), "/users")
-            .send({ hello: "world" })
-            .set("origin", "http://localhost:3000")
-            .then((x) => success([x, getJson()]));
+          method === "GET"
+            ? makeReq(request(app.instance), "/users")
+                .set("origin", "http://localhost:3000")
+                .then((x) => success([x, getJson()]))
+            : makeReq(request(app.instance), "/users")
+                .send({ hello: "world" })
+                .set("origin", "http://localhost:3000")
+                .then((x) => success([x, getJson()]));
         }
       );
 

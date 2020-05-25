@@ -9,7 +9,7 @@ export default function mergeResponses(
   requestId: string,
   responses: FetchedHttpHandlerResponse[],
   httpConfig: HttpProxyConfig
-): HttpResponse | undefined {
+): HttpResponse {
   const config = configModule.get();
   let finalResponse: HttpResponse = { status: 200, content: undefined };
 

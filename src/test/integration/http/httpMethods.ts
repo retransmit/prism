@@ -62,9 +62,15 @@ export default async function (app: { instance: any }) {
         },
       ]);
 
-      const response = await makeReq(request(app.instance), "/users")
-        .send({ hello: "world" })
-        .set("origin", "http://localhost:3000");
+      const response =
+        method === "GET"
+          ? await makeReq(request(app.instance), "/users").set(
+              "origin",
+              "http://localhost:3000"
+            )
+          : await makeReq(request(app.instance), "/users")
+              .send({ hello: "world" })
+              .set("origin", "http://localhost:3000");
 
       for (const backendApp of backendApps) {
         await closeServer(backendApp as any);

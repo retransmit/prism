@@ -1,12 +1,7 @@
 import { ClientOpts } from "redis";
 import { IncomingHttpHeaders } from "http2";
-import HttpRequestContext from "../requestHandlers/http/RequestContext";
 import { FetchedHttpHandlerResponse, HttpRouteConfig } from "./httpRequests";
-import {
-  WebSocketRouteConfig,
-  WebSocketRequest,
-  WebSocketResponse,
-} from "./webSocketRequests";
+import { WebSocketRouteConfig, WebSocketResponse } from "./webSocketRequests";
 import WebSocketRequestContext from "../requestHandlers/websocket/RequestContext";
 export {
   HttpServiceHttpHandlerConfig,
@@ -36,11 +31,16 @@ export type HttpProxyConfig = {
       [key in HttpMethods]?: HttpRouteConfig;
     };
   };
-  onRequest?: (ctx: HttpRequestContext) => Promise<{ handled: boolean }>;
+  onRequest?: (
+    request: HttpRequest
+  ) => Promise<
+    | { handled: true; response: HttpResponse }
+    | { handled: false; request: HttpRequest }
+  >;
   onResponse?: (
-    ctx: HttpRequestContext,
-    response: any
-  ) => Promise<{ handled: boolean }>;
+    request: HttpRequest,
+    response: HttpResponse
+  ) => Promise<HttpResponse>;
   genericErrors?: boolean;
   onError?: (
     responses: FetchedHttpHandlerResponse[],

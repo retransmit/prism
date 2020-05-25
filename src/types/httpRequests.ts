@@ -1,5 +1,4 @@
 import { HttpResponse, HttpRequest, HttpMethods } from ".";
-import HttpRequestContext from "../requestHandlers/http/RequestContext";
 
 /*
   RouteHandler Config
@@ -8,11 +7,16 @@ export type HttpRouteConfig = {
   services: {
     [key: string]: HttpHandlerConfig;
   };
-  onRequest?: (ctx: HttpRequestContext) => Promise<{ handled: boolean }>;
+  onRequest?: (
+    request: HttpRequest
+  ) => Promise<
+    | { handled: true; response: HttpResponse }
+    | { handled: false; request: HttpRequest }
+  >;
   onResponse?: (
-    ctx: HttpRequestContext,
-    response: any
-  ) => Promise<{ handled: boolean }>;
+    request: HttpRequest,
+    response: HttpResponse
+  ) => Promise<HttpResponse>;
   mergeResponses?: (
     responses: FetchedHttpHandlerResponse[]
   ) => Promise<FetchedHttpHandlerResponse[]>;
