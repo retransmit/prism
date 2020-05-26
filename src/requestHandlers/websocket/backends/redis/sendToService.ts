@@ -42,7 +42,7 @@ export default async function sendToService(
           : { handled: false as false, request: message };
 
         if (onRequestResult.handled) {
-          respond(onRequestResult.response, service, conn, websocketConfig);
+          respond(onRequestResult.response, conn, websocketConfig);
         } else {
           if (!alreadyPublishedChannels.includes(requestChannel)) {
             alreadyPublishedChannels.push(requestChannel);

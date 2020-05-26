@@ -60,7 +60,7 @@ export async function startWithConfiguration(
   redisInit();
   activeRedisRequestsInit();
   activeConnectionsInit();
-  
+
   await httpRedisServiceInit();
   await websocketRedisServiceInit();
 

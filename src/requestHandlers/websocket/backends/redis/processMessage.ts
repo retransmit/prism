@@ -21,14 +21,7 @@ export default function processMessage(websocketConfig: WebSocketProxyConfig) {
     const conn = activeConnections().get(redisResponse.id);
 
     if (conn) {
-      const serviceConfig =
-        websocketConfig.routes[conn.route].services[redisResponse.service];
-
-      const onResponseResult = serviceConfig.onResponse
-        ? await serviceConfig.onResponse(redisResponse)
-        : redisResponse;
-
-      respond(onResponseResult, redisResponse.service, conn, websocketConfig);
+      respond(redisResponse, conn, websocketConfig);
     } else {
       const serviceConfig = websocketConfig.routes[redisResponse.route]
         .services[redisResponse.service] as RedisServiceWebSocketHandlerConfig;

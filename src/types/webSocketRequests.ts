@@ -14,14 +14,18 @@ export type WebSocketRouteConfig = {
   ) => Promise<
     { handled: true; request: WebSocketRequest } | { handled: false }
   >;
-  onResponse?: (response: WebSocketResponse) => Promise<WebSocketRequest>;
+  onResponse?: (
+    response: WebSocketResponse
+  ) => Promise<WebSocketResponse>;
 };
 
 /*
   Service Configuration.
 */
 export type WebSocketHandlerConfigBase = {
-  onResponse?: (response: WebSocketResponse) => Promise<WebSocketResponse>;
+  onResponse?: (
+    response: WebSocketResponse
+  ) => Promise<WebSocketResponse>;
 };
 
 export type RedisServiceWebSocketHandlerConfig = {
