@@ -85,7 +85,7 @@ function setupWebSocketHandling(
             ws.terminate();
           } else {
             conn.initialized = true;
-            connect(conn, websocketConfig);
+            connect(requestId, conn, websocketConfig);
           }
         }
         // Regular message. Pass this on...
