@@ -24,6 +24,22 @@ export type WebSocketHandlerConfigBase = {
   onResponse?: (response: WebSocketResponse) => Promise<WebSocketResponse>;
 };
 
+export type HttpServiceWebSocketHandlerConfig = {
+  type: "http";
+  pollingInterval: number;
+  onRequest?: (
+    request: HttpRequest
+  ) => Promise<
+    | { handled: true; response: WebSocketResponse }
+    | { handled: false; request: HttpRequest }
+  >;
+  config: {
+    url: string;
+    onConnectUrl: string;
+    onDisconnectUrl: string;
+  };
+} & WebSocketHandlerConfigBase;
+
 export type RedisServiceWebSocketHandlerConfig = {
   type: "redis";
   onRequest?: (
@@ -35,22 +51,6 @@ export type RedisServiceWebSocketHandlerConfig = {
   config: {
     requestChannel: string;
     numRequestChannels?: number;
-  };
-} & WebSocketHandlerConfigBase;
-
-export type HttpServiceWebSocketHandlerConfig = {
-  type: "http";
-  pollingInterval: number;
-  onRequest?: (
-    request: HttpServiceWebSocketMessageRequest
-  ) => Promise<
-    | { handled: true; response: WebSocketResponse }
-    | { handled: false; request: HttpRequest }
-  >;
-  config: {
-    url: string;
-    onConnectUrl: string;
-    onDisconnectUrl: string;
   };
 } & WebSocketHandlerConfigBase;
 

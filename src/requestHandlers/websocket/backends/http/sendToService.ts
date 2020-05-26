@@ -1,7 +1,13 @@
-import { WebSocketProxyConfig } from "../../../../types";
+import { WebSocketProxyConfig, HttpRequest } from "../../../../types";
 import { ActiveWebSocketConnection } from "../../activeConnections";
-import { RedisServiceWebSocketRequest, HttpServiceWebSocketRequest, HttpServiceWebSocketMessageRequest } from "../../../../types/webSocketRequests";
+import {
+  HttpServiceWebSocketMessageRequest,
+  WebSocketResponse,
+} from "../../../../types/webSocketRequests";
 import respond from "../../respond";
+import { makeGotOptions } from "../../../../lib/http/gotUtil";
+import got from "got/dist/source";
+import { makeWebSocketResponse } from "./makeWebSocketResponse";
 
 export default async function sendToService(
   requestId: string,
@@ -23,14 +29,39 @@ export default async function sendToService(
         request: message,
       };
 
+      const httpRequest: HttpRequest = {
+        path: serviceConfig.config.url,
+        method: "POST",
+        body: websocketRequest,
+      };
+
       const onRequestResult = serviceConfig.onRequest
-        ? await serviceConfig.onRequest(websocketRequest)
+        ? await serviceConfig.onRequest(httpRequest)
         : { handled: false as false, request: message };
 
       if (onRequestResult.handled) {
         respond(onRequestResult.response, conn, websocketConfig);
       } else {
-        //TODO .... call service
+        const options = makeGotOptions(httpRequest);
+        got(serviceConfig.config.url, options)
+          .then(async (serverResponse) => {
+            const websocketResponse = makeWebSocketResponse(
+              serverResponse,
+              requestId
+            );
+            respond(websocketResponse, conn, websocketConfig);
+          })
+          .catch(async (error) => {
+            const websocketResponse: WebSocketResponse = error.response
+              ? makeWebSocketResponse(error.response, requestId)
+              : {
+                  id: requestId,
+                  response: error.message,
+                  route,
+                  service,
+                  type: "message",
+                };
+          });
       }
     }
   }

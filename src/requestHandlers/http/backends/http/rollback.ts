@@ -6,6 +6,7 @@ import * as configModule from "../../../../config";
 import responseIsError from "../../../../lib/http/responseIsError";
 import { makeHttpResponse } from "./makeHttpResponse";
 import { HttpRouteConfig } from "../../../../types/httpRequests";
+import { makeGotOptions } from "../../../../lib/http/gotUtil";
 
 /*
   Make Promises for Http Services
@@ -24,12 +25,13 @@ export default async function rollback(
   for (const service of Object.keys(routeConfig.services)) {
     const serviceConfig = routeConfig.services[service];
     if (serviceConfig.type === "http" && serviceConfig.config.rollbackUrl) {
-      const urlWithParamsReplaced = Object.keys(request.params).reduce(
-        (acc, param) => {
-          return acc.replace(`/:${param}`, `/${request.params[param]}`);
-        },
-        serviceConfig.config.rollbackUrl
-      );
+      const params = request.params;
+      const urlWithParamsReplaced = params
+        ? Object.keys(params).reduce((acc, param) => {
+            return acc.replace(`/:${param}`, `/${params[param]}`);
+          }, serviceConfig.config.rollbackUrl)
+        : serviceConfig.config.rollbackUrl;
+
       const requestCopy = {
         ...request,
         path: urlWithParamsReplaced,
@@ -40,25 +42,10 @@ export default async function rollback(
         : { handled: false as false, request: requestCopy };
 
       if (!modifiedRequest.handled) {
-        const basicOptions = {
-          searchParams: modifiedRequest.request.query,
-          method: modifiedRequest.request.method,
-          headers: modifiedRequest.request.headers,
-          timeout: serviceConfig.timeout,
-        };
-
-        const options =
-          typeof modifiedRequest.request.body === "string"
-            ? {
-                ...basicOptions,
-                body: modifiedRequest.request.body,
-              }
-            : typeof modifiedRequest.request.body === "object"
-            ? {
-                ...basicOptions,
-                json: modifiedRequest.request.body,
-              }
-            : basicOptions;
+        const options = makeGotOptions(
+          modifiedRequest.request,
+          serviceConfig.timeout
+        );
 
         got(modifiedRequest.request.path, options).catch(async (error) => {
           const httpResponse = error.response

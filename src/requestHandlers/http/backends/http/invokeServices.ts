@@ -15,6 +15,7 @@ import {
   FetchedHttpHandlerResponse,
   InvokeServiceResult,
 } from "../../../../types/httpRequests";
+import { makeGotOptions } from "../../../../lib/http/gotUtil";
 
 /*
   Make Promises for Http Services
@@ -41,12 +42,13 @@ export default function invokeServices(
     .map(
       ([service, serviceConfig]) =>
         new Promise(async (success) => {
-          const urlWithParamsReplaced = Object.keys(request.params).reduce(
-            (acc, param) => {
-              return acc.replace(`/:${param}`, `/${request.params[param]}`);
-            },
-            serviceConfig.config.url
-          );
+          const params = request.params || {};
+          const urlWithParamsReplaced = params
+            ? Object.keys(params).reduce((acc, param) => {
+                return acc.replace(`/:${param}`, `/${params[param]}`);
+              }, serviceConfig.config.url)
+            : serviceConfig.config.url;
+
           const requestCopy = {
             ...request,
             path: urlWithParamsReplaced,
@@ -75,25 +77,10 @@ export default function invokeServices(
           } else {
             const requestToSend = onRequestResult.request;
 
-            const basicOptions = {
-              searchParams: requestToSend.query,
-              method: method,
-              headers: requestToSend.headers,
-              timeout: serviceConfig.timeout,
-            };
-
-            const options =
-              typeof requestToSend.body === "string"
-                ? {
-                    ...basicOptions,
-                    body: requestToSend.body,
-                  }
-                : typeof requestToSend.body === "object"
-                ? {
-                    ...basicOptions,
-                    json: requestToSend.body,
-                  }
-                : basicOptions;
+            const options = makeGotOptions(
+              requestToSend,
+              serviceConfig.timeout
+            );
 
             if (serviceConfig.awaitResponse !== false) {
               got(requestToSend.path, options)

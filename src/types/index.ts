@@ -82,14 +82,14 @@ export type WebSocketProxyConfig = {
 export type HttpRequest = {
   path: string;
   method: HttpMethods;
-  params: {
+  params?: {
     [key: string]: string;
   };
-  query: {
+  query?: {
     [key: string]: string;
   };
-  body: any;
-  headers: {
+  body?: any;
+  headers?: {
     [key: string]: string;
   };
 };
