@@ -14,18 +14,14 @@ export type WebSocketRouteConfig = {
   ) => Promise<
     { handled: true; request: WebSocketRequest } | { handled: false }
   >;
-  onResponse?: (
-    response: WebSocketResponse
-  ) => Promise<WebSocketResponse>;
+  onResponse?: (response: WebSocketResponse) => Promise<WebSocketResponse>;
 };
 
 /*
   Service Configuration.
 */
 export type WebSocketHandlerConfigBase = {
-  onResponse?: (
-    response: WebSocketResponse
-  ) => Promise<WebSocketResponse>;
+  onResponse?: (response: WebSocketResponse) => Promise<WebSocketResponse>;
 };
 
 export type RedisServiceWebSocketHandlerConfig = {
@@ -79,13 +75,29 @@ export type HttpServiceWebSocketResponse = {
 /*
   Requests and Responses for Redis-based Services
 */
-export type WebSocketRequest = {
+export type WebSocketRequestBase = {
   id: string;
-  type: "connect" | "message" | "disconnect";
   route: string;
   responseChannel: string;
-  request: string;
 };
+
+export type WebSocketMessageRequest = {
+  type: "message";
+  request: string;
+} & WebSocketRequestBase;
+
+export type WebSocketConnectRequest = {
+  type: "connect";
+} & WebSocketRequestBase;
+
+export type WebSocketDisconnectRequest = {
+  type: "disconnect";
+} & WebSocketRequestBase;
+
+export type WebSocketRequest =
+  | WebSocketMessageRequest
+  | WebSocketConnectRequest
+  | WebSocketDisconnectRequest;
 
 export type WebSocketResponse = {
   id: string;

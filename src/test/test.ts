@@ -26,7 +26,7 @@ function run() {
   describe("retransmit", () => {
     let app: { instance: any } = { instance: undefined };
 
-    describe("integration", () => {
+    describe("http requests (integration)", () => {
       describe("redis", () => {
         afterEach(async function resetAfterEach() {
           await closeServer(app.instance);

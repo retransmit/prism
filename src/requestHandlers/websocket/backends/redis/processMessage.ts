@@ -30,7 +30,6 @@ export default function processMessage(websocketConfig: WebSocketProxyConfig) {
         id: redisResponse.id,
         type: "disconnect",
         route: redisResponse.route,
-        request: "CLIENT_HAS_DISCONNECTED",
         responseChannel: `${websocketConfig.redis?.responseChannel}.${config.instanceId}`,
       };
 

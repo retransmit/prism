@@ -77,7 +77,7 @@ function setupWebSocketHandling(
       } else {
         // If not initialized and there's an onConnect,
         // treat the first message as the onConnect argument.
-        if (routeConfig.onConnect && !conn.initialized) {
+        if (!conn.initialized && routeConfig.onConnect) {
           const onConnectResult = await routeConfig.onConnect(message);
 
           if (onConnectResult.drop) {
@@ -90,6 +90,9 @@ function setupWebSocketHandling(
         }
         // Regular message. Pass this on...
         else {
+          if (!conn.initialized) {
+            conn.initialized = true;
+          }
           const onRequestHandlers =
             websocketConfig.onRequest ||
             websocketConfig.routes[route].onRequest;

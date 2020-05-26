@@ -12,9 +12,7 @@ export default async function respond(
   conn: ActiveWebSocketConnection,
   websocketConfig: WebSocketProxyConfig
 ) {
-  if (websocketResponse.type === "disconnect") {
-    disconnect(websocketResponse, conn, websocketConfig);
-  } else {
+  if (websocketResponse.type === "message") {
     const routeConfig = websocketConfig.routes[websocketResponse.route];
     const serviceConfig = routeConfig.services[websocketResponse.service];
     const onResponse =
@@ -33,5 +31,7 @@ export default async function respond(
         conn.websocket.send(websocketResponse.response);
       }
     }
+  } else if (websocketResponse.type === "disconnect") {
+    disconnect(websocketResponse, conn, websocketConfig);
   }
 }
