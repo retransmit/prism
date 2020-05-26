@@ -2,8 +2,9 @@ import * as configModule from "../../../../config";
 import { WebSocketProxyConfig } from "../../../../types";
 import {
   WebSocketResponse,
-  WebSocketRequest,
+  RedisServiceWebSocketRequest,
   RedisServiceWebSocketHandlerConfig,
+  WebSocketNotConnectedRequest,
 } from "../../../../types/webSocketRequests";
 import { get as activeConnections } from "../../activeConnections";
 import respond from "../../respond";
@@ -26,11 +27,10 @@ export default function processMessage(websocketConfig: WebSocketProxyConfig) {
       const serviceConfig = websocketConfig.routes[redisResponse.route]
         .services[redisResponse.service] as RedisServiceWebSocketHandlerConfig;
 
-      const redisRequest: WebSocketRequest = {
+      const websocketRequest: WebSocketNotConnectedRequest = {
         id: redisResponse.id,
-        type: "disconnect",
-        route: redisResponse.route,
-        responseChannel: `${websocketConfig.redis?.responseChannel}.${config.instanceId}`,
+        type: "notconnected",
+        route: redisResponse.route
       };
 
       const requestChannel = getChannelForService(
@@ -38,7 +38,7 @@ export default function processMessage(websocketConfig: WebSocketProxyConfig) {
         serviceConfig.config.numRequestChannels
       );
 
-      getPublisher().publish(requestChannel, JSON.stringify(redisRequest));
+      getPublisher().publish(requestChannel, JSON.stringify(websocketRequest));
     }
   };
 }

@@ -39,7 +39,7 @@ export default function invokeServices(
     .map(
       ([service, serviceConfig]) =>
         new Promise(async (success) => {
-          const redisRequest: RedisServiceHttpRequest = {
+          const redisHttpRequest: RedisServiceHttpRequest = {
             id: requestId,
             request: httpRequest,
             responseChannel: `${httpConfig.redis?.responseChannel}.${config.instanceId}`,
@@ -48,8 +48,8 @@ export default function invokeServices(
 
           const timeBeforeOnRequestResult = Date.now();
           const onRequestResult = serviceConfig.config.onRequest
-            ? await serviceConfig.config.onRequest(redisRequest)
-            : { handled: false as false, request: redisRequest };
+            ? await serviceConfig.config.onRequest(redisHttpRequest)
+            : { handled: false as false, request: redisHttpRequest };
 
           if (onRequestResult.handled) {
             if (serviceConfig.awaitResponse !== false) {

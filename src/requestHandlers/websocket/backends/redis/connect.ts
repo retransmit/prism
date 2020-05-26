@@ -1,7 +1,8 @@
 import { WebSocketProxyConfig } from "../../../../types";
 import {
   RedisServiceWebSocketHandlerConfig,
-  WebSocketRequest,
+  RedisServiceWebSocketRequest,
+  RedisServiceWebSocketConnectRequest,
 } from "../../../../types/webSocketRequests";
 import * as configModule from "../../../../config";
 import { getPublisher } from "../../../../lib/redis/clients";
@@ -20,7 +21,7 @@ export default function connect(
     handlerConfig.config.numRequestChannels
   );
 
-  const request: WebSocketRequest = {
+  const request: RedisServiceWebSocketConnectRequest = {
     id: requestId,
     type: "connect",
     route,

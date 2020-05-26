@@ -26,7 +26,7 @@ export default async function rollback(
   for (const service of Object.keys(routeConfig.services)) {
     const serviceConfig = routeConfig.services[service];
     if (serviceConfig.type === "redis") {
-      const redisRequest: RedisServiceHttpRequest = {
+      const redisHttpRequest: RedisServiceHttpRequest = {
         id: requestId,
         request: httpRequest,
         responseChannel: `${httpConfig.redis?.responseChannel}.${config.instanceId}`,
@@ -40,8 +40,8 @@ export default async function rollback(
 
       if (!alreadyPublishedChannels.includes(requestChannel)) {
         const onRollbackRequestResult = serviceConfig.config.onRollbackRequest
-          ? await serviceConfig.config.onRollbackRequest(redisRequest)
-          : { handled: false as false, request: redisRequest };
+          ? await serviceConfig.config.onRollbackRequest(redisHttpRequest)
+          : { handled: false as false, request: redisHttpRequest };
 
         if (!onRollbackRequestResult.handled) {
           alreadyPublishedChannels.push(requestChannel);

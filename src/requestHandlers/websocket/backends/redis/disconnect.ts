@@ -1,7 +1,8 @@
 import { WebSocketProxyConfig } from "../../../../types";
 import {
   RedisServiceWebSocketHandlerConfig,
-  WebSocketRequest,
+  RedisServiceWebSocketRequest,
+  WebSocketDisconnectRequest,
 } from "../../../../types/webSocketRequests";
 import * as configModule from "../../../../config";
 import { getPublisher } from "../../../../lib/redis/clients";
@@ -20,9 +21,8 @@ export default function disconnect(
     handlerConfig.config.numRequestChannels
   );
 
-  const request: WebSocketRequest = {
+  const request: WebSocketDisconnectRequest = {
     id: requestId,
-    responseChannel: `${websocketConfig.redis?.responseChannel}.${config.instanceId}`,
     route,
     type: "disconnect"
   };

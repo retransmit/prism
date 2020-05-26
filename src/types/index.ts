@@ -4,7 +4,7 @@ import { FetchedHttpHandlerResponse, HttpRouteConfig } from "./httpRequests";
 import {
   WebSocketRouteConfig,
   WebSocketResponse,
-  WebSocketRequest,
+  RedisServiceWebSocketRequest,
 } from "./webSocketRequests";
 
 export {

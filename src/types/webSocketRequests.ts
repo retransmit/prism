@@ -12,7 +12,7 @@ export type WebSocketRouteConfig = {
   onRequest?: (
     message: string
   ) => Promise<
-    { handled: true; request: WebSocketRequest } | { handled: false }
+    { handled: true; request: string } | { handled: false }
   >;
   onResponse?: (response: WebSocketResponse) => Promise<WebSocketResponse>;
 };
@@ -27,10 +27,10 @@ export type WebSocketHandlerConfigBase = {
 export type RedisServiceWebSocketHandlerConfig = {
   type: "redis";
   onRequest?: (
-    request: WebSocketRequest
+    request: RedisServiceWebSocketMessageRequest
   ) => Promise<
     | { handled: true; response: WebSocketResponse }
-    | { handled: false; request: WebSocketRequest }
+    | { handled: false; request: RedisServiceWebSocketRequest }
   >;
   config: {
     requestChannel: string;
@@ -42,7 +42,7 @@ export type HttpServiceWebSocketHandlerConfig = {
   type: "http";
   pollingInterval: number;
   onRequest?: (
-    request: WebSocketRequest
+    request: HttpServiceWebSocketMessageRequest
   ) => Promise<
     | { handled: true; response: WebSocketResponse }
     | { handled: false; request: HttpRequest }
@@ -59,27 +59,8 @@ export type WebSocketHandlerConfig =
   | HttpServiceWebSocketHandlerConfig;
 
 /*
-  Requests and Responses for Http Services
+  WebSocket Requests and Responses
 */
-export type HttpServiceWebSocketRequest = {
-  id: string;
-  request: string;
-};
-
-export type HttpServiceWebSocketResponse = {
-  id: string;
-  service: string;
-  response: string;
-};
-
-/*
-  Requests and Responses for Redis-based Services
-*/
-export type WebSocketRequestBase = {
-  id: string;
-  route: string;
-  responseChannel: string;
-};
 
 export type WebSocketMessageRequest = {
   type: "message";
@@ -94,10 +75,9 @@ export type WebSocketDisconnectRequest = {
   type: "disconnect";
 } & WebSocketRequestBase;
 
-export type WebSocketRequest =
-  | WebSocketMessageRequest
-  | WebSocketConnectRequest
-  | WebSocketDisconnectRequest;
+export type WebSocketNotConnectedRequest = {
+  type: "notconnected";
+} & WebSocketRequestBase;
 
 export type WebSocketResponse = {
   id: string;
@@ -106,3 +86,44 @@ export type WebSocketResponse = {
   service: string;
   response: string;
 };
+
+/*
+  Requests and Responses for Http Services
+*/
+export type HttpServiceWebSocketMessageRequest = WebSocketMessageRequest;
+export type HttpServiceWebSocketConnectRequest = WebSocketConnectRequest;
+
+export type HttpServiceWebSocketRequest =
+| HttpServiceWebSocketMessageRequest
+| HttpServiceWebSocketConnectRequest
+| WebSocketDisconnectRequest
+| WebSocketNotConnectedRequest;
+
+export type HttpServiceWebSocketResponse = {
+  id: string;
+  service: string;
+  response: string;
+};
+
+/*
+  Requests and Responses for Redis-based Services
+*/
+export type WebSocketRequestBase = {
+  id: string;
+  route: string;
+};
+
+export type RedisServiceWebSocketMessageRequest = {
+  responseChannel: string;
+} & WebSocketMessageRequest;
+
+export type RedisServiceWebSocketConnectRequest = {
+  responseChannel: string;
+} & WebSocketConnectRequest;
+
+export type RedisServiceWebSocketRequest =
+  | RedisServiceWebSocketMessageRequest
+  | RedisServiceWebSocketConnectRequest
+  | WebSocketDisconnectRequest
+  | WebSocketNotConnectedRequest;
+

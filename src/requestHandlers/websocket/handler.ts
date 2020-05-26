@@ -8,7 +8,7 @@ import randomId from "../../lib/random";
 import { get as activeConnections } from "./activeConnections";
 import {
   WebSocketRouteConfig,
-  WebSocketRequest,
+  RedisServiceWebSocketRequest,
 } from "../../types/webSocketRequests";
 
 import sendToHttpService from "./backends/http/sendToService";
@@ -107,7 +107,7 @@ function setupWebSocketHandling(
                   route,
                   responseChannel: `${websocketConfig.redis?.responseChannel}.${config.instanceId}`,
                   request: message,
-                } as WebSocketRequest,
+                } as RedisServiceWebSocketRequest,
               };
 
           for (const connector of connectors) {
