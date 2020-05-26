@@ -1,5 +1,5 @@
 import * as configModule from "../../../../config";
-import activeRequests from "./activeRequests";
+import { get as activeRequests } from "./activeRequests";
 import responseIsError from "../../../../lib/http/responseIsError";
 import {
   RedisServiceHttpResponse,
@@ -17,11 +17,11 @@ export default function processMessage(httpConfig: HttpProxyConfig) {
     const redisResponse = JSON.parse(messageString) as RedisServiceHttpResponse;
 
     const activeRequestId = `${redisResponse.id}+${redisResponse.service}`;
-    const activeRequest = activeRequests.get(activeRequestId);
+    const activeRequest = activeRequests().get(activeRequestId);
 
     if (activeRequest) {
       // We're going to process it. So remove it.
-      activeRequests.delete(activeRequestId);
+      activeRequests().delete(activeRequestId);
 
       const routeConfig = httpConfig.routes[activeRequest.request.path][
         activeRequest.request.method

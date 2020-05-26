@@ -3,11 +3,12 @@ import { startWithConfiguration } from "../../..";
 import startBackends from "./startBackends";
 import { closeServer } from "../../utils";
 import { Server } from "net";
+import random from "../../../lib/random";
 
 export default async function (app: { instance: any }) {
   it(`rolls back`, async () => {
     const config = {
-      instanceId: "testinstance",
+      instanceId: random(),
       http: {
         routes: {
           "/users": {

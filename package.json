@@ -7,7 +7,7 @@
   ],
   "scripts": {
     "build": "./build.sh",
-    "test": "./build.sh && mocha --exit dist/test/test.js"
+    "test": "./build.sh && mocha --exit dist/test/test.js --timeout 5000"
   },
   "bin": {
     "retransmit": "dist/index.js"

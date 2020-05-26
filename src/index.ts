@@ -21,6 +21,9 @@ import createWebSocketRequestHandler, {
 import { init as redisInit } from "./lib/redis/clients";
 import httpRedisServiceInit from "./requestHandlers/http/backends/redis/init";
 import websocketRedisServiceInit from "./requestHandlers/http/backends/redis/init";
+import { init as activeRedisRequestsInit } from "./requestHandlers/http/backends/redis/activeRequests";
+import { init as activeConnectionsInit } from "./requestHandlers/websocket/activeConnections";
+
 import random from "./lib/random";
 
 const packageJson = require("../package.json");
@@ -55,6 +58,9 @@ export async function startWithConfiguration(
 
   // Init redis
   redisInit();
+  activeRedisRequestsInit();
+  activeConnectionsInit();
+  
   await httpRedisServiceInit();
   await websocketRedisServiceInit();
 

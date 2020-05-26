@@ -5,7 +5,7 @@ import {
   HttpProxyConfig,
 } from "../../../../types";
 
-import activeRequests from "./activeRequests";
+import { get as activeRequests } from "./activeRequests";
 import * as configModule from "../../../../config";
 import { getPublisher } from "../../../../lib/redis/clients";
 import { getChannelForService } from "../../../../lib/redis/getChannelForService";
@@ -81,7 +81,7 @@ export default function invokeServices(
                   JSON.stringify(onRequestResult.request)
                 );
               }
-              activeRequests.set(`${requestId}+${service}`, {
+              activeRequests().set(`${requestId}+${service}`, {
                 id: requestId,
                 request: httpRequest,
                 service,

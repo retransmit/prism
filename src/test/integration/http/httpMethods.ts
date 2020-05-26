@@ -4,11 +4,12 @@ import Koa = require("koa");
 import { startWithConfiguration } from "../../..";
 import startBackends from "./startBackends";
 import { closeServer } from "../../utils";
+import random from "../../../lib/random";
 
 export default async function (app: { instance: any }) {
   function makeConfig(options: { method: HttpMethods }): IAppConfig {
     return {
-      instanceId: "testinstance",
+      instanceId: random(),
       http: {
         routes: {
           "/users": {

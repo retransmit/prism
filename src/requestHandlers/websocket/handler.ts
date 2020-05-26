@@ -5,7 +5,7 @@ import WebSocket from "ws";
 
 import * as configModule from "../../config";
 import randomId from "../../lib/random";
-import activeConnections from "./activeConnections";
+import { get as activeConnections } from "./activeConnections";
 import {
   WebSocketRouteConfig,
   WebSocketRequest,
@@ -62,14 +62,14 @@ function setupWebSocketHandling(
     request: IncomingMessage
   ) {
     const requestId = randomId();
-    activeConnections.set(requestId, {
+    activeConnections().set(requestId, {
       initialized: false,
       route,
       websocket: ws,
     });
 
     ws.on("message", async function message(message: string) {
-      const conn = activeConnections.get(requestId);
+      const conn = activeConnections().get(requestId);
 
       // This should never happen.
       if (!conn) {
@@ -81,7 +81,7 @@ function setupWebSocketHandling(
           const onConnectResult = await routeConfig.onConnect(message);
 
           if (onConnectResult.drop) {
-            activeConnections.delete(requestId);
+            activeConnections().delete(requestId);
             ws.terminate();
           } else {
             conn.initialized = true;

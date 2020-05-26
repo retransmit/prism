@@ -2,11 +2,12 @@ import request = require("supertest");
 import { startWithConfiguration } from "../../..";
 import startBackends from "./startBackends";
 import { closeServer } from "../../utils";
+import random from "../../../lib/random";
 
 export default async function (app: { instance: any }) {
   it(`does not merge ignored results`, async () => {
     const config = {
-      instanceId: "testinstance",
+      instanceId: random(),
       http: {
         routes: {
           "/users": {

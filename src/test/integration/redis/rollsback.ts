@@ -1,11 +1,12 @@
 import request = require("supertest");
 import { doPubSub } from "./utils";
 import * as redis from "redis";
+import random from "../../../lib/random";
 
 export default async function (app: { instance: any }) {
   it(`rolls back`, async () => {
     const config = {
-      instanceId: "testinstance",
+      instanceId: random(),
       http: {
         routes: {
           "/users": {

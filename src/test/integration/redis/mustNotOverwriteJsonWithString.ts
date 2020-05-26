@@ -1,10 +1,11 @@
 import request = require("supertest");
 import { doPubSub } from "./utils";
+import random from "../../../lib/random";
 
 export default async function (app: { instance: any }) {
   it(`must not overwrite json content with string content`, async () => {
     const config = {
-      instanceId: "testinstance",
+      instanceId: random(),
       http: {
         routes: {
           "/users": {

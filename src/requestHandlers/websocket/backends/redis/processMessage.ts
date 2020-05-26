@@ -5,7 +5,7 @@ import {
   WebSocketRequest,
   RedisServiceWebSocketHandlerConfig,
 } from "../../../../types/webSocketRequests";
-import activeConnections from "../../activeConnections";
+import { get as activeConnections } from "../../activeConnections";
 import respond from "../../respond";
 import { getPublisher } from "../../../../lib/redis/clients";
 import { getChannelForService } from "../../../../lib/redis/getChannelForService";
@@ -18,7 +18,7 @@ export default function processMessage(websocketConfig: WebSocketProxyConfig) {
     const config = configModule.get();
     const redisResponse = JSON.parse(messageString) as WebSocketResponse;
 
-    const conn = activeConnections.get(redisResponse.id);
+    const conn = activeConnections().get(redisResponse.id);
 
     if (conn) {
       const serviceConfig =

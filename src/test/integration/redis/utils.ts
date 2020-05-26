@@ -38,7 +38,7 @@ export async function doPubSub(
           },
         };
         publisher.publish(
-          "output.testinstance",
+          `output.${config.instanceId}`,
           JSON.stringify({
             ...response,
             id: json.id,

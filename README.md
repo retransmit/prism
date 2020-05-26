@@ -577,7 +577,7 @@ Doing WebSockets with Redis Services is easy. For the example above, the Redis S
 {
   "id": "sl98sndflksdlfksomeid",
   "type": "request",
-  "responseChannel": "outputs",
+  "responseChannel": "output.instanceid",
   "request": {
     "body": {
       "action": "GET_QUOTE",

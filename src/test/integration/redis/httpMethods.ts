@@ -1,11 +1,12 @@
 import { HttpMethods, IAppConfig } from "../../../types";
 import request = require("supertest");
 import { doPubSub } from "./utils";
+import random from "../../../lib/random";
 
 export default async function (app: { instance: any }) {
   function makeConfig(options: { method: HttpMethods }): IAppConfig {
     return {
-      instanceId: "testinstance",
+      instanceId: random(),
       http: {
         routes: {
           "/users": {

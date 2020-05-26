@@ -1,10 +1,11 @@
 import request = require("supertest");
 import { doPubSub } from "./utils";
+import random from "../../../lib/random";
 
 export default async function (app: { instance: any }) {
   it(`shows generic errors for service`, async () => {
     const config = {
-      instanceId: "testinstance",
+      instanceId: random(),
       http: {
         routes: {
           "/users": {
@@ -73,7 +74,7 @@ export default async function (app: { instance: any }) {
 
   it(`shows generic errors for all services`, async () => {
     const config = {
-      instanceId: "testinstance",
+      instanceId: random(),
       http: {
         routes: {
           "/users": {

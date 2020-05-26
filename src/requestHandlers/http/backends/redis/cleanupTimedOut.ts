@@ -1,4 +1,4 @@
-import activeRequests, { ActiveHttpRequest } from "./activeRequests";
+import { get as activeRequests, ActiveHttpRequest } from "./activeRequests";
 import {
   HttpRouteConfig,
   FetchedHttpHandlerResponse,
@@ -14,12 +14,12 @@ export default function cleanupTimedOut(httpConfig: HttpProxyConfig) {
   return async function cleanupTimedOutImpl() {
     if (!isCleaningUp) {
       isCleaningUp = true;
-      const entries = activeRequests.entries();
+      const entries = activeRequests().entries();
 
       const timedOut: [string, ActiveHttpRequest][] = [];
       for (const [id, activeRequest] of entries) {
         if (Date.now() > activeRequest.timeoutAt) {
-          activeRequests.delete(id);
+          activeRequests().delete(id);
           timedOut.push([activeRequest.id, activeRequest]);
         }
       }
