@@ -7,10 +7,10 @@ import {
   HttpResponse,
 } from "../../types";
 import randomId from "../../lib/random";
-import invokeHttpServices from "./backends/http/invokeServices";
-import rollbackHttp from "./backends/http/rollback";
-import invokeRedisServices from "./backends/redis/invokeServices";
-import rollbackRedis from "./backends/redis/rollback";
+import httpServiceInvoke from "./backends/http/invokeServices";
+import httpServiceRollback from "./backends/http/rollback";
+import redisServiceInvoke from "./backends/redis/invokeServices";
+import redisServiceRollback from "./backends/redis/rollback";
 import mergeResponses from "./mergeResponses";
 import responseIsError from "../../lib/http/responseIsError";
 import {
@@ -20,11 +20,11 @@ import {
 } from "../../types/httpRequests";
 
 const connectors = [
-  { type: "http", invokeServices: invokeHttpServices, rollback: rollbackHttp },
+  { type: "http", invoke: httpServiceInvoke, rollback: httpServiceRollback },
   {
     type: "redis",
-    invokeServices: invokeRedisServices,
-    rollback: rollbackRedis,
+    invoke: redisServiceInvoke,
+    rollback: redisServiceRollback,
   },
 ];
 
@@ -64,7 +64,7 @@ async function handler(
       let promises: Promise<InvokeServiceResult>[] = [];
       for (const connector of connectors) {
         promises = promises.concat(
-          connector.invokeServices(requestId, request, httpConfig)
+          connector.invoke(requestId, request, httpConfig)
         );
       }
 
