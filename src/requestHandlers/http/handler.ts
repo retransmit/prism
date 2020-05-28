@@ -181,5 +181,7 @@ function makeHttpRequestFromContext(ctx: IRouterContext): HttpRequest {
     query: ctx.query,
     body: ctx.method === "GET" ? undefined : ctx.request.body,
     headers: ctx.headers,
+    remoteAddress: ctx.ip,
+    remotePort: ctx.req.socket.remotePort
   };
 }

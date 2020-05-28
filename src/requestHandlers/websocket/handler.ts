@@ -62,10 +62,20 @@ function setupWebSocketHandling(
     request: IncomingMessage
   ) {
     const requestId = randomId();
+
+    const xForwardedFor = request.headers["x-forwarded-for"];
+    const ip = Array.isArray(xForwardedFor)
+      ? xForwardedFor[0]
+      : xForwardedFor
+      ? xForwardedFor.split(/\s*,\s*/)[0]
+      : request.socket.remoteAddress;
+
     activeConnections().set(requestId, {
       initialized: false,
       route,
       websocket: ws,
+      ip,
+      port: request.socket.remotePort
     });
 
     ws.on("message", async function message(message: string) {

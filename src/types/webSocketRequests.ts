@@ -15,6 +15,7 @@ export type WebSocketRouteConfig = {
     { handled: true; request: string } | { handled: false }
   >;
   onResponse?: (response: WebSocketResponse) => Promise<WebSocketResponse>;
+  onError?: (response: any) => Promise<void>;
 };
 
 /*

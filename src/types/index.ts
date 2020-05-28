@@ -71,9 +71,8 @@ export type WebSocketProxyConfig = {
     | { handled: true; response: WebSocketResponse }
     | { handled: false; request: string }
   >;
-  onResponse?: (
-    response: WebSocketResponse
-  ) => Promise<WebSocketResponse>;
+  onResponse?: (response: WebSocketResponse) => Promise<WebSocketResponse>;
+  onError?: (response: any) => Promise<void>;
 };
 
 /*
@@ -92,6 +91,8 @@ export type HttpRequest = {
   headers?: {
     [key: string]: string;
   };
+  remoteAddress: string | undefined;
+  remotePort: number | undefined;
 };
 
 export type HttpResponse = {

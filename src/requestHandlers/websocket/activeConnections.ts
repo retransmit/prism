@@ -4,6 +4,8 @@ export type ActiveWebSocketConnection = {
   initialized: boolean;
   route: string;
   websocket: WebSocket;
+  ip: string | undefined;
+  port: number | undefined;
 };
 
 let map: Map<string, ActiveWebSocketConnection> = new Map<
