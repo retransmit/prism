@@ -13,12 +13,12 @@ import {
 */
 export default async function rollback(
   requestId: string,
-  httpRequest: HttpRequest,
+  request: HttpRequest,
   httpConfig: HttpProxyConfig
 ) {
   const config = configModule.get();
-  const routeConfig = httpConfig.routes[httpRequest.path][
-    httpRequest.method
+  const routeConfig = httpConfig.routes[request.path][
+    request.method
   ] as HttpRouteConfig;
 
   const alreadyPublishedChannels: string[] = [];
@@ -28,7 +28,7 @@ export default async function rollback(
     if (serviceConfig.type === "redis") {
       const redisHttpRequest: RedisServiceHttpRequest = {
         id: requestId,
-        request: httpRequest,
+        request: request,
         responseChannel: `${httpConfig.redis?.responseChannel}.${config.instanceId}`,
         type: "rollback",
       };

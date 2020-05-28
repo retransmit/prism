@@ -59,12 +59,12 @@ async function handler(
     sendResponse(ctx, modResult.response, routeConfig, httpConfig);
   } else {
     if (routeConfig) {
-      const httpRequest = modResult.request;
+      const request = modResult.request;
 
       let promises: Promise<InvokeServiceResult>[] = [];
       for (const connector of connectors) {
         promises = promises.concat(
-          connector.invokeServices(requestId, httpRequest, httpConfig)
+          connector.invokeServices(requestId, request, httpConfig)
         );
       }
 
@@ -87,17 +87,17 @@ async function handler(
 
       if (responseIsError(response)) {
         if (httpConfig.onError) {
-          httpConfig.onError(fetchedResponses, httpRequest);
+          httpConfig.onError(fetchedResponses, request);
         }
         for (const connector of connectors) {
-          connector.rollback(requestId, httpRequest, httpConfig);
+          connector.rollback(requestId, request, httpConfig);
         }
       }
 
       // Are there custom handlers for the response?
       const onResponse = routeConfig.onResponse || httpConfig.onResponse;
       const responseToSend = onResponse
-        ? await onResponse(httpRequest, response)
+        ? await onResponse(request, response)
         : response;
 
       sendResponse(ctx, responseToSend, routeConfig, httpConfig);

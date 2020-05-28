@@ -20,12 +20,12 @@ import {
 */
 export default function invokeServices(
   requestId: string,
-  httpRequest: HttpRequest,
+  request: HttpRequest,
   httpConfig: HttpProxyConfig
 ): Promise<InvokeServiceResult>[] {
   const config = configModule.get();
-  const routeConfig = httpConfig.routes[httpRequest.path][
-    httpRequest.method
+  const routeConfig = httpConfig.routes[request.path][
+    request.method
   ] as HttpRouteConfig;
 
   const alreadyPublishedChannels: string[] = [];
@@ -41,7 +41,7 @@ export default function invokeServices(
         new Promise(async (success) => {
           const redisHttpRequest: RedisServiceHttpRequest = {
             id: requestId,
-            request: httpRequest,
+            request: request,
             responseChannel: `${httpConfig.redis?.responseChannel}.${config.instanceId}`,
             type: "request",
           };
@@ -58,8 +58,8 @@ export default function invokeServices(
                 response: {
                   type: "redis",
                   id: requestId,
-                  method: httpRequest.method,
-                  path: httpRequest.path,
+                  method: request.method,
+                  path: request.path,
                   service,
                   time: Date.now() - timeBeforeOnRequestResult,
                   response: onRequestResult.response,
@@ -83,7 +83,7 @@ export default function invokeServices(
               }
               activeRequests().set(`${requestId}+${service}`, {
                 id: requestId,
-                request: httpRequest,
+                request: request,
                 service,
                 timeoutAt: Date.now() + (serviceConfig.timeout || 30000),
                 startTime: Date.now(),

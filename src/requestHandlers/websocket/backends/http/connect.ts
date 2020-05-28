@@ -33,7 +33,7 @@ export default function disconnect(
           route,
         };
 
-        const httpRequest: HttpRequest = {
+        const request: HttpRequest = {
           path: serviceConfig.config.onDisconnectUrl,
           method: "POST",
           body: websocketRequest,
@@ -41,7 +41,7 @@ export default function disconnect(
           remotePort: conn.port
         };
 
-        const options = makeGotOptions(httpRequest);
+        const options = makeGotOptions(request);
 
         got(serviceConfig.config.url, options).catch(async (error) => {
           // TODO...

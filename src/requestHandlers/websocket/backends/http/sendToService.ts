@@ -29,7 +29,7 @@ export default async function sendToService(
         request: message,
       };
 
-      const httpRequest: HttpRequest = {
+      const request: HttpRequest = {
         path: serviceConfig.config.url,
         method: "POST",
         body: websocketRequest,
@@ -38,13 +38,13 @@ export default async function sendToService(
       };
 
       const onRequestResult = serviceConfig.onRequest
-        ? await serviceConfig.onRequest(requestId, httpRequest)
+        ? await serviceConfig.onRequest(requestId, request)
         : { handled: false as false, request: message };
 
       if (onRequestResult.handled) {
         respond(requestId, onRequestResult.response, conn, websocketConfig);
       } else {
-        const options = makeGotOptions(httpRequest);
+        const options = makeGotOptions(request);
         got(serviceConfig.config.url, options)
           .then(async (serverResponse) => {
             const websocketResponse = makeWebSocketResponse(
