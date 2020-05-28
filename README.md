@@ -495,7 +495,7 @@ module.exports = {
           onError?: (
             response: HttpResponse,
             request: HttpRequest
-          ) => Promise<void>;
+          ) => any;
         */
               onError: async (response, request) => {
                 console.log("Failed in messagingservice.");
@@ -513,7 +513,7 @@ module.exports = {
     onError?: (
       responses: FetchedResponse[],
       request: HttpRequest
-    ) => Promise<void>;
+    ) => any;
   */
     onError: async (responses, request) => {
       console.log("Something failed somewhere.");

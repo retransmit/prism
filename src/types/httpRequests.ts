@@ -18,13 +18,14 @@ export type HttpRouteConfig = {
     response: HttpResponse
   ) => Promise<HttpResponse>;
   mergeResponses?: (
-    responses: FetchedHttpHandlerResponse[]
+    responses: FetchedHttpHandlerResponse[],
+    request: HttpRequest
   ) => Promise<FetchedHttpHandlerResponse[]>;
   genericErrors?: boolean;
   onError?: (
     responses: FetchedHttpHandlerResponse[],
     request: HttpRequest
-  ) => Promise<void>;
+  ) => any;
 };
 
 /*
@@ -44,7 +45,7 @@ export type FetchedHttpHandlerResponse = {
   time: number;
   path: string;
   method: HttpMethods;
-  response?: HttpResponse;
+  response: HttpResponse;
 };
 
 /*
@@ -72,10 +73,7 @@ export type HttpHandlerConfigBase = {
   timeout?: number;
   mergeField?: string;
   onResponse?: (response: HttpResponse) => Promise<HttpResponse>;
-  onError?: (
-    response: HttpResponse | undefined,
-    request: HttpRequest
-  ) => Promise<void>;
+  onError?: (response: HttpResponse | undefined, request: HttpRequest) => any;
 };
 
 export type RedisServiceHttpHandlerConfig = {

@@ -41,6 +41,8 @@ export default function disconnect(
 
         const options = makeGotOptions(httpRequest);
 
+        // We don't care about the response here.
+        // The client has already disco'ed.
         got(serviceConfig.config.url, options).catch(async (error) => {
           // TODO...
         });

@@ -11,7 +11,7 @@ export type WebSocketRouteConfig = {
     requestId: string,
     message: string
   ) => Promise<{ drop: boolean }>;
-  onDisconnect?: (requestId: string) => Promise<void>;
+  onDisconnect?: (requestId: string) => any;
   onRequest?: (
     requestId: string,
     message: string
@@ -20,7 +20,7 @@ export type WebSocketRouteConfig = {
     requestId: string,
     response: WebSocketResponse
   ) => Promise<WebSocketResponse>;
-  onError?: (requestId: string, response: any) => Promise<void>;
+  onError?: (requestId: string, response: any) => any;
 };
 
 /*

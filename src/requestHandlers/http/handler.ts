@@ -48,7 +48,7 @@ async function handler(
   const requestId = randomId(32);
   const routeConfig = httpConfig.routes[originalRequest.path][method];
 
-  // If there are custom handlers, try that first.
+  // Are there custom handlers for the request?
   const onRequest = routeConfig?.onRequest || httpConfig.onRequest;
 
   const modResult = onRequest
@@ -80,7 +80,7 @@ async function handler(
         .map((x) => x.response);
 
       const fetchedResponses = routeConfig.mergeResponses
-        ? await routeConfig.mergeResponses(validResponses)
+        ? await routeConfig.mergeResponses(validResponses, originalRequest)
         : validResponses;
 
       let response = mergeResponses(requestId, fetchedResponses, httpConfig);
@@ -94,14 +94,13 @@ async function handler(
         }
       }
 
-      // See if there are any custom handlers for final response
+      // Are there custom handlers for the response?
       const onResponse = routeConfig.onResponse || httpConfig.onResponse;
-      if (onResponse) {
-        const modResult = await onResponse(httpRequest, response);
-        sendResponse(ctx, modResult, routeConfig, httpConfig);
-      } else {
-        sendResponse(ctx, response, routeConfig, httpConfig);
-      }
+      const responseToSend = onResponse
+        ? await onResponse(httpRequest, response)
+        : response;
+
+      sendResponse(ctx, responseToSend, routeConfig, httpConfig);
     }
   }
 }
@@ -182,6 +181,6 @@ function makeHttpRequestFromContext(ctx: IRouterContext): HttpRequest {
     body: ctx.method === "GET" ? undefined : ctx.request.body,
     headers: ctx.headers,
     remoteAddress: ctx.ip,
-    remotePort: ctx.req.socket.remotePort
+    remotePort: ctx.req.socket.remotePort,
   };
 }
