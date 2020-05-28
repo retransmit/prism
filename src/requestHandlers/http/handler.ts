@@ -97,7 +97,7 @@ async function handler(
       // Are there custom handlers for the response?
       const onResponse = routeConfig.onResponse || httpConfig.onResponse;
       const responseToSend = onResponse
-        ? await onResponse(request, response)
+        ? await onResponse(response, request)
         : response;
 
       sendResponse(ctx, responseToSend, routeConfig, httpConfig);

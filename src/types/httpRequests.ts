@@ -14,8 +14,8 @@ export type HttpRouteConfig = {
     | { handled: false; request: HttpRequest }
   >;
   onResponse?: (
-    request: HttpRequest,
-    response: HttpResponse
+    response: HttpResponse,
+    request: HttpRequest
   ) => Promise<HttpResponse>;
   mergeResponses?: (
     responses: FetchedHttpHandlerResponse[],
