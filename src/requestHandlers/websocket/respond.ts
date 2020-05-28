@@ -8,6 +8,7 @@ import { ActiveWebSocketConnection } from "./activeConnections";
 import { WebSocketProxyConfig } from "../../types";
 
 export default async function respond(
+  requestId: string,
   websocketResponse: WebSocketResponse,
   conn: ActiveWebSocketConnection,
   websocketConfig: WebSocketProxyConfig
@@ -21,7 +22,7 @@ export default async function respond(
       websocketConfig.onResponse;
 
     const finalResponse = onResponse
-      ? await onResponse(websocketResponse)
+      ? await onResponse(requestId, websocketResponse)
       : websocketResponse;
 
     if (finalResponse.type === "disconnect") {

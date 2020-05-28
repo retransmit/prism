@@ -63,16 +63,23 @@ export type WebSocketProxyConfig = {
     responseChannel: string;
     cleanupInterval?: number;
   };
-  onConnect?: (message: string) => Promise<{ drop: boolean }>;
-  onDisconnect?: () => Promise<void>;
+  onConnect?: (
+    requestId: string,
+    message: string
+  ) => Promise<{ drop: boolean }>;
+  onDisconnect?: (requestId: string) => Promise<void>;
   onRequest?: (
+    requestId: string,
     message: string
   ) => Promise<
     | { handled: true; response: WebSocketResponse }
     | { handled: false; request: string }
   >;
-  onResponse?: (response: WebSocketResponse) => Promise<WebSocketResponse>;
-  onError?: (response: any) => Promise<void>;
+  onResponse?: (
+    requestId: string,
+    response: WebSocketResponse
+  ) => Promise<WebSocketResponse>;
+  onError?: (requestId: string, response: any) => Promise<void>;
 };
 
 /*

@@ -37,11 +37,11 @@ export default async function sendToService(
       );
 
       const onRequestResult = serviceConfig.onRequest
-        ? await serviceConfig.onRequest(websocketRequest)
+        ? await serviceConfig.onRequest(requestId, websocketRequest)
         : { handled: false as false, request: message };
 
       if (onRequestResult.handled) {
-        respond(onRequestResult.response, conn, websocketConfig);
+        respond(requestId, onRequestResult.response, conn, websocketConfig);
       } else {
         if (!alreadyPublishedChannels.includes(requestChannel)) {
           alreadyPublishedChannels.push(requestChannel);

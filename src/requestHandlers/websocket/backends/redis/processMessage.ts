@@ -22,7 +22,7 @@ export default function processMessage(websocketConfig: WebSocketProxyConfig) {
     const conn = activeConnections().get(redisResponse.id);
 
     if (conn) {
-      respond(redisResponse, conn, websocketConfig);
+      respond(redisResponse.id, redisResponse, conn, websocketConfig);
     } else {
       const serviceConfig = websocketConfig.routes[redisResponse.route]
         .services[redisResponse.service] as RedisServiceWebSocketHandlerConfig;

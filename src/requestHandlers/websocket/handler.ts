@@ -88,7 +88,7 @@ function setupWebSocketHandling(
         // If not initialized and there's an onConnect,
         // treat the first message as the onConnect argument.
         if (!conn.initialized && routeConfig.onConnect) {
-          const onConnectResult = await routeConfig.onConnect(message);
+          const onConnectResult = await routeConfig.onConnect(requestId, message);
 
           if (onConnectResult.drop) {
             activeConnections().delete(requestId);
@@ -108,7 +108,7 @@ function setupWebSocketHandling(
             websocketConfig.routes[route].onRequest;
 
           const messageToSend = onRequestHandlers
-            ? await onRequestHandlers(message)
+            ? await onRequestHandlers(requestId, message)
             : {
                 handled: false as false,
                 request: {

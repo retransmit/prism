@@ -7,28 +7,34 @@ export type WebSocketRouteConfig = {
   services: {
     [key: string]: WebSocketHandlerConfig;
   };
-  onConnect?: (message: string) => Promise<{ drop: boolean }>;
-  onDisconnect?: () => Promise<void>;
-  onRequest?: (
+  onConnect?: (
+    requestId: string,
     message: string
-  ) => Promise<
-    { handled: true; request: string } | { handled: false }
-  >;
-  onResponse?: (response: WebSocketResponse) => Promise<WebSocketResponse>;
-  onError?: (response: any) => Promise<void>;
+  ) => Promise<{ drop: boolean }>;
+  onDisconnect?: (requestId: string) => Promise<void>;
+  onRequest?: (
+    requestId: string,
+    message: string
+  ) => Promise<{ handled: true; request: string } | { handled: false }>;
+  onResponse?: (
+    requestId: string,
+    response: WebSocketResponse
+  ) => Promise<WebSocketResponse>;
+  onError?: (requestId: string, response: any) => Promise<void>;
 };
 
 /*
   Service Configuration.
 */
 export type WebSocketHandlerConfigBase = {
-  onResponse?: (response: WebSocketResponse) => Promise<WebSocketResponse>;
+  onResponse?: (requestId: string, response: WebSocketResponse) => Promise<WebSocketResponse>;
 };
 
 export type HttpServiceWebSocketHandlerConfig = {
   type: "http";
   pollingInterval: number;
   onRequest?: (
+    requestId: string, 
     request: HttpRequest
   ) => Promise<
     | { handled: true; response: WebSocketResponse }
@@ -44,6 +50,7 @@ export type HttpServiceWebSocketHandlerConfig = {
 export type RedisServiceWebSocketHandlerConfig = {
   type: "redis";
   onRequest?: (
+    requestId: string, 
     request: RedisServiceWebSocketMessageRequest
   ) => Promise<
     | { handled: true; response: WebSocketResponse }
@@ -95,10 +102,10 @@ export type HttpServiceWebSocketMessageRequest = WebSocketMessageRequest;
 export type HttpServiceWebSocketConnectRequest = WebSocketConnectRequest;
 
 export type HttpServiceWebSocketRequest =
-| HttpServiceWebSocketMessageRequest
-| HttpServiceWebSocketConnectRequest
-| WebSocketDisconnectRequest
-| WebSocketNotConnectedRequest;
+  | HttpServiceWebSocketMessageRequest
+  | HttpServiceWebSocketConnectRequest
+  | WebSocketDisconnectRequest
+  | WebSocketNotConnectedRequest;
 
 export type HttpServiceWebSocketResponse = {
   id: string;
@@ -127,4 +134,3 @@ export type RedisServiceWebSocketRequest =
   | RedisServiceWebSocketConnectRequest
   | WebSocketDisconnectRequest
   | WebSocketNotConnectedRequest;
-

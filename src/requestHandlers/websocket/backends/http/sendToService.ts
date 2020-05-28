@@ -38,11 +38,11 @@ export default async function sendToService(
       };
 
       const onRequestResult = serviceConfig.onRequest
-        ? await serviceConfig.onRequest(httpRequest)
+        ? await serviceConfig.onRequest(requestId, httpRequest)
         : { handled: false as false, request: message };
 
       if (onRequestResult.handled) {
-        respond(onRequestResult.response, conn, websocketConfig);
+        respond(requestId, onRequestResult.response, conn, websocketConfig);
       } else {
         const options = makeGotOptions(httpRequest);
         got(serviceConfig.config.url, options)
@@ -51,7 +51,7 @@ export default async function sendToService(
               serverResponse,
               requestId
             );
-            respond(websocketResponse, conn, websocketConfig);
+            respond(requestId, websocketResponse, conn, websocketConfig);
           })
           .catch(async (error) => {
             const websocketResponse: WebSocketResponse = error.response
