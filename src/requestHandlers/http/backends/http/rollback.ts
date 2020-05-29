@@ -48,16 +48,16 @@ export default async function rollback(
         );
 
         got(modifiedRequest.request.path, options).catch(async (error) => {
-          const httpResponse = error.response
+          const errorResponse = error.response
             ? makeHttpResponse(error.response)
             : {
                 status: 400,
                 content: error.message,
               };
 
-          if (responseIsError(httpResponse)) {
+          if (responseIsError(errorResponse)) {
             if (serviceConfig.onError) {
-              serviceConfig.onError(httpResponse, modifiedRequest.request);
+              serviceConfig.onError(errorResponse, modifiedRequest.request);
             }
           }
         });

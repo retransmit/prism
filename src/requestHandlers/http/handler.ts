@@ -59,23 +59,23 @@ async function handler(
     sendResponse(ctx, modResult.response, routeConfig, httpConfig);
   } else {
     if (routeConfig) {
-      const request = modResult.request;
+      const modifiedRequest = modResult.request;
 
       let promises: Promise<InvokeServiceResult>[] = [];
       for (const connector of connectors) {
         promises = promises.concat(
-          connector.invoke(requestId, request, httpConfig)
+          connector.invoke(requestId, modifiedRequest, httpConfig)
         );
       }
 
-      const interimResponses = await Promise.all(promises);
+      const allResponses = await Promise.all(promises);
 
       function responseIsNotSkipped(
         x: InvokeServiceResult
       ): x is { skip: false; response: FetchedHttpHandlerResponse } {
         return !x.skip;
       }
-      const validResponses = interimResponses
+      const validResponses = allResponses
         .filter(responseIsNotSkipped)
         .map((x) => x.response);
 
@@ -86,18 +86,19 @@ async function handler(
       let response = mergeResponses(requestId, fetchedResponses, httpConfig);
 
       if (responseIsError(response)) {
-        if (httpConfig.onError) {
-          httpConfig.onError(fetchedResponses, request);
+        const onError = routeConfig.onError || httpConfig.onError;
+        if (onError) {
+          onError(fetchedResponses, originalRequest);
         }
         for (const connector of connectors) {
-          connector.rollback(requestId, request, httpConfig);
+          connector.rollback(requestId, modifiedRequest, httpConfig);
         }
       }
 
       // Are there custom handlers for the response?
       const onResponse = routeConfig.onResponse || httpConfig.onResponse;
       const responseToSend = onResponse
-        ? await onResponse(response, request)
+        ? await onResponse(response, originalRequest)
         : response;
 
       sendResponse(ctx, responseToSend, routeConfig, httpConfig);

@@ -22,13 +22,11 @@ import { makeGotOptions } from "../../../../lib/http/gotUtil";
 */
 export default function invokeServices(
   requestId: string,
-  request: HttpRequest,
+  originalRequest: HttpRequest,
   httpConfig: HttpProxyConfig
 ): Promise<InvokeServiceResult>[] {
-  const timeNow = Date.now();
-  const config = configModule.get();
-  const path = request.path;
-  const method = request.method;
+  const path = originalRequest.path;
+  const method = originalRequest.method;
   const routeConfig = httpConfig.routes[path][method] as HttpRouteConfig;
 
   const promises: Promise<InvokeServiceResult>[] = [];
@@ -42,34 +40,41 @@ export default function invokeServices(
     .map(
       ([service, serviceConfig]) =>
         new Promise(async (success) => {
-          const params = request.params || {};
+          const timeNow = Date.now();
+          const params = originalRequest.params || {};
           const urlWithParamsReplaced = params
             ? Object.keys(params).reduce((acc, param) => {
                 return acc.replace(`/:${param}`, `/${params[param]}`);
               }, serviceConfig.config.url)
             : serviceConfig.config.url;
 
-          const requestCopy = {
-            ...request,
+          const requestWithEditedPath = {
+            ...originalRequest,
             path: urlWithParamsReplaced,
           };
 
           const onRequestResult = serviceConfig.config.onRequest
-            ? await serviceConfig.config.onRequest(requestCopy)
-            : { handled: false as false, request: requestCopy };
+            ? await serviceConfig.config.onRequest(requestWithEditedPath)
+            : { handled: false as false, request: requestWithEditedPath };
 
           if (onRequestResult.handled) {
             if (serviceConfig.awaitResponse !== false) {
+              const modifiedResponse = serviceConfig.onResponse
+                ? await serviceConfig.onResponse(onRequestResult.response)
+                : onRequestResult.response;
+
+              const fetchedResponse = {
+                type: "http" as "http",
+                id: requestId,
+                method: originalRequest.method,
+                path: originalRequest.path,
+                service,
+                time: Date.now() - timeNow,
+                response: modifiedResponse,
+              };
               success({
                 skip: false,
-                response: await makeFetchedResponse(
-                  requestId,
-                  timeNow,
-                  service,
-                  request,
-                  onRequestResult.response,
-                  serviceConfig
-                ),
+                response: fetchedResponse,
               });
             } else {
               success({ skip: true });
@@ -85,62 +90,74 @@ export default function invokeServices(
             if (serviceConfig.awaitResponse !== false) {
               got(requestToSend.path, options)
                 .then(async (serverResponse) => {
-                  const httpResponse = makeHttpResponse(serverResponse);
+                  const response = makeHttpResponse(serverResponse);
 
-                  if (responseIsError(httpResponse)) {
+                  if (responseIsError(response)) {
                     if (serviceConfig.onError) {
-                      serviceConfig.onError(httpResponse, requestToSend);
+                      serviceConfig.onError(response, requestToSend);
                     }
                   }
 
                   // Use the original request here - not modifiedRequest
-                  const fetchedResponse = await makeFetchedResponse(
-                    requestId,
-                    timeNow,
+                  const modifiedResponse = serviceConfig.onResponse
+                    ? await serviceConfig.onResponse(response)
+                    : response;
+
+                  const fetchedResponse = {
+                    type: "http" as "http",
+                    id: requestId,
+                    method: originalRequest.method,
+                    path: originalRequest.path,
                     service,
-                    request,
-                    httpResponse,
-                    serviceConfig
-                  );
+                    time: Date.now() - timeNow,
+                    response,
+                  };
+
                   success({ skip: false, response: fetchedResponse });
                 })
                 .catch(async (error) => {
-                  const httpResponse = error.response
+                  const errorResponse = error.response
                     ? makeHttpResponse(error.response)
                     : {
                         status: 400,
                         content: error.message,
                       };
 
-                  if (responseIsError(httpResponse)) {
+                  if (responseIsError(errorResponse)) {
                     if (serviceConfig.onError) {
-                      serviceConfig.onError(httpResponse, requestToSend);
+                      serviceConfig.onError(errorResponse, requestToSend);
                     }
                   }
 
                   // Use the original request here - not modifiedRequest
-                  const fetchedResponse = await makeFetchedResponse(
-                    requestId,
-                    timeNow,
+                  const modifiedResponse = serviceConfig.onResponse
+                    ? await serviceConfig.onResponse(errorResponse)
+                    : errorResponse;
+
+                  const fetchedResponse = {
+                    type: "http" as "http",
+                    id: requestId,
+                    method: originalRequest.method,
+                    path: originalRequest.path,
                     service,
-                    request,
-                    httpResponse,
-                    serviceConfig
-                  );
+                    time: Date.now() - timeNow,
+                    response: errorResponse,
+                  };
+
                   success({ skip: false, response: fetchedResponse });
                 });
             } else {
               got(requestToSend.path, options).catch(async (error) => {
-                const httpResponse = error.response
+                const errorResponse = error.response
                   ? makeHttpResponse(error.response)
                   : {
                       status: 400,
                       content: error.message,
                     };
 
-                if (responseIsError(httpResponse)) {
+                if (responseIsError(errorResponse)) {
                   if (serviceConfig.onError) {
-                    serviceConfig.onError(httpResponse, requestToSend);
+                    serviceConfig.onError(errorResponse, requestToSend);
                   }
                 }
               });
@@ -154,27 +171,4 @@ function isHttpServiceConfig(
   x: [string, HttpHandlerConfig]
 ): x is [string, HttpServiceHttpHandlerConfig] {
   return x[1].type === "http";
-}
-
-async function makeFetchedResponse(
-  requestId: string,
-  startTime: number,
-  service: string,
-  request: HttpRequest,
-  httpResponse: HttpResponse,
-  serviceConfig: HttpServiceHttpHandlerConfig
-): Promise<FetchedHttpHandlerResponse> {
-  const modifiedResponse = serviceConfig.onResponse
-    ? await serviceConfig.onResponse(httpResponse)
-    : httpResponse;
-
-  return {
-    type: "http",
-    id: requestId,
-    method: request.method,
-    path: request.path,
-    service,
-    time: Date.now() - startTime,
-    response: modifiedResponse,
-  };
 }
