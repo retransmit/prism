@@ -6,7 +6,7 @@ import {
   HttpRouteConfig,
   FetchedHttpHandlerResponse,
 } from "../../../../types/httpRequests";
-import { HttpProxyConfig } from "../../../../types";
+import { HttpProxyConfig, HttpResponse } from "../../../../types";
 
 export default function processMessage(httpConfig: HttpProxyConfig) {
   return async function processMessageImpl(
@@ -14,9 +14,8 @@ export default function processMessage(httpConfig: HttpProxyConfig) {
     messageString: string
   ) {
     const config = configModule.get();
-    const redisResponse = JSON.parse(messageString) as RedisServiceHttpResponse;
-
-    const activeRequestId = `${redisResponse.id}+${redisResponse.service}`;
+    const messageObj = JSON.parse(messageString);
+    const activeRequestId = `${messageObj.id}+${messageObj.service}`;
     const activeRequest = activeRequests().get(activeRequestId);
 
     if (activeRequest) {
@@ -34,6 +33,11 @@ export default function processMessage(httpConfig: HttpProxyConfig) {
         // Make sure the service responded in the configured channel
         // Otherwise ignore the message.
         if (channel === channelInRequest) {
+          const redisResponse = serviceConfig.onResponse
+            ? await serviceConfig.onResponse(messageString)
+            : messageObj as RedisServiceHttpResponse
+
+
           if (responseIsError(redisResponse.response)) {
             if (serviceConfig.onError) {
               serviceConfig.onError(
@@ -42,10 +46,6 @@ export default function processMessage(httpConfig: HttpProxyConfig) {
               );
             }
           }
-
-          const response = serviceConfig.onResponse
-            ? await serviceConfig.onResponse(redisResponse.response)
-            : redisResponse.response;
 
           const processingTime = Date.now() - activeRequest.startTime;
 
@@ -56,7 +56,7 @@ export default function processMessage(httpConfig: HttpProxyConfig) {
             path: activeRequest.request.path,
             method: activeRequest.request.method,
             service: activeRequest.service,
-            response,
+            response: redisResponse.response,
           };
 
           activeRequest.onResponse({

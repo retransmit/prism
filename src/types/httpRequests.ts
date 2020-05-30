@@ -112,7 +112,7 @@ export type RedisServiceHttpHandlerConfig = {
       }
     | { handled: false; request: string }
   >;
-  onResponse?: (response: HttpResponse) => Promise<HttpResponse>;
+  onResponse?: (response: string) => Promise<RedisServiceHttpResponse>;
   onRollbackRequest?: (
     request: RedisServiceHttpRequest
   ) => Promise<
