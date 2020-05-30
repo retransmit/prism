@@ -167,10 +167,12 @@ function onMessage(
           : { handled: false as false, request: message };
 
         if (onRequestResult.handled) {
-          if (onRequestResult.response.type === "message") {
-            ws.send(onRequestResult.response.response);
-          } else if (onRequestResult.response.type === "disconnect") {
-            ws.terminate();
+          if (onRequestResult.response) {
+            if (onRequestResult.response.type === "message") {
+              ws.send(onRequestResult.response.response);
+            } else if (onRequestResult.response.type === "disconnect") {
+              ws.terminate();
+            }
           }
         } else {
           for (const connector of connectors) {

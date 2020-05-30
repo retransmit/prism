@@ -34,7 +34,7 @@ export default async function sendToService(
         method: "POST",
         body: websocketRequest,
         remoteAddress: conn.ip,
-        remotePort: conn.port
+        remotePort: conn.port,
       };
 
       const onRequestResult = serviceConfig.onRequest
@@ -42,7 +42,9 @@ export default async function sendToService(
         : { handled: false as false, request: message };
 
       if (onRequestResult.handled) {
-        respond(requestId, onRequestResult.response, conn, websocketConfig);
+        if (onRequestResult.response) {
+          respond(requestId, onRequestResult.response, conn, websocketConfig);
+        }
       } else {
         const options = makeGotOptions(request);
         got(serviceConfig.url, options)

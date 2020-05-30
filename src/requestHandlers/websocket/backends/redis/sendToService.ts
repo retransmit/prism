@@ -2,7 +2,10 @@ import WebSocket from "ws";
 import { WebSocketProxyConfig } from "../../../../types";
 import { getPublisher } from "../../../../lib/redis/clients";
 import { getChannelForService } from "../../../../lib/redis/getChannelForService";
-import { RedisServiceWebSocketRequest, RedisServiceWebSocketMessageRequest } from "../../../../types/webSocketRequests";
+import {
+  RedisServiceWebSocketRequest,
+  RedisServiceWebSocketMessageRequest,
+} from "../../../../types/webSocketRequests";
 import * as configModule from "../../../../config";
 import { ActiveWebSocketConnection } from "../../activeConnections";
 import respond from "../../respond";
@@ -41,7 +44,9 @@ export default async function sendToService(
         : { handled: false as false, request: message };
 
       if (onRequestResult.handled) {
-        respond(requestId, onRequestResult.response, conn, websocketConfig);
+        if (onRequestResult.response) {
+          respond(requestId, onRequestResult.response, conn, websocketConfig);
+        }
       } else {
         if (!alreadyPublishedChannels.includes(requestChannel)) {
           alreadyPublishedChannels.push(requestChannel);

@@ -15,8 +15,6 @@ export default function disconnect(
   handlerConfig: RedisServiceWebSocketHandlerConfig,
   websocketConfig: WebSocketProxyConfig
 ) {
-  const config = configModule.get();
-
   const channel = getChannelForService(
     handlerConfig.requestChannel,
     handlerConfig.numRequestChannels

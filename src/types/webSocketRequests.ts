@@ -18,7 +18,7 @@ export type WebSocketRouteConfig = {
     requestId: string,
     message: string
   ) => Promise<
-    | { handled: true; response: WebSocketResponse }
+    | { handled: true; response?: WebSocketResponse }
     | { handled: false; request: string }
   >;
   onResponse?: (
@@ -47,7 +47,7 @@ export type HttpServiceWebSocketHandlerConfig = {
     requestId: string,
     request: HttpRequest
   ) => Promise<
-    | { handled: true; response: WebSocketResponse }
+    | { handled: true; response?: WebSocketResponse }
     | { handled: false; request: HttpRequest }
   >;
   onResponse?: (
@@ -65,7 +65,7 @@ export type RedisServiceWebSocketHandlerConfig = {
     requestId: string,
     request: RedisServiceWebSocketMessageRequest
   ) => Promise<
-    | { handled: true; response: WebSocketResponse }
+    | { handled: true; response?: WebSocketResponse }
     | { handled: false; request: RedisServiceWebSocketRequest }
   >;
   onResponse?: (
