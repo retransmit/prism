@@ -7,7 +7,7 @@ import { makeGotOptions } from "../../../../lib/http/gotUtil";
 import got from "got/dist/source";
 import * as activeConnections from "../../activeConnections";
 
-export default function disconnect(
+export default function connect(
   requestId: string,
   conn: activeConnections.ActiveWebSocketConnection,
   handlerConfig: HttpServiceWebSocketHandlerConfig,

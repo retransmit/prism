@@ -1,9 +1,6 @@
 import {
   WebSocketResponse,
-  WebSocketRouteConfig,
-  RedisServiceWebSocketRequest,
 } from "../../types/webSocketRequests";
-import disconnect from "./disconnect";
 import { ActiveWebSocketConnection } from "./activeConnections";
 import { WebSocketProxyConfig } from "../../types";
 

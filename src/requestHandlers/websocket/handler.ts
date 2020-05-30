@@ -6,18 +6,16 @@ import WebSocket from "ws";
 import * as configModule from "../../config";
 import randomId from "../../lib/random";
 import { get as activeConnections } from "./activeConnections";
-import {
-  WebSocketRouteConfig,
-  RedisServiceWebSocketRequest,
-  WebSocketConnectRequest,
-  WebSocketRequest,
-} from "../../types/webSocketRequests";
+import { WebSocketRouteConfig } from "../../types/webSocketRequests";
 
 import sendToHttpService from "./backends/http/sendToService";
 import sendToRedisService from "./backends/redis/sendToService";
 import { WebSocketProxyConfig } from "../../types";
-import connect from "./connect";
-import disconnect from "./disconnect";
+
+import httpConnect from "./backends/http/connect";
+import redisConnect from "./backends/redis/connect";
+import httpDisconnect from "./backends/http/disconnect";
+import redisDisconnect from "./backends/redis/disconnect";
 
 const connectors = [
   { type: "http", sendToService: sendToHttpService },
@@ -106,7 +104,18 @@ function setupWebSocketHandling(
             ws.terminate();
           } else {
             conn.initialized = true;
-            connect(requestId, conn, websocketConfig);
+            const route = conn.route;
+            for (const service of Object.keys(
+              websocketConfig.routes[conn.route]
+            )) {
+              const serviceConfig =
+                websocketConfig.routes[route].services[service];
+              if (serviceConfig.type === "http") {
+                httpConnect(requestId, conn, serviceConfig, websocketConfig);
+              } else if (serviceConfig.type === "redis") {
+                redisConnect(requestId, conn, serviceConfig, websocketConfig);
+              }
+            }
           }
         }
         // Regular message. Pass this on...
@@ -155,7 +164,15 @@ function setupWebSocketHandling(
         }
 
         // Call disconnect for services
-        disconnect(requestId, conn, websocketConfig);
+        const route = conn.route;
+        for (const service of Object.keys(websocketConfig.routes[conn.route])) {
+          const serviceConfig = websocketConfig.routes[route].services[service];
+          if (serviceConfig.type === "redis") {
+            redisDisconnect(requestId, conn, serviceConfig, websocketConfig);
+          } else if (serviceConfig.type === "http") {
+            httpDisconnect(requestId, conn, serviceConfig, websocketConfig);
+          }
+        }
       }
     });
   });
