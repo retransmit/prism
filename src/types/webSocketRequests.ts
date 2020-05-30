@@ -142,3 +142,7 @@ export type RedisServiceWebSocketRequest =
   | RedisServiceWebSocketConnectRequest
   | WebSocketDisconnectRequest
   | WebSocketNotConnectedRequest;
+
+export type WebSocketRequest =
+  | HttpServiceWebSocketRequest
+  | RedisServiceWebSocketRequest;

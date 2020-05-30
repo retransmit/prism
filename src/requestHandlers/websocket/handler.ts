@@ -10,6 +10,7 @@ import {
   WebSocketRouteConfig,
   RedisServiceWebSocketRequest,
   WebSocketConnectRequest,
+  WebSocketRequest,
 } from "../../types/webSocketRequests";
 
 import sendToHttpService from "./backends/http/sendToService";
@@ -105,7 +106,12 @@ function setupWebSocketHandling(
             ws.terminate();
           } else {
             conn.initialized = true;
-            connect(requestId, onConnectResult.request, conn, websocketConfig);
+            const connectRequest: WebSocketConnectRequest = {
+              id: requestId,
+              route,
+              type: "connect",
+            };
+            connect(requestId, connectRequest, conn, websocketConfig);
           }
         }
         // Regular message. Pass this on...
@@ -113,22 +119,24 @@ function setupWebSocketHandling(
           if (!conn.initialized) {
             conn.initialized = true;
           }
-          const onRequestHandlers =
+          const onRequest =
             websocketConfig.onRequest ||
             websocketConfig.routes[route].onRequest;
 
-          const messageToSend = onRequestHandlers
-            ? await onRequestHandlers(requestId, message)
-            : {
-                handled: false as false,
-                request: {
-                  id: requestId,
-                  type: "message",
-                  route,
-                  responseChannel: `${websocketConfig.redis?.responseChannel}.${config.instanceId}`,
-                  request: message,
-                } as RedisServiceWebSocketRequest,
-              };
+          const finalMessage = onRequest
+            ? await onRequest(requestId, message)
+            : message;
+
+          const messageToSend = {
+            handled: false as false,
+            request: {
+              id: requestId,
+              type: "message",
+              route,
+              responseChannel: `${websocketConfig.redis?.responseChannel}.${config.instanceId}`,
+              request: finalMessage,
+            } as WebSocketRequest,
+          };
 
           for (const connector of connectors) {
             connector.sendToService(
