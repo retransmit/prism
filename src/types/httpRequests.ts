@@ -71,35 +71,8 @@ export type HttpHandlerConfigBase = {
   awaitResponse?: boolean;
   merge?: boolean;
   timeout?: number;
-  mergeField?: string;
-  onResponse?: (response: HttpResponse) => Promise<HttpResponse>;
-  onError?: (response: HttpResponse | undefined, request: HttpRequest) => any;
+  mergeField?: string;  
 };
-
-export type RedisServiceHttpHandlerConfig = {
-  type: "redis";
-  config: {
-    requestChannel: string;
-    numRequestChannels?: number;
-    onRequest?: (
-      request: RedisServiceHttpRequest
-    ) => Promise<
-      | {
-          handled: true;
-          response: HttpResponse;
-        }
-      | { handled: false; request: RedisServiceHttpRequest }
-    >;
-    onRollbackRequest?: (
-      request: RedisServiceHttpRequest
-    ) => Promise<
-      | {
-          handled: true;
-        }
-      | { handled: false; request: RedisServiceHttpRequest }
-    >;
-  };
-} & HttpHandlerConfigBase;
 
 export type HttpServiceHttpHandlerConfig = {
   type: "http";
@@ -115,6 +88,7 @@ export type HttpServiceHttpHandlerConfig = {
         }
       | { handled: false; request: HttpRequest }
     >;
+    onResponse?: (response: HttpResponse) => Promise<HttpResponse>;
     onRollbackRequest?: (
       request: HttpRequest
     ) => Promise<
@@ -123,6 +97,34 @@ export type HttpServiceHttpHandlerConfig = {
         }
       | { handled: false; request: HttpRequest }
     >;
+    onError?: (response: HttpResponse | undefined, request: HttpRequest) => any;
+  };
+} & HttpHandlerConfigBase;
+
+export type RedisServiceHttpHandlerConfig = {
+  type: "redis";
+  config: {
+    requestChannel: string;
+    numRequestChannels?: number;
+    onRequest?: (
+      request: RedisServiceHttpRequest
+    ) => Promise<
+      | {
+          handled: true;
+          response: HttpResponse;
+        }
+      | { handled: false; request: string }
+    >;
+    onResponse?: (response: HttpResponse) => Promise<HttpResponse>;
+    onRollbackRequest?: (
+      request: RedisServiceHttpRequest
+    ) => Promise<
+      | {
+          handled: true;
+        }
+      | { handled: false; request: RedisServiceHttpRequest }
+    >;
+    onError?: (response: HttpResponse | undefined, request: HttpRequest) => any;
   };
 } & HttpHandlerConfigBase;
 

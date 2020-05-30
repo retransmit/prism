@@ -59,8 +59,8 @@ export default function invokeServices(
 
           if (onRequestResult.handled) {
             if (serviceConfig.awaitResponse !== false) {
-              const modifiedResponse = serviceConfig.onResponse
-                ? await serviceConfig.onResponse(onRequestResult.response)
+              const modifiedResponse = serviceConfig.config.onResponse
+                ? await serviceConfig.config.onResponse(onRequestResult.response)
                 : onRequestResult.response;
 
               const fetchedResponse = {
@@ -93,14 +93,14 @@ export default function invokeServices(
                   const response = makeHttpResponse(serverResponse);
 
                   if (responseIsError(response)) {
-                    if (serviceConfig.onError) {
-                      serviceConfig.onError(response, requestToSend);
+                    if (serviceConfig.config.onError) {
+                      serviceConfig.config.onError(response, requestToSend);
                     }
                   }
 
                   // Use the original request here - not modifiedRequest
-                  const modifiedResponse = serviceConfig.onResponse
-                    ? await serviceConfig.onResponse(response)
+                  const modifiedResponse = serviceConfig.config.onResponse
+                    ? await serviceConfig.config.onResponse(response)
                     : response;
 
                   const fetchedResponse = {
@@ -124,14 +124,17 @@ export default function invokeServices(
                       };
 
                   if (responseIsError(errorResponse)) {
-                    if (serviceConfig.onError) {
-                      serviceConfig.onError(errorResponse, requestToSend);
+                    if (serviceConfig.config.onError) {
+                      serviceConfig.config.onError(
+                        errorResponse,
+                        requestToSend
+                      );
                     }
                   }
 
                   // Use the original request here - not modifiedRequest
-                  const modifiedResponse = serviceConfig.onResponse
-                    ? await serviceConfig.onResponse(errorResponse)
+                  const modifiedResponse = serviceConfig.config.onResponse
+                    ? await serviceConfig.config.onResponse(errorResponse)
                     : errorResponse;
 
                   const fetchedResponse = {
@@ -156,8 +159,8 @@ export default function invokeServices(
                     };
 
                 if (responseIsError(errorResponse)) {
-                  if (serviceConfig.onError) {
-                    serviceConfig.onError(errorResponse, requestToSend);
+                  if (serviceConfig.config.onError) {
+                    serviceConfig.config.onError(errorResponse, requestToSend);
                   }
                 }
               });

@@ -56,8 +56,8 @@ export default async function rollback(
               };
 
           if (responseIsError(errorResponse)) {
-            if (serviceConfig.onError) {
-              serviceConfig.onError(errorResponse, modifiedRequest.request);
+            if (serviceConfig.config.onError) {
+              serviceConfig.config.onError(errorResponse, modifiedRequest.request);
             }
           }
         });

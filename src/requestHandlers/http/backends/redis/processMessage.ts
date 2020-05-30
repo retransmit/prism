@@ -35,16 +35,16 @@ export default function processMessage(httpConfig: HttpProxyConfig) {
         // Otherwise ignore the message.
         if (channel === channelInRequest) {
           if (responseIsError(redisResponse.response)) {
-            if (serviceConfig.onError) {
-              serviceConfig.onError(
+            if (serviceConfig.config.onError) {
+              serviceConfig.config.onError(
                 redisResponse.response,
                 activeRequest.request
               );
             }
           }
 
-          const response = serviceConfig.onResponse
-            ? await serviceConfig.onResponse(redisResponse.response)
+          const response = serviceConfig.config.onResponse
+            ? await serviceConfig.config.onResponse(redisResponse.response)
             : redisResponse.response;
 
           const processingTime = Date.now() - activeRequest.startTime;
