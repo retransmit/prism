@@ -58,10 +58,30 @@ function setupWebSocketHandling(
   websocketConfig: WebSocketProxyConfig
 ) {
   const config = configModule.get();
-  wss.on("connection", async function connection(
-    ws: WebSocket,
-    request: IncomingMessage
-  ) {
+  wss.on("connection", onConnection(route, routeConfig, websocketConfig));
+
+  const interval = setInterval(function ping() {
+    wss.clients.forEach(function each(ws: any) {
+      if (ws.isAlive === false) {
+        return ws.terminate();
+      }
+
+      ws.isAlive = false;
+      ws.ping(function noop() {});
+    });
+  }, 30000);
+
+  wss.on("close", function close() {
+    clearInterval(interval);
+  });
+}
+
+function onConnection(
+  route: string,
+  routeConfig: WebSocketRouteConfig,
+  websocketConfig: WebSocketProxyConfig
+) {
+  return async function connection(ws: WebSocket, request: IncomingMessage) {
     // This is for finding dead connections.
     (ws as any).isAlive = true;
     ws.on("pong", function heartbeat() {
@@ -85,112 +105,113 @@ function setupWebSocketHandling(
       port: request.socket.remotePort,
     });
 
-    ws.on("message", async function message(message: string) {
-      const conn = activeConnections().get(requestId);
+    ws.on(
+      "message",
+      onMessage(requestId, route, ws, routeConfig, websocketConfig)
+    );
 
-      // This should never happen.
-      if (!conn) {
-        ws.terminate();
-      } else {
-        // If not initialized and there's an onConnect,
-        // treat the first message as the onConnect argument.
-        const onConnect = routeConfig.onConnect || websocketConfig.onConnect;
+    ws.on("close", onClose(requestId, websocketConfig));
+  };
+}
 
-        if (!conn.initialized && onConnect) {
-          const onConnectResult = await onConnect(requestId, message);
+function onMessage(
+  requestId: string,
+  route: string,
+  ws: WebSocket,
+  routeConfig: WebSocketRouteConfig,
+  websocketConfig: WebSocketProxyConfig
+) {
+  return async function (message: string) {
+    const conn = activeConnections().get(requestId);
 
-          if (onConnectResult.drop === true) {
-            activeConnections().delete(requestId);
+    // This should never happen.
+    if (!conn) {
+      ws.terminate();
+    } else {
+      // If not initialized and there's an onConnect,
+      // treat the first message as the onConnect argument.
+      const onConnect = routeConfig.onConnect || websocketConfig.onConnect;
+
+      if (!conn.initialized && onConnect) {
+        const onConnectResult = await onConnect(requestId, message);
+
+        if (onConnectResult.drop === true) {
+          activeConnections().delete(requestId);
+          ws.terminate();
+        } else {
+          conn.initialized = true;
+          const route = conn.route;
+          for (const service of Object.keys(
+            websocketConfig.routes[conn.route]
+          )) {
+            const serviceConfig =
+              websocketConfig.routes[route].services[service];
+            if (serviceConfig.type === "http") {
+              httpConnect(requestId, conn, serviceConfig, websocketConfig);
+            } else if (serviceConfig.type === "redis") {
+              redisConnect(requestId, conn, serviceConfig, websocketConfig);
+            }
+          }
+        }
+      }
+      // Regular message. Pass this on...
+      else {
+        if (!conn.initialized) {
+          conn.initialized = true;
+        }
+        const onRequest =
+          websocketConfig.onRequest || websocketConfig.routes[route].onRequest;
+
+        const onRequestResult = onRequest
+          ? await onRequest(requestId, message)
+          : { handled: false as false, request: message };
+
+        if (onRequestResult.handled) {
+          if (onRequestResult.response.type === "message") {
+            ws.send(onRequestResult.response.response);
+          } else if (onRequestResult.response.type === "disconnect") {
             ws.terminate();
-          } else {
-            conn.initialized = true;
-            const route = conn.route;
-            for (const service of Object.keys(
-              websocketConfig.routes[conn.route]
-            )) {
-              const serviceConfig =
-                websocketConfig.routes[route].services[service];
-              if (serviceConfig.type === "http") {
-                httpConnect(requestId, conn, serviceConfig, websocketConfig);
-              } else if (serviceConfig.type === "redis") {
-                redisConnect(requestId, conn, serviceConfig, websocketConfig);
-              }
-            }
           }
-        }
-        // Regular message. Pass this on...
-        else {
-          if (!conn.initialized) {
-            conn.initialized = true;
-          }
-          const onRequest =
-            websocketConfig.onRequest ||
-            websocketConfig.routes[route].onRequest;
-
-          const onRequestResult = onRequest
-            ? await onRequest(requestId, message)
-            : { handled: false as false, request: message };
-
-          if (onRequestResult.handled) {
-            if (onRequestResult.response.type === "message") {
-              ws.send(onRequestResult.response.response);
-            } else if (onRequestResult.response.type === "disconnect") {
-              ws.terminate();
-            }
-          } else {
-            for (const connector of connectors) {
-              connector.sendToService(
-                requestId,
-                onRequestResult.request,
-                route,
-                conn,
-                websocketConfig
-              );
-            }
+        } else {
+          for (const connector of connectors) {
+            connector.sendToService(
+              requestId,
+              onRequestResult.request,
+              route,
+              conn,
+              websocketConfig
+            );
           }
         }
       }
-    });
+    }
+  };
+}
 
-    ws.on("close", async () => {
-      // Find the handler in question.
-      const conn = activeConnections().get(requestId);
-      if (conn) {
-        const handlerConfig = websocketConfig.routes[conn.route];
-        const onDisconnect =
-          handlerConfig.onDisconnect || websocketConfig.onDisconnect;
-        if (onDisconnect) {
-          onDisconnect(requestId);
-        }
-
-        // Call disconnect for services
-        const route = conn.route;
-        for (const service of Object.keys(websocketConfig.routes[conn.route])) {
-          const serviceConfig = websocketConfig.routes[route].services[service];
-          if (serviceConfig.type === "redis") {
-            redisDisconnect(requestId, conn, serviceConfig, websocketConfig);
-          } else if (serviceConfig.type === "http") {
-            httpDisconnect(requestId, conn, serviceConfig, websocketConfig);
-          }
-        }
-      }
-    });
-  });
-
-  const interval = setInterval(function ping() {
-    wss.clients.forEach(function each(ws: any) {
-      if (ws.isAlive === false) {
-        return ws.terminate();
+function onClose(requestId: string, websocketConfig: WebSocketProxyConfig) {
+  return async function () {
+    // Find the handler in question.
+    const conn = activeConnections().get(requestId);
+    if (conn) {
+      const handlerConfig = websocketConfig.routes[conn.route];
+      const onDisconnect =
+        handlerConfig.onDisconnect || websocketConfig.onDisconnect;
+      if (onDisconnect) {
+        onDisconnect(requestId);
       }
 
-      ws.isAlive = false;
-      ws.ping(function noop() {});
-    });
-  }, 30000);
-
-  wss.on("close", function close() {
-    clearInterval(interval);
-  });
+      // Call disconnect for services
+      const route = conn.route;
+      for (const service of Object.keys(websocketConfig.routes[conn.route])) {
+        const serviceConfig = websocketConfig.routes[route].services[service];
+        if (serviceConfig.type === "redis") {
+          redisDisconnect(requestId, conn, serviceConfig, websocketConfig);
+        } else if (serviceConfig.type === "http") {
+          httpDisconnect(requestId, conn, serviceConfig, websocketConfig);
+        }
+      }
+    }
+  };
 }
 
 export function upgrade(
