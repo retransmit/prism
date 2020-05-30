@@ -5,20 +5,19 @@ import { getChannelForService } from "../../../../lib/redis/getChannelForService
 import {
   RedisServiceWebSocketRequest,
   RedisServiceWebSocketMessageRequest,
+  WebSocketMessageRequest,
 } from "../../../../types/webSocketRequests";
 import * as configModule from "../../../../config";
 import { ActiveWebSocketConnection } from "../../activeConnections";
 import respond from "../../respond";
 
 export default async function sendToService(
-  requestId: string,
-  message: string,
-  route: string,
+  request: WebSocketMessageRequest,
   conn: ActiveWebSocketConnection,
   websocketConfig: WebSocketProxyConfig
 ) {
   const config = configModule.get();
-  const routeConfig = websocketConfig.routes[route];
+  const routeConfig = websocketConfig.routes[request.route];
 
   const alreadyPublishedChannels: string[] = [];
 
@@ -26,12 +25,9 @@ export default async function sendToService(
     const serviceConfig = routeConfig.services[service];
 
     if (serviceConfig.type === "redis") {
-      const websocketRequest: RedisServiceWebSocketMessageRequest = {
-        id: requestId,
-        type: "message",
-        route,
+      const redisRequest: RedisServiceWebSocketMessageRequest = {
+        ...request,
         responseChannel: `${serviceConfig.requestChannel}.${config.instanceId}`,
-        request: message,
       };
 
       const requestChannel = getChannelForService(
@@ -40,12 +36,12 @@ export default async function sendToService(
       );
 
       const onRequestResult = serviceConfig.onRequest
-        ? await serviceConfig.onRequest(requestId, websocketRequest)
-        : { handled: false as false, request: message };
+        ? await serviceConfig.onRequest(redisRequest)
+        : { handled: false as false, request: redisRequest };
 
       if (onRequestResult.handled) {
         if (onRequestResult.response) {
-          respond(requestId, onRequestResult.response, conn, websocketConfig);
+          respond(request.id, onRequestResult.response, conn, websocketConfig);
         }
       } else {
         if (!alreadyPublishedChannels.includes(requestChannel)) {

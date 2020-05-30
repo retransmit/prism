@@ -13,7 +13,7 @@ export default function connect(
   conn: ActiveWebSocketConnection,
   handlerConfig: RedisServiceWebSocketHandlerConfig,
   websocketConfig: WebSocketProxyConfig
-) {
+) {  
   const config = configModule.get();
 
   const channel = getChannelForService(

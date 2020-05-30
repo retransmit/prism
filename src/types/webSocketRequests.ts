@@ -19,7 +19,7 @@ export type WebSocketRouteConfig = {
     message: string
   ) => Promise<
     | { handled: true; response?: WebSocketResponse }
-    | { handled: false; request: string }
+    | { handled: false; request: WebSocketMessageRequest }
   >;
   onResponse?: (
     requestId: string,
@@ -31,21 +31,13 @@ export type WebSocketRouteConfig = {
 /*
   Service Configuration.
 */
-export type WebSocketHandlerConfigBase = {
-  onConnect?: (
-    requestId: string,
-    message: string
-  ) => Promise<
-    { drop: true } | { drop: false; request: WebSocketConnectRequest }
-  >;
-};
+export type WebSocketHandlerConfigBase = {};
 
 export type HttpServiceWebSocketHandlerConfig = {
   type: "http";
   pollingInterval: number;
   onRequest?: (
-    requestId: string,
-    request: HttpRequest
+    request: WebSocketMessageRequest
   ) => Promise<
     | { handled: true; response?: WebSocketResponse }
     | { handled: false; request: HttpRequest }
@@ -62,11 +54,10 @@ export type HttpServiceWebSocketHandlerConfig = {
 export type RedisServiceWebSocketHandlerConfig = {
   type: "redis";
   onRequest?: (
-    requestId: string,
-    request: RedisServiceWebSocketMessageRequest
+    request: WebSocketMessageRequest
   ) => Promise<
     | { handled: true; response?: WebSocketResponse }
-    | { handled: false; request: RedisServiceWebSocketRequest }
+    | { handled: false; request: string }
   >;
   onResponse?: (
     requestId: string,

@@ -1,7 +1,12 @@
 import { ClientOpts } from "redis";
 import { IncomingHttpHeaders } from "http2";
 import { FetchedHttpHandlerResponse, HttpRouteConfig } from "./httpRequests";
-import { WebSocketRouteConfig, WebSocketResponse } from "./webSocketRequests";
+import {
+  WebSocketRouteConfig,
+  WebSocketResponse,
+  WebSocketRequest,
+  WebSocketMessageRequest,
+} from "./webSocketRequests";
 
 export {
   HttpServiceHttpHandlerConfig,
@@ -68,8 +73,8 @@ export type WebSocketProxyConfig = {
     requestId: string,
     request: string
   ) => Promise<
-    | { handled: true; response: WebSocketResponse }
-    | { handled: false; request: string }
+    | { handled: true; response?: WebSocketResponse }
+    | { handled: false; request: WebSocketMessageRequest }
   >;
   onResponse?: (
     requestId: string,

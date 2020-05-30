@@ -3,6 +3,7 @@ import { ActiveWebSocketConnection } from "../../activeConnections";
 import {
   HttpServiceWebSocketMessageRequest,
   WebSocketResponse,
+  WebSocketMessageRequest,
 } from "../../../../types/webSocketRequests";
 import respond from "../../respond";
 import { makeGotOptions } from "../../../../lib/http/gotUtil";
@@ -10,26 +11,19 @@ import got from "got/dist/source";
 import { makeWebSocketResponse } from "./makeWebSocketResponse";
 
 export default async function sendToService(
-  requestId: string,
-  message: string,
-  route: string,
+  request: WebSocketMessageRequest,
   conn: ActiveWebSocketConnection,
   websocketConfig: WebSocketProxyConfig
 ) {
-  const routeConfig = websocketConfig.routes[route];
+  const routeConfig = websocketConfig.routes[request.route];
 
   for (const service of Object.keys(routeConfig.services)) {
     const serviceConfig = routeConfig.services[service];
 
     if (serviceConfig.type === "http") {
-      const websocketRequest: HttpServiceWebSocketMessageRequest = {
-        id: requestId,
-        type: "message",
-        route,
-        request: message,
-      };
+      const websocketRequest: HttpServiceWebSocketMessageRequest = request;
 
-      const request: HttpRequest = {
+      const httpRequest: HttpRequest = {
         path: serviceConfig.url,
         method: "POST",
         body: websocketRequest,
@@ -38,30 +32,33 @@ export default async function sendToService(
       };
 
       const onRequestResult = serviceConfig.onRequest
-        ? await serviceConfig.onRequest(requestId, request)
-        : { handled: false as false, request: message };
+        ? await serviceConfig.onRequest(request)
+        : {
+            handled: false as false,
+            request: httpRequest,
+          };
 
       if (onRequestResult.handled) {
         if (onRequestResult.response) {
-          respond(requestId, onRequestResult.response, conn, websocketConfig);
+          respond(request.id, onRequestResult.response, conn, websocketConfig);
         }
       } else {
-        const options = makeGotOptions(request);
+        const options = makeGotOptions(httpRequest);
         got(serviceConfig.url, options)
           .then(async (serverResponse) => {
             const websocketResponse = makeWebSocketResponse(
               serverResponse,
-              requestId
+              request.id
             );
-            respond(requestId, websocketResponse, conn, websocketConfig);
+            respond(request.id, websocketResponse, conn, websocketConfig);
           })
           .catch(async (error) => {
             const websocketResponse: WebSocketResponse = error.response
-              ? makeWebSocketResponse(error.response, requestId)
+              ? makeWebSocketResponse(error.response, request.id)
               : {
-                  id: requestId,
+                  id: request.id,
                   response: error.message,
-                  route,
+                  route: request.route,
                   service,
                   type: "message",
                 };

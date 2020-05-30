@@ -6,7 +6,10 @@ import WebSocket from "ws";
 import * as configModule from "../../config";
 import randomId from "../../lib/random";
 import { get as activeConnections } from "./activeConnections";
-import { WebSocketRouteConfig } from "../../types/webSocketRequests";
+import {
+  WebSocketRouteConfig,
+  WebSocketMessageRequest,
+} from "../../types/webSocketRequests";
 
 import sendToHttpService from "./backends/http/sendToService";
 import sendToRedisService from "./backends/redis/sendToService";
@@ -164,7 +167,15 @@ function onMessage(
 
         const onRequestResult = onRequest
           ? await onRequest(requestId, message)
-          : { handled: false as false, request: message };
+          : {
+              handled: false as false,
+              request: {
+                id: requestId,
+                request: message,
+                route,
+                type: "message" as "message",
+              },
+            };
 
         if (onRequestResult.handled) {
           if (onRequestResult.response) {
@@ -177,9 +188,7 @@ function onMessage(
         } else {
           for (const connector of connectors) {
             connector.sendToService(
-              requestId,
               onRequestResult.request,
-              route,
               conn,
               websocketConfig
             );
