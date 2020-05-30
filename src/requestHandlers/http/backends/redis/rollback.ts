@@ -41,14 +41,17 @@ export default async function rollback(
       if (!alreadyPublishedChannels.includes(requestChannel)) {
         const onRollbackRequestResult = serviceConfig.onRollbackRequest
           ? await serviceConfig.onRollbackRequest(redisHttpRequest)
-          : { handled: false as false, request: redisHttpRequest };
+          : {
+              handled: false as false,
+              request: JSON.stringify(redisHttpRequest),
+            };
 
         if (!onRollbackRequestResult.handled) {
           alreadyPublishedChannels.push(requestChannel);
 
           getPublisher().publish(
             requestChannel,
-            JSON.stringify(onRollbackRequestResult.request)
+            onRollbackRequestResult.request
           );
         }
       }

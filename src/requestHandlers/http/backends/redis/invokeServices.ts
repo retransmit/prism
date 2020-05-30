@@ -49,7 +49,10 @@ export default function invokeServices(
           const timeBeforeOnRequestResult = Date.now();
           const onRequestResult = serviceConfig.onRequest
             ? await serviceConfig.onRequest(redisHttpRequest)
-            : { handled: false as false, request: redisHttpRequest };
+            : {
+                handled: false as false,
+                request: JSON.stringify(redisHttpRequest),
+              };
 
           if (onRequestResult.handled) {
             if (serviceConfig.awaitResponse !== false) {
@@ -76,10 +79,7 @@ export default function invokeServices(
             if (serviceConfig.awaitResponse !== false) {
               if (!alreadyPublishedChannels.includes(requestChannel)) {
                 alreadyPublishedChannels.push(requestChannel);
-                getPublisher().publish(
-                  requestChannel,
-                  JSON.stringify(onRequestResult.request)
-                );
+                getPublisher().publish(requestChannel, onRequestResult.request);
               }
               activeRequests().set(`${requestId}+${service}`, {
                 id: requestId,
@@ -91,10 +91,7 @@ export default function invokeServices(
               });
             } else {
               if (!alreadyPublishedChannels.includes(requestChannel)) {
-                getPublisher().publish(
-                  requestChannel,
-                  JSON.stringify(onRequestResult.request)
-                );
+                getPublisher().publish(requestChannel, onRequestResult.request);
               }
               success({ skip: true });
             }

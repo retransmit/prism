@@ -119,7 +119,7 @@ export type RedisServiceHttpHandlerConfig = {
     | {
         handled: true;
       }
-    | { handled: false; request: RedisServiceHttpRequest }
+    | { handled: false; request: string }
   >;
   onError?: (response: HttpResponse | undefined, request: HttpRequest) => any;
 } & HttpHandlerConfigBase;
