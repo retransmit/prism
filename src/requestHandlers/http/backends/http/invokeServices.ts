@@ -60,7 +60,10 @@ export default function invokeServices(
           if (onRequestResult.handled) {
             if (serviceConfig.awaitResponse !== false) {
               const modifiedResponse = serviceConfig.onResponse
-                ? await serviceConfig.onResponse(onRequestResult.response)
+                ? await serviceConfig.onResponse(
+                    onRequestResult.response,
+                    originalRequest
+                  )
                 : onRequestResult.response;
 
               const fetchedResponse = {
@@ -100,7 +103,7 @@ export default function invokeServices(
 
                   // Use the original request here - not modifiedRequest
                   const modifiedResponse = serviceConfig.onResponse
-                    ? await serviceConfig.onResponse(response)
+                    ? await serviceConfig.onResponse(response, originalRequest)
                     : response;
 
                   const fetchedResponse = {
@@ -125,16 +128,13 @@ export default function invokeServices(
 
                   if (responseIsError(errorResponse)) {
                     if (serviceConfig.onError) {
-                      serviceConfig.onError(
-                        errorResponse,
-                        requestToSend
-                      );
+                      serviceConfig.onError(errorResponse, requestToSend);
                     }
                   }
 
                   // Use the original request here - not modifiedRequest
                   const modifiedResponse = serviceConfig.onResponse
-                    ? await serviceConfig.onResponse(errorResponse)
+                    ? await serviceConfig.onResponse(errorResponse, originalRequest)
                     : errorResponse;
 
                   const fetchedResponse = {

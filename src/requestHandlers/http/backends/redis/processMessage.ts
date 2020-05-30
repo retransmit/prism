@@ -6,7 +6,7 @@ import {
   HttpRouteConfig,
   FetchedHttpHandlerResponse,
 } from "../../../../types/httpRequests";
-import { HttpProxyConfig, HttpResponse } from "../../../../types";
+import { HttpProxyConfig, HttpResponse, HttpRequest } from "../../../../types";
 
 export default function processMessage(httpConfig: HttpProxyConfig) {
   return async function processMessageImpl(
@@ -34,9 +34,11 @@ export default function processMessage(httpConfig: HttpProxyConfig) {
         // Otherwise ignore the message.
         if (channel === channelInRequest) {
           const redisResponse = serviceConfig.onResponse
-            ? await serviceConfig.onResponse(messageString)
-            : messageObj as RedisServiceHttpResponse
-
+            ? await serviceConfig.onResponse(
+                messageString,
+                activeRequest.request
+              )
+            : (messageObj as RedisServiceHttpResponse);
 
           if (responseIsError(redisResponse.response)) {
             if (serviceConfig.onError) {
