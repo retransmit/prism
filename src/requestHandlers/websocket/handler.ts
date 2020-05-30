@@ -123,29 +123,26 @@ function setupWebSocketHandling(
             websocketConfig.onRequest ||
             websocketConfig.routes[route].onRequest;
 
-          const finalMessage = onRequest
+          const onRequestResult = onRequest
             ? await onRequest(requestId, message)
-            : message;
+            : { handled: false as false, request: message };
 
-          const messageToSend = {
-            handled: false as false,
-            request: {
-              id: requestId,
-              type: "message",
-              route,
-              responseChannel: `${websocketConfig.redis?.responseChannel}.${config.instanceId}`,
-              request: finalMessage,
-            } as WebSocketRequest,
-          };
-
-          for (const connector of connectors) {
-            connector.sendToService(
-              requestId,
-              message,
-              route,
-              conn,
-              websocketConfig
-            );
+          if (onRequestResult.handled) {
+            if (onRequestResult.response.type === "message") {
+              ws.send(onRequestResult.response.response);
+            } else if (onRequestResult.response.type === "disconnect") {
+              ws.terminate();
+            }
+          } else {
+            for (const connector of connectors) {
+              connector.sendToService(
+                requestId,
+                onRequestResult.request,
+                route,
+                conn,
+                websocketConfig
+              );
+            }
           }
         }
       }

@@ -15,20 +15,19 @@ export default async function respond(
 ) {
   if (websocketResponse.type === "message") {
     const routeConfig = websocketConfig.routes[websocketResponse.route];
-    const serviceConfig = routeConfig.services[websocketResponse.service];
+    
     const onResponse =
-      serviceConfig.onResponse ||
       routeConfig.onResponse ||
       websocketConfig.onResponse;
 
-    const finalResponse = onResponse
+    const onResponseResult = onResponse
       ? await onResponse(requestId, websocketResponse)
       : websocketResponse;
 
-    if (finalResponse.type === "disconnect") {
+    if (onResponseResult.type === "disconnect") {
       conn.websocket.terminate();
-    } else if (finalResponse.type === "message") {
-      if (finalResponse.response) {
+    } else if (onResponseResult.type === "message") {
+      if (onResponseResult.response) {
         conn.websocket.send(websocketResponse.response);
       }
     }

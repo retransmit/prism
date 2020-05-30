@@ -1,4 +1,4 @@
-import { HttpRequest } from ".";
+import { HttpRequest, HttpResponse } from ".";
 
 /*
   Web Socket Route Config
@@ -17,7 +17,10 @@ export type WebSocketRouteConfig = {
   onRequest?: (
     requestId: string,
     message: string
-  ) => Promise<{ handled: true; request: string } | { handled: false }>;
+  ) => Promise<
+    | { handled: true; response: WebSocketResponse }
+    | { handled: false; request: string }
+  >;
   onResponse?: (
     requestId: string,
     response: WebSocketResponse
@@ -35,10 +38,6 @@ export type WebSocketHandlerConfigBase = {
   ) => Promise<
     { drop: true } | { drop: false; request: WebSocketConnectRequest }
   >;
-  onResponse?: (
-    requestId: string,
-    response: WebSocketResponse
-  ) => Promise<WebSocketResponse>;
 };
 
 export type HttpServiceWebSocketHandlerConfig = {
@@ -51,6 +50,10 @@ export type HttpServiceWebSocketHandlerConfig = {
     | { handled: true; response: WebSocketResponse }
     | { handled: false; request: HttpRequest }
   >;
+  onResponse?: (
+    requestId: string,
+    response: HttpResponse
+  ) => Promise<WebSocketResponse>;
   url: string;
   onConnectUrl: string;
   onDisconnectUrl: string;
@@ -65,7 +68,10 @@ export type RedisServiceWebSocketHandlerConfig = {
     | { handled: true; response: WebSocketResponse }
     | { handled: false; request: RedisServiceWebSocketRequest }
   >;
-
+  onResponse?: (
+    requestId: string,
+    response: string
+  ) => Promise<WebSocketResponse>;
   requestChannel: string;
   numRequestChannels?: number;
 } & WebSocketHandlerConfigBase;
