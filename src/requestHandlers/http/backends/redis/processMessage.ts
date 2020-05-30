@@ -43,7 +43,7 @@ export default function processMessage(httpConfig: HttpProxyConfig) {
           if (responseIsError(redisResponse.response)) {
             if (serviceConfig.onError) {
               serviceConfig.onError(
-                redisResponse.response,
+                messageString,
                 activeRequest.request
               );
             }
