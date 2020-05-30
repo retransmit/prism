@@ -3,6 +3,7 @@ import {
   RedisServiceWebSocketHandlerConfig,
   RedisServiceWebSocketRequest,
   RedisServiceWebSocketConnectRequest,
+  WebSocketConnectRequest,
 } from "../../../../types/webSocketRequests";
 import * as configModule from "../../../../config";
 import { getPublisher } from "../../../../lib/redis/clients";
@@ -10,6 +11,7 @@ import { getChannelForService } from "../../../../lib/redis/getChannelForService
 
 export default function connect(
   requestId: string,
+  defaultRequest: WebSocketConnectRequest,
   route: string,
   handlerConfig: RedisServiceWebSocketHandlerConfig,
   websocketConfig: WebSocketProxyConfig
@@ -28,5 +30,5 @@ export default function connect(
     responseChannel: `${websocketConfig.redis?.responseChannel}.${config.instanceId}`,
   };
 
-  getPublisher().publish(channel, JSON.stringify(request));
+  getPublisher().publish(channel, JSON.stringify(defaultRequest));
 }

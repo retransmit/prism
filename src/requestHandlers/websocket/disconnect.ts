@@ -6,7 +6,7 @@ import httpDisconnect from "./backends/http/disconnect";
 import redisDisconnect from "./backends/redis/disconnect";
 
 export default function disconnect(
-  message: WebSocketResponse,
+  requestId: string,
   conn: ActiveWebSocketConnection,
   websocketConfig: WebSocketProxyConfig
 ) {
@@ -14,9 +14,9 @@ export default function disconnect(
   for (const service of Object.keys(websocketConfig.routes[conn.route])) {
     const serviceConfig = websocketConfig.routes[route].services[service];
     if (serviceConfig.type === "redis") {
-      redisDisconnect(message.id, conn.route, serviceConfig, websocketConfig);
+      redisDisconnect(requestId, conn.route, serviceConfig, websocketConfig);
     } else if (serviceConfig.type === "http") {
-      httpDisconnect(message.id, conn.route, serviceConfig, websocketConfig);
+      httpDisconnect(requestId, conn.route, serviceConfig, websocketConfig);
     }
   }
 }

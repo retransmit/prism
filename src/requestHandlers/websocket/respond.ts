@@ -26,13 +26,13 @@ export default async function respond(
       : websocketResponse;
 
     if (finalResponse.type === "disconnect") {
-      disconnect(websocketResponse, conn, websocketConfig);
+      conn.websocket.terminate();
     } else if (finalResponse.type === "message") {
       if (finalResponse.response) {
         conn.websocket.send(websocketResponse.response);
       }
     }
   } else if (websocketResponse.type === "disconnect") {
-    disconnect(websocketResponse, conn, websocketConfig);
+    conn.websocket.terminate();
   }
 }

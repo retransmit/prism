@@ -9,12 +9,14 @@ import { get as activeConnections } from "./activeConnections";
 import {
   WebSocketRouteConfig,
   RedisServiceWebSocketRequest,
+  WebSocketConnectRequest,
 } from "../../types/webSocketRequests";
 
 import sendToHttpService from "./backends/http/sendToService";
 import sendToRedisService from "./backends/redis/sendToService";
 import { WebSocketProxyConfig } from "../../types";
 import connect from "./connect";
+import disconnect from "./disconnect";
 
 const connectors = [
   { type: "http", sendToService: sendToHttpService },
@@ -61,6 +63,12 @@ function setupWebSocketHandling(
     ws: WebSocket,
     request: IncomingMessage
   ) {
+    // This is for finding dead connections.
+    (ws as any).isAlive = true;
+    ws.on("pong", function heartbeat() {
+      (this as any).isAlive = true;
+    });
+
     const requestId = randomId();
 
     const xForwardedFor = request.headers["x-forwarded-for"];
@@ -75,7 +83,7 @@ function setupWebSocketHandling(
       route,
       websocket: ws,
       ip,
-      port: request.socket.remotePort
+      port: request.socket.remotePort,
     });
 
     ws.on("message", async function message(message: string) {
@@ -88,16 +96,16 @@ function setupWebSocketHandling(
         // If not initialized and there's an onConnect,
         // treat the first message as the onConnect argument.
         const onConnect = routeConfig.onConnect || websocketConfig.onConnect;
-        
+
         if (!conn.initialized && onConnect) {
           const onConnectResult = await onConnect(requestId, message);
 
-          if (onConnectResult.drop) {
+          if (onConnectResult.drop === true) {
             activeConnections().delete(requestId);
             ws.terminate();
           } else {
             conn.initialized = true;
-            connect(requestId, conn, websocketConfig);
+            connect(requestId, onConnectResult.request, conn, websocketConfig);
           }
         }
         // Regular message. Pass this on...
@@ -134,6 +142,37 @@ function setupWebSocketHandling(
         }
       }
     });
+
+    ws.on("close", async () => {
+      // Find the handler in question.
+      const conn = activeConnections().get(requestId);
+      if (conn) {
+        const handlerConfig = websocketConfig.routes[conn.route];
+        const onDisconnect =
+          handlerConfig.onDisconnect || websocketConfig.onDisconnect;
+        if (onDisconnect) {
+          onDisconnect(requestId);
+        }
+
+        // Call disconnect for services
+        disconnect(requestId, conn, websocketConfig);
+      }
+    });
+  });
+
+  const interval = setInterval(function ping() {
+    wss.clients.forEach(function each(ws: any) {
+      if (ws.isAlive === false) {
+        return ws.terminate();
+      }
+
+      ws.isAlive = false;
+      ws.ping(function noop() {});
+    });
+  }, 30000);
+
+  wss.on("close", function close() {
+    clearInterval(interval);
   });
 }
 

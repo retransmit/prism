@@ -5,6 +5,7 @@ import {
   WebSocketRouteConfig,
   WebSocketResponse,
   RedisServiceWebSocketRequest,
+  WebSocketConnectRequest,
 } from "./webSocketRequests";
 
 export {
@@ -66,7 +67,7 @@ export type WebSocketProxyConfig = {
   onConnect?: (
     requestId: string,
     message: string
-  ) => Promise<{ drop: boolean }>;
+  ) => Promise<{ drop: true } | { drop: false; request: WebSocketConnectRequest }>;
   onDisconnect?: (requestId: string) => any;
   onRequest?: (
     requestId: string,

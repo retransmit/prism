@@ -1,19 +1,14 @@
 import { WebSocketProxyConfig, HttpRequest } from "../../../../types";
 import {
   HttpServiceWebSocketHandlerConfig,
-  WebSocketDisconnectRequest,
-  WebSocketResponse,
   WebSocketConnectRequest,
-} from "../../../../types/webSocketRequests";
-import { getPublisher } from "../../../../lib/redis/clients";
-import { getChannelForService } from "../../../../lib/redis/getChannelForService";
-import { makeGotOptions } from "../../../../lib/http/gotUtil";
+} from "../../../../types/webSocketRequests";import { makeGotOptions } from "../../../../lib/http/gotUtil";
 import got from "got/dist/source";
-import { makeWebSocketResponse } from "./makeWebSocketResponse";
 import * as activeConnections from "../../activeConnections";
 
 export default function disconnect(
   requestId: string,
+  defaultRequest: WebSocketConnectRequest,
   route: string,
   handlerConfig: HttpServiceWebSocketHandlerConfig,
   websocketConfig: WebSocketProxyConfig
@@ -38,7 +33,7 @@ export default function disconnect(
           method: "POST",
           body: websocketRequest,
           remoteAddress: conn.ip,
-          remotePort: conn.port
+          remotePort: conn.port,
         };
 
         const options = makeGotOptions(request);
