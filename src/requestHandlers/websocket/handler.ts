@@ -106,12 +106,7 @@ function setupWebSocketHandling(
             ws.terminate();
           } else {
             conn.initialized = true;
-            const connectRequest: WebSocketConnectRequest = {
-              id: requestId,
-              route,
-              type: "connect",
-            };
-            connect(requestId, connectRequest, conn, websocketConfig);
+            connect(requestId, conn, websocketConfig);
           }
         }
         // Regular message. Pass this on...

@@ -1,8 +1,4 @@
 import { ActiveWebSocketConnection } from "./activeConnections";
-import {
-  WebSocketResponse,
-  WebSocketConnectRequest,
-} from "../../types/webSocketRequests";
 import { WebSocketProxyConfig } from "../../types";
 
 import httpConnect from "./backends/http/connect";
@@ -10,7 +6,6 @@ import redisConnect from "./backends/redis/connect";
 
 export default function connect(
   requestId: string,
-  defaultRequest: WebSocketConnectRequest,
   conn: ActiveWebSocketConnection,
   websocketConfig: WebSocketProxyConfig
 ) {
@@ -20,16 +15,14 @@ export default function connect(
     if (serviceConfig.type === "http") {
       httpConnect(
         requestId,
-        defaultRequest,
-        conn.route,
+        conn,
         serviceConfig,
         websocketConfig
       );
     } else if (serviceConfig.type === "redis") {
       redisConnect(
         requestId,
-        defaultRequest,
-        conn.route,
+        conn,
         serviceConfig,
         websocketConfig
       );

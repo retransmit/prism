@@ -7,10 +7,11 @@ import {
 import * as configModule from "../../../../config";
 import { getPublisher } from "../../../../lib/redis/clients";
 import { getChannelForService } from "../../../../lib/redis/getChannelForService";
+import { ActiveWebSocketConnection } from "../../activeConnections";
 
 export default function disconnect(
   requestId: string,
-  route: string,
+  conn: ActiveWebSocketConnection,
   handlerConfig: RedisServiceWebSocketHandlerConfig,
   websocketConfig: WebSocketProxyConfig
 ) {
@@ -23,8 +24,8 @@ export default function disconnect(
 
   const request: WebSocketDisconnectRequest = {
     id: requestId,
-    route,
-    type: "disconnect"
+    route: conn.route,
+    type: "disconnect",
   };
 
   getPublisher().publish(channel, JSON.stringify(request));
