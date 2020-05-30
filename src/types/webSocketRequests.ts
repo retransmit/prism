@@ -51,11 +51,9 @@ export type HttpServiceWebSocketHandlerConfig = {
     | { handled: true; response: WebSocketResponse }
     | { handled: false; request: HttpRequest }
   >;
-  config: {
-    url: string;
-    onConnectUrl: string;
-    onDisconnectUrl: string;
-  };
+  url: string;
+  onConnectUrl: string;
+  onDisconnectUrl: string;
 } & WebSocketHandlerConfigBase;
 
 export type RedisServiceWebSocketHandlerConfig = {
@@ -67,10 +65,9 @@ export type RedisServiceWebSocketHandlerConfig = {
     | { handled: true; response: WebSocketResponse }
     | { handled: false; request: RedisServiceWebSocketRequest }
   >;
-  config: {
-    requestChannel: string;
-    numRequestChannels?: number;
-  };
+
+  requestChannel: string;
+  numRequestChannels?: number;
 } & WebSocketHandlerConfigBase;
 
 export type WebSocketHandlerConfig =

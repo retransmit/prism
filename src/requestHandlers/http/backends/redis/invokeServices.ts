@@ -47,8 +47,8 @@ export default function invokeServices(
           };
 
           const timeBeforeOnRequestResult = Date.now();
-          const onRequestResult = serviceConfig.config.onRequest
-            ? await serviceConfig.config.onRequest(redisHttpRequest)
+          const onRequestResult = serviceConfig.onRequest
+            ? await serviceConfig.onRequest(redisHttpRequest)
             : { handled: false as false, request: redisHttpRequest };
 
           if (onRequestResult.handled) {
@@ -70,8 +70,8 @@ export default function invokeServices(
             }
           } else {
             const requestChannel = getChannelForService(
-              serviceConfig.config.requestChannel,
-              serviceConfig.config.numRequestChannels
+              serviceConfig.requestChannel,
+              serviceConfig.numRequestChannels
             );
             if (serviceConfig.awaitResponse !== false) {
               if (!alreadyPublishedChannels.includes(requestChannel)) {

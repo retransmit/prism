@@ -19,8 +19,8 @@ export default function connect(
   const config = configModule.get();
 
   const channel = getChannelForService(
-    handlerConfig.config.requestChannel,
-    handlerConfig.config.numRequestChannels
+    handlerConfig.requestChannel,
+    handlerConfig.numRequestChannels
   );
 
   const request: RedisServiceWebSocketConnectRequest = {

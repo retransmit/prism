@@ -29,7 +29,7 @@ export default function disconnect(
         };
 
         const request: HttpRequest = {
-          path: serviceConfig.config.onDisconnectUrl,
+          path: serviceConfig.onDisconnectUrl,
           method: "POST",
           body: websocketRequest,
           remoteAddress: conn.ip,
@@ -38,7 +38,7 @@ export default function disconnect(
 
         const options = makeGotOptions(request);
 
-        got(serviceConfig.config.url, options).catch(async (error) => {
+        got(serviceConfig.url, options).catch(async (error) => {
           // TODO...
         });
       }

@@ -27,13 +27,13 @@ export default async function sendToService(
         id: requestId,
         type: "message",
         route,
-        responseChannel: `${serviceConfig.config.requestChannel}.${config.instanceId}`,
+        responseChannel: `${serviceConfig.requestChannel}.${config.instanceId}`,
         request: message,
       };
 
       const requestChannel = getChannelForService(
-        serviceConfig.config.requestChannel,
-        serviceConfig.config.numRequestChannels
+        serviceConfig.requestChannel,
+        serviceConfig.numRequestChannels
       );
 
       const onRequestResult = serviceConfig.onRequest

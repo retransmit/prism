@@ -14,9 +14,7 @@ export default async function (app: { instance: any }) {
               services: {
                 userservice: {
                   type: "redis" as "redis",
-                  config: {
-                    requestChannel: "input",
-                  },
+                  requestChannel: "input",
                 },
               },
             },

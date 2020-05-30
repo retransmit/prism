@@ -15,15 +15,11 @@ export default async function (app: { instance: any }) {
               services: {
                 userservice: {
                   type: "http" as "http",
-                  config: {
-                    url: "http://localhost:6666/users",
-                  },
+                  url: "http://localhost:6666/users",
                 },
                 messagingservice: {
                   type: "http" as "http",
-                  config: {
-                    url: "http://localhost:6667/messages",
-                  },
+                  url: "http://localhost:6667/messages",
                 },
               },
             },
@@ -32,7 +28,11 @@ export default async function (app: { instance: any }) {
       },
     };
 
-    const server = await startWithConfiguration(undefined, "testinstance", config);
+    const server = await startWithConfiguration(
+      undefined,
+      "testinstance",
+      config
+    );
     app.instance = server;
 
     // Start mock servers.

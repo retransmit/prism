@@ -34,13 +34,13 @@ export default async function rollback(
       };
 
       const requestChannel = getChannelForService(
-        serviceConfig.config.requestChannel,
-        serviceConfig.config.numRequestChannels
+        serviceConfig.requestChannel,
+        serviceConfig.numRequestChannels
       );
 
       if (!alreadyPublishedChannels.includes(requestChannel)) {
-        const onRollbackRequestResult = serviceConfig.config.onRollbackRequest
-          ? await serviceConfig.config.onRollbackRequest(redisHttpRequest)
+        const onRollbackRequestResult = serviceConfig.onRollbackRequest
+          ? await serviceConfig.onRollbackRequest(redisHttpRequest)
           : { handled: false as false, request: redisHttpRequest };
 
         if (!onRollbackRequestResult.handled) {

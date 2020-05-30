@@ -24,21 +24,21 @@ export default async function rollback(
 
   for (const service of Object.keys(routeConfig.services)) {
     const serviceConfig = routeConfig.services[service];
-    if (serviceConfig.type === "http" && serviceConfig.config.rollbackUrl) {
+    if (serviceConfig.type === "http" && serviceConfig.rollbackUrl) {
       const params = request.params;
       const urlWithParamsReplaced = params
         ? Object.keys(params).reduce((acc, param) => {
             return acc.replace(`/:${param}`, `/${params[param]}`);
-          }, serviceConfig.config.rollbackUrl)
-        : serviceConfig.config.rollbackUrl;
+          }, serviceConfig.rollbackUrl)
+        : serviceConfig.rollbackUrl;
 
       const requestCopy = {
         ...request,
         path: urlWithParamsReplaced,
       };
 
-      const modifiedRequest = serviceConfig.config.onRollbackRequest
-        ? await serviceConfig.config.onRollbackRequest(requestCopy)
+      const modifiedRequest = serviceConfig.onRollbackRequest
+        ? await serviceConfig.onRollbackRequest(requestCopy)
         : { handled: false as false, request: requestCopy };
 
       if (!modifiedRequest.handled) {
@@ -56,8 +56,8 @@ export default async function rollback(
               };
 
           if (responseIsError(errorResponse)) {
-            if (serviceConfig.config.onError) {
-              serviceConfig.config.onError(errorResponse, modifiedRequest.request);
+            if (serviceConfig.onError) {
+              serviceConfig.onError(errorResponse, modifiedRequest.request);
             }
           }
         });

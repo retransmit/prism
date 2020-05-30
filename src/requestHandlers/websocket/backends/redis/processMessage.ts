@@ -34,8 +34,8 @@ export default function processMessage(websocketConfig: WebSocketProxyConfig) {
       };
 
       const requestChannel = getChannelForService(
-        serviceConfig.config.requestChannel,
-        serviceConfig.config.numRequestChannels
+        serviceConfig.requestChannel,
+        serviceConfig.numRequestChannels
       );
 
       getPublisher().publish(requestChannel, JSON.stringify(websocketRequest));

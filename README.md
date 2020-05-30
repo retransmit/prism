@@ -33,15 +33,11 @@ module.exports = {
           services: {
             userservice: {
               type: "http",
-              config: {
-                url: "http://localhost:6666/users",
-              },
+              url: "http://localhost:6666/users",
             },
             messagingservice: {
               type: "http",
-              config: {
-                url: "http://localhost:6667/messages",
-              },
+              url: "http://localhost:6667/messages",
             },
           },
         },
@@ -52,17 +48,11 @@ module.exports = {
           services: {
             userservice: {
               type: "http",
-              config: {
-                // And use them like this.
-                url: "http://localhost:6666/users/:id",
-              },
+              url: "http://localhost:6666/users/:id",
             },
             messagingservice: {
               type: "http",
-              config: {
-                // And use them like this.
-                url: "http://localhost:6667/messages/for/:id",
-              },
+              url: "http://localhost:6667/messages/for/:id",
             },
           },
         },
@@ -89,15 +79,11 @@ module.exports = {
           services: {
             userservice: {
               type: "redis",
-              config: {
-                requestChannel: "input",
-              },
+              requestChannel: "input",
             },
             messagingservice: {
               type: "redis",
-              config: {
-                requestChannel: "input",
-              },
+              requestChannel: "input",
             },
           },
         },
@@ -195,16 +181,12 @@ module.exports = {
   // parts of config omitted for brevity
   userservice: {
     type: "redis",
-    config: {
-      requestChannel: "input",
-    },
+    requestChannel: "input",
     mergeField: "userData",
   },
   messagingservice: {
     type: "redis",
-    config: {
-      requestChannel: "input",
-    },
+    requestChannel: "input",
     mergeField: "messagingData",
   },
 };
@@ -213,16 +195,14 @@ module.exports = {
 You can also choose not to merge data from a certain service with the 'merge' flag in configuration.
 
 ```js
-{
+module.exports = {
   // parts of config omitted for brevity
   messagingservice: {
     type: "redis",
-    config: {
-      requestChannel: "inputs"
-    },
-    merge: false
+    requestChannel: "inputs",
+    merge: false,
   },
-}
+};
 ```
 
 ## Not waiting for responses
@@ -230,16 +210,14 @@ You can also choose not to merge data from a certain service with the 'merge' fl
 There might be services which you just want to call, and not wait for results. Use the 'awaitResponse' property to configure this.
 
 ```js
-{
+module.exports = {
   // parts of config omitted for brevity
   messagingservice: {
     type: "redis",
-    config: {
-      requestChannel: "inputs"
-    },
-    awaitResponse: false
+    requestChannel: "inputs",
+    awaitResponse: false,
   },
-}
+};
 ```
 
 ## Modifying Requests and Responses
@@ -260,9 +238,7 @@ module.exports = {
       services: {
         userservice: {
           type: "redis",
-          config: {
-            requestChannel: "input",
-          },
+          requestChannel: "input",
         },
       },
     },
@@ -352,9 +328,8 @@ module.exports = {
   // parts of config omitted for brevity
   messagingservice: {
     type: "redis",
-    config: {
-      requestChannel: "input",
-    },
+    requestChannel: "input",
+
     /*
       Signature of onRequest
       onRequest?: (ctx: HttpRequestContext) => Promise<{ handled: boolean }>;
@@ -392,9 +367,7 @@ module.exports = {
           services: {
             userservice: {
               type: "redis",
-              config: {
-                requestChannel: "input",
-              },
+              requestChannel: "input",
               mergeField: "userData",
             },
           },
@@ -432,17 +405,14 @@ module.exports = {
           services: {
             userservice: {
               type: "http",
-              config: {
-                url: "http://localhost:6666/users",
-                // Rollback url to call
-                rollbackUrl: "http://localhost:6666/users/remove",
-              },
+              url: "http://localhost:6666/users",
+              // Rollback url to call
+              rollbackUrl: "http://localhost:6666/users/remove",
             },
             accountsservice: {
               type: "http",
-              config: {
-                url: "http://localhost:6666/accounts",
-              },
+              url: "http://localhost:6666/accounts",
+
               // The rollback call goes as an HTTP PUT to a different url.
               modifyRollbackRequest: (req) => {
                 return {
@@ -486,17 +456,8 @@ module.exports = {
           services: {
             messagingservice: {
               type: "redis",
-              config: {
-                requestChannel: "input",
-                responseChannel: "output",
-              },
-              /*
-          Note the difference. Contains only one response.
-          onError?: (
-            response: HttpResponse,
-            request: HttpRequest
-          ) => any;
-        */
+              requestChannel: "input",
+              responseChannel: "output",
               onError: async (response, request) => {
                 console.log("Failed in messagingservice.");
               },
@@ -539,18 +500,14 @@ module.exports = {
         services: {
           quoteservice: {
             type: "redis",
-            config: {
-              requestChannel: "input",
-              responseChannel: "output",
-            },
+            requestChannel: "input",
+            responseChannel: "output",
           },
           alertservice: {
             type: "http",
-            config: {
-              url: "http://localhost:6454/alerts",
-              disconnectUrl: "http://localhost:6454/disconnect",
-              pollingInterval: 10000,
-            },
+            url: "http://localhost:6454/alerts",
+            disconnectUrl: "http://localhost:6454/disconnect",
+            pollingInterval: 10000,
           },
         },
       },
@@ -630,25 +587,19 @@ module.exports = {
           services: {
             messagingservice: {
               type: "redis",
-              config: {
-                requestChannel: "input",
-              },
+              requestChannel: "input",
               // Timeout defaults to 30s
               timeout: 100000,
             },
             notificationservice: {
               type: "http",
-              config: {
-                url: "http://notify.example.com/users",
-              },
+              url: "http://notify.example.com/users",
               // Do not wait for this response
               awaitResponse: false,
             },
             accountservice: {
               type: "http",
-              config: {
-                url: "http://accounts.example.com/online",
-              },
+              url: "http://accounts.example.com/online",
               // Do not merge the response from this service
               merge: false,
             },
@@ -680,12 +631,10 @@ module.exports = {
           services: {
             messagingservice: {
               type: "redis",
-              config: {
-                requestChannel: "input",
-                // Specify 10 channels
-                // Instances need to subscribe to input0 to inputs9
-                numRequestChannels: 10,
-              },
+              requestChannel: "input",
+              // Specify 10 channels
+              // Instances need to subscribe to input0 to inputs9
+              numRequestChannels: 10,
             },
           },
         },

@@ -32,7 +32,7 @@ export default function disconnect(
         };
 
         const request: HttpRequest = {
-          path: serviceConfig.config.onDisconnectUrl,
+          path: serviceConfig.onDisconnectUrl,
           method: "POST",
           body: websocketRequest,
           remoteAddress: conn.ip,
@@ -43,7 +43,7 @@ export default function disconnect(
 
         // We don't care about the response here.
         // The client has already disco'ed.
-        got(serviceConfig.config.url, options).catch(async (error) => {
+        got(serviceConfig.url, options).catch(async (error) => {
           // TODO...
         });
       }
