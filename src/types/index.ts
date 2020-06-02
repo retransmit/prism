@@ -4,7 +4,6 @@ import { FetchedHttpHandlerResponse, HttpRouteConfig } from "./httpRequests";
 import {
   WebSocketRouteConfig,
   WebSocketResponse,
-  WebSocketRequest,
   WebSocketMessageRequest,
 } from "./webSocketRequests";
 
