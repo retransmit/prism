@@ -7,18 +7,19 @@ import * as configModule from "../../../../config";
 import { getPublisher } from "../../../../lib/redis/clients";
 import { getChannelForService } from "../../../../lib/redis/getChannelForService";
 import { ActiveWebSocketConnection } from "../../activeConnections";
+import respond from "../../respond";
 
-export default function connect(
+export default async function connect(
   requestId: string,
   conn: ActiveWebSocketConnection,
-  handlerConfig: RedisServiceWebSocketHandlerConfig,
+  serviceConfig: RedisServiceWebSocketHandlerConfig,
   websocketConfig: WebSocketProxyConfig
-) {  
+) {
   const config = configModule.get();
 
   const channel = getChannelForService(
-    handlerConfig.requestChannel,
-    handlerConfig.numRequestChannels
+    serviceConfig.requestChannel,
+    serviceConfig.numRequestChannels
   );
 
   const request: RedisServiceWebSocketConnectRequest = {
@@ -28,5 +29,15 @@ export default function connect(
     responseChannel: `${websocketConfig.redis?.responseChannel}.${config.instanceId}`,
   };
 
-  getPublisher().publish(channel, JSON.stringify(request));
+  const onRequestResult = serviceConfig.onRequest
+    ? await serviceConfig.onRequest(request)
+    : { handled: false as false, request: JSON.stringify(request) };
+
+  if (onRequestResult.handled) {
+    if (onRequestResult.response) {
+      respond(requestId, onRequestResult.response, conn, websocketConfig);
+    }
+  } else {
+    getPublisher().publish(channel, onRequestResult.request);
+  }
 }

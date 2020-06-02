@@ -6,11 +6,12 @@ import {
 import { makeGotOptions } from "../../../../lib/http/gotUtil";
 import got from "got/dist/source";
 import * as activeConnections from "../../activeConnections";
+import respond from "../../respond";
 
-export default function connect(
+export default async function connect(
   requestId: string,
   conn: activeConnections.ActiveWebSocketConnection,
-  handlerConfig: HttpServiceWebSocketHandlerConfig,
+  serviceConfig: HttpServiceWebSocketHandlerConfig,
   websocketConfig: WebSocketProxyConfig
 ) {
   const websocketRequest: WebSocketConnectRequest = {
@@ -19,17 +20,28 @@ export default function connect(
     route: conn.route,
   };
 
-  const request: HttpRequest = {
-    path: handlerConfig.onDisconnectUrl,
-    method: "POST",
-    body: websocketRequest,
-    remoteAddress: conn.ip,
-    remotePort: conn.port,
-  };
+  const onRequestResult = serviceConfig.onRequest
+    ? await serviceConfig.onRequest(websocketRequest)
+    : {
+        handled: false as false,
+        request: {
+          path: serviceConfig.onDisconnectUrl,
+          method: "POST" as "POST",
+          body: websocketRequest,
+          remoteAddress: conn.ip,
+          remotePort: conn.port,
+        },
+      };
 
-  const options = makeGotOptions(request);
+  if (onRequestResult.handled) {
+    if (onRequestResult.response) {
+      respond(requestId, onRequestResult.response, conn, websocketConfig);
+    }
+  } else {
+    const options = makeGotOptions(onRequestResult.request);
 
-  got(handlerConfig.url, options).catch(async (error) => {
-    // TODO...
-  });
+    got(serviceConfig.url, options).catch(async (error) => {
+      // TODO...
+    });
+  }
 }

@@ -83,21 +83,19 @@ export default function invokeServices(
               success({ skip: true });
             }
           } else {
-            const requestToSend = onRequestResult.request;
-
             const options = makeGotOptions(
-              requestToSend,
+              onRequestResult.request,
               serviceConfig.timeout
             );
 
             if (serviceConfig.awaitResponse !== false) {
-              got(requestToSend.path, options)
+              got(onRequestResult.request.path, options)
                 .then(async (serverResponse) => {
                   const response = makeHttpResponse(serverResponse);
 
                   if (responseIsError(response)) {
                     if (serviceConfig.onError) {
-                      serviceConfig.onError(response, requestToSend);
+                      serviceConfig.onError(response, onRequestResult.request);
                     }
                   }
 
@@ -128,13 +126,19 @@ export default function invokeServices(
 
                   if (responseIsError(errorResponse)) {
                     if (serviceConfig.onError) {
-                      serviceConfig.onError(errorResponse, requestToSend);
+                      serviceConfig.onError(
+                        errorResponse,
+                        onRequestResult.request
+                      );
                     }
                   }
 
                   // Use the original request here - not modifiedRequest
                   const modifiedResponse = serviceConfig.onResponse
-                    ? await serviceConfig.onResponse(errorResponse, originalRequest)
+                    ? await serviceConfig.onResponse(
+                        errorResponse,
+                        originalRequest
+                      )
                     : errorResponse;
 
                   const fetchedResponse = {
@@ -150,20 +154,25 @@ export default function invokeServices(
                   success({ skip: false, response: fetchedResponse });
                 });
             } else {
-              got(requestToSend.path, options).catch(async (error) => {
-                const errorResponse = error.response
-                  ? makeHttpResponse(error.response)
-                  : {
-                      status: 400,
-                      content: error.message,
-                    };
+              got(onRequestResult.request.path, options).catch(
+                async (error) => {
+                  const errorResponse = error.response
+                    ? makeHttpResponse(error.response)
+                    : {
+                        status: 400,
+                        content: error.message,
+                      };
 
-                if (responseIsError(errorResponse)) {
-                  if (serviceConfig.onError) {
-                    serviceConfig.onError(errorResponse, requestToSend);
+                  if (responseIsError(errorResponse)) {
+                    if (serviceConfig.onError) {
+                      serviceConfig.onError(
+                        errorResponse,
+                        onRequestResult.request
+                      );
+                    }
                   }
                 }
-              });
+              );
             }
           }
         })

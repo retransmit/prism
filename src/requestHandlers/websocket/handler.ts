@@ -204,9 +204,9 @@ function onClose(requestId: string, websocketConfig: WebSocketProxyConfig) {
     // Find the handler in question.
     const conn = activeConnections().get(requestId);
     if (conn) {
-      const handlerConfig = websocketConfig.routes[conn.route];
+      const routeConfig = websocketConfig.routes[conn.route];
       const onDisconnect =
-        handlerConfig.onDisconnect || websocketConfig.onDisconnect;
+        routeConfig.onDisconnect || websocketConfig.onDisconnect;
       if (onDisconnect) {
         onDisconnect(requestId);
       }

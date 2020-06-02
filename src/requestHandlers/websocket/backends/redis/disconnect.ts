@@ -1,23 +1,21 @@
 import { WebSocketProxyConfig } from "../../../../types";
 import {
   RedisServiceWebSocketHandlerConfig,
-  RedisServiceWebSocketRequest,
   WebSocketDisconnectRequest,
 } from "../../../../types/webSocketRequests";
-import * as configModule from "../../../../config";
 import { getPublisher } from "../../../../lib/redis/clients";
 import { getChannelForService } from "../../../../lib/redis/getChannelForService";
 import { ActiveWebSocketConnection } from "../../activeConnections";
 
-export default function disconnect(
+export default async function disconnect(
   requestId: string,
   conn: ActiveWebSocketConnection,
-  handlerConfig: RedisServiceWebSocketHandlerConfig,
+  serviceConfig: RedisServiceWebSocketHandlerConfig,
   websocketConfig: WebSocketProxyConfig
 ) {
   const channel = getChannelForService(
-    handlerConfig.requestChannel,
-    handlerConfig.numRequestChannels
+    serviceConfig.requestChannel,
+    serviceConfig.numRequestChannels
   );
 
   const request: WebSocketDisconnectRequest = {
@@ -26,5 +24,11 @@ export default function disconnect(
     type: "disconnect",
   };
 
-  getPublisher().publish(channel, JSON.stringify(request));
+  const onRequestResult = serviceConfig.onRequest
+    ? await serviceConfig.onRequest(request)
+    : { handled: false as false, request: JSON.stringify(request) };
+
+  if (!onRequestResult.handled) {
+    getPublisher().publish(channel, onRequestResult.request);
+  }
 }
