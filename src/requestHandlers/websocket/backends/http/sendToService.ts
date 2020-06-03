@@ -32,7 +32,7 @@ export default async function sendToService(
       };
 
       const onRequestResult = serviceConfig.onRequest
-        ? await serviceConfig.onRequest(request)
+        ? await serviceConfig.onRequest(httpRequest)
         : {
             handled: false as false,
             request: httpRequest,

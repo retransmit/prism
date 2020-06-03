@@ -6,10 +6,7 @@ import WebSocket from "ws";
 import * as configModule from "../../config";
 import randomId from "../../lib/random";
 import { get as activeConnections } from "./activeConnections";
-import {
-  WebSocketRouteConfig,
-  WebSocketMessageRequest,
-} from "../../types/webSocketRequests";
+import { WebSocketRouteConfig } from "../../types/webSocketRequests";
 
 import sendToHttpService from "./backends/http/sendToService";
 import sendToRedisService from "./backends/redis/sendToService";
@@ -19,6 +16,7 @@ import httpConnect from "./backends/http/connect";
 import redisConnect from "./backends/redis/connect";
 import httpDisconnect from "./backends/http/disconnect";
 import redisDisconnect from "./backends/redis/disconnect";
+import { saveLastRequest } from "./backends/http/poll";
 
 const connectors = [
   { type: "http", sendToService: sendToHttpService },
@@ -106,6 +104,8 @@ function onConnection(
       websocket: ws,
       ip,
       port: request.socket.remotePort,
+      saveLastRequest: saveLastRequest(routeConfig),
+      lastRequest: undefined,
     });
 
     ws.on(
@@ -186,6 +186,10 @@ function onMessage(
             }
           }
         } else {
+          if (conn.saveLastRequest) {
+            conn.lastRequest = onRequestResult.request;
+          }
+
           for (const connector of connectors) {
             connector.sendToService(
               onRequestResult.request,

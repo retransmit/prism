@@ -36,8 +36,9 @@ export type WebSocketHandlerConfigBase = {};
 export type HttpServiceWebSocketHandlerConfig = {
   type: "http";
   pollingInterval: number;
+  resendRequestWhilePolling: boolean;
   onRequest?: (
-    request: WebSocketRequest
+    request: HttpRequest
   ) => Promise<
     | { handled: true; response?: WebSocketResponse }
     | { handled: false; request: HttpRequest }
@@ -54,7 +55,7 @@ export type HttpServiceWebSocketHandlerConfig = {
 export type RedisServiceWebSocketHandlerConfig = {
   type: "redis";
   onRequest?: (
-    request: WebSocketRequest
+    request: RedisServiceWebSocketRequest
   ) => Promise<
     | { handled: true; response?: WebSocketResponse }
     | { handled: false; request: string }

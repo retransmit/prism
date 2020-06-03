@@ -1,4 +1,5 @@
 import WebSocket from "ws";
+import { WebSocketMessageRequest } from "../../types/webSocketRequests";
 
 export type ActiveWebSocketConnection = {
   initialized: boolean;
@@ -6,6 +7,8 @@ export type ActiveWebSocketConnection = {
   websocket: WebSocket;
   ip: string | undefined;
   port: number | undefined;
+  saveLastRequest: boolean;
+  lastRequest: WebSocketMessageRequest | undefined;
 };
 
 let map: Map<string, ActiveWebSocketConnection> = new Map<

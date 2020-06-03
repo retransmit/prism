@@ -19,17 +19,19 @@ export default async function disconnect(
     route: conn.route,
   };
 
+  const httpRequest = {
+    path: serviceConfig.onDisconnectUrl,
+    method: "POST" as "POST",
+    body: websocketRequest,
+    remoteAddress: conn.ip,
+    remotePort: conn.port,
+  };
+  
   const onRequestResult = serviceConfig.onRequest
-    ? await serviceConfig.onRequest(websocketRequest)
+    ? await serviceConfig.onRequest(httpRequest)
     : {
         handled: false as false,
-        request: {
-          path: serviceConfig.onDisconnectUrl,
-          method: "POST" as "POST",
-          body: websocketRequest,
-          remoteAddress: conn.ip,
-          remotePort: conn.port,
-        },
+        request: httpRequest,
       };
 
   if (!onRequestResult.handled) {
