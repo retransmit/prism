@@ -1,9 +1,10 @@
 import request = require("supertest");
 import { doPubSub } from "./utils";
-import random from "../../../lib/random";
+import * as redis from "redis";
+import random from "../../../../../../lib/random";
 
 export default async function (app: { instance: any }) {
-  it(`must not overwrite json content with string content`, async () => {
+  it(`rolls back`, async () => {
     const config = {
       instanceId: random(),
       http: {
@@ -29,7 +30,7 @@ export default async function (app: { instance: any }) {
       },
     };
 
-    const serviceResults = [
+    const serviceResponses = [
       {
         id: "temp",
         service: "userservice",
@@ -43,15 +44,27 @@ export default async function (app: { instance: any }) {
         id: "temp",
         service: "messagingservice",
         response: {
-          content: "Hello world",
+          status: 400,
+          content: "Invalid request",
         },
       },
     ];
 
+    const rollbackPromise = new Promise((success) => {
+      const client = redis.createClient();
+      client.subscribe("input");
+      client.on("message", (channel, message) => {
+        const jsonMessage = JSON.parse(message);
+        if (channel === "input" && jsonMessage.type === "rollback") {
+          success(jsonMessage);
+        }
+      });
+    });
+
     const result = await doPubSub(
       app,
       config,
-      serviceResults,
+      serviceResponses,
       (success, getJson) => {
         request(app.instance)
           .post("/users")
@@ -61,11 +74,14 @@ export default async function (app: { instance: any }) {
       }
     );
 
+    const rollbackMessage: any = await rollbackPromise;
+
     const [response, json] = result;
     json.request.headers.origin.should.equal("http://localhost:3000");
-    response.status.should.equal(500);
-    response.text.should.equal(
-      "messagingservice returned a response which will overwrite current response."
-    );
+    response.status.should.equal(400);
+    response.text.should.equal("POST: Invalid request");
+
+    rollbackMessage.type.should.equal("rollback");
+    rollbackMessage.request.path.should.equal("/users");
   });
 }

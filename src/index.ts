@@ -13,16 +13,16 @@ import { ServerResponse } from "http";
 import * as configModule from "./config";
 import { IAppConfig } from "./types";
 
-import createHttpRequestHandler from "./requestHandlers/http/handler";
-import createWebSocketRequestHandler, {
+import createHttpRequestHandler from "./connections/http/handler";
+import {
   init as wsInit,
   upgrade as wsUpgrade,
-} from "./requestHandlers/websocket/handler";
+} from "./connections/websocket/handler";
 import { init as redisInit } from "./lib/redis/clients";
-import httpRedisServiceInit from "./requestHandlers/http/backends/redis/init";
-import websocketRedisServiceInit from "./requestHandlers/http/backends/redis/init";
-import { init as activeRedisRequestsInit } from "./requestHandlers/http/backends/redis/activeRequests";
-import { init as activeConnectionsInit } from "./requestHandlers/websocket/activeConnections";
+import httpRedisServiceInit from "./connections/http/backends/redis/init";
+import websocketRedisServiceInit from "./connections/http/backends/redis/init";
+import { init as activeRedisRequestsInit } from "./connections/http/backends/redis/activeRequests";
+import { init as activeConnectionsInit } from "./connections/websocket/activeConnections";
 
 import random from "./lib/random";
 

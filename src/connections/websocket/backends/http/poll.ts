@@ -2,8 +2,6 @@ import { WebSocketProxyConfig, HttpRequest } from "../../../../types";
 import {
   HttpServiceWebSocketHandlerConfig,
   WebSocketRouteConfig,
-  WebSocketRequest,
-  HttpServiceWebSocketRequest,
   WebSocketResponse,
 } from "../../../../types/webSocketRequests";
 import * as activeConnections from "../../activeConnections";

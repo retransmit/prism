@@ -1,8 +1,8 @@
 import request = require("supertest");
-import { startWithConfiguration } from "../../..";
+import { startWithConfiguration } from "../../../../../..";
 import startBackends from "./startBackends";
-import { closeServer } from "../../utils";
-import random from "../../../lib/random";
+import { closeServer } from "../../../../../utils";
+import random from "../../../../../../lib/random";
 
 export default async function (app: { instance: any }) {
   it(`must not overwrite json content with string content`, async () => {

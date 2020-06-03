@@ -1,9 +1,9 @@
 import request = require("supertest");
-import { startWithConfiguration } from "../../..";
+import { startWithConfiguration } from "../../../../../..";
 import startBackends from "./startBackends";
-import { closeServer } from "../../utils";
+import { closeServer } from "../../../../../utils";
 import { Server } from "net";
-import random from "../../../lib/random";
+import random from "../../../../../../lib/random";
 
 export default async function (app: { instance: any }) {
   it(`rolls back`, async () => {

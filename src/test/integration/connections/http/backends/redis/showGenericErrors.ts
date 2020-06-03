@@ -1,6 +1,6 @@
 import request = require("supertest");
 import { doPubSub } from "./utils";
-import random from "../../../lib/random";
+import random from "../../../../../../lib/random";
 
 export default async function (app: { instance: any }) {
   it(`shows generic errors for service`, async () => {

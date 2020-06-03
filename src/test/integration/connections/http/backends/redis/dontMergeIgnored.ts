@@ -1,9 +1,9 @@
 import request = require("supertest");
 import { doPubSub } from "./utils";
-import random from "../../../lib/random";
+import random from "../../../../../../lib/random";
 
 export default async function (app: { instance: any }) {
-  it(`merges responses`, async () => {
+  it(`does not merge ignored results`, async () => {
     const config = {
       instanceId: random(),
       http: {
@@ -18,6 +18,8 @@ export default async function (app: { instance: any }) {
                 messagingservice: {
                   type: "redis" as "redis",
                   requestChannel: "input",
+
+                  merge: false,
                 },
               },
             },
@@ -29,7 +31,7 @@ export default async function (app: { instance: any }) {
       },
     };
 
-    const serviceResults = [
+    const serviceResponses = [
       {
         id: "temp",
         service: "userservice",
@@ -53,7 +55,7 @@ export default async function (app: { instance: any }) {
     const result = await doPubSub(
       app,
       config,
-      serviceResults,
+      serviceResponses,
       (success, getJson) => {
         request(app.instance)
           .post("/users")
@@ -68,7 +70,6 @@ export default async function (app: { instance: any }) {
     response.status.should.equal(200);
     response.body.should.deepEqual({
       user: 1,
-      message: "hello world",
     });
   });
 }

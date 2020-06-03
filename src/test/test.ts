@@ -2,18 +2,18 @@ import "mocha";
 import "should";
 import request = require("supertest");
 
-import httpHttpMethods from "./integration/http/httpMethods";
-import httpMergeResults from "./integration/http/mergeResults";
-import httpDontMergeIgnored from "./integration/http/dontMergeIgnored";
-import httpMustNotOverwriteJsonWithString from "./integration/http/mustNotOverwriteJsonWithString";
-import httpRollsback from "./integration/http/rollsback";
+import httpHttpMethods from "./integration/connections/http/backends/http/httpMethods";
+import httpMergeResults from "./integration/connections/http/backends/http/mergeResults";
+import httpDontMergeIgnored from "./integration/connections/http/backends/http/dontMergeIgnored";
+import httpMustNotOverwriteJsonWithString from "./integration/connections/http/backends/http/mustNotOverwriteJsonWithString";
+import httpRollsback from "./integration/connections/http/backends/http/rollsback";
 
-import redisHttpMethods from "./integration/redis/httpMethods";
-import redisMergeResults from "./integration/redis/mergeResults";
-import redisDontMergeIgnored from "./integration/redis/dontMergeIgnored";
-import redisShowGenericErrors from "./integration/redis/showGenericErrors";
-import redisMustNotOverwriteJsonWithString from "./integration/redis/mustNotOverwriteJsonWithString";
-import redisRollsback from "./integration/redis/rollsback";
+import redisHttpMethods from "./integration/connections/http/backends/redis/httpMethods";
+import redisMergeResults from "./integration/connections/http/backends/redis/mergeResults";
+import redisDontMergeIgnored from "./integration/connections/http/backends/redis/dontMergeIgnored";
+import redisShowGenericErrors from "./integration/connections/http/backends/redis/showGenericErrors";
+import redisMustNotOverwriteJsonWithString from "./integration/connections/http/backends/redis/mustNotOverwriteJsonWithString";
+import redisRollsback from "./integration/connections/http/backends/redis/rollsback";
 
 import { closeServer } from "./utils";
 
@@ -26,7 +26,7 @@ function run() {
   describe("retransmit", () => {
     let app: { instance: any } = { instance: undefined };
 
-    describe("http requests (integration)", () => {
+    describe("http connections (integration)", () => {
       describe("redis", () => {
         afterEach(async function resetAfterEach() {
           await closeServer(app.instance);

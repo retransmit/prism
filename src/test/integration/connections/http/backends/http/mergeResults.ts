@@ -1,11 +1,11 @@
 import request = require("supertest");
-import { startWithConfiguration } from "../../..";
+import { startWithConfiguration } from "../../../../../..";
 import startBackends from "./startBackends";
-import { closeServer } from "../../utils";
-import random from "../../../lib/random";
+import { closeServer } from "../../../../../utils";
+import random from "../../../../../../lib/random";
 
 export default async function (app: { instance: any }) {
-  it(`does not merge ignored results`, async () => {
+  it(`merges responses`, async () => {
     const config = {
       instanceId: random(),
       http: {
@@ -19,8 +19,7 @@ export default async function (app: { instance: any }) {
                 },
                 messagingservice: {
                   type: "http" as "http",
-                  url: "http://localhost:6667/messages",                  
-                  merge: false,
+                  url: "http://localhost:6667/messages",
                 },
               },
             },
@@ -76,6 +75,7 @@ export default async function (app: { instance: any }) {
     response.status.should.equal(200);
     response.body.should.deepEqual({
       user: 1,
+      message: "hello world",
     });
   });
 }

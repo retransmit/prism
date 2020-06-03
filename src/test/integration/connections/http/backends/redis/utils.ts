@@ -1,8 +1,8 @@
 import request = require("supertest");
-import { IAppConfig } from "../../../types";
-import { startWithConfiguration } from "../../..";
+import { IAppConfig } from "../../../../../../types";
+import { startWithConfiguration } from "../../../../../..";
 import { createClient } from "redis";
-import { RedisServiceHttpResponse } from "../../../types/httpRequests";
+import { RedisServiceHttpResponse } from "../../../../../../types/httpRequests";
 
 export async function doPubSub(
   app: { instance: any },
