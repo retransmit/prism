@@ -10,9 +10,7 @@ export type WebSocketRouteConfig = {
   onConnect?: (
     requestId: string,
     message: string
-  ) => Promise<
-    { drop: true } | { drop: false; request: WebSocketConnectRequest }
-  >;
+  ) => Promise<{ drop: true, message?: string } | { drop: false }>;
   onDisconnect?: (requestId: string) => any;
   onRequest?: (
     requestId: string,

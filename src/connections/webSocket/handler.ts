@@ -144,7 +144,12 @@ function onMessage(
 
         if (onConnectResult.drop === true) {
           activeConnections().delete(requestId);
-          ws.terminate();
+          if (onConnectResult.message) {
+            ws.send(onConnectResult.message);
+            ws.terminate();
+          } else {
+            ws.terminate();
+          }
         } else {
           conn.initialized = true;
           const route = conn.route;

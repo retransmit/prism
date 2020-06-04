@@ -66,7 +66,7 @@ export type WebSocketProxyConfig = {
   onConnect?: (
     requestId: string,
     message: string
-  ) => Promise<{ drop: boolean }>;
+  ) => Promise<{ drop: true; message?: string } | { drop: false }>;
   onDisconnect?: (requestId: string) => any;
   onRequest?: (
     requestId: string,

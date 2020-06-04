@@ -15,7 +15,7 @@ import redisShowGenericErrors from "./integration/connections/http/backends/redi
 import redisMustNotOverwriteJsonWithString from "./integration/connections/http/backends/redis/mustNotOverwriteJsonWithString";
 import redisRollsback from "./integration/connections/http/backends/redis/rollsback";
 
-import httpConnect from "./integration/connections/websocket/backends/http/connect";
+import httpConnect from "./integration/connections/websocket/backends/http/onConnect";
 
 import { closeHttpServer, closeWebSocketServer } from "./utils";
 import { Server } from "http";
@@ -34,29 +34,29 @@ function run() {
       };
     } = { app: { servers: undefined } } as any;
 
-    describe("Http connections (integration)", () => {
-        describe("http", () => {
-          afterEach(async function resetAfterEach() {
-            await closeHttpServer(app.servers.httpServer);
-          });
-          httpHttpMethods(app);
-          httpMergeResults(app);
-          httpDontMergeIgnored(app);
-          httpMustNotOverwriteJsonWithString(app);
-          httpRollsback(app);
-        });
-        describe("redis", () => {
-          afterEach(async function resetAfterEach() {
-            await closeHttpServer(app.servers.httpServer);
-          });
-          redisHttpMethods(app);
-          redisMergeResults(app);
-          redisDontMergeIgnored(app);
-          redisShowGenericErrors(app);
-          redisMustNotOverwriteJsonWithString(app);
-          redisRollsback(app);
-        });
-    });
+    // describe("Http connections (integration)", () => {
+    //     describe("http", () => {
+    //       afterEach(async function resetAfterEach() {
+    //         await closeHttpServer(app.servers.httpServer);
+    //       });
+    //       httpHttpMethods(app);
+    //       httpMergeResults(app);
+    //       httpDontMergeIgnored(app);
+    //       httpMustNotOverwriteJsonWithString(app);
+    //       httpRollsback(app);
+    //     });
+    //     describe("redis", () => {
+    //       afterEach(async function resetAfterEach() {
+    //         await closeHttpServer(app.servers.httpServer);
+    //       });
+    //       redisHttpMethods(app);
+    //       redisMergeResults(app);
+    //       redisDontMergeIgnored(app);
+    //       redisShowGenericErrors(app);
+    //       redisMustNotOverwriteJsonWithString(app);
+    //       redisRollsback(app);
+    //     });
+    // });
 
     describe("WebSocket connections (integration)", () => {
       describe("http", () => {
