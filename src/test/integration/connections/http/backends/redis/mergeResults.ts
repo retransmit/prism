@@ -1,8 +1,15 @@
 import request = require("supertest");
 import { doPubSub } from "./utils";
 import random from "../../../../../../lib/random";
+import { Server } from "http";
+import WebSocket from "ws";
 
-export default async function (app: { instance: any }) {
+export default async function (app: {
+  servers: {
+    httpServer: Server;
+    websocketServers: WebSocket.Server[];
+  };
+}) {
   it(`merges responses`, async () => {
     const config = {
       instanceId: random(),
@@ -55,7 +62,7 @@ export default async function (app: { instance: any }) {
       config,
       serviceResults,
       (success, getJson) => {
-        request(app.instance)
+        request(app.servers.httpServer)
           .post("/users")
           .send({ hello: "world" })
           .set("origin", "http://localhost:3000")

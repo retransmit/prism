@@ -3,19 +3,27 @@ import { IAppConfig } from "../../../../../../types";
 import { startWithConfiguration } from "../../../../../..";
 import { createClient } from "redis";
 import { RedisServiceHttpResponse } from "../../../../../../types/httpRequests";
+import { Server } from "http";
+import WebSocket from "ws";
 
 export async function doPubSub(
-  app: { instance: any },
+  app: {
+    servers: {
+      httpServer: Server;
+      websocketServers: WebSocket.Server[];
+    };
+  },
   config: IAppConfig,
   serviceResponses: RedisServiceHttpResponse[],
   then: (success: Function, getJson: () => any) => void
 ): Promise<[request.Response, any]> {
-  const server = await startWithConfiguration(
+  const servers = await startWithConfiguration(
     undefined,
     "testinstance",
     config
   );
-  app.instance = server;
+  
+  app.servers = servers;
 
   const subscriber = createClient();
   const publisher = createClient();

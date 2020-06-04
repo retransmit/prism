@@ -4,7 +4,7 @@ import { WebSocketMessageRequest } from "../../types/webSocketRequests";
 export type ActiveWebSocketConnection = {
   initialized: boolean;
   route: string;
-  websocket: WebSocket;
+  webSocket: WebSocket;
   ip: string | undefined;
   port: number | undefined;
   saveLastRequest: boolean;

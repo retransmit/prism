@@ -494,7 +494,7 @@ This configuration lets clients open an WebSocket connection to "/liveupdates" a
   Application Config
 */
 module.exports = {
-  websocket: {
+  webSocket: {
     routes: {
       "/liveupdates": {
         services: {

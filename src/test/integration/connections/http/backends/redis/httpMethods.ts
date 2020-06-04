@@ -2,8 +2,15 @@ import { HttpMethods, IAppConfig } from "../../../../../../types";
 import request = require("supertest");
 import { doPubSub } from "./utils";
 import random from "../../../../../../lib/random";
+import { Server } from "http";
+import WebSocket from "ws";
 
-export default async function (app: { instance: any }) {
+export default async function (app: {
+  servers: {
+    httpServer: Server;
+    websocketServers: WebSocket.Server[];
+  };
+}) {
   function makeConfig(options: { method: HttpMethods }): IAppConfig {
     return {
       instanceId: random(),
@@ -57,10 +64,10 @@ export default async function (app: { instance: any }) {
         [redisServiceResponse],
         (success, getJson) => {
           method === "GET"
-            ? makeReq(request(app.instance), "/users")
+            ? makeReq(request(app.servers.httpServer), "/users")
                 .set("origin", "http://localhost:3000")
                 .then((x) => success([x, getJson()]))
-            : makeReq(request(app.instance), "/users")
+            : makeReq(request(app.servers.httpServer), "/users")
                 .send({ hello: "world" })
                 .set("origin", "http://localhost:3000")
                 .then((x) => success([x, getJson()]));

@@ -9,6 +9,7 @@ import url = require("url");
 import { IncomingMessage } from "http";
 import { createServer } from "http";
 import { ServerResponse } from "http";
+import WebSocket from "ws";
 
 import * as configModule from "./config";
 import { IAppConfig } from "./types";
@@ -17,14 +18,15 @@ import createHttpRequestHandler from "./connections/http/handler";
 import {
   init as wsInit,
   upgrade as wsUpgrade,
-} from "./connections/websocket/handler";
+} from "./connections/webSocket/handler";
 import { init as redisInit } from "./lib/redis/clients";
 import httpRedisServiceInit from "./connections/http/backends/redis/init";
 import websocketRedisServiceInit from "./connections/http/backends/redis/init";
 import { init as activeRedisRequestsInit } from "./connections/http/backends/redis/activeRequests";
-import { init as activeConnectionsInit } from "./connections/websocket/activeConnections";
+import { init as activeConnectionsInit } from "./connections/webSocket/activeConnections";
 
 import random from "./lib/random";
+import { Server } from "http";
 
 const packageJson = require("../package.json");
 
@@ -48,7 +50,10 @@ export async function startWithConfiguration(
   port: number | undefined,
   instanceId: string,
   appConfig: IAppConfig
-) {
+): Promise<{
+  httpServer: Server;
+  websocketServers: WebSocket.Server[];
+}> {
   if (!appConfig.instanceId) {
     appConfig.instanceId = instanceId;
   }
@@ -108,8 +113,10 @@ export async function startWithConfiguration(
 
   const httpServer = createServer(httpRequestHandler);
 
-  if (config.websocket) {
-    wsInit();
+  let websocketServers: WebSocket.Server[] = [];
+
+  if (config.webSocket) {
+    websocketServers = wsInit();
     httpServer.on("upgrade", wsUpgrade);
   }
 
@@ -119,7 +126,16 @@ export async function startWithConfiguration(
     httpServer.listen();
   }
 
-  return httpServer;
+  httpServer.on("close", () => {
+    for (const server of websocketServers) {
+      server.close();
+    }
+  });
+
+  return {
+    httpServer,
+    websocketServers,
+  };
 }
 
 if (require.main === module) {

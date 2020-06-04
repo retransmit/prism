@@ -1,11 +1,17 @@
 import request = require("supertest");
 import { startWithConfiguration } from "../../../../../..";
 import startBackends from "./startBackends";
-import { closeServer } from "../../../../../utils";
-import { Server } from "net";
+import { closeHttpServer } from "../../../../../utils";
 import random from "../../../../../../lib/random";
+import { Server } from "http";
+import WebSocket from "ws";
 
-export default async function (app: { instance: any }) {
+export default async function (app: {
+  servers: {
+    httpServer: Server;
+    websocketServers: WebSocket.Server[];
+  };
+}) {
   it(`rolls back`, async () => {
     const config = {
       instanceId: random(),
@@ -30,12 +36,12 @@ export default async function (app: { instance: any }) {
       },
     };
 
-    const server = await startWithConfiguration(
+    const servers = await startWithConfiguration(
       undefined,
       "testinstance",
       config
     );
-    app.instance = server;
+    app.servers = servers;
 
     let calledRollback = false;
     let backendApps: Server[] = [];
@@ -80,7 +86,7 @@ export default async function (app: { instance: any }) {
       ]);
     });
 
-    const response = await request(app.instance)
+    const response = await request(app.servers.httpServer)
       .post("/users")
       .send({ hello: "world" })
       .set("origin", "http://localhost:3000");
@@ -88,7 +94,7 @@ export default async function (app: { instance: any }) {
     await calledPromise;
 
     for (const backendApp of backendApps) {
-      await closeServer(backendApp as any);
+      await closeHttpServer(backendApp);
     }
 
     calledRollback.should.be.true();

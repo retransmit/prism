@@ -1,10 +1,17 @@
 import request = require("supertest");
 import { startWithConfiguration } from "../../../../../..";
 import startBackends from "./startBackends";
-import { closeServer } from "../../../../../utils";
+import { closeHttpServer } from "../../../../../utils";
 import random from "../../../../../../lib/random";
+import { Server } from "http";
+import WebSocket from "ws";
 
-export default async function (app: { instance: any }) {
+export default async function (app: {
+  servers: {
+    httpServer: Server;
+    websocketServers: WebSocket.Server[];
+  };
+}) {
   it(`does not merge ignored results`, async () => {
     const config = {
       instanceId: random(),
@@ -19,7 +26,7 @@ export default async function (app: { instance: any }) {
                 },
                 messagingservice: {
                   type: "http" as "http",
-                  url: "http://localhost:6667/messages",                  
+                  url: "http://localhost:6667/messages",
                   merge: false,
                 },
               },
@@ -29,12 +36,13 @@ export default async function (app: { instance: any }) {
       },
     };
 
-    const server = await startWithConfiguration(
+    const servers = await startWithConfiguration(
       undefined,
       "testinstance",
       config
     );
-    app.instance = server;
+
+    app.servers = servers;
 
     // Start mock servers.
     const backendApps = startBackends([
@@ -64,13 +72,13 @@ export default async function (app: { instance: any }) {
       },
     ]);
 
-    const response = await request(app.instance)
+    const response = await request(app.servers.httpServer)
       .get("/users")
       .send({ hello: "world" })
       .set("origin", "http://localhost:3000");
 
     for (const backendApp of backendApps) {
-      await closeServer(backendApp as any);
+      await closeHttpServer(backendApp);
     }
 
     response.status.should.equal(200);

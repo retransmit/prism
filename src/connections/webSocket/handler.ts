@@ -39,9 +39,9 @@ const websocketServers: {
   [key: string]: WebSocket.Server;
 } = {};
 
-export function init() {
+export function init(): WebSocket.Server[] {
   const config = configModule.get();
-  const websocketConfig = config.websocket;
+  const websocketConfig = config.webSocket;
   if (websocketConfig) {
     for (const route of Object.keys(websocketConfig.routes)) {
       const routeConfig = websocketConfig.routes[route];
@@ -50,6 +50,10 @@ export function init() {
       setupWebSocketHandling(wss, route, routeConfig, websocketConfig);
     }
   }
+  return Object.keys(websocketServers).reduce(
+    (acc, route) => acc.concat(websocketServers[route]),
+    [] as WebSocket.Server[]
+  );
 }
 
 function setupWebSocketHandling(
@@ -101,7 +105,7 @@ function onConnection(
     activeConnections().set(requestId, {
       initialized: false,
       route,
-      websocket: ws,
+      webSocket: ws,
       ip,
       port: request.socket.remotePort,
       saveLastRequest: saveLastRequest(routeConfig),
@@ -145,7 +149,7 @@ function onMessage(
           conn.initialized = true;
           const route = conn.route;
           for (const service of Object.keys(
-            websocketConfig.routes[conn.route]
+            websocketConfig.routes[conn.route].services
           )) {
             const serviceConfig =
               websocketConfig.routes[route].services[service];
@@ -217,7 +221,9 @@ function onClose(requestId: string, websocketConfig: WebSocketProxyConfig) {
 
       // Call disconnect for services
       const route = conn.route;
-      for (const service of Object.keys(websocketConfig.routes[conn.route])) {
+      for (const service of Object.keys(
+        websocketConfig.routes[conn.route].services
+      )) {
         const serviceConfig = websocketConfig.routes[route].services[service];
         if (serviceConfig.type === "redis") {
           redisDisconnect(requestId, conn, serviceConfig, websocketConfig);

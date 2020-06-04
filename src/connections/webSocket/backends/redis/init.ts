@@ -9,17 +9,17 @@ export default async function init() {
   // Setup subscriptions
   const alreadySubscribed: string[] = [];
 
-  if (config.websocket?.redis) {
+  if (config.webSocket?.redis) {
     const websocketClientSubscriber = getSubscriber();
-    websocketClientSubscriber.on("message", processMessage(config.websocket));
+    websocketClientSubscriber.on("message", processMessage(config.webSocket));
     websocketClientSubscriber.subscribe(
-      `${config.websocket.redis.responseChannel}.${config.instanceId}`
+      `${config.webSocket.redis.responseChannel}.${config.instanceId}`
     );
 
     // Some services may never respond. Fail them.
     // setInterval(
-    //   cleanupTimedOut(config.websocket),
-    //   config.websocket.redis.cleanupInterval || 10000
+    //   cleanupTimedOut(config.webSocket),
+    //   config.webSocket.redis.cleanupInterval || 10000
     // );
   }
 }
