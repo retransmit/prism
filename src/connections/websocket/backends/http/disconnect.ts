@@ -13,34 +13,36 @@ export default async function disconnect(
   serviceConfig: HttpServiceWebSocketHandlerConfig,
   websocketConfig: WebSocketProxyConfig
 ) {
-  const websocketRequest: WebSocketDisconnectRequest = {
-    id: requestId,
-    type: "disconnect",
-    route: conn.route,
-  };
+  if (serviceConfig.onDisconnectUrl) {
+    const websocketRequest: WebSocketDisconnectRequest = {
+      id: requestId,
+      type: "disconnect",
+      route: conn.route,
+    };
 
-  const httpRequest = {
-    path: serviceConfig.onDisconnectUrl,
-    method: "POST" as "POST",
-    body: websocketRequest,
-    remoteAddress: conn.ip,
-    remotePort: conn.port,
-  };
-  
-  const onRequestResult = serviceConfig.onRequest
-    ? await serviceConfig.onRequest(httpRequest)
-    : {
-        handled: false as false,
-        request: httpRequest,
-      };
+    const httpRequest = {
+      path: serviceConfig.onDisconnectUrl,
+      method: "POST" as "POST",
+      body: websocketRequest,
+      remoteAddress: conn.ip,
+      remotePort: conn.port,
+    };
 
-  if (!onRequestResult.handled) {
-    const options = makeGotOptions(onRequestResult.request);
+    const onRequestResult = serviceConfig.onRequest
+      ? await serviceConfig.onRequest(httpRequest)
+      : {
+          handled: false as false,
+          request: httpRequest,
+        };
 
-    // We don't care about the response here.
-    // The client has already disco'ed.
-    got(serviceConfig.url, options).catch(async (error) => {
-      // TODO...
-    });
+    if (!onRequestResult.handled) {
+      const options = makeGotOptions(onRequestResult.request);
+
+      // We don't care about the response here.
+      // The client has already disco'ed.
+      got(serviceConfig.url, options).catch(async (error) => {
+        // TODO...
+      });
+    }
   }
 }

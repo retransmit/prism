@@ -22,7 +22,7 @@ export type HttpMethods = "GET" | "POST" | "PUT" | "DELETE" | "PATCH";
 export interface IAppConfig {
   instanceId: string;
   http?: HttpProxyConfig;
-  websockets?: WebSocketProxyConfig;
+  websocket?: WebSocketProxyConfig;
   redis?: {
     options?: ClientOpts;
   };

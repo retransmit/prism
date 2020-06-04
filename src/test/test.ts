@@ -1,6 +1,5 @@
 import "mocha";
 import "should";
-import request = require("supertest");
 
 import httpHttpMethods from "./integration/connections/http/backends/http/httpMethods";
 import httpMergeResults from "./integration/connections/http/backends/http/mergeResults";
@@ -15,6 +14,8 @@ import redisShowGenericErrors from "./integration/connections/http/backends/redi
 import redisMustNotOverwriteJsonWithString from "./integration/connections/http/backends/redis/mustNotOverwriteJsonWithString";
 import redisRollsback from "./integration/connections/http/backends/redis/rollsback";
 
+import httpConnect from "./integration/connections/websocket/backends/http/connect";
+
 import { closeServer } from "./utils";
 
 function run() {
@@ -26,30 +27,53 @@ function run() {
   describe("retransmit", () => {
     let app: { instance: any } = { instance: undefined };
 
-    describe("http connections (integration)", () => {
-      describe("redis", () => {
-        afterEach(async function resetAfterEach() {
-          await closeServer(app.instance);
-        });
+    // describe("http connections (integration)", () => {
+    //   describe("redis", () => {
+    //     afterEach(async function resetAfterEach() {
+    //       await closeServer(app.instance);
+    //     });
 
-        redisHttpMethods(app);
-        redisMergeResults(app);
-        redisDontMergeIgnored(app);
-        redisShowGenericErrors(app);
-        redisMustNotOverwriteJsonWithString(app);
-        redisRollsback(app);
-      });
+    //     redisHttpMethods(app);
+    //     redisMergeResults(app);
+    //     redisDontMergeIgnored(app);
+    //     redisShowGenericErrors(app);
+    //     redisMustNotOverwriteJsonWithString(app);
+    //     redisRollsback(app);
+    //   });
+
+    //   describe("http", () => {
+    //     afterEach(async function resetAfterEach() {
+    //       await closeServer(app.instance);
+    //     });
+
+    //     httpHttpMethods(app);
+    //     httpMergeResults(app);
+    //     httpDontMergeIgnored(app);
+    //     httpMustNotOverwriteJsonWithString(app);
+    //     httpRollsback(app);
+    //   });
+    // });
+
+    describe("websocket connections (integration)", () => {
+      // describe("redis", () => {
+      //   afterEach(async function resetAfterEach() {
+      //     await closeServer(app.instance);
+      //   });
+
+      //   redisHttpMethods(app);
+      //   redisMergeResults(app);
+      //   redisDontMergeIgnored(app);
+      //   redisShowGenericErrors(app);
+      //   redisMustNotOverwriteJsonWithString(app);
+      //   redisRollsback(app);
+      // });
 
       describe("http", () => {
         afterEach(async function resetAfterEach() {
           await closeServer(app.instance);
         });
 
-        httpHttpMethods(app);
-        httpMergeResults(app);
-        httpDontMergeIgnored(app);
-        httpMustNotOverwriteJsonWithString(app);
-        httpRollsback(app);
+        httpConnect(app);
       });
     });
   });

@@ -44,7 +44,7 @@ export default async function (app: { instance: any }) {
       backendApps = startBackends([
         {
           port: 6666,
-          beforeResponse: async (ctx: any) => {
+          afterResponse: async (ctx: any) => {
             if (ctx.path === "/users/remove" && ctx.method === "POST") {
               ctx.body = "Deleted";
               calledRollback = true;

@@ -9,7 +9,12 @@
       "request": "launch",
       "name": "Launch Program",
       "program": "${workspaceFolder}/dist/index.js",
-      "args": ["-p", "5000", "-c", "/home/jeswin/temp/retransmit-config/"],
+      "args": [
+        "-p",
+        "5000",
+        "-c",
+        "/home/jeswin/temp/retransmit-config/wsconfig.js"
+      ],
       "preLaunchTask": "build",
       "skipFiles": ["<node_internals>/**"]
     },

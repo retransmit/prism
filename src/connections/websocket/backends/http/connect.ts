@@ -14,35 +14,37 @@ export default async function connect(
   serviceConfig: HttpServiceWebSocketHandlerConfig,
   websocketConfig: WebSocketProxyConfig
 ) {
-  const websocketRequest: WebSocketConnectRequest = {
-    id: requestId,
-    type: "connect",
-    route: conn.route,
-  };
+  if (serviceConfig.onConnectUrl) {
+    const websocketRequest: WebSocketConnectRequest = {
+      id: requestId,
+      type: "connect",
+      route: conn.route,
+    };
 
-  const httpRequest = {
-    path: serviceConfig.onDisconnectUrl,
-    method: "POST" as "POST",
-    body: websocketRequest,
-    remoteAddress: conn.ip,
-    remotePort: conn.port,
-  };
-  const onRequestResult = serviceConfig.onRequest
-    ? await serviceConfig.onRequest(httpRequest)
-    : {
-        handled: false as false,
-        request: httpRequest,
-      };
+    const httpRequest = {
+      path: serviceConfig.onConnectUrl,
+      method: "POST" as "POST",
+      body: websocketRequest,
+      remoteAddress: conn.ip,
+      remotePort: conn.port,
+    };
+    const onRequestResult = serviceConfig.onRequest
+      ? await serviceConfig.onRequest(httpRequest)
+      : {
+          handled: false as false,
+          request: httpRequest,
+        };
 
-  if (onRequestResult.handled) {
-    if (onRequestResult.response) {
-      respond(requestId, onRequestResult.response, conn, websocketConfig);
+    if (onRequestResult.handled) {
+      if (onRequestResult.response) {
+        respond(requestId, onRequestResult.response, conn, websocketConfig);
+      }
+    } else {
+      const options = makeGotOptions(onRequestResult.request);
+
+      got(serviceConfig.url, options).catch(async (error) => {
+        // TODO...
+      });
     }
-  } else {
-    const options = makeGotOptions(onRequestResult.request);
-
-    got(serviceConfig.url, options).catch(async (error) => {
-      // TODO...
-    });
   }
 }

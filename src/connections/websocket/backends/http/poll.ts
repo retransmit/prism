@@ -17,7 +17,7 @@ export function setupPolling(websocketConfig: WebSocketProxyConfig) {
       if (serviceConfig.type === "http") {
         setInterval(
           timerCallback(route, service, serviceConfig, websocketConfig),
-          serviceConfig.pollingInterval
+          serviceConfig.pollingInterval || 60000 //every minute
         );
       }
     }
@@ -38,7 +38,7 @@ function timerCallback(
           const httpRequest: HttpRequest = {
             path: serviceConfig.url,
             method: "POST",
-            body: conn.lastRequest,
+            body: conn.lastRequest || { id: requestId },
             remoteAddress: conn.ip,
             remotePort: conn.port,
           };
@@ -91,7 +91,11 @@ export function saveLastRequest(routeConfig: WebSocketRouteConfig) {
   for (const service of Object.keys(routeConfig.services)) {
     const serviceConfig = routeConfig.services[service];
     if (serviceConfig.type === "http") {
-      if (serviceConfig.resendRequestWhilePolling) {
+      if (
+        typeof serviceConfig.resendRequestWhilePolling !== "undefined"
+          ? serviceConfig.resendRequestWhilePolling
+          : false
+      ) {
         return true;
       }
     }

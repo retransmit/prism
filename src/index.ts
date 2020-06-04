@@ -108,7 +108,7 @@ export async function startWithConfiguration(
 
   const httpServer = createServer(httpRequestHandler);
 
-  if (config.websockets) {
+  if (config.websocket) {
     wsInit();
     httpServer.on("upgrade", wsUpgrade);
   }

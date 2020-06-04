@@ -41,7 +41,7 @@ const websocketServers: {
 
 export function init() {
   const config = configModule.get();
-  const websocketConfig = config.websockets;
+  const websocketConfig = config.websocket;
   if (websocketConfig) {
     for (const route of Object.keys(websocketConfig.routes)) {
       const routeConfig = websocketConfig.routes[route];

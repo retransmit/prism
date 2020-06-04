@@ -35,8 +35,8 @@ export type WebSocketHandlerConfigBase = {};
 
 export type HttpServiceWebSocketHandlerConfig = {
   type: "http";
-  pollingInterval: number;
-  resendRequestWhilePolling: boolean;
+  pollingInterval?: number;
+  resendRequestWhilePolling?: boolean;
   onRequest?: (
     request: HttpRequest
   ) => Promise<
@@ -48,8 +48,8 @@ export type HttpServiceWebSocketHandlerConfig = {
     response: HttpResponse
   ) => Promise<WebSocketResponse>;
   url: string;
-  onConnectUrl: string;
-  onDisconnectUrl: string;
+  onConnectUrl?: string;
+  onDisconnectUrl?: string;
 } & WebSocketHandlerConfigBase;
 
 export type RedisServiceWebSocketHandlerConfig = {
