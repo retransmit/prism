@@ -1,15 +1,10 @@
 import request = require("supertest");
 import { startWithConfiguration } from "../../../../..";
 import random from "../../../../../lib/random";
-import { Server } from "http";
 import WebSocket from "ws";
+import { TestAppInstance } from "../../../../test";
 
-export default async function (app: {
-  servers: {
-    httpServer: Server;
-    websocketServers: WebSocket.Server[];
-  };
-}) {
+export default async function (app: TestAppInstance) {
   it(`runs the connect hook on root config`, async () => {
     let ran = false;
     let receivedMessage = "";

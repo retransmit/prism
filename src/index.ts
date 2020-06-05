@@ -6,9 +6,14 @@ import bodyParser = require("koa-bodyparser");
 import yargs = require("yargs");
 import ws = require("ws");
 import url = require("url");
+
 import { IncomingMessage } from "http";
-import { createServer } from "http";
 import { ServerResponse } from "http";
+import { createServer as httpCreateServer } from "http";
+import { Server as HttpServer } from "http";
+import { createServer as httpsCreateServer } from "https";
+import { Server as HttpsServer } from "https";
+
 import WebSocket from "ws";
 
 import * as configModule from "./config";
@@ -27,6 +32,7 @@ import { init as activeConnectionsInit } from "./connections/webSocket/activeCon
 
 import random from "./lib/random";
 import { Server } from "http";
+import { readFileSync } from "fs";
 
 const packageJson = require("../package.json");
 
@@ -111,7 +117,16 @@ export async function startWithConfiguration(
     koaRequestHandler(req, res);
   }
 
-  const httpServer = createServer(httpRequestHandler);
+  let httpServer: HttpServer | HttpsServer;
+  if (config.useHttps) {
+    const options = {
+      key: readFileSync(config.useHttps.key),
+      cert: readFileSync(config.useHttps.cert),
+    };
+    httpServer = httpsCreateServer(options, httpRequestHandler);
+  } else {
+    httpServer = httpCreateServer(httpRequestHandler);
+  }
 
   let websocketServers: WebSocket.Server[] = [];
 

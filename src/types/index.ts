@@ -26,6 +26,10 @@ export interface IAppConfig {
   redis?: {
     options?: ClientOpts;
   };
+  useHttps?: {
+    key: string;
+    cert: string;
+  };
 }
 
 export type HttpProxyConfig = {

@@ -8,7 +8,15 @@ import integrationTestsWebSocket from "./integration/connections/websocket";
 import { closeHttpServer } from "./utils/http";
 import { closeWebSocketServer } from "./utils/websocket";
 
-import { Server } from "http";
+import { Server as HttpServer } from "http";
+import { Server as HttpsServer } from "https";
+
+export type TestAppInstance = {
+  servers: {
+    httpServer: HttpServer | HttpsServer;
+    websocketServers: WebSocket.Server[];
+  };
+};
 
 function run() {
   /* Sanity check to make sure we don't accidentally run on the server. */
@@ -17,12 +25,7 @@ function run() {
   }
 
   describe("retransmit", () => {
-    let app: {
-      servers: {
-        httpServer: Server;
-        websocketServers: WebSocket.Server[];
-      };
-    } = { app: { servers: undefined } } as any;
+    let app: TestAppInstance = { app: { servers: undefined } } as any;
 
     afterEach(async function resetAfterEach() {
       for (const webSocketServer of app.servers.websocketServers) {

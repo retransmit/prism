@@ -16,13 +16,9 @@ import redisMustNotOverwriteJsonWithString from "./backends/redis/mustNotOverwri
 import redisRollsback from "./backends/redis/rollsback";
 
 import { Server } from "http";
+import { TestAppInstance } from "../../../test";
 
-export default function run(app: {
-  servers: {
-    httpServer: Server;
-    websocketServers: WebSocket.Server[];
-  };
-}) {
+export default function run(app: TestAppInstance) {
   describe("Http connections (integration)", () => {
     describe("http", () => {
       httpHttpMethods(app);

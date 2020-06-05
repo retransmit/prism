@@ -4,13 +4,9 @@ import { Server } from "http";
 import WebSocket from "ws";
 
 import onConnect from "./backends/onConnect";
+import { TestAppInstance } from "../../../test";
 
-export default function run(app: {
-  servers: {
-    httpServer: Server;
-    websocketServers: WebSocket.Server[];
-  };
-}) {
+export default function run(app: TestAppInstance) {
   describe("WebSocket connections (integration)", () => {
     describe("http", () => {      
       onConnect(app);

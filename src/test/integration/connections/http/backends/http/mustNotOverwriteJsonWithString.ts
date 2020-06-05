@@ -3,15 +3,9 @@ import { startWithConfiguration } from "../../../../../..";
 import {startBackends} from "../../../../../utils/http";
 import { closeHttpServer } from "../../../../../utils/http";
 import random from "../../../../../../lib/random";
-import { Server } from "http";
-import WebSocket from "ws";
+import { TestAppInstance } from "../../../../../test";
 
-export default async function (app: {
-  servers: {
-    httpServer: Server;
-    websocketServers: WebSocket.Server[];
-  };
-}) {
+export default async function (app: TestAppInstance) {
   it(`must not overwrite json content with string content`, async () => {
     const config = {
       instanceId: random(),
