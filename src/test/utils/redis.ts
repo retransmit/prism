@@ -1,8 +1,8 @@
 import request = require("supertest");
-import { IAppConfig } from "../../../../../../types";
-import { startWithConfiguration } from "../../../../../..";
+import { IAppConfig } from "../../types";
+import { startWithConfiguration } from "../../";
 import { createClient } from "redis";
-import { RedisServiceHttpResponse } from "../../../../../../types/httpRequests";
+import { RedisServiceHttpResponse } from "../../types/httpRequests";
 import { Server } from "http";
 import WebSocket from "ws";
 
@@ -22,7 +22,7 @@ export async function doPubSub(
     "testinstance",
     config
   );
-  
+
   app.servers = servers;
 
   const subscriber = createClient();

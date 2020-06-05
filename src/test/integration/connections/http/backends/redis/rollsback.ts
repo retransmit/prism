@@ -1,5 +1,5 @@
 import request = require("supertest");
-import { doPubSub } from "./utils";
+import { doPubSub } from "../../../../../utils/redis";
 import * as redis from "redis";
 import random from "../../../../../../lib/random";
 import { Server } from "http";

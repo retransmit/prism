@@ -5,7 +5,9 @@ import WebSocket from "ws";
 import integrationTestsHttp from "./integration/connections/http";
 import integrationTestsWebSocket from "./integration/connections/websocket";
 
-import { closeHttpServer, closeWebSocketServer } from "./utils";
+import { closeHttpServer } from "./utils/http";
+import { closeWebSocketServer } from "./utils/websocket";
+
 import { Server } from "http";
 
 function run() {

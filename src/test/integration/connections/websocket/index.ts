@@ -1,11 +1,9 @@
 import "mocha";
 import "should";
+import { Server } from "http";
 import WebSocket from "ws";
 
 import onConnect from "./backends/onConnect";
-
-import { closeHttpServer, closeWebSocketServer } from "../../../utils";
-import { Server } from "http";
 
 export default function run(app: {
   servers: {

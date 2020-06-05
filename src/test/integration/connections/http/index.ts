@@ -15,7 +15,6 @@ import redisShowGenericErrors from "./backends/redis/showGenericErrors";
 import redisMustNotOverwriteJsonWithString from "./backends/redis/mustNotOverwriteJsonWithString";
 import redisRollsback from "./backends/redis/rollsback";
 
-import { closeHttpServer, closeWebSocketServer } from "../../../utils";
 import { Server } from "http";
 
 export default function run(app: {
