@@ -30,6 +30,13 @@ export interface IAppConfig {
     key: string;
     cert: string;
   };
+  cors?: {
+    origin?: string;
+    allowMethods?: string;
+    maxAge?: number;
+    allowHeaders?: string | string[];
+    credentials?: boolean;
+  };
 }
 
 export type HttpProxyConfig = {

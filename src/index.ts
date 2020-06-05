@@ -4,8 +4,7 @@ import Koa = require("koa");
 import Router = require("koa-router");
 import bodyParser = require("koa-bodyparser");
 import yargs = require("yargs");
-import ws = require("ws");
-import url = require("url");
+const cors = require("@koa/cors");
 
 import { IncomingMessage } from "http";
 import { ServerResponse } from "http";
@@ -108,6 +107,9 @@ export async function startWithConfiguration(
 
   // Start app
   const koaApp = new Koa();
+  if (config.cors) {
+    koaApp.use(cors(config.cors));
+  }
   koaApp.use(bodyParser());
   koaApp.use(router.routes());
   koaApp.use(router.allowedMethods());
