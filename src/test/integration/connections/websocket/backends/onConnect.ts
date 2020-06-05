@@ -1,6 +1,6 @@
 import request = require("supertest");
-import { startWithConfiguration } from "../../../../../..";
-import random from "../../../../../../lib/random";
+import { startWithConfiguration } from "../../../../..";
+import random from "../../../../../lib/random";
 import { Server } from "http";
 import WebSocket from "ws";
 
