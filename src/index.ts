@@ -44,7 +44,7 @@ const argv = yargs.options({
 
 export async function startApp(
   port: number,
-  instanceId: string,
+  instanceId: string | undefined,
   configFile: string
 ) {
   const appConfig: IAppConfig = require(configFile);
@@ -53,13 +53,13 @@ export async function startApp(
 
 export async function startWithConfiguration(
   port: number | undefined,
-  instanceId: string,
+  instanceId: string | undefined,
   appConfig: IAppConfig
 ): Promise<{
   httpServer: Server;
   websocketServers: WebSocket.Server[];
 }> {
-  if (!appConfig.instanceId) {
+  if (instanceId) {
     appConfig.instanceId = instanceId;
   }
 
@@ -174,7 +174,7 @@ if (require.main === module) {
 
     const configDir = argv.c;
     const port = argv.p;
-    const instanceId = argv.i || random(16);
+    const instanceId = argv.i;
 
     startApp(port, instanceId, configDir);
     console.log(`listening on port ${port}`);

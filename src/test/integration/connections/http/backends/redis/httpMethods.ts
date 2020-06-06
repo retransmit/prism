@@ -1,6 +1,5 @@
 import { HttpMethods, IAppConfig } from "../../../../../../types";
 import request = require("supertest");
-import { doPubSub } from "../../../../../utils/redis";
 import random from "../../../../../../lib/random";
 import { TestAppInstance } from "../../../../../test";
 
@@ -52,21 +51,20 @@ export default async function (app: TestAppInstance) {
         },
       };
 
-      const result = await doPubSub(
-        app,
-        config,
-        [redisServiceResponse],
-        (success, getJson) => {
-          method === "GET"
-            ? makeReq(request(app.servers.httpServer), "/users")
-                .set("origin", "http://localhost:3000")
-                .then((x) => success([x, getJson()]))
-            : makeReq(request(app.servers.httpServer), "/users")
-                .send({ hello: "world" })
-                .set("origin", "http://localhost:3000")
-                .then((x) => success([x, getJson()]));
-        }
-      );
+      const result: any = {};
+      // const result = await doPubSub(
+      //   app,
+      //   config,
+      //   [redisServiceResponse],
+      //   (success, getJson) => {
+      //     method === "GET"
+      //       ? makeReq(request(app.servers.httpServer), "/users")
+      //           .set("origin", "http://localhost:3000")
+      //       : makeReq(request(app.servers.httpServer), "/users")
+      //           .send({ hello: "world" })
+      //           .set("origin", "http://localhost:3000")
+      //   }
+      // );
 
       const [response, json] = result;
       json.request.headers.origin.should.equal("http://localhost:3000");

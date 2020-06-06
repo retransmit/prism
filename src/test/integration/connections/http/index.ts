@@ -20,21 +20,21 @@ import { TestAppInstance } from "../../../test";
 
 export default function run(app: TestAppInstance) {
   describe("Http connections (integration)", () => {
-    describe("http", () => {
-      httpHttpMethods(app);
-      httpMergeResults(app);
-      httpDontMergeIgnored(app);
-      httpMustNotOverwriteJsonWithString(app);
-      httpRollsback(app);
-    });
+    // describe("http", () => {
+    //   httpHttpMethods(app);
+    //   httpMergeResults(app);
+    //   httpDontMergeIgnored(app);
+    //   httpMustNotOverwriteJsonWithString(app);
+    //   httpRollsback(app);
+    // });
     
     describe("redis", () => {
-      redisHttpMethods(app);
-      redisMergeResults(app);
+      // redisHttpMethods(app);
+      // redisMergeResults(app);
       redisDontMergeIgnored(app);
-      redisShowGenericErrors(app);
-      redisMustNotOverwriteJsonWithString(app);
-      redisRollsback(app);
+      // redisShowGenericErrors(app);
+      // redisMustNotOverwriteJsonWithString(app);
+      // redisRollsback(app);
     });
   });
 }

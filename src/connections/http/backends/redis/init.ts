@@ -3,7 +3,6 @@ import { HttpMethods, HttpProxyConfig } from "../../../../types";
 import { getSubscriber } from "../../../../lib/redis/clients";
 import processMessage from "./processMessage";
 import cleanupTimedOut from "./cleanupTimedOut";
-import { HttpRouteConfig } from "../../../../types/httpRequests";
 
 export default async function init() {
   const config = configModule.get();
