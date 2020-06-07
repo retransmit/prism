@@ -2,8 +2,8 @@ import request = require("supertest");
 import { startWithConfiguration } from "../../../../../..";
 import {startBackends} from "../../../../../utils/http";
 import { closeHttpServer } from "../../../../../utils/http";
-import random from "../../../../../../lib/random";
 import { TestAppInstance } from "../../../../../test";
+import random from "../../../../../../lib/random";
 
 export default async function (app: TestAppInstance) {
   it(`merges responses`, async () => {

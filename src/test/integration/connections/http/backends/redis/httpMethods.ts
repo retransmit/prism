@@ -1,10 +1,10 @@
 import { HttpMethods, IAppConfig } from "../../../../../../types";
 import request = require("supertest");
-import random from "../../../../../../lib/random";
 import { TestAppInstance } from "../../../../../test";
 import { startWithConfiguration } from "../../../../../..";
 import { createClient } from "redis";
 import got from "got/dist/source";
+import random from "../../../../../../lib/random";
 
 export default async function (app: TestAppInstance) {
   function makeConfig(options: { method: HttpMethods }): IAppConfig {
@@ -80,7 +80,6 @@ export default async function (app: TestAppInstance) {
             });
 
       const inputMessage = await promisedInputMessage;
-      const requestFromInput = JSON.parse(inputMessage.message).request.method;
       const redisInput = JSON.parse(inputMessage.message);
 
       const publisher = createClient();
@@ -91,7 +90,7 @@ export default async function (app: TestAppInstance) {
           id: redisInput.id,
           service: "userservice",
           response: {
-            content: `${requestFromInput}: Everything worked.`,
+            content: `${redisInput.request.method}: Everything worked.`,
           },
         })
       );

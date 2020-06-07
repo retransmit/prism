@@ -2,11 +2,12 @@ import { TestAppInstance } from "../../../../../test";
 import { startWithConfiguration } from "../../../../../..";
 import { createClient } from "redis";
 import got from "got/dist/source";
+import random from "../../../../../../lib/random";
 
 export default async function (app: TestAppInstance) {
   it(`does not merge ignored results`, async () => {
     const config = {
-      instanceId: "testinstance",
+      instanceId: random(),
       http: {
         routes: {
           "/users": {

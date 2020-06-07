@@ -1,6 +1,8 @@
 import { promisify } from "util";
 import { Server } from "http";
 import Koa = require("koa");
+import { CancelableRequest } from "got/dist/source";
+import { Response } from "got/dist/source/core";
 
 function closeHttpServerCb(server: Server, cb: any) {
   (server as any).close(cb);
@@ -11,7 +13,6 @@ const promisifiedCloseHttpServer = promisify(closeHttpServerCb);
 export async function closeHttpServer(server: Server) {
   await promisifiedCloseHttpServer(server);
 }
-
 
 type MockHttpBackendConfig = {
   port: number;
@@ -52,4 +53,15 @@ export function startBackends(configs: MockHttpBackendConfig[]) {
     apps.push(app);
   }
   return apps;
+}
+
+export async function getResponse(
+  promisedResponse: CancelableRequest<Response<string>>
+) {
+  try {
+    const result = await promisedResponse;
+    return result;
+  } catch (ex) {
+    return ex.response;
+  }
 }

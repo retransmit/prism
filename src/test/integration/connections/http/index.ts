@@ -29,12 +29,12 @@ export default function run(app: TestAppInstance) {
     // });
 
     describe("redis", () => {
-      redisHttpMethods(app);
-      // redisMergeResults(app);
       redisDontMergeIgnored(app);
-      // redisShowGenericErrors(app);
-      // redisMustNotOverwriteJsonWithString(app);
-      // redisRollsback(app);
+      redisHttpMethods(app);
+      redisMergeResults(app);
+      redisMustNotOverwriteJsonWithString(app);
+      redisRollsback(app);
+      redisShowGenericErrors(app);
     });
   });
 }

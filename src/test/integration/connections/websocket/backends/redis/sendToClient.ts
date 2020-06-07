@@ -1,6 +1,5 @@
 // import request = require("supertest");
 // import { doPubSub } from "../../../../../utils/redis";
-// import random from "../../../../../../lib/random";
 // import WebSocket from "ws";
 // import { TestAppInstance } from "../../../../../test";
 

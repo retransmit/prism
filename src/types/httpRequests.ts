@@ -53,7 +53,7 @@ export type FetchedHttpHandlerResponse = {
 */
 export type RedisServiceHttpRequest = {
   id: string;
-  type: string;
+  type: "request" | "rollback";
   request: HttpRequest;
   responseChannel: string;
 };

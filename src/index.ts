@@ -29,9 +29,9 @@ import websocketRedisServiceInit from "./connections/http/backends/redis/init";
 import { init as activeRedisRequestsInit } from "./connections/http/backends/redis/activeRequests";
 import { init as activeConnectionsInit } from "./connections/webSocket/activeConnections";
 
-import random from "./lib/random";
 import { Server } from "http";
 import { readFileSync } from "fs";
+import random from "./lib/random";
 
 const packageJson = require("../package.json");
 
@@ -58,9 +58,14 @@ export async function startWithConfiguration(
 ): Promise<{
   httpServer: Server;
   websocketServers: WebSocket.Server[];
+  instanceId: string;
 }> {
   if (instanceId) {
     appConfig.instanceId = instanceId;
+  }
+
+  if (!appConfig.instanceId || appConfig.instanceId.trim() === "") {
+    appConfig.instanceId = random();
   }
 
   // Set up the config
@@ -152,6 +157,7 @@ export async function startWithConfiguration(
   return {
     httpServer,
     websocketServers,
+    instanceId: appConfig.instanceId,
   };
 }
 
@@ -176,7 +182,10 @@ if (require.main === module) {
     const port = argv.p;
     const instanceId = argv.i;
 
-    startApp(port, instanceId, configDir);
-    console.log(`listening on port ${port}`);
+    startApp(port, instanceId, configDir).then((config) => {
+      console.log(
+        `retransmit instance ${config.instanceId} listening on port ${port}`
+      );
+    });
   }
 }
