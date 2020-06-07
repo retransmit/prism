@@ -80,6 +80,7 @@ export default async function (app: TestAppInstance) {
             });
 
       const inputMessage = await promisedInputMessage;
+      const requestFromInput = JSON.parse(inputMessage.message).request.method;
       const redisInput = JSON.parse(inputMessage.message);
 
       const publisher = createClient();
@@ -90,14 +91,14 @@ export default async function (app: TestAppInstance) {
           id: redisInput.id,
           service: "userservice",
           response: {
-            content: "Everything worked.",
+            content: `${requestFromInput}: Everything worked.`,
           },
         })
       );
 
       const serverResponse = await promisedServerRespose;
       serverResponse.statusCode.should.equal(200);
-      serverResponse.body.should.equal(`Everything worked.`);
+      serverResponse.body.should.equal(`${method}: Everything worked.`);
     });
   });
 }
