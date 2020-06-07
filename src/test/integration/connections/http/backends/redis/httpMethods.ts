@@ -2,6 +2,9 @@ import { HttpMethods, IAppConfig } from "../../../../../../types";
 import request = require("supertest");
 import random from "../../../../../../lib/random";
 import { TestAppInstance } from "../../../../../test";
+import { startWithConfiguration } from "../../../../../..";
+import { createClient } from "redis";
+import got from "got/dist/source";
 
 export default async function (app: TestAppInstance) {
   function makeConfig(options: { method: HttpMethods }): IAppConfig {
@@ -42,34 +45,59 @@ export default async function (app: TestAppInstance) {
     it(`adds ${method} request to the channel`, async () => {
       const config = makeConfig({ method });
 
-      const redisServiceResponse = {
-        id: "temp",
-        service: "userservice",
-        response: {
-          method,
-          content: "Everything worked.",
-        },
-      };
+      const servers = await startWithConfiguration(
+        undefined,
+        undefined,
+        config
+      );
 
-      const result: any = {};
-      // const result = await doPubSub(
-      //   app,
-      //   config,
-      //   [redisServiceResponse],
-      //   (success, getJson) => {
-      //     method === "GET"
-      //       ? makeReq(request(app.servers.httpServer), "/users")
-      //           .set("origin", "http://localhost:3000")
-      //       : makeReq(request(app.servers.httpServer), "/users")
-      //           .send({ hello: "world" })
-      //           .set("origin", "http://localhost:3000")
-      //   }
-      // );
+      app.servers = servers;
 
-      const [response, json] = result;
-      json.request.headers.origin.should.equal("http://localhost:3000");
-      response.status.should.equal(200);
-      response.text.should.equal(`${method}: Everything worked.`);
+      let subscriberCb: (channel: string, message: string) => void = (
+        a,
+        b
+      ) => {};
+
+      const subscriber = createClient();
+      subscriber.subscribe("input");
+      subscriber.on("message", (c, m) => subscriberCb(c, m));
+
+      let promisedInputMessage = new Promise<{
+        channel: string;
+        message: string;
+      }>((success) => {
+        subscriberCb = (channel, message) => success({ channel, message });
+      });
+
+      // Make the http request.
+      const { port } = app.servers.httpServer.address() as any;
+      const promisedServerRespose =
+        method === "GET" || method === "DELETE"
+          ? got(`http://localhost:${port}/users`, { method })
+          : got(`http://localhost:${port}/users`, {
+              method,
+              json: { hello: "world" },
+            });
+
+      const inputMessage = await promisedInputMessage;
+      const redisInput = JSON.parse(inputMessage.message);
+
+      const publisher = createClient();
+
+      publisher.publish(
+        redisInput.responseChannel,
+        JSON.stringify({
+          id: redisInput.id,
+          service: "userservice",
+          response: {
+            content: "Everything worked.",
+          },
+        })
+      );
+
+      const serverResponse = await promisedServerRespose;
+      serverResponse.statusCode.should.equal(200);
+      serverResponse.body.should.equal(`Everything worked.`);
     });
   });
 }

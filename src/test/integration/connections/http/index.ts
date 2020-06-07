@@ -27,9 +27,9 @@ export default function run(app: TestAppInstance) {
     //   httpMustNotOverwriteJsonWithString(app);
     //   httpRollsback(app);
     // });
-    
+
     describe("redis", () => {
-      // redisHttpMethods(app);
+      redisHttpMethods(app);
       // redisMergeResults(app);
       redisDontMergeIgnored(app);
       // redisShowGenericErrors(app);
