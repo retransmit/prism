@@ -1,5 +1,4 @@
 import { HttpMethods, IAppConfig } from "../../../../../../types";
-import request = require("supertest");
 import { TestAppInstance } from "../../../../../test";
 import { startWithConfiguration } from "../../../../../..";
 import { createClient } from "redis";
@@ -30,18 +29,15 @@ export default async function (app: TestAppInstance) {
     };
   }
 
-  const httpMethodTests: [
-    HttpMethods,
-    (req: request.SuperTest<request.Test>, url: string) => request.Test
-  ][] = [
-    ["GET", (req, url) => req.get(url)],
-    ["POST", (req, url) => req.post(url)],
-    ["PUT", (req, url) => req.put(url)],
-    ["DELETE", (req, url) => req.delete(url)],
-    ["PATCH", (req, url) => req.patch(url)],
+  const httpMethodTests: HttpMethods[] = [
+    "GET",
+    "POST",
+    "PUT",
+    "DELETE",
+    "PATCH",
   ];
 
-  httpMethodTests.forEach(([method, makeReq]) => {
+  httpMethodTests.forEach((method) => {
     it(`adds ${method} request to the channel`, async () => {
       const config = makeConfig({ method });
 
@@ -73,10 +69,11 @@ export default async function (app: TestAppInstance) {
       const { port } = app.servers.httpServer.address() as any;
       const promisedServerRespose =
         method === "GET" || method === "DELETE"
-          ? got(`http://localhost:${port}/users`, { method })
+          ? got(`http://localhost:${port}/users`, { method, retry: 0 })
           : got(`http://localhost:${port}/users`, {
               method,
               json: { hello: "world" },
+              retry: 0,
             });
 
       const inputMessage = await promisedInputMessage;

@@ -1,10 +1,10 @@
-import request = require("supertest");
 import { startWithConfiguration } from "../../../../../..";
-import { startBackends } from "../../../../../utils/http";
+import { startBackends, getResponse } from "../../../../../utils/http";
 import { closeHttpServer } from "../../../../../utils/http";
 import { Server } from "http";
 import { TestAppInstance } from "../../../../../test";
 import random from "../../../../../../lib/random";
+import got from "got/dist/source";
 
 export default async function (app: TestAppInstance) {
   it(`rolls back`, async () => {
@@ -36,10 +36,10 @@ export default async function (app: TestAppInstance) {
       "testinstance",
       config
     );
-    app.servers = servers;
 
     let calledRollback = false;
     let backendApps: Server[] = [];
+
     const calledPromise = new Promise((success) => {
       // Start mock servers.
       backendApps = startBackends([
@@ -81,19 +81,23 @@ export default async function (app: TestAppInstance) {
       ]);
     });
 
-    const response = await request(app.servers.httpServer)
-      .post("/users")
-      .send({ hello: "world" })
-      .set("origin", "http://localhost:3000");
+    app.servers = {
+      ...servers,
+      mockHttpServers: backendApps,
+    };
+
+    const { port } = app.servers.httpServer.address() as any;
+    const promisedResponse = got(`http://localhost:${port}/users`, {
+      method: "POST",
+      json: { hello: "world" },
+      retry: 0,
+    });
+
+    const serverResponse = await getResponse(promisedResponse);
+    serverResponse.statusCode.should.equal(400);
+    serverResponse.body.should.equal("I don't like the input.");
 
     await calledPromise;
-
-    for (const backendApp of backendApps) {
-      await closeHttpServer(backendApp);
-    }
-
     calledRollback.should.be.true();
-    response.status.should.equal(400);
-    response.text.should.equal("I don't like the input.");
   });
 }

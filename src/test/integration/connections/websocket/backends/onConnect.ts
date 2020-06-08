@@ -1,4 +1,3 @@
-import request = require("supertest");
 import { startWithConfiguration } from "../../../../..";
 import random from "../../../../../lib/random";
 import WebSocket from "ws";
@@ -8,7 +7,6 @@ export default async function (app: TestAppInstance) {
   it(`runs the connect hook on root config`, async () => {
     let ran = false;
     let receivedMessage = "";
-    let clientResponse = "";
 
     const connectedPromise: Promise<void> = new Promise(async (success) => {
       const config = {

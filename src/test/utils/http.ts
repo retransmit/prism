@@ -58,7 +58,7 @@ export function startBackends(configs: MockHttpBackendConfig[]) {
 export async function getResponse(
   promisedResponse: CancelableRequest<Response<string>>
 ) {
-  try {
+  try {    
     const result = await promisedResponse;
     return result;
   } catch (ex) {

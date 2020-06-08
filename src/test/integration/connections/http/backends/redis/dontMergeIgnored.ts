@@ -54,6 +54,7 @@ export default async function (app: TestAppInstance) {
     const promisedServerRespose = got(`http://localhost:${port}/users`, {
       method: "POST",
       json: { hello: "world" },
+      retry: 0,
     });
 
     const inputMessage = await promisedInputMessage;

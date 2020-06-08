@@ -1,7 +1,10 @@
 import * as configModule from "../../config";
 import { HttpResponse, HttpProxyConfig } from "../../types";
 import responseIsError from "../../lib/http/responseIsError";
-import { FetchedHttpHandlerResponse, HttpRouteConfig } from "../../types/httpRequests";
+import {
+  FetchedHttpHandlerResponse,
+  HttpRouteConfig,
+} from "../../types/httpRequests";
 /*
   Merge received results into a final response
 */

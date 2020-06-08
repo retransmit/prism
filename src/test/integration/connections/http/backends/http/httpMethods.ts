@@ -1,11 +1,9 @@
 import { HttpMethods, IAppConfig } from "../../../../../../types";
-import request = require("supertest");
-import Koa = require("koa");
 import { startWithConfiguration } from "../../../../../..";
-import {startBackends} from "../../../../../utils/http";
-import { closeHttpServer } from "../../../../../utils/http";
+import { startBackends, getResponse } from "../../../../../utils/http";
 import { TestAppInstance } from "../../../../../test";
 import random from "../../../../../../lib/random";
+import got from "got/dist/source";
 
 export default async function (app: TestAppInstance) {
   function makeConfig(options: { method: HttpMethods }): IAppConfig {
@@ -28,19 +26,16 @@ export default async function (app: TestAppInstance) {
     };
   }
 
-  const httpMethodTests: [
-    HttpMethods,
-    (req: request.SuperTest<request.Test>, url: string) => request.Test
-  ][] = [
-    ["GET", (req, url) => req.get(url)],
-    ["POST", (req, url) => req.post(url)],
-    ["PUT", (req, url) => req.put(url)],
-    ["DELETE", (req, url) => req.delete(url)],
-    ["PATCH", (req, url) => req.patch(url)],
+  const httpMethodTests: HttpMethods[] = [
+    "GET",
+    "POST",
+    "PUT",
+    "DELETE",
+    "PATCH",
   ];
 
-  httpMethodTests.forEach(([method, makeReq]) => {
-    it(`adds ${method} request to the channel`, async () => {
+  httpMethodTests.forEach((method) => {
+    it(`sends an HTTP ${method} request to the backend`, async () => {
       const config = makeConfig({ method });
 
       const servers = await startWithConfiguration(
@@ -48,7 +43,6 @@ export default async function (app: TestAppInstance) {
         "testinstance",
         config
       );
-      app.servers = servers;
 
       // Start mock servers.
       const backendApps = startBackends([
@@ -62,22 +56,24 @@ export default async function (app: TestAppInstance) {
         },
       ]);
 
-      const response =
-        method === "GET"
-          ? await makeReq(request(app.servers.httpServer), "/users").set(
-              "origin",
-              "http://localhost:3000"
-            )
-          : await makeReq(request(app.servers.httpServer), "/users")
-              .send({ hello: "world" })
-              .set("origin", "http://localhost:3000");
+      app.servers = {
+        ...servers,
+        mockHttpServers: backendApps,
+      };
 
-      for (const backendApp of backendApps) {
-        await closeHttpServer(backendApp);
-      }
+      const { port } = app.servers.httpServer.address() as any;
+      const promisedResponse = got(`http://localhost:${port}/users`, {
+        method,
+        retry: 0,
+        json:
+          method !== "GET" && method !== "DELETE"
+            ? { hello: "world" }
+            : undefined,
+      });
 
-      response.status.should.equal(200);
-      response.text.should.equal(`${method}: Everything worked.`);
+      const serverResponse = await getResponse(promisedResponse);
+      serverResponse.statusCode.should.equal(200);
+      serverResponse.body.should.equal(`${method}: Everything worked.`);
     });
   });
 }

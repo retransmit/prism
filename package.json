@@ -35,10 +35,8 @@
   "devDependencies": {
     "@types/mocha": "^7.0.2",
     "@types/should": "^13.0.0",
-    "@types/supertest": "^2.0.8",
     "mocha": "^7.1.2",
-    "should": "^13.2.3",
-    "supertest": "^4.0.2"
+    "should": "^13.2.3"
   },
   "license": "MIT"
 }

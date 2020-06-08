@@ -1,4 +1,3 @@
-import request = require("supertest");
 import { TestAppInstance } from "../../../../../test";
 import { startWithConfiguration } from "../../../../../..";
 import { createClient } from "redis";
@@ -54,6 +53,7 @@ export default async function (app: TestAppInstance) {
 
     const promisedServerRespose = got(`http://localhost:${port}/users`, {
       method: "POST",
+      retry: 0,
     });
 
     const inputMessage = await promisedInputMessage;

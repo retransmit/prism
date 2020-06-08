@@ -1,7 +1,7 @@
 // import request = require("supertest");
 // import { doPubSub } from "../../../../../utils/redis";
-// import WebSocket from "ws";
 // import { TestAppInstance } from "../../../../../test";
+// import random from "../../../../../../lib/random";
 
 // export default async function (app: TestAppInstance) {
 //   it(`gets responses from redis backends`, async () => {

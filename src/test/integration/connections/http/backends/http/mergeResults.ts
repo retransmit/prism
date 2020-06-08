@@ -1,9 +1,9 @@
-import request = require("supertest");
 import { startWithConfiguration } from "../../../../../..";
-import {startBackends} from "../../../../../utils/http";
+import { startBackends, getResponse } from "../../../../../utils/http";
 import { closeHttpServer } from "../../../../../utils/http";
 import { TestAppInstance } from "../../../../../test";
 import random from "../../../../../../lib/random";
+import got from "got/dist/source";
 
 export default async function (app: TestAppInstance) {
   it(`merges responses`, async () => {
@@ -34,7 +34,6 @@ export default async function (app: TestAppInstance) {
       "testinstance",
       config
     );
-    app.servers = servers;
 
     // Start mock servers.
     const backendApps = startBackends([
@@ -64,17 +63,20 @@ export default async function (app: TestAppInstance) {
       },
     ]);
 
-    const response = await request(app.servers.httpServer)
-      .get("/users")
-      .send({ hello: "world" })
-      .set("origin", "http://localhost:3000");
+    app.servers = {
+      ...servers,
+      mockHttpServers: backendApps,
+    };
 
-    for (const backendApp of backendApps) {
-      await closeHttpServer(backendApp);
-    }
+    const { port } = app.servers.httpServer.address() as any;
+    const promisedResponse = got(`http://localhost:${port}/users`, {
+      method: "GET",
+      retry: 0,
+    });
 
-    response.status.should.equal(200);
-    response.body.should.deepEqual({
+    const serverResponse = await getResponse(promisedResponse);
+    serverResponse.statusCode.should.equal(200);
+    JSON.parse(serverResponse.body).should.deepEqual({
       user: 1,
       message: "hello world",
     });

@@ -15,6 +15,7 @@ export type TestAppInstance = {
   servers: {
     httpServer: HttpServer | HttpsServer;
     websocketServers: WebSocket.Server[];
+    mockHttpServers?: (HttpServer | HttpsServer)[];
   };
 };
 
@@ -30,6 +31,11 @@ function run() {
     afterEach(async function resetAfterEach() {
       for (const webSocketServer of app.servers.websocketServers) {
         await closeWebSocketServer(webSocketServer);
+      }
+      if (app.servers.mockHttpServers) {
+        for (const mockHttpServer of app.servers.mockHttpServers) {
+          await await closeHttpServer(mockHttpServer);
+        }
       }
       await closeHttpServer(app.servers.httpServer);
     });

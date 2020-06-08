@@ -1,4 +1,3 @@
-import request = require("supertest");
 import * as redis from "redis";
 import { TestAppInstance } from "../../../../../test";
 import random from "../../../../../../lib/random";
@@ -56,6 +55,7 @@ export default async function (app: TestAppInstance) {
 
     const promisedServerRespose = got(`http://localhost:${port}/users`, {
       method: "POST",
+      retry: 0,
     });
 
     const inputMessage = await promisedInputMessage;

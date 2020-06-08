@@ -5,6 +5,7 @@ export function makeGotOptions(request: HttpRequest, timeout?: number) {
     searchParams: request.query,
     method: request.method,
     headers: request.headers,
+    retry: 0,
     timeout,
   };
 
@@ -20,6 +21,6 @@ export function makeGotOptions(request: HttpRequest, timeout?: number) {
           json: request.body,
         }
       : basicOptions;
-     
+
   return options;
 }
