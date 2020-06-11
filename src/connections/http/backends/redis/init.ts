@@ -1,5 +1,4 @@
 import * as configModule from "../../../../config";
-import { HttpMethods, HttpProxyConfig } from "../../../../types";
 import { getSubscriber } from "../../../../lib/redis/clients";
 import processMessage from "./processMessage";
 import cleanupTimedOut from "./cleanupTimedOut";

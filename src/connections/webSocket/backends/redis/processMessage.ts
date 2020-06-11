@@ -18,6 +18,10 @@ export default function processMessage(websocketConfig: WebSocketProxyConfig) {
     const config = configModule.get();
     const redisResponse = JSON.parse(messageString) as WebSocketResponse;
 
+    // Default to 'message' type.
+    // Some services might forget to add this.
+    redisResponse.type = redisResponse.type || "message";
+
     const conn = activeConnections().get(redisResponse.id);
 
     const serviceConfig = websocketConfig.routes[redisResponse.route].services[

@@ -73,7 +73,7 @@ export default async function (app: TestAppInstance) {
   configs.forEach((testCfg: [string, IAppConfig]) => {
     const [testName, config] = testCfg;
     it(testName, async () => {
-      const config = {
+      const config: IAppConfig = {
         instanceId: random(),
         http: {
           routes: {

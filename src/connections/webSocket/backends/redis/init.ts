@@ -15,12 +15,5 @@ export default async function init() {
     websocketClientSubscriber.subscribe(
       `${config.webSocket.redis.responseChannel}.${config.instanceId}`
     );
-
-    // Some services may never respond. Fail them.
-    // setInterval(
-    //   cleanupTimedOut(config.webSocket),
-    //   config.webSocket.redis.cleanupInterval || 10000
-    // );
   }
 }
-

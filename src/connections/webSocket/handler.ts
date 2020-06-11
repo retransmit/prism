@@ -5,7 +5,10 @@ import WebSocket from "ws";
 
 import * as configModule from "../../config";
 import randomId from "../../lib/random";
-import { get as activeConnections } from "./activeConnections";
+import {
+  get as activeConnections,
+  ActiveWebSocketConnection,
+} from "./activeConnections";
 import { WebSocketRouteConfig } from "../../types/webSocketRequests";
 
 import sendToHttpService from "./backends/http/sendToService";
@@ -17,6 +20,7 @@ import redisConnect from "./backends/redis/connect";
 import httpDisconnect from "./backends/http/disconnect";
 import redisDisconnect from "./backends/redis/disconnect";
 import { saveLastRequest } from "./backends/http/poll";
+import onConnect from "../../test/integration/connections/websocket/backends/onConnect";
 
 const connectors = [
   { type: "http", sendToService: sendToHttpService },
@@ -102,7 +106,7 @@ function onConnection(
       ? xForwardedFor.split(/\s*,\s*/)[0]
       : request.socket.remoteAddress;
 
-    activeConnections().set(requestId, {
+    const conn = {
       initialized: false,
       route,
       webSocket: ws,
@@ -110,7 +114,23 @@ function onConnection(
       port: request.socket.remotePort,
       saveLastRequest: saveLastRequest(routeConfig),
       lastRequest: undefined,
-    });
+    };
+    activeConnections().set(requestId, conn);
+
+    /*
+      If the onConnect hook is defined, we postpone connection init till a message arrives from the user. When the message arrives, the message is sent to the onConnect hook - which can return whether the connection needs to be dropped or not. This is useful, for say, authentication.
+
+      If there is no onConnect hook, then initialize immediately. And notify backends that a new connection has arrived.
+    */
+    if (!routeConfig.onConnect && !websocketConfig.onConnect) {
+      conn.initialized = true;
+      sendConnectionRequestsToServices(
+        requestId,
+        conn,
+        routeConfig,
+        websocketConfig
+      );
+    }
 
     ws.on(
       "message",
@@ -135,11 +155,13 @@ function onMessage(
     if (!conn) {
       ws.terminate();
     } else {
-      // If not initialized and there's an onConnect,
-      // treat the first message as the onConnect argument.
       const onConnect = routeConfig.onConnect || websocketConfig.onConnect;
-
+      
       if (!conn.initialized && onConnect) {
+        // One check above is redundant. 
+        // If conn is not initialized, onConnect must exist.
+        // Treat the first message as the onConnect argument.
+
         const onConnectResult = await onConnect(requestId, message);
 
         if (onConnectResult.drop === true) {
@@ -150,27 +172,23 @@ function onMessage(
           } else {
             ws.terminate();
           }
-        } else {
-          conn.initialized = true;
-          const route = conn.route;
-          for (const service of Object.keys(
-            websocketConfig.routes[conn.route].services
-          )) {
-            const serviceConfig =
-              websocketConfig.routes[route].services[service];
-            if (serviceConfig.type === "http") {
-              httpConnect(requestId, conn, serviceConfig, websocketConfig);
-            } else if (serviceConfig.type === "redis") {
-              redisConnect(requestId, conn, serviceConfig, websocketConfig);
-            }
-          }
+          // We're done here.
+          return;
         }
+
+        // Not dropping. Initialize the connection.
+        // And send the connect request.
+        conn.initialized = true;
+        sendConnectionRequestsToServices(
+          requestId,
+          conn,
+          routeConfig,
+          websocketConfig
+        );
       }
-      // Regular message. Pass this on...
+      // This is an active connection.
+      // Pass on the message to backend services.
       else {
-        if (!conn.initialized) {
-          conn.initialized = true;
-        }
         const onRequest =
           websocketConfig.onRequest || websocketConfig.routes[route].onRequest;
 
@@ -210,6 +228,22 @@ function onMessage(
       }
     }
   };
+}
+
+async function sendConnectionRequestsToServices(
+  requestId: string,
+  conn: ActiveWebSocketConnection,
+  routeConfig: WebSocketRouteConfig,
+  websocketConfig: WebSocketProxyConfig
+) {
+  for (const service of Object.keys(routeConfig.services)) {
+    const serviceConfig = routeConfig.services[service];
+    if (serviceConfig.type === "http") {
+      httpConnect(requestId, conn, serviceConfig, websocketConfig);
+    } else if (serviceConfig.type === "redis") {
+      redisConnect(requestId, conn, serviceConfig, websocketConfig);
+    }
+  }
 }
 
 function onClose(requestId: string, websocketConfig: WebSocketProxyConfig) {

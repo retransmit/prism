@@ -1,65 +1,95 @@
-// import request = require("supertest");
-// import { doPubSub } from "../../../../../utils/redis";
-// import { TestAppInstance } from "../../../../../test";
-// import random from "../../../../../../lib/random";
+import WebSocket from "ws";
+import { TestAppInstance } from "../../../../../test";
+import random from "../../../../../../lib/random";
+import { startWithConfiguration } from "../../../../../..";
+import { createClient } from "redis";
+import { RedisServiceWebSocketConnectRequest } from "../../../../../../types/webSocketRequests";
+import { IAppConfig } from "../../../../../../types";
 
-// export default async function (app: TestAppInstance) {
-//   it(`gets responses from redis backends`, async () => {
-//     const config = {
-//       instanceId: random(),
-//       http: {
-//         routes: {
-//           "/users": {
-//             POST: {
-//               services: {
-//                 userservice: {
-//                   type: "redis" as "redis",
-//                   requestChannel: "input",
-//                 },
-//                 messagingservice: {
-//                   type: "redis" as "redis",
-//                   requestChannel: "input",
-//                 },
-//               },
-//               genericErrors: true,
-//             },
-//           },
-//         },
-//         redis: {
-//           responseChannel: "output",
-//         },
-//       },
-//     };
+export default async function (app: TestAppInstance) {
+  it(`gets websocket responses from redis backends`, async () => {
+    const config: IAppConfig = {
+      instanceId: random(),
+      webSocket: {
+        routes: {
+          "/quotes": {
+            services: {
+              quoteservice: {
+                type: "redis" as "redis",
+                requestChannel: "input",
+              },
+            },
+          },
+        },
+        redis: {
+          responseChannel: "output",
+        },
+      },
+    };
 
-//     const serviceResults = [
-//       {
-//         id: "someid",
-//         service: "quoteservice",
-//         response: "GOOG: 1425.1",
-//       },
-//       {
-//         id: "someid",
-//         service: "quoteservice",
-//         response: "GOOG: 1420.1",
-//       },
-//     ];
+    const servers = await startWithConfiguration(
+      undefined,
+      "testinstance",
+      config
+    );
+    app.servers = servers;
 
-//     const result = await doPubSub(
-//       app,
-//       config,
-//       serviceResults,
-//       (success, getJson) => {
-//         request(app.servers.httpServer)
-//           .post("/users")
-//           .send({ hello: "world" })
-//           .set("origin", "http://localhost:3000")
-//           .then((x) => success([x, getJson()]));
-//       }
-//     );
+    const promisedConnectRequest = new Promise<
+      RedisServiceWebSocketConnectRequest
+    >((success) => {
+      const subscriber = createClient();
+      subscriber.subscribe("input");
+      subscriber.on("message", (channel, messageString) => {
+        const message = JSON.parse(messageString);
+        if (message.type === "connect") {
+          success(message);
+        }
+      });
+    });
 
-//     const [response, json] = result;
-//     json.request.headers.origin.should.equal("http://localhost:3000");
-//     response.status.should.equal(500);
-//     response.text.should.equal("Internal Server Error.");
-//   });
-// }
+    const ws = new WebSocket(
+      `ws://localhost:${(app.servers.httpServer.address() as any).port}/quotes`
+    );
+
+    ws.on("open", () => {
+      ws.send("HELO");
+    });
+
+    const connectRequest: RedisServiceWebSocketConnectRequest = await promisedConnectRequest;
+
+    const publisher = createClient();
+
+    publisher.publish(
+      connectRequest.responseChannel,
+      JSON.stringify({
+        id: connectRequest.id,
+        service: "quoteservice",
+        route: "/quotes",
+        response: "GOOG: 1425.1",
+      })
+      );
+      
+      publisher.publish(
+        connectRequest.responseChannel,
+        JSON.stringify({
+          id: connectRequest.id,
+          service: "quoteservice",
+          route: "/quotes",
+        response: "AAPL: 331.8",
+      })
+    );
+
+    const promisedWSResponses = new Promise<string[]>((success) => {
+      const responses: string[] = [];
+      ws.on("message", (message: string) => {
+        responses.push(message);
+        if (responses.length === 2) {
+          success(responses);
+        }
+      });
+    });
+
+    const responses = await promisedWSResponses;
+    responses.should.deepEqual(["GOOG: 1425.1", "AAPL: 331.8"]);
+  });
+}

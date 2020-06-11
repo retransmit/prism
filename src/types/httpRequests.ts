@@ -51,12 +51,21 @@ export type FetchedHttpHandlerResponse = {
 /*
   Http Requests and Responses for Redis-based Services
 */
-export type RedisServiceHttpRequest = {
+export type RedisServiceHttpRequestBase = {
   id: string;
-  type: "request" | "rollback";
   request: HttpRequest;
-  responseChannel: string;
 };
+
+export type RedisServiceHttpRequest = RedisServiceHttpRequestBase &
+  (
+    | {
+        type: "request";
+        responseChannel: string;
+      }
+    | {
+        type: "rollback";
+      }
+  );
 
 export type RedisServiceHttpResponse = {
   id: string;

@@ -5,10 +5,11 @@ import { Server } from "http";
 import { TestAppInstance } from "../../../../../test";
 import random from "../../../../../../lib/random";
 import got from "got/dist/source";
+import { IAppConfig } from "../../../../../../types";
 
 export default async function (app: TestAppInstance) {
   it(`rolls back`, async () => {
-    const config = {
+    const config: IAppConfig = {
       instanceId: random(),
       http: {
         routes: {

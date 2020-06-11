@@ -28,7 +28,27 @@
       "cwd": "${workspaceRoot}",
       "preLaunchTask": "build",
       "env": {
-        "CHIMPANZEE_DEBUG": "1"
+        "SOMEVAR": "1"
+      },
+      "envFile": "${workspaceFolder}/.env"
+    },
+    {
+      "name": "Debug specific test",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceRoot}/node_modules/mocha/bin/_mocha",
+      "stopOnEntry": true,
+      // Change the args to the test you want.
+      "args": [
+        "--no-timeouts",
+        "dist/test/test.js",
+        "-g",
+        "gets websocket responses from redis backends"
+      ],
+      "cwd": "${workspaceRoot}",
+      "preLaunchTask": "build",
+      "env": {
+        "SOMEVAR": "1"
       },
       "envFile": "${workspaceFolder}/.env"
     }

@@ -25,7 +25,7 @@ import {
 } from "./connections/webSocket/handler";
 import { init as redisInit } from "./lib/redis/clients";
 import httpRedisServiceInit from "./connections/http/backends/redis/init";
-import websocketRedisServiceInit from "./connections/http/backends/redis/init";
+import websocketRedisServiceInit from "./connections/webSocket/backends/redis/init";
 import { init as activeRedisRequestsInit } from "./connections/http/backends/redis/activeRequests";
 import { init as activeConnectionsInit } from "./connections/webSocket/activeConnections";
 
@@ -66,6 +66,12 @@ export async function startWithConfiguration(
 
   if (!appConfig.instanceId || appConfig.instanceId.trim() === "") {
     appConfig.instanceId = random();
+  }
+
+  // People are going to mistype 'webSocket' as all lowercase.
+  if ((appConfig as any).websocket !== undefined) {
+    appConfig.webSocket = (appConfig as any).websocket;
+    (appConfig as any).websocket = undefined;
   }
 
   // Set up the config

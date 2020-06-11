@@ -2,6 +2,7 @@ import { startWithConfiguration } from "../../../../..";
 import random from "../../../../../lib/random";
 import WebSocket from "ws";
 import { TestAppInstance } from "../../../../test";
+import { IAppConfig } from "../../../../../types";
 
 export default async function (app: TestAppInstance) {
   it(`runs the connect hook on root config`, async () => {
@@ -9,7 +10,7 @@ export default async function (app: TestAppInstance) {
     let receivedMessage = "";
 
     const connectedPromise: Promise<void> = new Promise(async (success) => {
-      const config = {
+      const config: IAppConfig = {
         instanceId: random(),
         webSocket: {
           onConnect: async (requestId: string, message: string) => {
@@ -60,7 +61,7 @@ export default async function (app: TestAppInstance) {
     let clientResponse = "";
 
     const connectedPromise: Promise<void> = new Promise(async (success) => {
-      const config = {
+      const config: IAppConfig = {
         instanceId: random(),
         webSocket: {
           routes: {
@@ -111,7 +112,7 @@ export default async function (app: TestAppInstance) {
     let clientResponse = "";
 
     const connectedPromise: Promise<void> = new Promise(async (success) => {
-      const config = {
+      const config: IAppConfig = {
         instanceId: random(),
         webSocket: {
           onConnect: async (requestId: string, message: string) => {
@@ -170,7 +171,7 @@ export default async function (app: TestAppInstance) {
     let clientResponse = "";
 
     const connectedPromise: Promise<void> = new Promise(async (success) => {
-      const config = {
+      const config: IAppConfig = {
         instanceId: random(),
         webSocket: {
           routes: {

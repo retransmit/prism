@@ -3,23 +3,16 @@ import "should";
 
 import onConnect from "./backends/onConnect";
 import { TestAppInstance } from "../../../test";
+import redisSendToClient from "./backends/redis/sendToClient";
 
 export default function run(app: TestAppInstance) {
   describe("WebSocket connections (integration)", () => {
-    describe("http", () => {      
+    describe("http", () => {
       onConnect(app);
     });
 
-    // describe("redis", () => {
-    //   afterEach(async function resetAfterEach() {
-    //     await closeServer(app.servers.httpServer);
-    //   });
-    //   redisHttpMethods(app);
-    //   redisMergeResults(app);
-    //   redisDontMergeIgnored(app);
-    //   redisShowGenericErrors(app);
-    //   redisMustNotOverwriteJsonWithString(app);
-    //   redisRollsback(app);
-    // });
+    describe("redis", () => {
+      redisSendToClient(app);
+    });
   });
 }

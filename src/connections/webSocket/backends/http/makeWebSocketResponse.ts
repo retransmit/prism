@@ -9,6 +9,7 @@ export function makeWebSocketResponse(
   return requestId
     ? {
         ...result,
+        type: result.type || "message",
         id: requestId,
       }
     : result;
