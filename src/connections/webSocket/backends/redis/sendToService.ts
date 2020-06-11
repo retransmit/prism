@@ -9,7 +9,7 @@ import {
 } from "../../../../types/webSocketRequests";
 import * as configModule from "../../../../config";
 import { ActiveWebSocketConnection } from "../../activeConnections";
-import respond from "../../respond";
+import respondToWebSocketClient from "../../respond";
 
 export default async function sendToService(
   request: WebSocketMessageRequest,
@@ -41,7 +41,7 @@ export default async function sendToService(
 
       if (onRequestResult.handled) {
         if (onRequestResult.response) {
-          respond(request.id, onRequestResult.response, conn, websocketConfig);
+          respondToWebSocketClient(request.id, onRequestResult.response, conn, websocketConfig);
         }
       } else {
         if (!alreadyPublishedChannels.includes(requestChannel)) {

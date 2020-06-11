@@ -5,10 +5,12 @@ import {
   WebSocketResponse,
 } from "../../../../types/webSocketRequests";
 import * as activeConnections from "../../activeConnections";
-import respond from "../../respond";
+import respondToWebSocketClient from "../../respond";
 import { makeGotOptions } from "../../../../lib/http/gotUtil";
 import got from "got/dist/source";
 import { makeWebSocketResponse } from "./makeWebSocketResponse";
+import { makeHttpResponse } from "../../../http/backends/http/makeHttpResponse";
+import responseIsError from "../../../../lib/http/responseIsError";
 
 export function setupPolling(websocketConfig: WebSocketProxyConfig) {
   for (const route of Object.keys(websocketConfig.routes)) {
@@ -52,7 +54,7 @@ function timerCallback(
 
           if (onRequestResult.handled) {
             if (onRequestResult.response) {
-              respond(
+              respondToWebSocketClient(
                 requestId,
                 onRequestResult.response,
                 conn,
@@ -63,11 +65,14 @@ function timerCallback(
             const options = makeGotOptions(httpRequest);
             got(serviceConfig.url, options)
               .then(async (serverResponse) => {
-                const websocketResponse = makeWebSocketResponse(
-                  serverResponse,
-                  requestId
-                );
-                respond(requestId, websocketResponse, conn, websocketConfig);
+                const websocketResponse = serviceConfig.onResponse
+                  ? await serviceConfig.onResponse(
+                      requestId,
+                      makeHttpResponse(serverResponse)
+                    )
+                  : makeWebSocketResponse(serverResponse, requestId);
+
+                respondToWebSocketClient(requestId, websocketResponse, conn, websocketConfig);
               })
               .catch(async (error) => {
                 const websocketResponse: WebSocketResponse = error.response
@@ -79,6 +84,24 @@ function timerCallback(
                       service,
                       type: "message",
                     };
+
+                respondToWebSocketClient(requestId, websocketResponse, conn, websocketConfig);
+
+                const errorResponse = error.response
+                  ? makeHttpResponse(error.response)
+                  : {
+                      status: 400,
+                      content: error.message,
+                    };
+
+                if (responseIsError(errorResponse)) {
+                  if (serviceConfig.onError) {
+                    serviceConfig.onError(
+                      errorResponse,
+                      onRequestResult.request
+                    );
+                  }
+                }
               });
           }
         }

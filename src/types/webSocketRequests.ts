@@ -23,7 +23,6 @@ export type WebSocketRouteConfig = {
     requestId: string,
     response: WebSocketResponse
   ) => Promise<WebSocketResponse>;
-  onError?: (requestId: string, response: any) => any;
 };
 
 /*
@@ -48,6 +47,7 @@ export type HttpServiceWebSocketHandlerConfig = {
   url: string;
   onConnectUrl?: string;
   onDisconnectUrl?: string;
+  onError?: (response: HttpResponse | undefined, request: HttpRequest) => any;
 } & WebSocketHandlerConfigBase;
 
 export type RedisServiceWebSocketHandlerConfig = {
@@ -93,7 +93,7 @@ export type WebSocketNotConnectedRequest = {
 
 export type WebSocketResponse = {
   id: string;
-  type: "message" | "disconnect";
+  type: "message" | "disconnect" | "null";
   route: string;
   service: string;
   response: string;

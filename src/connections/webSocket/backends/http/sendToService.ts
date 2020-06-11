@@ -5,7 +5,7 @@ import {
   WebSocketResponse,
   WebSocketMessageRequest,
 } from "../../../../types/webSocketRequests";
-import respond from "../../respond";
+import respondToWebSocketClient from "../../respond";
 import { makeGotOptions } from "../../../../lib/http/gotUtil";
 import got from "got/dist/source";
 import { makeWebSocketResponse } from "./makeWebSocketResponse";
@@ -40,7 +40,7 @@ export default async function sendToService(
 
       if (onRequestResult.handled) {
         if (onRequestResult.response) {
-          respond(request.id, onRequestResult.response, conn, websocketConfig);
+          respondToWebSocketClient(request.id, onRequestResult.response, conn, websocketConfig);
         }
       } else {
         const options = makeGotOptions(httpRequest);
@@ -50,7 +50,7 @@ export default async function sendToService(
               serverResponse,
               request.id
             );
-            respond(request.id, websocketResponse, conn, websocketConfig);
+            respondToWebSocketClient(request.id, websocketResponse, conn, websocketConfig);
           })
           .catch(async (error) => {
             const websocketResponse: WebSocketResponse = error.response

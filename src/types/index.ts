@@ -90,7 +90,6 @@ export type WebSocketProxyConfig = {
     requestId: string,
     response: WebSocketResponse
   ) => Promise<WebSocketResponse>;
-  onError?: (requestId: string, response: any) => any;
 };
 
 /*

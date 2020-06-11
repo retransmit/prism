@@ -7,7 +7,7 @@ import * as configModule from "../../../../config";
 import { getPublisher } from "../../../../lib/redis/clients";
 import { getChannelForService } from "../../../../lib/redis/getChannelForService";
 import { ActiveWebSocketConnection } from "../../activeConnections";
-import respond from "../../respond";
+import respondToWebSocketClient from "../../respond";
 
 export default async function connect(
   requestId: string,
@@ -35,7 +35,7 @@ export default async function connect(
 
   if (onRequestResult.handled) {
     if (onRequestResult.response) {
-      respond(requestId, onRequestResult.response, conn, websocketConfig);
+      respondToWebSocketClient(requestId, onRequestResult.response, conn, websocketConfig);
     }
   } else {
     getPublisher().publish(channel, onRequestResult.request);

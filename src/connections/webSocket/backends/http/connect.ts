@@ -6,7 +6,9 @@ import {
 import { makeGotOptions } from "../../../../lib/http/gotUtil";
 import got from "got/dist/source";
 import * as activeConnections from "../../activeConnections";
-import respond from "../../respond";
+import respondToWebSocketClient from "../../respond";
+import { makeHttpResponse } from "../../../http/backends/http/makeHttpResponse";
+import responseIsError from "../../../../lib/http/responseIsError";
 
 export default async function connect(
   requestId: string,
@@ -37,13 +39,24 @@ export default async function connect(
 
     if (onRequestResult.handled) {
       if (onRequestResult.response) {
-        respond(requestId, onRequestResult.response, conn, websocketConfig);
+        respondToWebSocketClient(requestId, onRequestResult.response, conn, websocketConfig);
       }
     } else {
       const options = makeGotOptions(onRequestResult.request);
 
       got(serviceConfig.url, options).catch(async (error) => {
-        // TODO...
+        const errorResponse = error.response
+          ? makeHttpResponse(error.response)
+          : {
+              status: 400,
+              content: error.message,
+            };
+
+        if (responseIsError(errorResponse)) {
+          if (serviceConfig.onError) {
+            serviceConfig.onError(errorResponse, onRequestResult.request);
+          }
+        }
       });
     }
   }

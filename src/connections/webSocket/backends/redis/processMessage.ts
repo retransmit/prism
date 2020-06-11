@@ -6,7 +6,7 @@ import {
   WebSocketNotConnectedRequest,
 } from "../../../../types/webSocketRequests";
 import { get as activeConnections } from "../../activeConnections";
-import respond from "../../respond";
+import respondToWebSocketClient from "../../respond";
 import { getPublisher } from "../../../../lib/redis/clients";
 import { getChannelForService } from "../../../../lib/redis/getChannelForService";
 
@@ -33,7 +33,7 @@ export default function processMessage(websocketConfig: WebSocketProxyConfig) {
         ? await serviceConfig.onResponse(redisResponse.id, messageString)
         : redisResponse;
 
-      respond(redisResponse.id, onResponseResult, conn, websocketConfig);
+      respondToWebSocketClient(redisResponse.id, onResponseResult, conn, websocketConfig);
     } else {
       const websocketRequest: WebSocketNotConnectedRequest = {
         id: redisResponse.id,
