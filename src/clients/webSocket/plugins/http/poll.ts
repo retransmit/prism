@@ -12,13 +12,13 @@ import { makeWebSocketResponse } from "./makeWebSocketResponse";
 import { makeHttpResponse } from "../../../http/plugins/http/makeHttpResponse";
 import responseIsError from "../../../../lib/http/responseIsError";
 
-export function setupPolling(websocketConfig: WebSocketProxyConfig) {
-  for (const route of Object.keys(websocketConfig.routes)) {
-    for (const service of Object.keys(websocketConfig.routes[route].services)) {
-      const serviceConfig = websocketConfig.routes[route].services[service];
+export function setupPolling(webSocketConfig: WebSocketProxyConfig) {
+  for (const route of Object.keys(webSocketConfig.routes)) {
+    for (const service of Object.keys(webSocketConfig.routes[route].services)) {
+      const serviceConfig = webSocketConfig.routes[route].services[service];
       if (serviceConfig.type === "http") {
         setInterval(
-          timerCallback(route, service, serviceConfig, websocketConfig),
+          timerCallback(route, service, serviceConfig, webSocketConfig),
           serviceConfig.pollingInterval || 60000 //every minute
         );
       }
@@ -30,7 +30,7 @@ function timerCallback(
   route: string,
   service: string,
   serviceConfig: HttpServiceWebSocketHandlerConfig,
-  websocketConfig: WebSocketProxyConfig
+  webSocketConfig: WebSocketProxyConfig
 ) {
   return () => {
     (async function () {
@@ -58,24 +58,24 @@ function timerCallback(
                 requestId,
                 onRequestResult.response,
                 conn,
-                websocketConfig
+                webSocketConfig
               );
             }
           } else {
             const options = makeGotOptions(httpRequest);
             got(serviceConfig.url, options)
               .then(async (serverResponse) => {
-                const websocketResponse = serviceConfig.onResponse
+                const webSocketResponse = serviceConfig.onResponse
                   ? await serviceConfig.onResponse(
                       requestId,
                       makeHttpResponse(serverResponse)
                     )
                   : makeWebSocketResponse(serverResponse, requestId);
 
-                respondToWebSocketClient(requestId, websocketResponse, conn, websocketConfig);
+                respondToWebSocketClient(requestId, webSocketResponse, conn, webSocketConfig);
               })
               .catch(async (error) => {
-                const websocketResponse: WebSocketResponse = error.response
+                const webSocketResponse: WebSocketResponse = error.response
                   ? makeWebSocketResponse(error.response, requestId)
                   : {
                       id: requestId,
@@ -85,7 +85,7 @@ function timerCallback(
                       type: "message",
                     };
 
-                respondToWebSocketClient(requestId, websocketResponse, conn, websocketConfig);
+                respondToWebSocketClient(requestId, webSocketResponse, conn, webSocketConfig);
 
                 const errorResponse = error.response
                   ? makeHttpResponse(error.response)

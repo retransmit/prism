@@ -13,10 +13,10 @@ export default async function disconnect(
   requestId: string,
   conn: activeConnections.ActiveWebSocketConnection,
   serviceConfig: HttpServiceWebSocketHandlerConfig,
-  websocketConfig: WebSocketProxyConfig
+  webSocketConfig: WebSocketProxyConfig
 ) {
   if (serviceConfig.onDisconnectUrl) {
-    const websocketRequest: WebSocketDisconnectRequest = {
+    const webSocketRequest: WebSocketDisconnectRequest = {
       id: requestId,
       type: "disconnect",
       route: conn.route,
@@ -25,7 +25,7 @@ export default async function disconnect(
     const httpRequest = {
       path: serviceConfig.onDisconnectUrl,
       method: "POST" as "POST",
-      body: websocketRequest,
+      body: webSocketRequest,
       remoteAddress: conn.ip,
       remotePort: conn.port,
     };

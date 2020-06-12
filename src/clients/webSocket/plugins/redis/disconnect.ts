@@ -11,7 +11,7 @@ export default async function disconnect(
   requestId: string,
   conn: ActiveWebSocketConnection,
   serviceConfig: RedisServiceWebSocketHandlerConfig,
-  websocketConfig: WebSocketProxyConfig
+  webSocketConfig: WebSocketProxyConfig
 ) {
   const channel = getChannelForService(
     serviceConfig.requestChannel,

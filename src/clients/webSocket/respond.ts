@@ -4,21 +4,21 @@ import { WebSocketProxyConfig } from "../../types";
 
 export default async function respondToWebSocketClient(
   requestId: string,
-  websocketResponse: WebSocketResponse,
+  webSocketResponse: WebSocketResponse,
   conn: ActiveWebSocketConnection,
-  websocketConfig: WebSocketProxyConfig
+  webSocketConfig: WebSocketProxyConfig
 ) {
-  const routeConfig = websocketConfig.routes[websocketResponse.route];
+  const routeConfig = webSocketConfig.routes[webSocketResponse.route];
 
-  const onResponse = routeConfig.onResponse || websocketConfig.onResponse;
+  const onResponse = routeConfig.onResponse || webSocketConfig.onResponse;
 
   const onResponseResult = onResponse
-    ? await onResponse(requestId, websocketResponse)
-    : websocketResponse;
+    ? await onResponse(requestId, webSocketResponse)
+    : webSocketResponse;
 
   if (onResponseResult.type === "message") {
     if (onResponseResult.response) {
-      conn.webSocket.send(websocketResponse.response);
+      conn.webSocket.send(webSocketResponse.response);
     }
   } else if (onResponseResult.type === "disconnect") {
     conn.webSocket.terminate();

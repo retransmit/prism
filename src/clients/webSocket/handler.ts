@@ -34,28 +34,28 @@ const connectors = [
   Make an HTTP request handler
 */
 export default function createHandler() {
-  return async function websocketHandler(ctx: IRouterContext) {
+  return async function webSocketHandler(ctx: IRouterContext) {
     return await handler(ctx);
   };
 }
 
-const websocketServers: {
+const webSocketServers: {
   [key: string]: WebSocket.Server;
 } = {};
 
 export function init(): WebSocket.Server[] {
   const config = configModule.get();
-  const websocketConfig = config.webSocket;
-  if (websocketConfig) {
-    for (const route of Object.keys(websocketConfig.routes)) {
-      const routeConfig = websocketConfig.routes[route];
+  const webSocketConfig = config.webSocket;
+  if (webSocketConfig) {
+    for (const route of Object.keys(webSocketConfig.routes)) {
+      const routeConfig = webSocketConfig.routes[route];
       const wss = new WebSocket.Server({ noServer: true });
-      websocketServers[route] = wss;
-      setupWebSocketHandling(wss, route, routeConfig, websocketConfig);
+      webSocketServers[route] = wss;
+      setupWebSocketHandling(wss, route, routeConfig, webSocketConfig);
     }
   }
-  return Object.keys(websocketServers).reduce(
-    (acc, route) => acc.concat(websocketServers[route]),
+  return Object.keys(webSocketServers).reduce(
+    (acc, route) => acc.concat(webSocketServers[route]),
     [] as WebSocket.Server[]
   );
 }
@@ -64,10 +64,10 @@ function setupWebSocketHandling(
   wss: WebSocket.Server,
   route: string,
   routeConfig: WebSocketRouteConfig,
-  websocketConfig: WebSocketProxyConfig
+  webSocketConfig: WebSocketProxyConfig
 ) {
   const config = configModule.get();
-  wss.on("connection", onConnection(route, routeConfig, websocketConfig));
+  wss.on("connection", onConnection(route, routeConfig, webSocketConfig));
 
   const interval = setInterval(function ping() {
     wss.clients.forEach(function each(ws: any) {
@@ -88,7 +88,7 @@ function setupWebSocketHandling(
 function onConnection(
   route: string,
   routeConfig: WebSocketRouteConfig,
-  websocketConfig: WebSocketProxyConfig
+  webSocketConfig: WebSocketProxyConfig
 ) {
   return async function connection(ws: WebSocket, request: IncomingMessage) {
     // This is for finding dead connections.
@@ -122,22 +122,22 @@ function onConnection(
 
       If there is no onConnect hook, then initialize immediately. And notify backends that a new connection has arrived.
     */
-    if (!routeConfig.onConnect && !websocketConfig.onConnect) {
+    if (!routeConfig.onConnect && !webSocketConfig.onConnect) {
       conn.initialized = true;
       sendConnectionRequestsToServices(
         requestId,
         conn,
         routeConfig,
-        websocketConfig
+        webSocketConfig
       );
     }
 
     ws.on(
       "message",
-      onMessage(requestId, route, ws, routeConfig, websocketConfig)
+      onMessage(requestId, route, ws, routeConfig, webSocketConfig)
     );
 
-    ws.on("close", onClose(requestId, websocketConfig));
+    ws.on("close", onClose(requestId, webSocketConfig));
   };
 }
 
@@ -146,7 +146,7 @@ function onMessage(
   route: string,
   ws: WebSocket,
   routeConfig: WebSocketRouteConfig,
-  websocketConfig: WebSocketProxyConfig
+  webSocketConfig: WebSocketProxyConfig
 ) {
   return async function (message: string) {
     const conn = activeConnections().get(requestId);
@@ -155,7 +155,7 @@ function onMessage(
     if (!conn) {
       ws.terminate();
     } else {
-      const onConnect = routeConfig.onConnect || websocketConfig.onConnect;
+      const onConnect = routeConfig.onConnect || webSocketConfig.onConnect;
       
       if (!conn.initialized && onConnect) {
         // One check above is redundant. 
@@ -183,14 +183,14 @@ function onMessage(
           requestId,
           conn,
           routeConfig,
-          websocketConfig
+          webSocketConfig
         );
       }
       // This is an active connection.
       // Pass on the message to backend services.
       else {
         const onRequest =
-          websocketConfig.onRequest || websocketConfig.routes[route].onRequest;
+          webSocketConfig.onRequest || webSocketConfig.routes[route].onRequest;
 
         const onRequestResult = onRequest
           ? await onRequest(requestId, message)
@@ -221,7 +221,7 @@ function onMessage(
             connector.sendToService(
               onRequestResult.request,
               conn,
-              websocketConfig
+              webSocketConfig
             );
           }
         }
@@ -234,26 +234,26 @@ async function sendConnectionRequestsToServices(
   requestId: string,
   conn: ActiveWebSocketConnection,
   routeConfig: WebSocketRouteConfig,
-  websocketConfig: WebSocketProxyConfig
+  webSocketConfig: WebSocketProxyConfig
 ) {
   for (const service of Object.keys(routeConfig.services)) {
     const serviceConfig = routeConfig.services[service];
     if (serviceConfig.type === "http") {
-      httpConnect(requestId, conn, serviceConfig, websocketConfig);
+      httpConnect(requestId, conn, serviceConfig, webSocketConfig);
     } else if (serviceConfig.type === "redis") {
-      redisConnect(requestId, conn, serviceConfig, websocketConfig);
+      redisConnect(requestId, conn, serviceConfig, webSocketConfig);
     }
   }
 }
 
-function onClose(requestId: string, websocketConfig: WebSocketProxyConfig) {
+function onClose(requestId: string, webSocketConfig: WebSocketProxyConfig) {
   return async function () {
     // Find the handler in question.
     const conn = activeConnections().get(requestId);
     if (conn) {
-      const routeConfig = websocketConfig.routes[conn.route];
+      const routeConfig = webSocketConfig.routes[conn.route];
       const onDisconnect =
-        routeConfig.onDisconnect || websocketConfig.onDisconnect;
+        routeConfig.onDisconnect || webSocketConfig.onDisconnect;
       if (onDisconnect) {
         onDisconnect(requestId);
       }
@@ -261,13 +261,13 @@ function onClose(requestId: string, websocketConfig: WebSocketProxyConfig) {
       // Call disconnect for services
       const route = conn.route;
       for (const service of Object.keys(
-        websocketConfig.routes[conn.route].services
+        webSocketConfig.routes[conn.route].services
       )) {
-        const serviceConfig = websocketConfig.routes[route].services[service];
+        const serviceConfig = webSocketConfig.routes[route].services[service];
         if (serviceConfig.type === "redis") {
-          redisDisconnect(requestId, conn, serviceConfig, websocketConfig);
+          redisDisconnect(requestId, conn, serviceConfig, webSocketConfig);
         } else if (serviceConfig.type === "http") {
-          httpDisconnect(requestId, conn, serviceConfig, websocketConfig);
+          httpDisconnect(requestId, conn, serviceConfig, webSocketConfig);
         }
       }
     }
@@ -280,7 +280,7 @@ export function upgrade(
   head: Buffer
 ) {
   if (request.url) {
-    const server = websocketServers[request.url];
+    const server = webSocketServers[request.url];
     if (server) {
       server.handleUpgrade(request, socket, head, function done(ws) {
         server.emit("connection", ws, request);

@@ -6,7 +6,7 @@ import integrationTestsHttp from "./integration/clients/http";
 import integrationTestsWebSocket from "./integration/clients/webSocket";
 
 import { closeHttpServer } from "./utils/http";
-import { closeWebSocketServer } from "./utils/websocket";
+import { closeWebSocketServer } from "./utils/webSocket";
 
 import { Server as HttpServer } from "http";
 import { Server as HttpsServer } from "https";
@@ -14,7 +14,7 @@ import { Server as HttpsServer } from "https";
 export type TestAppInstance = {
   servers: {
     httpServer: HttpServer | HttpsServer;
-    websocketServers: WebSocket.Server[];
+    webSocketServers: WebSocket.Server[];
     mockHttpServers?: (HttpServer | HttpsServer)[];
   };
 };
@@ -29,7 +29,7 @@ function run() {
     let app: TestAppInstance = { app: { servers: undefined } } as any;
 
     afterEach(async function resetAfterEach() {
-      for (const webSocketServer of app.servers.websocketServers) {
+      for (const webSocketServer of app.servers.webSocketServers) {
         await closeWebSocketServer(webSocketServer);
       }
       if (app.servers.mockHttpServers) {

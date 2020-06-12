@@ -13,20 +13,20 @@ import { makeWebSocketResponse } from "./makeWebSocketResponse";
 export default async function sendToService(
   request: WebSocketMessageRequest,
   conn: ActiveWebSocketConnection,
-  websocketConfig: WebSocketProxyConfig
+  webSocketConfig: WebSocketProxyConfig
 ) {
-  const routeConfig = websocketConfig.routes[request.route];
+  const routeConfig = webSocketConfig.routes[request.route];
 
   for (const service of Object.keys(routeConfig.services)) {
     const serviceConfig = routeConfig.services[service];
 
     if (serviceConfig.type === "http") {
-      const websocketRequest: HttpServiceWebSocketMessageRequest = request;
+      const webSocketRequest: HttpServiceWebSocketMessageRequest = request;
 
       const httpRequest: HttpRequest = {
         path: serviceConfig.url,
         method: "POST",
-        body: websocketRequest,
+        body: webSocketRequest,
         remoteAddress: conn.ip,
         remotePort: conn.port,
       };
@@ -40,20 +40,20 @@ export default async function sendToService(
 
       if (onRequestResult.handled) {
         if (onRequestResult.response) {
-          respondToWebSocketClient(request.id, onRequestResult.response, conn, websocketConfig);
+          respondToWebSocketClient(request.id, onRequestResult.response, conn, webSocketConfig);
         }
       } else {
         const options = makeGotOptions(httpRequest);
         got(serviceConfig.url, options)
           .then(async (serverResponse) => {
-            const websocketResponse = makeWebSocketResponse(
+            const webSocketResponse = makeWebSocketResponse(
               serverResponse,
               request.id
             );
-            respondToWebSocketClient(request.id, websocketResponse, conn, websocketConfig);
+            respondToWebSocketClient(request.id, webSocketResponse, conn, webSocketConfig);
           })
           .catch(async (error) => {
-            const websocketResponse: WebSocketResponse = error.response
+            const webSocketResponse: WebSocketResponse = error.response
               ? makeWebSocketResponse(error.response, request.id)
               : {
                   id: request.id,

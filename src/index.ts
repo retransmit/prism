@@ -25,7 +25,7 @@ import {
 } from "./clients/webSocket/handler";
 import { init as redisInit } from "./lib/redis/clients";
 import httpRedisServiceInit from "./clients/http/plugins/redis/init";
-import websocketRedisServiceInit from "./clients/webSocket/plugins/redis/init";
+import webSocketRedisServiceInit from "./clients/webSocket/plugins/redis/init";
 import { init as activeRedisRequestsInit } from "./clients/http/plugins/redis/activeRequests";
 import { init as activeConnectionsInit } from "./clients/webSocket/activeConnections";
 
@@ -57,7 +57,7 @@ export async function startWithConfiguration(
   appConfig: IAppConfig
 ): Promise<{
   httpServer: Server;
-  websocketServers: WebSocket.Server[];
+  webSocketServers: WebSocket.Server[];
   instanceId: string;
 }> {
   if (instanceId) {
@@ -83,7 +83,7 @@ export async function startWithConfiguration(
   activeConnectionsInit();
 
   await httpRedisServiceInit();
-  await websocketRedisServiceInit();
+  await webSocketRedisServiceInit();
 
   // Set up routes
   const router = new Router();
@@ -141,10 +141,10 @@ export async function startWithConfiguration(
     httpServer = httpCreateServer(httpRequestHandler);
   }
 
-  let websocketServers: WebSocket.Server[] = [];
+  let webSocketServers: WebSocket.Server[] = [];
 
   if (config.webSocket) {
-    websocketServers = wsInit();
+    webSocketServers = wsInit();
     httpServer.on("upgrade", wsUpgrade);
   }
 
@@ -155,14 +155,14 @@ export async function startWithConfiguration(
   }
 
   httpServer.on("close", () => {
-    for (const server of websocketServers) {
+    for (const server of webSocketServers) {
       server.close();
     }
   });
 
   return {
     httpServer,
-    websocketServers,
+    webSocketServers: webSocketServers,
     instanceId: appConfig.instanceId,
   };
 }

@@ -10,9 +10,9 @@ export default async function init() {
   const alreadySubscribed: string[] = [];
 
   if (config.webSocket?.redis) {
-    const websocketClientSubscriber = getSubscriber();
-    websocketClientSubscriber.on("message", processMessage(config.webSocket));
-    websocketClientSubscriber.subscribe(
+    const webSocketClientSubscriber = getSubscriber();
+    webSocketClientSubscriber.on("message", processMessage(config.webSocket));
+    webSocketClientSubscriber.subscribe(
       `${config.webSocket.redis.responseChannel}.${config.instanceId}`
     );
   }

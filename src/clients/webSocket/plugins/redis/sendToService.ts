@@ -14,10 +14,10 @@ import respondToWebSocketClient from "../../respond";
 export default async function sendToService(
   request: WebSocketMessageRequest,
   conn: ActiveWebSocketConnection,
-  websocketConfig: WebSocketProxyConfig
+  webSocketConfig: WebSocketProxyConfig
 ) {
   const config = configModule.get();
-  const routeConfig = websocketConfig.routes[request.route];
+  const routeConfig = webSocketConfig.routes[request.route];
 
   const alreadyPublishedChannels: string[] = [];
 
@@ -41,7 +41,7 @@ export default async function sendToService(
 
       if (onRequestResult.handled) {
         if (onRequestResult.response) {
-          respondToWebSocketClient(request.id, onRequestResult.response, conn, websocketConfig);
+          respondToWebSocketClient(request.id, onRequestResult.response, conn, webSocketConfig);
         }
       } else {
         if (!alreadyPublishedChannels.includes(requestChannel)) {

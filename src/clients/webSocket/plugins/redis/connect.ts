@@ -13,7 +13,7 @@ export default async function connect(
   requestId: string,
   conn: ActiveWebSocketConnection,
   serviceConfig: RedisServiceWebSocketHandlerConfig,
-  websocketConfig: WebSocketProxyConfig
+  webSocketConfig: WebSocketProxyConfig
 ) {
   const config = configModule.get();
 
@@ -26,7 +26,7 @@ export default async function connect(
     id: requestId,
     type: "connect",
     route: conn.route,
-    responseChannel: `${websocketConfig.redis?.responseChannel}.${config.instanceId}`,
+    responseChannel: `${webSocketConfig.redis?.responseChannel}.${config.instanceId}`,
   };
 
   const onRequestResult = serviceConfig.onRequest
@@ -35,7 +35,7 @@ export default async function connect(
 
   if (onRequestResult.handled) {
     if (onRequestResult.response) {
-      respondToWebSocketClient(requestId, onRequestResult.response, conn, websocketConfig);
+      respondToWebSocketClient(requestId, onRequestResult.response, conn, webSocketConfig);
     }
   } else {
     getPublisher().publish(channel, onRequestResult.request);

@@ -10,7 +10,7 @@ import respondToWebSocketClient from "../../respond";
 import { getPublisher } from "../../../../lib/redis/clients";
 import { getChannelForService } from "../../../../lib/redis/getChannelForService";
 
-export default function processMessage(websocketConfig: WebSocketProxyConfig) {
+export default function processMessage(webSocketConfig: WebSocketProxyConfig) {
   return async function processMessageImpl(
     channel: string,
     messageString: string
@@ -24,7 +24,7 @@ export default function processMessage(websocketConfig: WebSocketProxyConfig) {
 
     const conn = activeConnections().get(redisResponse.id);
 
-    const serviceConfig = websocketConfig.routes[redisResponse.route].services[
+    const serviceConfig = webSocketConfig.routes[redisResponse.route].services[
       redisResponse.service
     ] as RedisServiceWebSocketHandlerConfig;
 
@@ -33,9 +33,9 @@ export default function processMessage(websocketConfig: WebSocketProxyConfig) {
         ? await serviceConfig.onResponse(redisResponse.id, messageString)
         : redisResponse;
 
-      respondToWebSocketClient(redisResponse.id, onResponseResult, conn, websocketConfig);
+      respondToWebSocketClient(redisResponse.id, onResponseResult, conn, webSocketConfig);
     } else {
-      const websocketRequest: WebSocketNotConnectedRequest = {
+      const webSocketRequest: WebSocketNotConnectedRequest = {
         id: redisResponse.id,
         type: "notconnected",
         route: redisResponse.route,
@@ -46,7 +46,7 @@ export default function processMessage(websocketConfig: WebSocketProxyConfig) {
         serviceConfig.numRequestChannels
       );
 
-      getPublisher().publish(requestChannel, JSON.stringify(websocketRequest));
+      getPublisher().publish(requestChannel, JSON.stringify(webSocketRequest));
     }
   };
 }

@@ -14,10 +14,10 @@ export default async function connect(
   requestId: string,
   conn: activeConnections.ActiveWebSocketConnection,
   serviceConfig: HttpServiceWebSocketHandlerConfig,
-  websocketConfig: WebSocketProxyConfig
+  webSocketConfig: WebSocketProxyConfig
 ) {
   if (serviceConfig.onConnectUrl) {
-    const websocketRequest: WebSocketConnectRequest = {
+    const webSocketRequest: WebSocketConnectRequest = {
       id: requestId,
       type: "connect",
       route: conn.route,
@@ -26,7 +26,7 @@ export default async function connect(
     const httpRequest = {
       path: serviceConfig.onConnectUrl,
       method: "POST" as "POST",
-      body: websocketRequest,
+      body: webSocketRequest,
       remoteAddress: conn.ip,
       remotePort: conn.port,
     };
@@ -39,7 +39,7 @@ export default async function connect(
 
     if (onRequestResult.handled) {
       if (onRequestResult.response) {
-        respondToWebSocketClient(requestId, onRequestResult.response, conn, websocketConfig);
+        respondToWebSocketClient(requestId, onRequestResult.response, conn, webSocketConfig);
       }
     } else {
       const options = makeGotOptions(onRequestResult.request);
