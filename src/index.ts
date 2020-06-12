@@ -83,8 +83,8 @@ export async function startWithConfiguration(
   activeRedisRequestsInit();
   activeConnectionsInit();
 
-  await httpRedisServiceInit();
-  await webSocketRedisServiceInit();
+  await httpRedisServiceInit(appConfig);
+  await webSocketRedisServiceInit(appConfig);
 
   // Set up routes
   const router = new Router();

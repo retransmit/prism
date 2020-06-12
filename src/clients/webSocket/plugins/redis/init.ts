@@ -1,9 +1,9 @@
 import * as configModule from "../../../../config";
 import { getSubscriber } from "../../../../lib/redis/clients";
-import { WebSocketProxyConfig } from "../../../../types";
+import { WebSocketProxyConfig, IAppConfig } from "../../../../types";
 import processMessage from "./processMessage";
 
-export default async function init() {
+export default async function init(appConfig: IAppConfig) {
   const config = configModule.get();
 
   // Setup subscriptions

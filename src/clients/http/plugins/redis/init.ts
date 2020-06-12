@@ -1,11 +1,9 @@
-import * as configModule from "../../../../config";
 import { getSubscriber } from "../../../../lib/redis/clients";
 import processMessage from "./processMessage";
 import cleanupTimedOut from "./cleanupTimedOut";
+import { IAppConfig } from "../../../../types";
 
-export default async function init() {
-  const config = configModule.get();
-
+export default async function init(config: IAppConfig) {
   // Setup subscriptions
   const alreadySubscribed: string[] = [];
 

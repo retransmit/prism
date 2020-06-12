@@ -29,8 +29,6 @@ export default function handleRequest(
   const method = originalRequest.method;
   const routeConfig = httpConfig.routes[path][method] as HttpRouteConfig;
 
-  const promises: Promise<InvokeServiceResult>[] = [];
-
   return Object.keys(routeConfig.services)
     .map(
       (service) =>
