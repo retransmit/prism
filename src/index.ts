@@ -18,17 +18,18 @@ import WebSocket from "ws";
 import * as configModule from "./config";
 import { IAppConfig } from "./types";
 
-import createHttpRequestHandler from "./clients/http/handler";
+import initHttpRequestHandlers from "./connections/http/handler";
+
 import {
   init as wsInit,
   upgrade as wsUpgrade,
-} from "./clients/webSocket/handler";
+} from "./connections/webSocket/handler";
 
 import { init as redisInit } from "./lib/redis/clients";
-import httpRedisServiceInit from "./clients/http/plugins/redis/init";
-import webSocketRedisServiceInit from "./clients/webSocket/plugins/redis/init";
-import { init as activeRedisRequestsInit } from "./clients/http/plugins/redis/activeRequests";
-import { init as activeConnectionsInit } from "./clients/webSocket/activeConnections";
+import httpRedisServiceInit from "./connections/http/plugins/redis/init";
+import webSocketRedisServiceInit from "./connections/webSocket/plugins/redis/init";
+import { init as activeRedisRequestsInit } from "./connections/http/plugins/redis/activeRequests";
+import { init as activeConnectionsInit } from "./connections/webSocket/activeConnections";
 
 import { Server } from "http";
 import { readFileSync } from "fs";
@@ -92,6 +93,7 @@ export async function startWithConfiguration(
   const config = configModule.get();
 
   if (config.http) {
+    const createHttpRequestHandler = await initHttpRequestHandlers(appConfig);
     for (const route of Object.keys(config.http.routes)) {
       const routeConfig = config.http.routes[route];
 

@@ -1,17 +1,17 @@
 import { ClientOpts } from "redis";
 import { IncomingHttpHeaders } from "http2";
-import { FetchedHttpHandlerResponse, HttpRouteConfig } from "./httpClients";
+import { FetchedHttpRequestHandlerResponse, HttpRouteConfig } from "./httpConnection";
 import {
   WebSocketRouteConfig,
   WebSocketResponse,
   WebSocketMessageRequest,
-} from "./webSocketClients";
+} from "./webSocketConnection";
 
 export {
-  HttpServiceHttpHandlerConfig,
-  RedisServiceHttpHandlerConfig,
-  HttpHandlerConfig,
-} from "./httpClients";
+  HttpServiceHttpRequestHandlerConfig,
+  RedisServiceHttpRequestHandlerConfig,
+  HttpRequestHandlerConfig,
+} from "./httpConnection";
 1;
 
 export type HttpMethods = "GET" | "POST" | "PUT" | "DELETE" | "PATCH";
@@ -61,7 +61,7 @@ export type HttpProxyConfig = {
   ) => Promise<HttpResponse>;
   genericErrors?: boolean;
   onError?: (
-    responses: FetchedHttpHandlerResponse[],
+    responses: FetchedHttpRequestHandlerResponse[],
     request: HttpRequest
   ) => any;
 };
