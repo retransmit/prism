@@ -2,7 +2,7 @@ import { WebSocketProxyConfig } from "../../../../types";
 import {
   RedisServiceWebSocketHandlerConfig,
   RedisServiceWebSocketConnectRequest,
-} from "../../../../types/webSocketRequests";
+} from "../../../../types/webSocketClients";
 import * as configModule from "../../../../config";
 import { getPublisher } from "../../../../lib/redis/clients";
 import { getChannelForService } from "../../../../lib/redis/getChannelForService";

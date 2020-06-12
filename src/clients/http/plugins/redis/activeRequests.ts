@@ -1,5 +1,5 @@
 import { HttpRequest } from "../../../../types";
-import { InvokeServiceResult } from "../../../../types/httpRequests";
+import { InvokeServiceResult } from "../../../../types/httpClients";
 
 export type ActiveHttpRequest = {
   id: string;

@@ -9,26 +9,58 @@ import {
   get as activeConnections,
   ActiveWebSocketConnection,
 } from "./activeConnections";
-import { WebSocketRouteConfig } from "../../types/webSocketRequests";
+import {
+  WebSocketRouteConfig,
+  WebSocketMessageRequest,
+} from "../../types/webSocketClients";
 
-import sendToHttpService from "./plugins/http/sendToService";
-import sendToRedisService from "./plugins/redis/sendToService";
+import * as httpPlugin from "./plugins/http";
+import * as redisPlugin from "./plugins/redis";
+
+// import sendToHttpService from "./plugins/http/handleRequest";
+// import sendToRedisService from "./plugins/redis/handleRequest";
 import { WebSocketProxyConfig } from "../../types";
 
-import httpConnect from "./plugins/http/connect";
-import redisConnect from "./plugins/redis/connect";
-import httpDisconnect from "./plugins/http/disconnect";
-import redisDisconnect from "./plugins/redis/disconnect";
+// import httpConnect from "./plugins/http/connect";
+// import redisConnect from "./plugins/redis/connect";
+// import httpDisconnect from "./plugins/http/disconnect";
+// import redisDisconnect from "./plugins/redis/disconnect";
 import { saveLastRequest } from "./plugins/http/poll";
-import onConnect from "../../test/integration/clients/webSocket/plugins/onConnect";
 
-const connectors = [
-  { type: "http", sendToService: sendToHttpService },
-  {
-    type: "redis",
-    sendToService: sendToRedisService,
+type IWebSocketClientPlugin = {
+  handleRequest: (
+    request: WebSocketMessageRequest,
+    conn: ActiveWebSocketConnection,
+    webSocketConfig: WebSocketProxyConfig
+  ) => void;
+  connect: (
+    requestId: string,
+    conn: ActiveWebSocketConnection,
+    serviceConfig: any,
+    webSocketConfig: WebSocketProxyConfig
+  ) => void;
+  disconnect: (
+    requestId: string,
+    conn: ActiveWebSocketConnection,
+    serviceConfig: any,
+    webSocketConfig: WebSocketProxyConfig
+  ) => void;
+};
+
+const plugins: {
+  [name: string]: IWebSocketClientPlugin;
+} = {
+  http: {
+    handleRequest: httpPlugin.handleRequest,
+    connect: httpPlugin.connect,
+    disconnect: httpPlugin.disconnect,
   },
-];
+  redis: {
+    handleRequest: redisPlugin.handleRequest,
+    connect: redisPlugin.connect,
+    disconnect: redisPlugin.disconnect,
+  },
+};
 
 /*
   Make an HTTP request handler
@@ -156,9 +188,9 @@ function onMessage(
       ws.terminate();
     } else {
       const onConnect = routeConfig.onConnect || webSocketConfig.onConnect;
-      
+
       if (!conn.initialized && onConnect) {
-        // One check above is redundant. 
+        // One check above is redundant.
         // If conn is not initialized, onConnect must exist.
         // Treat the first message as the onConnect argument.
 
@@ -217,8 +249,8 @@ function onMessage(
             conn.lastRequest = onRequestResult.request;
           }
 
-          for (const connector of connectors) {
-            connector.sendToService(
+          for (const pluginName of Object.keys(plugins)) {
+            plugins[pluginName].handleRequest(
               onRequestResult.request,
               conn,
               webSocketConfig
@@ -238,11 +270,12 @@ async function sendConnectionRequestsToServices(
 ) {
   for (const service of Object.keys(routeConfig.services)) {
     const serviceConfig = routeConfig.services[service];
-    if (serviceConfig.type === "http") {
-      httpConnect(requestId, conn, serviceConfig, webSocketConfig);
-    } else if (serviceConfig.type === "redis") {
-      redisConnect(requestId, conn, serviceConfig, webSocketConfig);
-    }
+    plugins[serviceConfig.type].connect(
+      requestId,
+      conn,
+      serviceConfig,
+      webSocketConfig
+    );
   }
 }
 
@@ -264,11 +297,12 @@ function onClose(requestId: string, webSocketConfig: WebSocketProxyConfig) {
         webSocketConfig.routes[conn.route].services
       )) {
         const serviceConfig = webSocketConfig.routes[route].services[service];
-        if (serviceConfig.type === "redis") {
-          redisDisconnect(requestId, conn, serviceConfig, webSocketConfig);
-        } else if (serviceConfig.type === "http") {
-          httpDisconnect(requestId, conn, serviceConfig, webSocketConfig);
-        }
+        plugins[serviceConfig.type].disconnect(
+          requestId,
+          conn,
+          serviceConfig,
+          webSocketConfig
+        );
       }
     }
   };

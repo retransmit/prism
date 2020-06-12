@@ -5,7 +5,7 @@ import {
   RedisServiceHttpResponse,
   HttpRouteConfig,
   FetchedHttpHandlerResponse,
-} from "../../../../types/httpRequests";
+} from "../../../../types/httpClients";
 import { HttpProxyConfig, HttpResponse, HttpRequest } from "../../../../types";
 
 export default function processMessage(httpConfig: HttpProxyConfig) {

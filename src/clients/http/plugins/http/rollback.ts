@@ -5,7 +5,7 @@ import { HttpRequest, HttpProxyConfig } from "../../../../types";
 import * as configModule from "../../../../config";
 import responseIsError from "../../../../lib/http/responseIsError";
 import { makeHttpResponse } from "./makeHttpResponse";
-import { HttpRouteConfig } from "../../../../types/httpRequests";
+import { HttpRouteConfig } from "../../../../types/httpClients";
 import { makeGotOptions } from "../../../../lib/http/gotUtil";
 
 /*

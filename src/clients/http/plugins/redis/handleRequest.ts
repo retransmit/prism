@@ -13,12 +13,12 @@ import {
   HttpRouteConfig,
   RedisServiceHttpRequest,
   InvokeServiceResult,
-} from "../../../../types/httpRequests";
+} from "../../../../types/httpClients";
 
 /*
   Make Promises for Redis Services
 */
-export default function invokeServices(
+export default function handleRequest(
   requestId: string,
   request: HttpRequest,
   httpConfig: HttpProxyConfig

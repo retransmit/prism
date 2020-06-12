@@ -30,7 +30,7 @@
       "env": {
         "SOMEVAR": "1"
       },
-      "envFile": "${workspaceFolder}/.env"
+      // "envFile": "${workspaceFolder}/.env"
     },
     {
       "name": "Debug specific test",
@@ -43,14 +43,14 @@
         "--no-timeouts",
         "dist/test/test.js",
         "-g",
-        "gets websocket responses from redis backends"
+        "sends an HTTP GET request to the backend"
       ],
       "cwd": "${workspaceRoot}",
       "preLaunchTask": "build",
       "env": {
         "SOMEVAR": "1"
       },
-      "envFile": "${workspaceFolder}/.env"
+      // "envFile": "${workspaceFolder}/.env"
     }
   ]
 }

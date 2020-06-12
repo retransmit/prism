@@ -1,17 +1,17 @@
 import { ClientOpts } from "redis";
 import { IncomingHttpHeaders } from "http2";
-import { FetchedHttpHandlerResponse, HttpRouteConfig } from "./httpRequests";
+import { FetchedHttpHandlerResponse, HttpRouteConfig } from "./httpClients";
 import {
   WebSocketRouteConfig,
   WebSocketResponse,
   WebSocketMessageRequest,
-} from "./webSocketRequests";
+} from "./webSocketClients";
 
 export {
   HttpServiceHttpHandlerConfig,
   RedisServiceHttpHandlerConfig,
   HttpHandlerConfig,
-} from "./httpRequests";
+} from "./httpClients";
 1;
 
 export type HttpMethods = "GET" | "POST" | "PUT" | "DELETE" | "PATCH";

@@ -4,7 +4,7 @@ import {
   WebSocketResponse,
   RedisServiceWebSocketHandlerConfig,
   WebSocketNotConnectedRequest,
-} from "../../../../types/webSocketRequests";
+} from "../../../../types/webSocketClients";
 import { get as activeConnections } from "../../activeConnections";
 import respondToWebSocketClient from "../../respond";
 import { getPublisher } from "../../../../lib/redis/clients";

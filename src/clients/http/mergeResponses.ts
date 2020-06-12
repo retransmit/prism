@@ -4,7 +4,7 @@ import responseIsError from "../../lib/http/responseIsError";
 import {
   FetchedHttpHandlerResponse,
   HttpRouteConfig,
-} from "../../types/httpRequests";
+} from "../../types/httpClients";
 /*
   Merge received results into a final response
 */

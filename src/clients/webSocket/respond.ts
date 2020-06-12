@@ -1,4 +1,4 @@
-import { WebSocketResponse } from "../../types/webSocketRequests";
+import { WebSocketResponse } from "../../types/webSocketClients";
 import { ActiveWebSocketConnection } from "./activeConnections";
 import { WebSocketProxyConfig } from "../../types";
 

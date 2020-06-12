@@ -3,7 +3,7 @@ import "should";
 
 import onConnect from "./plugins/onConnect";
 import { TestAppInstance } from "../../../test";
-import redisSendToClient from "./plugins/redis/sendToClient";
+import redisSendToClient from "./plugins/redis/handleRequest";
 
 export default function run(app: TestAppInstance) {
   describe("WebSocket connections (integration)", () => {

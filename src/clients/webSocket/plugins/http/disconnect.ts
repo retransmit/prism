@@ -2,7 +2,7 @@ import { WebSocketProxyConfig, HttpRequest } from "../../../../types";
 import {
   HttpServiceWebSocketHandlerConfig,
   WebSocketDisconnectRequest,
-} from "../../../../types/webSocketRequests";
+} from "../../../../types/webSocketClients";
 import { makeGotOptions } from "../../../../lib/http/gotUtil";
 import got from "got/dist/source";
 import * as activeConnections from "../../activeConnections";

@@ -5,7 +5,7 @@ import { HttpRequest, HttpResponse } from ".";
 */
 export type WebSocketRouteConfig = {
   services: {
-    [key: string]: WebSocketHandlerConfig;
+    [key: string]: any;
   };
   onConnect?: (
     requestId: string,
@@ -65,10 +65,6 @@ export type RedisServiceWebSocketHandlerConfig = {
   requestChannel: string;
   numRequestChannels?: number;
 } & WebSocketHandlerConfigBase;
-
-export type WebSocketHandlerConfig =
-  | RedisServiceWebSocketHandlerConfig
-  | HttpServiceWebSocketHandlerConfig;
 
 /*
   WebSocket Requests and Responses

@@ -1,5 +1,5 @@
 import WebSocket from "ws";
-import { WebSocketMessageRequest } from "../../types/webSocketRequests";
+import { WebSocketMessageRequest } from "../../types/webSocketClients";
 
 export type ActiveWebSocketConnection = {
   initialized: boolean;

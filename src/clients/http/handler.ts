@@ -7,26 +7,44 @@ import {
   HttpResponse,
 } from "../../types";
 import randomId from "../../lib/random";
-import httpServiceInvoke from "./plugins/http/invokeServices";
-import httpServiceRollback from "./plugins/http/rollback";
-import redisServiceInvoke from "./plugins/redis/invokeServices";
-import redisServiceRollback from "./plugins/redis/rollback";
+
+import * as httpPlugin from "./plugins/http";
+import * as redisPlugin from "./plugins/redis";
+
 import mergeResponses from "./mergeResponses";
 import responseIsError from "../../lib/http/responseIsError";
+
 import {
   FetchedHttpHandlerResponse,
   InvokeServiceResult,
   HttpRouteConfig,
-} from "../../types/httpRequests";
+} from "../../types/httpClients";
 
-const connectors = [
-  { type: "http", invoke: httpServiceInvoke, rollback: httpServiceRollback },
-  {
-    type: "redis",
-    invoke: redisServiceInvoke,
-    rollback: redisServiceRollback,
+type IHttpClientPlugin = {
+  handleRequest: (
+    requestId: string,
+    request: HttpRequest,
+    httpConfig: HttpProxyConfig
+  ) => Promise<InvokeServiceResult>[];
+  rollback: (
+    requestId: string,
+    request: HttpRequest,
+    httpConfig: HttpProxyConfig
+  ) => void;
+};
+
+const plugins: {
+  [name: string]: IHttpClientPlugin;
+} = {
+  http: {
+    handleRequest: httpPlugin.handleRequest,
+    rollback: httpPlugin.rollback,
   },
-];
+  redis: {
+    handleRequest: redisPlugin.handleRequest,
+    rollback: redisPlugin.rollback,
+  },
+};
 
 /*
   Make an HTTP request handler
@@ -62,9 +80,13 @@ async function handler(
       const modifiedRequest = modResult.request;
 
       let promises: Promise<InvokeServiceResult>[] = [];
-      for (const connector of connectors) {
+      for (const pluginName of Object.keys(plugins)) {
         promises = promises.concat(
-          connector.invoke(requestId, modifiedRequest, httpConfig)
+          plugins[pluginName].handleRequest(
+            requestId,
+            modifiedRequest,
+            httpConfig
+          )
         );
       }
 
@@ -90,8 +112,8 @@ async function handler(
         if (onError) {
           onError(fetchedResponses, originalRequest);
         }
-        for (const connector of connectors) {
-          connector.rollback(requestId, modifiedRequest, httpConfig);
+        for (const pluginName of Object.keys(plugins)) {
+          plugins[pluginName].rollback(requestId, modifiedRequest, httpConfig);
         }
       }
 

@@ -3,7 +3,7 @@ import { TestAppInstance } from "../../../../../test";
 import random from "../../../../../../lib/random";
 import { startWithConfiguration } from "../../../../../..";
 import got from "got/dist/source";
-import { RedisServiceHttpRequest } from "../../../../../../types/httpRequests";
+import { RedisServiceHttpRequest } from "../../../../../../types/httpClients";
 import { getResponse } from "../../../../../utils/http";
 import { IAppConfig } from "../../../../../../types";
 

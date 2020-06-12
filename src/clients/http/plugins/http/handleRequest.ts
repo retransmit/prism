@@ -14,13 +14,13 @@ import {
   HttpRouteConfig,
   FetchedHttpHandlerResponse,
   InvokeServiceResult,
-} from "../../../../types/httpRequests";
+} from "../../../../types/httpClients";
 import { makeGotOptions } from "../../../../lib/http/gotUtil";
 
 /*
   Make Promises for Http Services
 */
-export default function invokeServices(
+export default function handleRequest(
   requestId: string,
   originalRequest: HttpRequest,
   httpConfig: HttpProxyConfig

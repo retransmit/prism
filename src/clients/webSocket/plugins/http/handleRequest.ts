@@ -4,7 +4,7 @@ import {
   HttpServiceWebSocketMessageRequest,
   WebSocketResponse,
   WebSocketMessageRequest,
-} from "../../../../types/webSocketRequests";
+} from "../../../../types/webSocketClients";
 import respondToWebSocketClient from "../../respond";
 import { makeGotOptions } from "../../../../lib/http/gotUtil";
 import got from "got/dist/source";

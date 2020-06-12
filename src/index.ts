@@ -23,6 +23,7 @@ import {
   init as wsInit,
   upgrade as wsUpgrade,
 } from "./clients/webSocket/handler";
+
 import { init as redisInit } from "./lib/redis/clients";
 import httpRedisServiceInit from "./clients/http/plugins/redis/init";
 import webSocketRedisServiceInit from "./clients/webSocket/plugins/redis/init";
