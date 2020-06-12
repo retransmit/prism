@@ -18,16 +18,16 @@ import WebSocket from "ws";
 import * as configModule from "./config";
 import { IAppConfig } from "./types";
 
-import createHttpRequestHandler from "./connections/http/handler";
+import createHttpRequestHandler from "./clients/http/handler";
 import {
   init as wsInit,
   upgrade as wsUpgrade,
-} from "./connections/webSocket/handler";
+} from "./clients/webSocket/handler";
 import { init as redisInit } from "./lib/redis/clients";
-import httpRedisServiceInit from "./connections/http/backends/redis/init";
-import websocketRedisServiceInit from "./connections/webSocket/backends/redis/init";
-import { init as activeRedisRequestsInit } from "./connections/http/backends/redis/activeRequests";
-import { init as activeConnectionsInit } from "./connections/webSocket/activeConnections";
+import httpRedisServiceInit from "./clients/http/plugins/redis/init";
+import websocketRedisServiceInit from "./clients/webSocket/plugins/redis/init";
+import { init as activeRedisRequestsInit } from "./clients/http/plugins/redis/activeRequests";
+import { init as activeConnectionsInit } from "./clients/webSocket/activeConnections";
 
 import { Server } from "http";
 import { readFileSync } from "fs";

@@ -1,9 +1,9 @@
 import "mocha";
 import "should";
 
-import onConnect from "./backends/onConnect";
+import onConnect from "./plugins/onConnect";
 import { TestAppInstance } from "../../../test";
-import redisSendToClient from "./backends/redis/sendToClient";
+import redisSendToClient from "./plugins/redis/sendToClient";
 
 export default function run(app: TestAppInstance) {
   describe("WebSocket connections (integration)", () => {

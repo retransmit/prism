@@ -6,7 +6,7 @@ import {
 import { makeGotOptions } from "../../../../lib/http/gotUtil";
 import got from "got/dist/source";
 import * as activeConnections from "../../activeConnections";
-import { makeHttpResponse } from "../../../http/backends/http/makeHttpResponse";
+import { makeHttpResponse } from "../../../http/plugins/http/makeHttpResponse";
 import responseIsError from "../../../../lib/http/responseIsError";
 
 export default async function disconnect(

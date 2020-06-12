@@ -9,7 +9,7 @@ import respondToWebSocketClient from "../../respond";
 import { makeGotOptions } from "../../../../lib/http/gotUtil";
 import got from "got/dist/source";
 import { makeWebSocketResponse } from "./makeWebSocketResponse";
-import { makeHttpResponse } from "../../../http/backends/http/makeHttpResponse";
+import { makeHttpResponse } from "../../../http/plugins/http/makeHttpResponse";
 import responseIsError from "../../../../lib/http/responseIsError";
 
 export function setupPolling(websocketConfig: WebSocketProxyConfig) {

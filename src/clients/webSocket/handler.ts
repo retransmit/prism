@@ -11,16 +11,16 @@ import {
 } from "./activeConnections";
 import { WebSocketRouteConfig } from "../../types/webSocketRequests";
 
-import sendToHttpService from "./backends/http/sendToService";
-import sendToRedisService from "./backends/redis/sendToService";
+import sendToHttpService from "./plugins/http/sendToService";
+import sendToRedisService from "./plugins/redis/sendToService";
 import { WebSocketProxyConfig } from "../../types";
 
-import httpConnect from "./backends/http/connect";
-import redisConnect from "./backends/redis/connect";
-import httpDisconnect from "./backends/http/disconnect";
-import redisDisconnect from "./backends/redis/disconnect";
-import { saveLastRequest } from "./backends/http/poll";
-import onConnect from "../../test/integration/connections/websocket/backends/onConnect";
+import httpConnect from "./plugins/http/connect";
+import redisConnect from "./plugins/redis/connect";
+import httpDisconnect from "./plugins/http/disconnect";
+import redisDisconnect from "./plugins/redis/disconnect";
+import { saveLastRequest } from "./plugins/http/poll";
+import onConnect from "../../test/integration/clients/webSocket/plugins/onConnect";
 
 const connectors = [
   { type: "http", sendToService: sendToHttpService },

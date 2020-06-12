@@ -7,10 +7,10 @@ import {
   HttpResponse,
 } from "../../types";
 import randomId from "../../lib/random";
-import httpServiceInvoke from "./backends/http/invokeServices";
-import httpServiceRollback from "./backends/http/rollback";
-import redisServiceInvoke from "./backends/redis/invokeServices";
-import redisServiceRollback from "./backends/redis/rollback";
+import httpServiceInvoke from "./plugins/http/invokeServices";
+import httpServiceRollback from "./plugins/http/rollback";
+import redisServiceInvoke from "./plugins/redis/invokeServices";
+import redisServiceRollback from "./plugins/redis/rollback";
 import mergeResponses from "./mergeResponses";
 import responseIsError from "../../lib/http/responseIsError";
 import {
