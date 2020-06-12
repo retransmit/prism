@@ -2,7 +2,7 @@ import { get as activeRequests, ActiveHttpRequest } from "./activeRequests";
 import {
   HttpRouteConfig,
   FetchedHttpRequestHandlerResponse,
-} from "../../../../types/httpConnection";
+} from "../../../../types/http";
 import { HttpProxyConfig } from "../../../../types";
 
 let isCleaningUp = false;

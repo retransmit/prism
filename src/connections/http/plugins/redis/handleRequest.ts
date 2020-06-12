@@ -13,7 +13,7 @@ import {
   HttpRouteConfig,
   RedisServiceHttpRequest,
   InvokeServiceResult,
-} from "../../../../types/httpConnection";
+} from "../../../../types/http";
 
 /*
   Make Promises for Redis Services

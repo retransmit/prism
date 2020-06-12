@@ -14,7 +14,7 @@ import {
   HttpRouteConfig,
   FetchedHttpRequestHandlerResponse,
   InvokeServiceResult,
-} from "../../../../types/httpConnection";
+} from "../../../../types/http";
 import { makeGotOptions } from "../../../../lib/http/gotUtil";
 
 /*

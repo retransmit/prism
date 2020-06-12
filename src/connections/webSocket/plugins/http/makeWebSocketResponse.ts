@@ -1,5 +1,5 @@
 import { Response } from "got/dist/source/core";
-import { WebSocketResponse } from "../../../../types/webSocketConnection";
+import { WebSocketResponse } from "../../../../types/webSocket";
 
 export function makeWebSocketResponse(
   serverResponse: Response<string>,

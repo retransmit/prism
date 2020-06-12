@@ -6,7 +6,7 @@ import {
   RedisServiceWebSocketRequest,
   RedisServiceWebSocketMessageRequest,
   WebSocketMessageRequest,
-} from "../../../../types/webSocketConnection";
+} from "../../../../types/webSocket";
 import * as configModule from "../../../../config";
 import { ActiveWebSocketConnection } from "../../activeConnections";
 import respondToWebSocketClient from "../../respond";

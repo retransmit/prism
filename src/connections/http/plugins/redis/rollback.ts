@@ -5,7 +5,7 @@ import { getPublisher } from "../../../../lib/redis/clients";
 import {
   HttpRouteConfig,
   RedisServiceHttpRequest,
-} from "../../../../types/httpConnection";
+} from "../../../../types/http";
 
 /*
   Make Promises for Redis Services.

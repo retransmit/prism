@@ -12,7 +12,7 @@ import {
 import {
   WebSocketRouteConfig,
   WebSocketMessageRequest,
-} from "../../types/webSocketConnection";
+} from "../../types/webSocket";
 
 import * as httpPlugin from "./plugins/http";
 import * as redisPlugin from "./plugins/redis";

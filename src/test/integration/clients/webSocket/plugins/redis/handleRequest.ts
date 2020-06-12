@@ -3,7 +3,7 @@ import { TestAppInstance } from "../../../../../test";
 import random from "../../../../../../lib/random";
 import { startWithConfiguration } from "../../../../../..";
 import { createClient } from "redis";
-import { RedisServiceWebSocketConnectRequest } from "../../../../../../types/webSocketConnection";
+import { RedisServiceWebSocketConnectRequest } from "../../../../../../types/webSocket";
 import { IAppConfig } from "../../../../../../types";
 
 export default async function (app: TestAppInstance) {

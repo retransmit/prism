@@ -19,7 +19,7 @@ import {
   InvokeServiceResult,
   HttpRouteConfig,
   IHttpRequestHandlerPlugin
-} from "../../types/httpConnection";
+} from "../../types/http";
 
 const plugins: {
   [name: string]: IHttpRequestHandlerPlugin;
