@@ -9,6 +9,7 @@ import WebSocket from "ws";
 import makeHandler from "./handler";
 import { IncomingMessage } from "http";
 import { Socket } from "net";
+import { init as activeConnectionsInit } from "./activeConnections";
 
 const plugins: {
   [name: string]: IWebSocketRequestHandlerPlugin;
@@ -35,20 +36,28 @@ export default async function init(
     [key: string]: WebSocket.Server;
   } = {};
 
-  const webSocketConfig = config.webSocket;
-  if (webSocketConfig) {
+  if (config.webSocket) {
     httpServer.on("upgrade", makeUpgrade(webSocketServers));
+
+    // Load other plugins
+    if (config.webSocket.plugins) {
+      for (const pluginName of Object.keys(config.webSocket.plugins)) {
+        plugins[pluginName] = require(config.webSocket.plugins[pluginName].path);
+      }
+    }
 
     for (const pluginName of Object.keys(plugins)) {
       await plugins[pluginName].init(config);
     }
 
-    for (const route of Object.keys(webSocketConfig.routes)) {
-      const routeConfig = webSocketConfig.routes[route];
+    for (const route of Object.keys(config.webSocket.routes)) {
+      const routeConfig = config.webSocket.routes[route];
       const wss = new WebSocket.Server({ noServer: true });
       webSocketServers[route] = wss;
-      setupWebSocketHandling(wss, route, routeConfig, webSocketConfig);
+      setupWebSocketHandling(wss, route, routeConfig, config.webSocket);
     }
+
+    activeConnectionsInit();
   }
 
   return Object.keys(webSocketServers).reduce(

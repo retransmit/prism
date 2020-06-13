@@ -64,6 +64,11 @@ export type HttpProxyConfig = {
     responses: FetchedHttpRequestHandlerResponse[],
     request: HttpRequest
   ) => any;
+  plugins?: {
+    [pluginName: string]: {
+      path: string;
+    };
+  };
 };
 
 export type WebSocketProxyConfig = {
@@ -90,6 +95,11 @@ export type WebSocketProxyConfig = {
     requestId: string,
     response: WebSocketResponse
   ) => Promise<WebSocketResponse>;
+  plugins?: {
+    [pluginName: string]: {
+      path: string;
+    };
+  };
 };
 
 /*

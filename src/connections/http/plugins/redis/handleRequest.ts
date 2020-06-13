@@ -7,13 +7,13 @@ import {
 
 import { get as activeRequests } from "./activeRequests";
 import * as configModule from "../../../../config";
-import { getPublisher } from "../../../../lib/redis/clients";
 import { getChannelForService } from "../../../../lib/redis/getChannelForService";
 import {
   HttpRouteConfig,
   RedisServiceHttpRequest,
   InvokeServiceResult,
 } from "../../../../types/http";
+import { publish } from "./publish";
 
 /*
   Make Promises for Redis Services
@@ -33,7 +33,10 @@ export default function handleRequest(
   return Object.keys(routeConfig.services)
     .map(
       (service) =>
-        [service, routeConfig.services[service]] as [string, HttpRequestHandlerConfig]
+        [service, routeConfig.services[service]] as [
+          string,
+          HttpRequestHandlerConfig
+        ]
     )
     .filter(isRedisServiceConfig)
     .map(
@@ -79,7 +82,7 @@ export default function handleRequest(
             if (serviceConfig.awaitResponse !== false) {
               if (!alreadyPublishedChannels.includes(requestChannel)) {
                 alreadyPublishedChannels.push(requestChannel);
-                getPublisher().publish(requestChannel, onRequestResult.request);
+                publish(requestChannel, onRequestResult.request);
               }
               activeRequests().set(`${requestId}+${service}`, {
                 id: requestId,
@@ -91,7 +94,7 @@ export default function handleRequest(
               });
             } else {
               if (!alreadyPublishedChannels.includes(requestChannel)) {
-                getPublisher().publish(requestChannel, onRequestResult.request);
+                publish(requestChannel, onRequestResult.request);
               }
               success({ skip: true });
             }

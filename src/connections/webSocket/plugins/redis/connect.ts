@@ -5,9 +5,9 @@ import {
   ActiveWebSocketConnection,
 } from "../../../../types/webSocket";
 import * as configModule from "../../../../config";
-import { getPublisher } from "../../../../lib/redis/clients";
 import { getChannelForService } from "../../../../lib/redis/getChannelForService";
 import respondToWebSocketClient from "../../respond";
+import { publish } from "./publish";
 
 export default async function connect(
   requestId: string,
@@ -38,6 +38,6 @@ export default async function connect(
       respondToWebSocketClient(requestId, onRequestResult.response, conn, webSocketConfig);
     }
   } else {
-    getPublisher().publish(channel, onRequestResult.request);
+    publish(channel, onRequestResult.request);
   }
 }

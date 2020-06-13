@@ -4,8 +4,8 @@ import {
   WebSocketDisconnectRequest,
   ActiveWebSocketConnection,
 } from "../../../../types/webSocket";
-import { getPublisher } from "../../../../lib/redis/clients";
 import { getChannelForService } from "../../../../lib/redis/getChannelForService";
+import { publish } from "./publish";
 
 export default async function disconnect(
   requestId: string,
@@ -29,6 +29,6 @@ export default async function disconnect(
     : { handled: false as false, request: JSON.stringify(request) };
 
   if (!onRequestResult.handled) {
-    getPublisher().publish(channel, onRequestResult.request);
+    publish(channel, onRequestResult.request);
   }
 }

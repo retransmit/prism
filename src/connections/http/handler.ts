@@ -48,6 +48,13 @@ export type CreateHttpRequestHandler = (
 
 export default async function init(config: IAppConfig) {
   if (config.http) {
+    // Load other plugins.
+    if (config.http.plugins) {
+      for (const pluginName of Object.keys(config.http.plugins)) {
+        plugins[pluginName] = require(config.http.plugins[pluginName].path);
+      }
+    }
+
     for (const pluginName of Object.keys(plugins)) {
       await plugins[pluginName].init(config);
     }

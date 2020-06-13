@@ -7,8 +7,8 @@ import {
 } from "../../../../types/webSocket";
 import { get as activeConnections } from "../../activeConnections";
 import respondToWebSocketClient from "../../respond";
-import { getPublisher } from "../../../../lib/redis/clients";
 import { getChannelForService } from "../../../../lib/redis/getChannelForService";
+import { publish } from "./publish";
 
 export default function processMessage(webSocketConfig: WebSocketProxyConfig) {
   return async function processMessageImpl(
@@ -46,7 +46,7 @@ export default function processMessage(webSocketConfig: WebSocketProxyConfig) {
         serviceConfig.numRequestChannels
       );
 
-      getPublisher().publish(requestChannel, JSON.stringify(webSocketRequest));
+      publish(requestChannel, JSON.stringify(webSocketRequest));
     }
   };
 }

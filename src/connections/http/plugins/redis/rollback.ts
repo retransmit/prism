@@ -1,11 +1,11 @@
 import { HttpRequest, HttpProxyConfig } from "../../../../types";
 import * as configModule from "../../../../config";
 import { getChannelForService } from "../../../../lib/redis/getChannelForService";
-import { getPublisher } from "../../../../lib/redis/clients";
 import {
   HttpRouteConfig,
   RedisServiceHttpRequest,
 } from "../../../../types/http";
+import { publish } from "./publish";
 
 /*
   Make Promises for Redis Services.
@@ -48,7 +48,7 @@ export default async function rollback(
         if (!onRollbackRequestResult.handled) {
           alreadyPublishedChannels.push(requestChannel);
 
-          getPublisher().publish(
+          publish(
             requestChannel,
             onRollbackRequestResult.request
           );

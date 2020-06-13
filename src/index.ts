@@ -14,12 +14,6 @@ import { IAppConfig } from "./types";
 import initHttpRequestHandling from "./connections/http/handler";
 import initWebSocketRequestHandling from "./connections/webSocket";
 
-import { init as redisInit } from "./lib/redis/clients";
-import httpRedisServiceInit from "./connections/http/plugins/redis/init";
-import webSocketRedisServiceInit from "./connections/webSocket/plugins/redis/init";
-import { init as activeRedisRequestsInit } from "./connections/http/plugins/redis/activeRequests";
-import { init as activeConnectionsInit } from "./connections/webSocket/activeConnections";
-
 import { Server } from "http";
 import { readFileSync } from "fs";
 import random from "./lib/random";
@@ -38,49 +32,39 @@ export async function startApp(
   instanceId: string | undefined,
   configFile: string
 ) {
-  const appConfig: IAppConfig = require(configFile);
-  return await startWithConfiguration(port, instanceId, appConfig);
+  const config: IAppConfig = require(configFile);
+  return await startWithConfiguration(port, instanceId, config);
 }
 
 export async function startWithConfiguration(
   port: number | undefined,
   instanceId: string | undefined,
-  appConfig: IAppConfig
+  config: IAppConfig
 ): Promise<{
   httpServer: Server;
   webSocketServers: WebSocket.Server[];
   instanceId: string;
 }> {
   if (instanceId) {
-    appConfig.instanceId = instanceId;
+    config.instanceId = instanceId;
   }
 
-  if (!appConfig.instanceId || appConfig.instanceId.trim() === "") {
-    appConfig.instanceId = random();
+  if (!config.instanceId || config.instanceId.trim() === "") {
+    config.instanceId = random();
   }
 
   // People are going to mistype 'webSocket' as all lowercase.
-  if ((appConfig as any).websocket !== undefined) {
-    appConfig.webSocket = (appConfig as any).websocket;
-    (appConfig as any).websocket = undefined;
+  if ((config as any).websocket !== undefined) {
+    config.webSocket = (config as any).websocket;
+    (config as any).websocket = undefined;
   }
 
   // Set up the config
-  configModule.set(appConfig);
-
-  // Init redis
-  redisInit();
-  activeRedisRequestsInit();
-  activeConnectionsInit();
-
-  await httpRedisServiceInit(appConfig);
-  await webSocketRedisServiceInit(appConfig);
-
-  const config = configModule.get();
+  configModule.set(config);
 
   // Get routes to handle
-  const httpRequestHandler = await initHttpRequestHandling(appConfig);
-  
+  const httpRequestHandler = await initHttpRequestHandling(config);
+
   // Create the HttpServer
   let httpServer: HttpServer | HttpsServer;
   if (config.useHttps) {
@@ -96,11 +80,8 @@ export async function startWithConfiguration(
   let webSocketServers: WebSocket.Server[] = [];
 
   // Attach webSocket servers
-  webSocketServers = await initWebSocketRequestHandling(
-    httpServer,
-    appConfig
-  );
-  
+  webSocketServers = await initWebSocketRequestHandling(httpServer, config);
+
   if (port) {
     httpServer.listen(port);
   } else {
@@ -116,7 +97,7 @@ export async function startWithConfiguration(
   return {
     httpServer,
     webSocketServers: webSocketServers,
-    instanceId: appConfig.instanceId,
+    instanceId: config.instanceId,
   };
 }
 

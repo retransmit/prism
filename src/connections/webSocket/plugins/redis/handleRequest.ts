@@ -1,6 +1,4 @@
-import WebSocket from "ws";
 import { WebSocketProxyConfig } from "../../../../types";
-import { getPublisher } from "../../../../lib/redis/clients";
 import { getChannelForService } from "../../../../lib/redis/getChannelForService";
 import {
   RedisServiceWebSocketRequest,
@@ -10,6 +8,7 @@ import {
 } from "../../../../types/webSocket";
 import * as configModule from "../../../../config";
 import respondToWebSocketClient from "../../respond";
+import { publish } from "./publish";
 
 export default async function sendToService(
   request: WebSocketMessageRequest,
@@ -46,7 +45,7 @@ export default async function sendToService(
       } else {
         if (!alreadyPublishedChannels.includes(requestChannel)) {
           alreadyPublishedChannels.push(requestChannel);
-          getPublisher().publish(
+          publish(
             requestChannel,
             JSON.stringify(onRequestResult.request)
           );
