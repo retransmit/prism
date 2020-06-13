@@ -2,10 +2,10 @@ import { WebSocketProxyConfig } from "../../../../types";
 import {
   RedisServiceWebSocketRequestHandlerConfig,
   WebSocketDisconnectRequest,
+  ActiveWebSocketConnection,
 } from "../../../../types/webSocket";
 import { getPublisher } from "../../../../lib/redis/clients";
 import { getChannelForService } from "../../../../lib/redis/getChannelForService";
-import { ActiveWebSocketConnection } from "../../activeConnections";
 
 export default async function disconnect(
   requestId: string,

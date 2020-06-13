@@ -1,18 +1,18 @@
-import * as configModule from "../../../../config";
-import { getSubscriber } from "../../../../lib/redis/clients";
-import { WebSocketProxyConfig, IAppConfig } from "../../../../types";
+import redis = require("redis");
 import processMessage from "./processMessage";
+import { IAppConfig } from "../../../../types";
 
-export default async function init(appConfig: IAppConfig) {
-  const config = configModule.get();
+let subscriber: redis.RedisClient;
 
+export default async function init(config: IAppConfig) {
   // Setup subscriptions
   const alreadySubscribed: string[] = [];
 
   if (config.webSocket?.redis) {
-    const webSocketClientSubscriber = getSubscriber();
-    webSocketClientSubscriber.on("message", processMessage(config.webSocket));
-    webSocketClientSubscriber.subscribe(
+    subscriber = redis.createClient(config.redis?.options);
+
+    subscriber.on("message", processMessage(config.webSocket));
+    subscriber.subscribe(
       `${config.webSocket.redis.responseChannel}.${config.instanceId}`
     );
   }

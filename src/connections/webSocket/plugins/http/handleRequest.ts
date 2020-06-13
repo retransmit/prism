@@ -1,9 +1,9 @@
 import { WebSocketProxyConfig, HttpRequest } from "../../../../types";
-import { ActiveWebSocketConnection } from "../../activeConnections";
 import {
   HttpServiceWebSocketMessageRequest,
   WebSocketResponse,
   WebSocketMessageRequest,
+  ActiveWebSocketConnection,
 } from "../../../../types/webSocket";
 import respondToWebSocketClient from "../../respond";
 import { makeGotOptions } from "../../../../lib/http/gotUtil";

@@ -1,5 +1,4 @@
-import { WebSocketResponse } from "../../types/webSocket";
-import { ActiveWebSocketConnection } from "./activeConnections";
+import { WebSocketResponse, ActiveWebSocketConnection } from "../../types/webSocket";
 import { WebSocketProxyConfig } from "../../types";
 
 export default async function respondToWebSocketClient(

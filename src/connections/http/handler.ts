@@ -1,4 +1,8 @@
-import { IRouterContext } from "koa-router";
+import Koa = require("koa");
+import bodyParser = require("koa-bodyparser");
+import Router, { IRouterContext } from "koa-router";
+import { IncomingMessage } from "http";
+import { ServerResponse } from "http";
 import {
   HttpMethods,
   HttpProxyConfig,
@@ -18,8 +22,10 @@ import {
   FetchedHttpRequestHandlerResponse,
   InvokeServiceResult,
   HttpRouteConfig,
-  IHttpRequestHandlerPlugin
+  IHttpRequestHandlerPlugin,
 } from "../../types/http";
+
+const cors = require("@koa/cors");
 
 const plugins: {
   [name: string]: IHttpRequestHandlerPlugin;
@@ -40,17 +46,60 @@ export type CreateHttpRequestHandler = (
   method: HttpMethods
 ) => (ctx: IRouterContext) => void;
 
-export default async function init(
-  config: IAppConfig
-): Promise<CreateHttpRequestHandler> {
-  for (const pluginName of Object.keys(plugins)) {
-    await plugins[pluginName].init(config);
-  }
+export default async function init(config: IAppConfig) {
+  if (config.http) {
+    for (const pluginName of Object.keys(plugins)) {
+      await plugins[pluginName].init(config);
+    }
 
-  return function createHandler(method: HttpMethods) {
-    return async function httpHandler(ctx: IRouterContext) {
-      return await handler(ctx, method, config.http as HttpProxyConfig);
+    const router = new Router();
+
+    for (const route of Object.keys(config.http.routes)) {
+      const routeConfig = config.http.routes[route];
+
+      if (routeConfig["GET"]) {
+        router.get(route, createHandler("GET", config));
+      }
+
+      if (routeConfig["POST"]) {
+        router.post(route, createHandler("POST", config));
+      }
+
+      if (routeConfig["PUT"]) {
+        router.put(route, createHandler("PUT", config));
+      }
+
+      if (routeConfig["DELETE"]) {
+        router.del(route, createHandler("DELETE", config));
+      }
+
+      if (routeConfig["PATCH"]) {
+        router.patch(route, createHandler("PATCH", config));
+      }
+    }
+
+    const koaApp = new Koa();
+
+    if (config.cors) {
+      koaApp.use(cors(config.cors));
+    }
+    koaApp.use(bodyParser());
+    koaApp.use(router.routes());
+    koaApp.use(router.allowedMethods());
+    const koaRequestHandler = koaApp.callback();
+
+    return function httpRequestHandler(
+      req: IncomingMessage,
+      res: ServerResponse
+    ) {
+      koaRequestHandler(req, res);
     };
+  }
+}
+
+function createHandler(method: HttpMethods, config: IAppConfig) {
+  return async function httpHandler(ctx: IRouterContext) {
+    return await handler(ctx, method, config.http as HttpProxyConfig);
   };
 }
 

@@ -1,4 +1,5 @@
-import { HttpRequest, HttpResponse } from ".";
+import { HttpRequest, HttpResponse, WebSocketProxyConfig, IAppConfig } from ".";
+import WebSocket from "ws";
 
 /*
   Web Socket Route Config
@@ -138,3 +139,34 @@ export type RedisServiceWebSocketRequest =
 export type WebSocketRequest =
   | HttpServiceWebSocketRequest
   | RedisServiceWebSocketRequest;
+
+export type ActiveWebSocketConnection = {
+  initialized: boolean;
+  route: string;
+  webSocket: WebSocket;
+  ip: string | undefined;
+  port: number | undefined;
+  saveLastRequest: boolean;
+  lastRequest: WebSocketMessageRequest | undefined;
+};
+
+export type IWebSocketRequestHandlerPlugin = {
+  init: (config: IAppConfig) => any;
+  handleRequest: (
+    request: WebSocketMessageRequest,
+    conn: ActiveWebSocketConnection,
+    webSocketConfig: WebSocketProxyConfig
+  ) => void;
+  connect: (
+    requestId: string,
+    conn: ActiveWebSocketConnection,
+    serviceConfig: any,
+    webSocketConfig: WebSocketProxyConfig
+  ) => void;
+  disconnect: (
+    requestId: string,
+    conn: ActiveWebSocketConnection,
+    serviceConfig: any,
+    webSocketConfig: WebSocketProxyConfig
+  ) => void;
+};

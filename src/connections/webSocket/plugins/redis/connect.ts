@@ -2,11 +2,11 @@ import { WebSocketProxyConfig } from "../../../../types";
 import {
   RedisServiceWebSocketRequestHandlerConfig,
   RedisServiceWebSocketConnectRequest,
+  ActiveWebSocketConnection,
 } from "../../../../types/webSocket";
 import * as configModule from "../../../../config";
 import { getPublisher } from "../../../../lib/redis/clients";
 import { getChannelForService } from "../../../../lib/redis/getChannelForService";
-import { ActiveWebSocketConnection } from "../../activeConnections";
 import respondToWebSocketClient from "../../respond";
 
 export default async function connect(

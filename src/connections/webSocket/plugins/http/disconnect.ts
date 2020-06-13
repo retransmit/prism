@@ -2,16 +2,16 @@ import { WebSocketProxyConfig, HttpRequest } from "../../../../types";
 import {
   HttpServiceWebSocketRequestHandlerConfig,
   WebSocketDisconnectRequest,
+  ActiveWebSocketConnection,
 } from "../../../../types/webSocket";
 import { makeGotOptions } from "../../../../lib/http/gotUtil";
 import got from "got/dist/source";
-import * as activeConnections from "../../activeConnections";
 import { makeHttpResponse } from "../../../http/plugins/http/makeHttpResponse";
 import responseIsError from "../../../../lib/http/responseIsError";
 
 export default async function disconnect(
   requestId: string,
-  conn: activeConnections.ActiveWebSocketConnection,
+  conn: ActiveWebSocketConnection,
   serviceConfig: HttpServiceWebSocketRequestHandlerConfig,
   webSocketConfig: WebSocketProxyConfig
 ) {

@@ -6,9 +6,9 @@ import {
   RedisServiceWebSocketRequest,
   RedisServiceWebSocketMessageRequest,
   WebSocketMessageRequest,
+  ActiveWebSocketConnection,
 } from "../../../../types/webSocket";
 import * as configModule from "../../../../config";
-import { ActiveWebSocketConnection } from "../../activeConnections";
 import respondToWebSocketClient from "../../respond";
 
 export default async function sendToService(

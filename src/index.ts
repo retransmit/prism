@@ -1,13 +1,6 @@
 #!/usr/bin/env node
-
-import Koa = require("koa");
-import Router = require("koa-router");
-import bodyParser = require("koa-bodyparser");
 import yargs = require("yargs");
-const cors = require("@koa/cors");
 
-import { IncomingMessage } from "http";
-import { ServerResponse } from "http";
 import { createServer as httpCreateServer } from "http";
 import { Server as HttpServer } from "http";
 import { createServer as httpsCreateServer } from "https";
@@ -18,12 +11,8 @@ import WebSocket from "ws";
 import * as configModule from "./config";
 import { IAppConfig } from "./types";
 
-import initHttpRequestHandlers from "./connections/http/handler";
-
-import {
-  init as wsInit,
-  upgrade as wsUpgrade,
-} from "./connections/webSocket/handler";
+import initHttpRequestHandling from "./connections/http/handler";
+import initWebSocketRequestHandling from "./connections/webSocket";
 
 import { init as redisInit } from "./lib/redis/clients";
 import httpRedisServiceInit from "./connections/http/plugins/redis/init";
@@ -87,52 +76,12 @@ export async function startWithConfiguration(
   await httpRedisServiceInit(appConfig);
   await webSocketRedisServiceInit(appConfig);
 
-  // Set up routes
-  const router = new Router();
-
   const config = configModule.get();
 
-  if (config.http) {
-    const createHttpRequestHandler = await initHttpRequestHandlers(appConfig);
-    for (const route of Object.keys(config.http.routes)) {
-      const routeConfig = config.http.routes[route];
-
-      if (routeConfig["GET"]) {
-        router.get(route, createHttpRequestHandler("GET"));
-      }
-
-      if (routeConfig["POST"]) {
-        router.post(route, createHttpRequestHandler("POST"));
-      }
-
-      if (routeConfig["PUT"]) {
-        router.put(route, createHttpRequestHandler("PUT"));
-      }
-
-      if (routeConfig["DELETE"]) {
-        router.del(route, createHttpRequestHandler("DELETE"));
-      }
-
-      if (routeConfig["PATCH"]) {
-        router.patch(route, createHttpRequestHandler("PATCH"));
-      }
-    }
-  }
-
-  // Start app
-  const koaApp = new Koa();
-  if (config.cors) {
-    koaApp.use(cors(config.cors));
-  }
-  koaApp.use(bodyParser());
-  koaApp.use(router.routes());
-  koaApp.use(router.allowedMethods());
-  const koaRequestHandler = koaApp.callback();
-
-  function httpRequestHandler(req: IncomingMessage, res: ServerResponse) {
-    koaRequestHandler(req, res);
-  }
-
+  // Get routes to handle
+  const httpRequestHandler = await initHttpRequestHandling(appConfig);
+  
+  // Create the HttpServer
   let httpServer: HttpServer | HttpsServer;
   if (config.useHttps) {
     const options = {
@@ -146,11 +95,12 @@ export async function startWithConfiguration(
 
   let webSocketServers: WebSocket.Server[] = [];
 
-  if (config.webSocket) {
-    webSocketServers = wsInit();
-    httpServer.on("upgrade", wsUpgrade);
-  }
-
+  // Attach webSocket servers
+  webSocketServers = await initWebSocketRequestHandling(
+    httpServer,
+    appConfig
+  );
+  
   if (port) {
     httpServer.listen(port);
   } else {
