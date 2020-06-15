@@ -5,7 +5,7 @@ import {
   ActiveWebSocketConnection,
 } from "../../../../types/webSocket";
 import { makeGotOptions } from "../../../../lib/http/gotUtil";
-import got from "got/dist/source";
+import got from "got";
 import respondToWebSocketClient from "../../respond";
 import { makeHttpResponse } from "../../../http/plugins/http/makeHttpResponse";
 import responseIsError from "../../../../lib/http/responseIsError";

@@ -7,7 +7,7 @@ import {
 } from "../../../../types/webSocket";
 import respondToWebSocketClient from "../../respond";
 import { makeGotOptions } from "../../../../lib/http/gotUtil";
-import got from "got/dist/source";
+import got from "got";
 import { makeWebSocketResponse } from "./makeWebSocketResponse";
 
 export default async function sendToService(

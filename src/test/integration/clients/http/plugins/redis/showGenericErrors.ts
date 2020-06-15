@@ -3,7 +3,7 @@ import random from "../../../../../../lib/random";
 import { startWithConfiguration } from "../../../../../..";
 import { createClient } from "redis";
 import { getResponse } from "../../../../../utils/http";
-import got from "got/dist/source";
+import got from "got";
 import { IAppConfig } from "../../../../../../types";
 
 const genericErrorsForRoute = [

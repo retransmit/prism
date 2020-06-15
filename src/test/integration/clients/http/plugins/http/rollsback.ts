@@ -4,7 +4,7 @@ import { closeHttpServer } from "../../../../../utils/http";
 import { Server } from "http";
 import { TestAppInstance } from "../../../../../test";
 import random from "../../../../../../lib/random";
-import got from "got/dist/source";
+import got from "got";
 import { IAppConfig } from "../../../../../../types";
 
 export default async function (app: TestAppInstance) {

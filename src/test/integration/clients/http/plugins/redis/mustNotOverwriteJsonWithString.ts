@@ -1,5 +1,5 @@
 import { TestAppInstance } from "../../../../../test";
-import got from "got/dist/source";
+import got from "got";
 import { createClient } from "redis";
 import { startWithConfiguration } from "../../../../../..";
 import random from "../../../../../../lib/random";
