@@ -1,5 +1,5 @@
 import { startWithConfiguration } from "../../../../../..";
-import { startBackends } from "../../../../../utils/http";
+import { startBackends, getResponse } from "../../../../../utils/http";
 import { closeHttpServer } from "../../../../../utils/http";
 import { TestAppInstance } from "../../../../../test";
 import random from "../../../../../../lib/random";
@@ -7,22 +7,20 @@ import got from "got";
 import { IAppConfig } from "../../../../../../types";
 
 export default async function (app: TestAppInstance) {
-  it(`does not merge ignored results`, async () => {
+  it(`maps fields`, async () => {
     const config: IAppConfig = {
       instanceId: random(),
       http: {
         routes: {
           "/users": {
-            GET: {
+            POST: {
               services: {
                 userservice: {
                   type: "http" as "http",
                   url: "http://localhost:6666/users",
-                },
-                messagingservice: {
-                  type: "http" as "http",
-                  url: "http://localhost:6667/messages",
-                  merge: false,
+                  fields: {
+                    username: "uname",
+                  },
                 },
               },
             },
@@ -44,25 +42,9 @@ export default async function (app: TestAppInstance) {
         routes: [
           {
             path: "/users",
-            method: "GET",
-            response: {
-              body: {
-                user: 1,
-              },
-            },
-          },
-        ],
-      },
-      {
-        port: 6667,
-        routes: [
-          {
-            path: "/messages",
-            method: "GET",
-            response: {
-              body: {
-                message: "hello world",
-              },
+            method: "POST",
+            handleResponse: async (ctx) => {
+              ctx.body = `Hello ${ctx.request.body.uname}`;
             },
           },
         ],
@@ -75,14 +57,13 @@ export default async function (app: TestAppInstance) {
     };
 
     const { port } = app.servers.httpServer.address() as any;
-    const serverResponse = await got(`http://localhost:${port}/users`, {
-      method: "GET",
+    const promisedResponse = got(`http://localhost:${port}/users`, {
+      method: "POST",
+      json: { username: "jeswin" },
       retry: 0,
     });
-
+    const serverResponse = await getResponse(promisedResponse);
     serverResponse.statusCode.should.equal(200);
-    JSON.parse(serverResponse.body).should.deepEqual({
-      user: 1,
-    });
+    serverResponse.body.should.equal("Hello jeswin");
   });
 }

@@ -39,23 +39,27 @@ export default async function (app: TestAppInstance) {
     const backendApps = startBackends([
       {
         port: 6666,
-        routes: ["GET"].map((method) => ({
-          path: "/users",
-          method,
-          response: {
-            body: {
-              user: 1,
+        routes: [
+          {
+            path: "/users",
+            method: "GET",
+            response: {
+              body: {
+                user: 1,
+              },
             },
           },
-        })),
+        ],
       },
       {
         port: 6667,
-        routes: ["GET"].map((method) => ({
-          path: "/messages",
-          method,
-          response: { body: "hello world" },
-        })),
+        routes: [
+          {
+            path: "/messages",
+            method: "GET",
+            response: { body: "hello world" },
+          },
+        ],
       },
     ]);
 

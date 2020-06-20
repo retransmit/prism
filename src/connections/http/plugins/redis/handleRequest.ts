@@ -14,6 +14,7 @@ import {
   InvokeServiceResult,
 } from "../../../../types/http";
 import { publish } from "./publish";
+import mapFields from "../../mapFields";
 
 /*
   Make Promises for Redis Services
@@ -42,14 +43,17 @@ export default function handleRequest(
     .map(
       ([service, serviceConfig]) =>
         new Promise(async (success) => {
+          const httpRequestWithMappedFields = mapFields(request, serviceConfig);
+          
           const redisHttpRequest: RedisServiceHttpRequest = {
             id: requestId,
-            request: request,
+            request: httpRequestWithMappedFields,
             responseChannel: `${httpConfig.redis?.responseChannel}.${config.instanceId}`,
             type: "request",
           };
 
           const timeBeforeOnRequestResult = Date.now();
+
           const onRequestResult = serviceConfig.onRequest
             ? await serviceConfig.onRequest(redisHttpRequest)
             : {

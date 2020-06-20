@@ -87,6 +87,9 @@ export type HttpRequestHandlerConfigBase = {
   merge?: boolean;
   timeout?: number;
   mergeField?: string;
+  fields?: {
+    [name: string]: string;
+  };
 };
 
 export type HttpServiceHttpRequestHandlerConfig = {

@@ -64,36 +64,36 @@ export default async function init(config: IAppConfig) {
     for (const route of Object.keys(config.http.routes)) {
       const routeConfig = config.http.routes[route];
 
-      if (routeConfig["GET"]) {
+      if (routeConfig.GET) {
         router.get(route, createHandler("GET", config));
       }
 
-      if (routeConfig["POST"]) {
+      if (routeConfig.POST) {
         router.post(route, createHandler("POST", config));
       }
 
-      if (routeConfig["PUT"]) {
+      if (routeConfig.PUT) {
         router.put(route, createHandler("PUT", config));
       }
 
-      if (routeConfig["DELETE"]) {
+      if (routeConfig.DELETE) {
         router.del(route, createHandler("DELETE", config));
       }
 
-      if (routeConfig["PATCH"]) {
+      if (routeConfig.PATCH) {
         router.patch(route, createHandler("PATCH", config));
       }
     }
 
-    const koaApp = new Koa();
+    const koa = new Koa();
 
     if (config.cors) {
-      koaApp.use(cors(config.cors));
+      koa.use(cors(config.cors));
     }
-    koaApp.use(bodyParser());
-    koaApp.use(router.routes());
-    koaApp.use(router.allowedMethods());
-    const koaRequestHandler = koaApp.callback();
+    koa.use(bodyParser());
+    koa.use(router.routes());
+    koa.use(router.allowedMethods());
+    const koaRequestHandler = koa.callback();
 
     return function httpRequestHandler(
       req: IncomingMessage,

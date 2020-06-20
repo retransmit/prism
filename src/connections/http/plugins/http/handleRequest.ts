@@ -16,6 +16,7 @@ import {
   InvokeServiceResult,
 } from "../../../../types/http";
 import { makeGotOptions } from "../../../../lib/http/gotUtil";
+import mapFields from "../../mapFields";
 
 /*
   Make Promises for Http Services
@@ -32,7 +33,10 @@ export default function handleRequest(
   return Object.keys(routeConfig.services)
     .map(
       (service) =>
-        [service, routeConfig.services[service]] as [string, HttpRequestHandlerConfig]
+        [service, routeConfig.services[service]] as [
+          string,
+          HttpRequestHandlerConfig
+        ]
     )
     .filter(isHttpServiceConfig)
     .map(
@@ -46,8 +50,13 @@ export default function handleRequest(
               }, serviceConfig.url)
             : serviceConfig.url;
 
+          const requestWithMappedFields = mapFields(
+            originalRequest,
+            serviceConfig
+          );
+
           const requestWithEditedPath = {
-            ...originalRequest,
+            ...requestWithMappedFields,
             path: urlWithParamsReplaced,
           };
 

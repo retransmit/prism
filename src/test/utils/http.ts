@@ -3,6 +3,7 @@ import { Server } from "http";
 import Koa = require("koa");
 import { CancelableRequest } from "got/dist/source";
 import { Response } from "got/dist/source/core";
+import bodyParser = require("koa-bodyparser");
 
 function closeHttpServerCb(server: Server, cb: any) {
   (server as any).close(cb);
@@ -20,7 +21,10 @@ type MockHttpBackendConfig = {
   routes: {
     path: string;
     method: string;
-    response: {
+    handleResponse?: (
+      ctx: Koa.ParameterizedContext<Koa.DefaultState, Koa.DefaultContext>
+    ) => Promise<void>;
+    response?: {
       status?: number;
       body: string | { [key: string]: any };
     };
@@ -32,6 +36,7 @@ export function startBackends(configs: MockHttpBackendConfig[]) {
   for (const config of configs) {
     const koa = new Koa();
 
+    koa.use(bodyParser());
     koa.use(async (ctx) => {
       const handled = config.afterResponse
         ? await config.afterResponse(ctx)
@@ -39,11 +44,17 @@ export function startBackends(configs: MockHttpBackendConfig[]) {
       if (!handled) {
         for (const route of config.routes) {
           if (ctx.path === route.path && ctx.method === route.method) {
-            if (route.response.status) {
-              ctx.status = route.response.status;
+            if (route.handleResponse) {
+              await route.handleResponse(ctx);
+            } else {
+              if (route.response) {
+                if (route.response.status) {
+                  ctx.status = route.response.status;
+                }
+                ctx.body = route.response.body;
+                break;
+              }
             }
-            ctx.body = route.response.body;
-            break;
           }
         }
       }

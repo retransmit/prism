@@ -43,7 +43,7 @@
         "--no-timeouts",
         "dist/test/test.js",
         "-g",
-        "sends an HTTP GET request to the backend"
+        "maps fields"
       ],
       "cwd": "${workspaceRoot}",
       "preLaunchTask": "build",
