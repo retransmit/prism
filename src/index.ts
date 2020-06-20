@@ -124,7 +124,7 @@ if (require.main === module) {
 
     startApp(port, instanceId, configDir).then((config) => {
       console.log(
-        `retransmit instance ${config.instanceId} listening on port ${port}`
+        `retransmit instance '${config.instanceId}' listening on port ${port}`
       );
     });
   }

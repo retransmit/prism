@@ -1,4 +1,10 @@
-import { HttpResponse, HttpRequest, HttpMethods, HttpProxyConfig, IAppConfig } from ".";
+import {
+  HttpResponse,
+  HttpRequest,
+  HttpMethods,
+  HttpProxyConfig,
+  IAppConfig,
+} from ".";
 
 /*
   RouteHandler Config
@@ -86,7 +92,7 @@ export type HttpRequestHandlerConfigBase = {
 export type HttpServiceHttpRequestHandlerConfig = {
   type: "http";
   url: string;
-  rollbackUrl?: string;
+  rollback?: (originalRequest: HttpRequest) => HttpRequest | undefined;
   onRequest?: (
     request: HttpRequest
   ) => Promise<

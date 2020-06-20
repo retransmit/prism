@@ -394,7 +394,7 @@ module.exports = {
 
 When a service fails, Retransmit can notify the other services that an error has occured - so that they can rollback changes if necessary.
 
-For Http Services, the rollbackUrl specified in the configuration is called with the same request data. If modifyRollbackRequest is specified, you could change the url, method and parameters for the rollback call.
+For Http Services, the rollback function is called with the original request and the rollback function is expected to return new request information which will be used to invoked a rollback api on the backend service.
 
 ```js
 module.exports = {
@@ -407,20 +407,20 @@ module.exports = {
               type: "http",
               url: "http://localhost:6666/users",
               // Rollback url to call
-              rollbackUrl: "http://localhost:6666/users/remove",
+              rollback: (req) => {
+                return {
+                  params: req.params,
+                  path: `/admin/users/remove/${req.body.username}`,
+                  method: "DELETE",
+                  headers: {
+                    "my-secret": "somesecret",
+                  },
+                };
+              },
             },
             accountsservice: {
               type: "http",
               url: "http://localhost:6666/accounts",
-
-              // The rollback call goes as an HTTP PUT to a different url.
-              modifyRollbackRequest: (req) => {
-                return {
-                  ...req,
-                  url: "http://localhost:6666/users/remove",
-                  method: "PUT",
-                };
-              },
             },
             messagingservice: {
               // omitted...

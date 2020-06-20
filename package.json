@@ -1,13 +1,13 @@
 {
   "name": "retransmit",
-  "version": "0.2.1",
+  "version": "0.3.0",
   "author": "Jeswin Kumar<jeswinpk@agilehead.com>",
   "contributors": [
     "Jeswin Kumar<jeswinpk@agilehead.com>"
   ],
   "scripts": {
     "build": "./build.sh",
-    "test": "./build.sh && mocha --exit dist/test/test.js --timeout 5000"
+    "test": "./build.sh && mocha --exit dist/test/test.js --timeout 2000"
   },
   "bin": {
     "retransmit": "dist/index.js"

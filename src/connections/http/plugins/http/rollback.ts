@@ -24,43 +24,48 @@ export default async function rollback(
 
   for (const service of Object.keys(routeConfig.services)) {
     const serviceConfig = routeConfig.services[service];
-    if (serviceConfig.type === "http" && serviceConfig.rollbackUrl) {
-      const params = request.params;
-      const urlWithParamsReplaced = params
-        ? Object.keys(params).reduce((acc, param) => {
-            return acc.replace(`/:${param}`, `/${params[param]}`);
-          }, serviceConfig.rollbackUrl)
-        : serviceConfig.rollbackUrl;
+    if (serviceConfig.type === "http" && serviceConfig.rollback) {
+      const rollbackRequest = serviceConfig.rollback(request);
 
-      const requestCopy = {
-        ...request,
-        path: urlWithParamsReplaced,
-      };
+      if (rollbackRequest) {
+        const params = request.params;
 
-      const modifiedRequest = serviceConfig.onRollbackRequest
-        ? await serviceConfig.onRollbackRequest(requestCopy)
-        : { handled: false as false, request: requestCopy };
+        const urlWithParamsReplaced = params
+          ? Object.keys(params).reduce((acc, param) => {
+              return acc.replace(`/:${param}`, `/${params[param]}`);
+            }, rollbackRequest.path)
+          : rollbackRequest.path;
 
-      if (!modifiedRequest.handled) {
-        const options = makeGotOptions(
-          modifiedRequest.request,
-          serviceConfig.timeout
-        );
+        const requestWithPathParams = {
+          ...rollbackRequest,
+          path: urlWithParamsReplaced,
+        };
 
-        got(modifiedRequest.request.path, options).catch(async (error) => {
-          const errorResponse = error.response
-            ? makeHttpResponse(error.response)
-            : {
-                status: 400,
-                content: error.message,
-              };
+        const modifiedRequest = serviceConfig.onRollbackRequest
+          ? await serviceConfig.onRollbackRequest(requestWithPathParams)
+          : { handled: false as false, request: requestWithPathParams };
 
-          if (responseIsError(errorResponse)) {
-            if (serviceConfig.onError) {
-              serviceConfig.onError(errorResponse, modifiedRequest.request);
+        if (!modifiedRequest.handled) {
+          const options = makeGotOptions(
+            modifiedRequest.request,
+            serviceConfig.timeout
+          );
+
+          got(modifiedRequest.request.path, options).catch(async (error) => {
+            const errorResponse = error.response
+              ? makeHttpResponse(error.response)
+              : {
+                  status: 400,
+                  content: error.message,
+                };
+
+            if (responseIsError(errorResponse)) {
+              if (serviceConfig.onError) {
+                serviceConfig.onError(errorResponse, modifiedRequest.request);
+              }
             }
-          }
-        });
+          });
+        }
       }
     }
   }

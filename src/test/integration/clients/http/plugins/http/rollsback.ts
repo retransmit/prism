@@ -19,7 +19,10 @@ export default async function (app: TestAppInstance) {
                 userservice: {
                   type: "http" as "http",
                   url: "http://localhost:6666/users",
-                  rollbackUrl: "http://localhost:6666/users/remove",
+                  rollback: req => ({
+                    ...req,
+                    path: "http://localhost:6666/users/remove"
+                  })
                 },
                 messagingservice: {
                   type: "http" as "http",
