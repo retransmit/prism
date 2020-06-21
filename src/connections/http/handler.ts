@@ -263,7 +263,7 @@ function makeHttpRequestFromContext(ctx: IRouterContext): HttpRequest {
 }
 
 /*
-  Don't copy the content-type and content-length header.
+  Don't copy the content-type and content-length headers.
   That's going to differ based on the backend service.
 */
 function copyHeadersFromContext(headers: { [field: string]: string }) {
