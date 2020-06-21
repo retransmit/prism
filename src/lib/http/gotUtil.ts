@@ -9,6 +9,7 @@ export function makeGotOptions(
     searchParams: request.query,
     method: request.method,
     headers: request.headers,
+    followRedirect: false,
     retry: 0,
     timeout,
   };
