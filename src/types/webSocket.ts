@@ -1,4 +1,4 @@
-import { HttpRequest, HttpResponse, WebSocketProxyConfig, IAppConfig } from ".";
+import { HttpRequest, HttpResponse, WebSocketProxyConfig, IAppConfig, HttpRequestBodyEncoding } from ".";
 import WebSocket from "ws";
 
 /*
@@ -46,8 +46,11 @@ export type HttpServiceWebSocketRequestHandlerConfig = {
     response: HttpResponse
   ) => Promise<WebSocketResponse>;
   url: string;
+  encoding?: HttpRequestBodyEncoding;
   onConnectUrl?: string;
+  onConnectRequestEncoding?: HttpRequestBodyEncoding;
   onDisconnectUrl?: string;
+  onDisconnectRequestEncoding?: HttpRequestBodyEncoding;
   onError?: (response: HttpResponse | undefined, request: HttpRequest) => any;
 } & WebSocketRequestHandlerConfigBase;
 

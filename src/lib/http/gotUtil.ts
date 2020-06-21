@@ -1,6 +1,10 @@
-import { HttpRequest } from "../../types";
+import { HttpRequest, HttpRequestBodyEncoding } from "../../types";
 
-export function makeGotOptions(request: HttpRequest, timeout?: number) {
+export function makeGotOptions(
+  request: HttpRequest,
+  encoding: HttpRequestBodyEncoding | undefined,
+  timeout?: number
+) {
   const basicOptions = {
     searchParams: request.query,
     method: request.method,
@@ -16,10 +20,15 @@ export function makeGotOptions(request: HttpRequest, timeout?: number) {
           body: request.body,
         }
       : typeof request.body === "object"
-      ? {
-          ...basicOptions,
-          json: request.body,
-        }
+      ? encoding === "application/x-www-form-urlencoded"
+        ? {
+            ...basicOptions,
+            form: request.body,
+          }
+        : {
+            ...basicOptions,
+            json: request.body,
+          }
       : basicOptions;
 
   return options;

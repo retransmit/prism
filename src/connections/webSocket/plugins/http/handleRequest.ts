@@ -40,17 +40,27 @@ export default async function sendToService(
 
       if (onRequestResult.handled) {
         if (onRequestResult.response) {
-          respondToWebSocketClient(request.id, onRequestResult.response, conn, webSocketConfig);
+          respondToWebSocketClient(
+            request.id,
+            onRequestResult.response,
+            conn,
+            webSocketConfig
+          );
         }
       } else {
-        const options = makeGotOptions(httpRequest);
+        const options = makeGotOptions(httpRequest, undefined);
         got(serviceConfig.url, options)
           .then(async (serverResponse) => {
             const webSocketResponse = makeWebSocketResponse(
               serverResponse,
               request.id
             );
-            respondToWebSocketClient(request.id, webSocketResponse, conn, webSocketConfig);
+            respondToWebSocketClient(
+              request.id,
+              webSocketResponse,
+              conn,
+              webSocketConfig
+            );
           })
           .catch(async (error) => {
             const webSocketResponse: WebSocketResponse = error.response

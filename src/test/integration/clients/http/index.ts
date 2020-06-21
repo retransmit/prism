@@ -8,6 +8,7 @@ import httpDontMergeIgnored from "./plugins/http/dontMergeIgnored";
 import httpMustNotOverwriteJsonWithString from "./plugins/http/mustNotOverwriteJsonWithString";
 import httpRollsback from "./plugins/http/rollsback";
 import httpMapsFields from "./plugins/http/mapsFields";
+import httpUrlEncodedRequests from "./plugins/http/urlEncodedRequests";
 
 import redisHttpMethods from "./plugins/redis/httpMethods";
 import redisMergeResults from "./plugins/redis/mergeResults";
@@ -28,6 +29,7 @@ export default function run(app: TestAppInstance) {
       httpMustNotOverwriteJsonWithString(app);
       httpRollsback(app);
       httpMapsFields(app);
+      httpUrlEncodedRequests(app);
     });
 
     describe("redis", () => {

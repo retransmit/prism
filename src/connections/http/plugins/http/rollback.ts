@@ -48,6 +48,7 @@ export default async function rollback(
         if (!modifiedRequest.handled) {
           const options = makeGotOptions(
             modifiedRequest.request,
+            serviceConfig.rollbackRequestEncoding,
             serviceConfig.timeout
           );
 

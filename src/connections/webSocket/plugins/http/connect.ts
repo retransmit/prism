@@ -39,10 +39,18 @@ export default async function connect(
 
     if (onRequestResult.handled) {
       if (onRequestResult.response) {
-        respondToWebSocketClient(requestId, onRequestResult.response, conn, webSocketConfig);
+        respondToWebSocketClient(
+          requestId,
+          onRequestResult.response,
+          conn,
+          webSocketConfig
+        );
       }
     } else {
-      const options = makeGotOptions(onRequestResult.request);
+      const options = makeGotOptions(
+        onRequestResult.request,
+        serviceConfig.onConnectRequestEncoding
+      );
 
       got(serviceConfig.url, options).catch(async (error) => {
         const errorResponse = error.response

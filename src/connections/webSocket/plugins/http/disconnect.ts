@@ -38,7 +38,10 @@ export default async function disconnect(
         };
 
     if (!onRequestResult.handled) {
-      const options = makeGotOptions(onRequestResult.request);
+      const options = makeGotOptions(
+        onRequestResult.request,
+        serviceConfig.onDisconnectRequestEncoding
+      );
 
       // We don't care about the response here.
       // The client has already disco'ed.

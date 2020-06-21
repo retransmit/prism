@@ -256,8 +256,22 @@ function makeHttpRequestFromContext(ctx: IRouterContext): HttpRequest {
     params: ctx.params,
     query: ctx.query,
     body: ctx.method === "GET" ? undefined : ctx.request.body,
-    headers: ctx.headers,
+    headers: copyHeadersFromContext(ctx.headers),
     remoteAddress: ctx.ip,
     remotePort: ctx.req.socket.remotePort,
   };
+}
+
+/*
+  Don't copy the content-type and content-length header.
+  That's going to differ based on the backend service.
+*/
+function copyHeadersFromContext(headers: { [field: string]: string }) {
+  return Object.keys(headers || {}).reduce(
+    (acc, field) =>
+      !["content-type", "content-length"].includes(field.toLowerCase())
+        ? ((acc[field] = headers[field]), acc)
+        : acc,
+    {} as { [field: string]: string }
+  );
 }

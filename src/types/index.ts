@@ -141,3 +141,10 @@ export type HttpCookie = {
   maxAge?: number;
   overwrite?: boolean;
 };
+
+/*
+  That's all we support for now.
+*/
+export type HttpRequestBodyEncoding =
+  | "application/x-www-form-urlencoded"
+  | "application/json";

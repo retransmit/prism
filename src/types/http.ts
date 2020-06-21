@@ -4,6 +4,7 @@ import {
   HttpMethods,
   HttpProxyConfig,
   IAppConfig,
+  HttpRequestBodyEncoding,
 } from ".";
 
 /*
@@ -90,12 +91,14 @@ export type HttpRequestHandlerConfigBase = {
   fields?: {
     [name: string]: string;
   };
+  encoding?: HttpRequestBodyEncoding;
 };
 
 export type HttpServiceHttpRequestHandlerConfig = {
   type: "http";
   url: string;
   rollback?: (originalRequest: HttpRequest) => HttpRequest | undefined;
+  rollbackRequestEncoding?: HttpRequestBodyEncoding;
   onRequest?: (
     request: HttpRequest
   ) => Promise<

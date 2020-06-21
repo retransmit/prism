@@ -62,7 +62,7 @@ function timerCallback(
               );
             }
           } else {
-            const options = makeGotOptions(httpRequest);
+            const options = makeGotOptions(httpRequest, serviceConfig.encoding);
             got(serviceConfig.url, options)
               .then(async (serverResponse) => {
                 const webSocketResponse = serviceConfig.onResponse
@@ -72,7 +72,12 @@ function timerCallback(
                     )
                   : makeWebSocketResponse(serverResponse, requestId);
 
-                respondToWebSocketClient(requestId, webSocketResponse, conn, webSocketConfig);
+                respondToWebSocketClient(
+                  requestId,
+                  webSocketResponse,
+                  conn,
+                  webSocketConfig
+                );
               })
               .catch(async (error) => {
                 const webSocketResponse: WebSocketResponse = error.response
@@ -85,7 +90,12 @@ function timerCallback(
                       type: "message",
                     };
 
-                respondToWebSocketClient(requestId, webSocketResponse, conn, webSocketConfig);
+                respondToWebSocketClient(
+                  requestId,
+                  webSocketResponse,
+                  conn,
+                  webSocketConfig
+                );
 
                 const errorResponse = error.response
                   ? makeHttpResponse(error.response)

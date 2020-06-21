@@ -1,18 +1,15 @@
 import {
   HttpRequest,
-  HttpResponse,
   HttpServiceHttpRequestHandlerConfig,
   HttpRequestHandlerConfig,
   HttpProxyConfig,
 } from "../../../../types";
 
-import * as configModule from "../../../../config";
 import got from "got";
 import responseIsError from "../../../../lib/http/responseIsError";
 import { makeHttpResponse } from "./makeHttpResponse";
 import {
   HttpRouteConfig,
-  FetchedHttpRequestHandlerResponse,
   InvokeServiceResult,
 } from "../../../../types/http";
 import { makeGotOptions } from "../../../../lib/http/gotUtil";
@@ -92,6 +89,7 @@ export default function handleRequest(
           } else {
             const options = makeGotOptions(
               onRequestResult.request,
+              serviceConfig.encoding,
               serviceConfig.timeout
             );
 
