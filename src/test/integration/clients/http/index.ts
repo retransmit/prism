@@ -9,6 +9,7 @@ import httpRollsback from "./plugins/http/rollsback";
 import httpMapsBody from "./plugins/http/mapsBody";
 import httpMapsHeaders from "./plugins/http/mapsHeaders";
 import httpUrlEncodedRequests from "./plugins/http/urlEncodedRequests";
+import httpRedirect from "./plugins/http/redirect";
 
 import redisHttpMethods from "./plugins/redis/httpMethods";
 import redisMergeResults from "./plugins/redis/mergeResults";
@@ -32,6 +33,7 @@ export default function run(app: TestAppInstance) {
       httpMapsBody(app);
       httpMapsHeaders(app);
       httpUrlEncodedRequests(app);
+      httpRedirect(app);
     });
 
     describe("redis", () => {

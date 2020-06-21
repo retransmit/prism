@@ -14,7 +14,7 @@ export default function mergeResponses(
   httpConfig: HttpProxyConfig
 ): HttpResponse {
   const config = configModule.get();
-  let finalResponse: HttpResponse = { status: 200, content: undefined };
+  let finalResponse: HttpResponse = {};
 
   for (const fetchedResponse of responses) {
     if (typeof fetchedResponse.response !== "undefined") {
