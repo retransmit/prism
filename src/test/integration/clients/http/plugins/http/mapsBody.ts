@@ -18,8 +18,10 @@ export default async function (app: TestAppInstance) {
                 userservice: {
                   type: "http" as "http",
                   url: "http://localhost:6666/users",
-                  fields: {
-                    username: "uname",
+                  mapping: {
+                    fields: {
+                      username: "uname",
+                    },
                   },
                 },
               },

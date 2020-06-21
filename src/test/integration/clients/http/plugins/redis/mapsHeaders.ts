@@ -6,7 +6,7 @@ import random from "../../../../../../lib/random";
 import { IAppConfig } from "../../../../../../types";
 
 export default async function (app: TestAppInstance) {
-  it(`maps fields`, async () => {
+  it(`maps headers`, async () => {
     const config: IAppConfig = {
       instanceId: random(),
       http: {
@@ -17,8 +17,10 @@ export default async function (app: TestAppInstance) {
                 userservice: {
                   type: "redis" as "redis",
                   requestChannel: "input",
-                  fields: {
-                    username: "uname",
+                  mapping: {
+                    headers: {
+                      "x-app-instance": "x-app-id",
+                    },
                   },
                 },
               },
@@ -53,6 +55,9 @@ export default async function (app: TestAppInstance) {
 
     const promisedServerRespose = got(`http://localhost:${port}/users`, {
       method: "POST",
+      headers: {
+        "x-app-instance": "myinst",
+      },
       json: {
         username: "jeswin",
       },
@@ -70,13 +75,13 @@ export default async function (app: TestAppInstance) {
         id: redisInput.id,
         service: "userservice",
         response: {
-          content: `Hello ${redisInput.request.body.uname}`,
+          content: `Header was ${redisInput.request.headers["x-app-id"]}`,
         },
       })
     );
 
     const serverResponse = await promisedServerRespose;
     serverResponse.statusCode.should.equal(200);
-    serverResponse.body.should.equal("Hello jeswin");
+    serverResponse.body.should.equal("Header was myinst");
   });
 }

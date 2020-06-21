@@ -88,8 +88,13 @@ export type HttpRequestHandlerConfigBase = {
   merge?: boolean;
   timeout?: number;
   mergeField?: string;
-  fields?: {
-    [name: string]: string;
+  mapping?: {
+    fields?: {
+      [name: string]: string;
+    };
+    headers?: {
+      [name: string]: string;
+    };
   };
   encoding?: HttpRequestBodyEncoding;
 };

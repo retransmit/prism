@@ -13,7 +13,7 @@ import {
   InvokeServiceResult,
 } from "../../../../types/http";
 import { makeGotOptions } from "../../../../lib/http/gotUtil";
-import mapFields from "../../mapFields";
+import mapBodyAndHeaders from "../../mapBodyAndHeaders";
 
 /*
   Make Promises for Http Services
@@ -47,7 +47,7 @@ export default function handleRequest(
               }, serviceConfig.url)
             : serviceConfig.url;
 
-          const requestWithMappedFields = mapFields(
+          const requestWithMappedFields = mapBodyAndHeaders(
             originalRequest,
             serviceConfig
           );

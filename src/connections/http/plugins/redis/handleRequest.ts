@@ -14,7 +14,7 @@ import {
   InvokeServiceResult,
 } from "../../../../types/http";
 import { publish } from "./publish";
-import mapFields from "../../mapFields";
+import mapBodyAndHeaders from "../../mapBodyAndHeaders";
 
 /*
   Make Promises for Redis Services
@@ -43,7 +43,7 @@ export default function handleRequest(
     .map(
       ([service, serviceConfig]) =>
         new Promise(async (success) => {
-          const httpRequestWithMappedFields = mapFields(request, serviceConfig);
+          const httpRequestWithMappedFields = mapBodyAndHeaders(request, serviceConfig);
           
           const redisHttpRequest: RedisServiceHttpRequest = {
             id: requestId,

@@ -1,13 +1,13 @@
 import "mocha";
 import "should";
-import WebSocket from "ws";
 
 import httpHttpMethods from "./plugins/http/httpMethods";
 import httpMergeResults from "./plugins/http/mergeResults";
 import httpDontMergeIgnored from "./plugins/http/dontMergeIgnored";
 import httpMustNotOverwriteJsonWithString from "./plugins/http/mustNotOverwriteJsonWithString";
 import httpRollsback from "./plugins/http/rollsback";
-import httpMapsFields from "./plugins/http/mapsFields";
+import httpMapsBody from "./plugins/http/mapsBody";
+import httpMapsHeaders from "./plugins/http/mapsHeaders";
 import httpUrlEncodedRequests from "./plugins/http/urlEncodedRequests";
 
 import redisHttpMethods from "./plugins/redis/httpMethods";
@@ -16,7 +16,8 @@ import redisDontMergeIgnored from "./plugins/redis/dontMergeIgnored";
 import redisShowGenericErrors from "./plugins/redis/showGenericErrors";
 import redisMustNotOverwriteJsonWithString from "./plugins/redis/mustNotOverwriteJsonWithString";
 import redisRollsback from "./plugins/redis/rollsback";
-import redisMapsFields from "./plugins/redis/mapsFields";
+import redisMapsBody from "./plugins/redis/mapsBody";
+import redisMapsHeaders from "./plugins/redis/mapsHeaders";
 
 import { TestAppInstance } from "../../../test";
 
@@ -28,7 +29,8 @@ export default function run(app: TestAppInstance) {
       httpMergeResults(app);
       httpMustNotOverwriteJsonWithString(app);
       httpRollsback(app);
-      httpMapsFields(app);
+      httpMapsBody(app);
+      httpMapsHeaders(app);
       httpUrlEncodedRequests(app);
     });
 
@@ -39,7 +41,8 @@ export default function run(app: TestAppInstance) {
       redisMustNotOverwriteJsonWithString(app);
       redisRollsback(app);
       redisShowGenericErrors(app);
-      redisMapsFields(app);
+      redisMapsBody(app);
+      redisMapsHeaders(app);
     });
   });
 }
