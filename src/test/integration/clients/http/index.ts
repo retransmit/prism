@@ -6,8 +6,10 @@ import httpMergeResults from "./plugins/http/mergeResults";
 import httpDontMergeIgnored from "./plugins/http/dontMergeIgnored";
 import httpMustNotOverwriteJsonWithString from "./plugins/http/mustNotOverwriteJsonWithString";
 import httpRollsback from "./plugins/http/rollsback";
-import httpMapsBody from "./plugins/http/mapsBody";
+import httpMapsBodyFields from "./plugins/http/mapsBodyFields";
+import httpExcludesBodyFields from "./plugins/http/excludesBodyFields";
 import httpMapsHeaders from "./plugins/http/mapsHeaders";
+import httpExcludesHeaders from "./plugins/http/excludesHeaders";
 import httpUrlEncodedRequests from "./plugins/http/urlEncodedRequests";
 import httpRedirect from "./plugins/http/redirect";
 
@@ -17,7 +19,9 @@ import redisDontMergeIgnored from "./plugins/redis/dontMergeIgnored";
 import redisShowGenericErrors from "./plugins/redis/showGenericErrors";
 import redisMustNotOverwriteJsonWithString from "./plugins/redis/mustNotOverwriteJsonWithString";
 import redisRollsback from "./plugins/redis/rollsback";
-import redisMapsBody from "./plugins/redis/mapsBody";
+import redisMapsBodyFields from "./plugins/redis/mapsBodyFields";
+import redisExcludesBodyFields from "./plugins/redis/excludesBodyFields";
+import redisExcludesHeaders from "./plugins/redis/excludesHeaders";
 import redisMapsHeaders from "./plugins/redis/mapsHeaders";
 
 import { TestAppInstance } from "../../../test";
@@ -30,8 +34,10 @@ export default function run(app: TestAppInstance) {
       httpMergeResults(app);
       httpMustNotOverwriteJsonWithString(app);
       httpRollsback(app);
-      httpMapsBody(app);
+      httpMapsBodyFields(app);
+      httpExcludesBodyFields(app);
       httpMapsHeaders(app);
+      httpExcludesHeaders(app);
       httpUrlEncodedRequests(app);
       httpRedirect(app);
     });
@@ -43,7 +49,9 @@ export default function run(app: TestAppInstance) {
       redisMustNotOverwriteJsonWithString(app);
       redisRollsback(app);
       redisShowGenericErrors(app);
-      redisMapsBody(app);
+      redisMapsBodyFields(app);
+      redisExcludesBodyFields(app);
+      redisExcludesHeaders(app);
       redisMapsHeaders(app);
     });
   });

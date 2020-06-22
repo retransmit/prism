@@ -6,7 +6,7 @@ import random from "../../../../../../lib/random";
 import { IAppConfig } from "../../../../../../types";
 
 export default async function (app: TestAppInstance) {
-  it(`maps headers`, async () => {
+  it(`excludes body fields`, async () => {
     const config: IAppConfig = {
       instanceId: random(),
       http: {
@@ -18,10 +18,8 @@ export default async function (app: TestAppInstance) {
                   type: "redis" as "redis",
                   requestChannel: "input",
                   mapping: {
-                    headers: {
-                      include: {
-                        "x-app-instance": "x-app-id",
-                      },
+                    fields: {
+                      exclude: ["username"],
                     },
                   },
                 },
@@ -57,12 +55,7 @@ export default async function (app: TestAppInstance) {
 
     const promisedServerRespose = got(`http://localhost:${port}/users`, {
       method: "POST",
-      headers: {
-        "x-app-instance": "myinst",
-      },
-      json: {
-        username: "jeswin",
-      },
+      json: { username: "jeswin", account: "1234" },
       retry: 0,
     });
 
@@ -77,13 +70,13 @@ export default async function (app: TestAppInstance) {
         id: redisInput.id,
         service: "userservice",
         response: {
-          content: `Value of the header was ${redisInput.request.headers["x-app-id"]}`,
+          content: `Contains fields: ${Object.keys(redisInput.request.body)}`,
         },
       })
     );
 
     const serverResponse = await promisedServerRespose;
     serverResponse.statusCode.should.equal(200);
-    serverResponse.body.should.equal("Value of the header was myinst");
+    serverResponse.body.should.equal("Contains fields: account");
   });
 }

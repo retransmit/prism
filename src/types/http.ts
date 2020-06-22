@@ -90,10 +90,16 @@ export type HttpRequestHandlerConfigBase = {
   mergeField?: string;
   mapping?: {
     fields?: {
-      [name: string]: string;
+      include?: {
+        [name: string]: string;
+      };
+      exclude?: string[];
     };
     headers?: {
-      [name: string]: string;
+      include?: {
+        [name: string]: string;
+      };
+      exclude?: string[];
     };
   };
   encoding?: HttpRequestBodyEncoding;

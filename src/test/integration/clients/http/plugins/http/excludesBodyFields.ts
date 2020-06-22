@@ -7,7 +7,7 @@ import got from "got";
 import { IAppConfig } from "../../../../../../types";
 
 export default async function (app: TestAppInstance) {
-  it(`maps headers`, async () => {
+  it(`excludes body fields`, async () => {
     const config: IAppConfig = {
       instanceId: random(),
       http: {
@@ -19,10 +19,8 @@ export default async function (app: TestAppInstance) {
                   type: "http" as "http",
                   url: "http://localhost:6666/users",
                   mapping: {
-                    headers: {
-                      include: {
-                        "x-app-instance": "x-app-id",
-                      },
+                    fields: {
+                      exclude: ["username"],
                     },
                   },
                 },
@@ -48,7 +46,7 @@ export default async function (app: TestAppInstance) {
             path: "/users",
             method: "POST",
             handleResponse: async (ctx) => {
-              ctx.body = `Value of the header was ${ctx.headers["x-app-id"]}`;
+              ctx.body = `Contains fields: ${Object.keys(ctx.request.body)}`;
             },
           },
         ],
@@ -63,14 +61,11 @@ export default async function (app: TestAppInstance) {
     const { port } = app.servers.httpServer.address() as any;
     const promisedResponse = got(`http://localhost:${port}/users`, {
       method: "POST",
-      headers: {
-        "x-app-instance": "myinst",
-      },
-      json: { username: "jeswin" },
+      json: { username: "jeswin", account: "1234" },
       retry: 0,
     });
     const serverResponse = await getResponse(promisedResponse);
     serverResponse.statusCode.should.equal(200);
-    serverResponse.body.should.equal("Value of the header was myinst");
+    serverResponse.body.should.equal("Contains fields: account");
   });
 }

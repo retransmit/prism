@@ -5,32 +5,44 @@ export default function mapBodyAndHeaders(
   request: HttpRequest,
   serviceConfig: HttpRequestHandlerConfigBase
 ) {
-  const mappedFields = serviceConfig.mapping?.fields;
-  const mappedHeaders = serviceConfig.mapping?.headers;
+  const includedFields = serviceConfig.mapping?.fields?.include;
+  const excludedFields = serviceConfig.mapping?.fields?.exclude;
+  const includedHeaders = serviceConfig.mapping?.headers?.include;
+  const excludedHeaders = serviceConfig.mapping?.headers?.exclude;
 
   return {
     ...request,
-    body: mapObject(mappedFields, request.body),
+    body: mapObject(includedFields, excludedFields || [], request.body),
     headers: request.headers
-      ? mapObject(mappedHeaders, request.headers)
+      ? mapObject(includedHeaders, excludedHeaders || [], request.headers)
       : undefined,
   };
 }
 
+type Mapping = {
+  [name: string]: string;
+};
+
 function mapObject(
-  mappedFields:
-    | {
-        [name: string]: string;
-      }
-    | undefined,
-  defaultValue: { [field: string]: any }
+  included: Mapping | undefined,
+  excluded: string[],
+  defaultValue: { [field: string]: any } | undefined
 ) {
-  return mappedFields
-    ? Object.keys(mappedFields).reduce(
-        (acc, fieldName) => (
-          (acc[mappedFields[fieldName]] = defaultValue[fieldName]), acc
-        ),
-        {} as { [field: string]: any }
-      )
-    : defaultValue;
+  if (defaultValue === undefined) return undefined;
+
+  const result: { [field: string]: any } = {};
+
+  const includedFields = included !== undefined ? Object.keys(included) : [];
+
+  for (const field of Object.keys(defaultValue)) {
+    if (
+      !excluded.includes(field) &&
+      (included === undefined || includedFields.includes(field))
+    ) {
+      const fieldName = included === undefined ? field : included[field];
+      result[fieldName] = defaultValue[field];
+    }
+  }
+
+  return result;
 }
