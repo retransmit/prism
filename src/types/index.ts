@@ -127,7 +127,7 @@ export type HttpResponse = {
   redirect?: string;
   cookies?: HttpCookie[];
   headers?: IncomingHttpHeaders;
-  content?: any;
+  body?: any;
   contentType?: string;
 };
 

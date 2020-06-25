@@ -70,7 +70,7 @@ export default async function (app: TestAppInstance) {
         id: redisInput.id,
         service: "userservice",
         response: {
-          content: `Contains fields: ${Object.keys(redisInput.request.body)}`,
+          body: `Contains fields: ${Object.keys(redisInput.request.body)}`,
         },
       })
     );

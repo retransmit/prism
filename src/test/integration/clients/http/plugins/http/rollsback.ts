@@ -1,6 +1,5 @@
 import { startWithConfiguration } from "../../../../../..";
 import { startBackends, getResponse } from "../../../../../utils/http";
-import { closeHttpServer } from "../../../../../utils/http";
 import { Server } from "http";
 import { TestAppInstance } from "../../../../../test";
 import random from "../../../../../../lib/random";

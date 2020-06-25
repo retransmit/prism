@@ -57,7 +57,7 @@ export default async function connect(
           ? makeHttpResponse(error.response)
           : {
               status: 400,
-              content: error.message,
+              body: error.message,
             };
 
         if (responseIsError(errorResponse)) {

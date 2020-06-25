@@ -87,7 +87,7 @@ export default async function (app: TestAppInstance) {
           id: redisInput.id,
           service: "userservice",
           response: {
-            content: `${redisInput.request.method}: Everything worked.`,
+            body: `${redisInput.request.method}: Everything worked.`,
           },
         })
       );

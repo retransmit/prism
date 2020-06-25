@@ -101,7 +101,7 @@ function timerCallback(
                   ? makeHttpResponse(error.response)
                   : {
                       status: 400,
-                      content: error.message,
+                      body: error.message,
                     };
 
                 if (responseIsError(errorResponse)) {

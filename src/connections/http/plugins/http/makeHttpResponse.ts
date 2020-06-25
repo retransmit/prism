@@ -8,7 +8,7 @@ export function makeHttpResponse(
   return {
     headers: serverResponse.headers,
     status: serverResponse.statusCode,
-    content: isJson(serverResponse)
+    body: isJson(serverResponse)
       ? JSON.parse(serverResponse.body)
       : serverResponse.body,
   };

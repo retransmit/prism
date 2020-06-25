@@ -76,7 +76,7 @@ export default async function (app: TestAppInstance) {
         id: redisInput.id,
         service: "userservice",
         response: {
-          content: `Contains headers: ${Object.keys(
+          body: `Contains headers: ${Object.keys(
             redisInput.request.headers
           ).filter((x) => x.startsWith("x-"))}`,
         },

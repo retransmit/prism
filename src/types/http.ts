@@ -53,6 +53,7 @@ export type FetchedHttpRequestHandlerResponse = {
   path: string;
   method: HttpMethods;
   response: HttpResponse;
+  stage: number | undefined;
 };
 
 /*
@@ -103,6 +104,7 @@ export type HttpRequestHandlerConfigBase = {
     };
   };
   encoding?: HttpRequestBodyEncoding;
+  stage?: number;
 };
 
 export type HttpServiceHttpRequestHandlerConfig = {
@@ -111,7 +113,8 @@ export type HttpServiceHttpRequestHandlerConfig = {
   rollback?: (originalRequest: HttpRequest) => HttpRequest | undefined;
   rollbackRequestEncoding?: HttpRequestBodyEncoding;
   onRequest?: (
-    request: HttpRequest
+    request: HttpRequest,
+    otherResponses: FetchedHttpRequestHandlerResponse[]
   ) => Promise<
     | {
         handled: true;
@@ -121,7 +124,8 @@ export type HttpServiceHttpRequestHandlerConfig = {
   >;
   onResponse?: (
     response: HttpResponse,
-    request: HttpRequest
+    request: HttpRequest,
+    otherResponses: FetchedHttpRequestHandlerResponse[]
   ) => Promise<HttpResponse>;
   onRollbackRequest?: (
     request: HttpRequest
@@ -139,7 +143,8 @@ export type RedisServiceHttpRequestHandlerConfig = {
   requestChannel: string;
   numRequestChannels?: number;
   onRequest?: (
-    request: RedisServiceHttpRequest
+    request: RedisServiceHttpRequest,
+    otherResponses: FetchedHttpRequestHandlerResponse[]
   ) => Promise<
     | {
         handled: true;
@@ -149,7 +154,8 @@ export type RedisServiceHttpRequestHandlerConfig = {
   >;
   onResponse?: (
     response: string,
-    request: HttpRequest
+    request: HttpRequest,
+    otherResponses: FetchedHttpRequestHandlerResponse[]
   ) => Promise<RedisServiceHttpResponse>;
   onRollbackRequest?: (
     request: RedisServiceHttpRequest
@@ -171,6 +177,11 @@ export type IHttpRequestHandlerPlugin = {
   handleRequest: (
     requestId: string,
     request: HttpRequest,
+    stage: number | undefined,
+    otherResponses: FetchedHttpRequestHandlerResponse[],
+    services: {
+      [name: string]: HttpRequestHandlerConfig;
+    },
     httpConfig: HttpProxyConfig
   ) => Promise<InvokeServiceResult>[];
   rollback: (

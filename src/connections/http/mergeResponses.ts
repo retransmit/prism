@@ -27,45 +27,45 @@ export default function mergeResponses(
           if (responseIsError(fetchedResponse.response)) {
             return {
               status: fetchedResponse.response?.status,
-              content: fetchedResponse.response?.content,
+              body: fetchedResponse.response?.body,
             };
           }
-          if (fetchedResponse.response.content) {
+          if (fetchedResponse.response.body) {
             /*
               If the response has already been redirected, you can't write on to it.
             */
             if (finalResponse.redirect) {
               return {
                 status: 500,
-                content: `${fetchedResponse.service} is redirecting the response to ${fetchedResponse.response.redirect} but content has already been added to the response.`,
+                body: `${fetchedResponse.service} is redirecting the response to ${fetchedResponse.response.redirect} but content has already been added to the response.`,
               };
             } else {
               /*
                 If current response is not an object and new result is an object, we throw an error. We can't merge an object on to a string.
               */
-              if (typeof fetchedResponse.response.content === "object") {
-                if (typeof finalResponse.content === "undefined") {
-                  finalResponse.content = fetchedResponse.response.content;
+              if (typeof fetchedResponse.response.body === "object") {
+                if (typeof finalResponse.body === "undefined") {
+                  finalResponse.body = fetchedResponse.response.body;
                   finalResponse.contentType = "application/json";
                 } else {
-                  if (typeof finalResponse.content !== "object") {
+                  if (typeof finalResponse.body !== "object") {
                     return {
                       status: 500,
-                      content: `Cannot merge multiple types of content. ${
+                      body: `Cannot merge multiple types of content. ${
                         fetchedResponse.service
-                      } is returned a json response while the current response is of type ${typeof finalResponse.content}.`,
+                      } is returned a json response while the current response is of type ${typeof finalResponse.body}.`,
                     };
                   } else {
                     const mergeField = serviceConfig.mergeField;
 
-                    finalResponse.content = mergeField
+                    finalResponse.body = mergeField
                       ? {
-                          ...finalResponse.content,
-                          [mergeField]: fetchedResponse.response.content,
+                          ...finalResponse.body,
+                          [mergeField]: fetchedResponse.response.body,
                         }
                       : {
-                          ...finalResponse.content,
-                          ...fetchedResponse.response.content,
+                          ...finalResponse.body,
+                          ...fetchedResponse.response.body,
                         };
                     finalResponse.contentType = "application/json";
                   }
@@ -74,17 +74,17 @@ export default function mergeResponses(
                 /*
                   Again, if current response is already set, we can't overwrite.
                 */
-                if (typeof finalResponse.content !== "undefined") {
+                if (typeof finalResponse.body !== "undefined") {
                   return {
                     status: 500,
-                    content: `${fetchedResponse.service} returned a response which will overwrite current response.`,
+                    body: `${fetchedResponse.service} returned a response which will overwrite current response.`,
                   };
                 } else {
                   const mergeField = serviceConfig.mergeField;
 
-                  finalResponse.content = mergeField
-                    ? { [mergeField]: fetchedResponse.response.content }
-                    : fetchedResponse.response.content;
+                  finalResponse.body = mergeField
+                    ? { [mergeField]: fetchedResponse.response.body }
+                    : fetchedResponse.response.body;
                 }
               }
             }
@@ -100,7 +100,7 @@ export default function mergeResponses(
               ) {
                 return {
                   status: 500,
-                  content: `${fetchedResponse.service} returned content type ${fetchedResponse.response.contentType} while the current response has content type ${finalResponse.contentType}.`,
+                  body: `${fetchedResponse.service} returned content type ${fetchedResponse.response.contentType} while the current response has content type ${finalResponse.contentType}.`,
                 };
               } else {
                 finalResponse.contentType =
@@ -113,15 +113,15 @@ export default function mergeResponses(
             If the response content has already been modified previously, then you cannot redirect. If there's already a pending redirect, you cannot redirect again.
           */
           if (fetchedResponse.response.redirect) {
-            if (finalResponse.content) {
+            if (finalResponse.body) {
               return {
                 status: 500,
-                content: `${fetchedResponse.service} is redirecting to ${fetchedResponse.response.redirect} but the current response already has some content.`,
+                body: `${fetchedResponse.service} is redirecting to ${fetchedResponse.response.redirect} but the current response already has some content.`,
               };
             } else if (finalResponse.redirect) {
               return {
                 status: 500,
-                content: `${fetchedResponse.service} is redirecting to ${fetchedResponse.response.redirect} but the response has already been redirected to ${finalResponse.redirect}.`,
+                body: `${fetchedResponse.service} is redirecting to ${fetchedResponse.response.redirect} but the response has already been redirected to ${finalResponse.redirect}.`,
               };
             } else {
               finalResponse.redirect = fetchedResponse.response.redirect;
@@ -148,7 +148,7 @@ export default function mergeResponses(
                 } else {
                   return {
                     status: 500,
-                    content: `${fetchedResponse.service} is returning status code ${fetchedResponse.response.status} but the response already has its status set to ${finalResponse.status}.`,
+                    body: `${fetchedResponse.service} is returning status code ${fetchedResponse.response.status} but the response already has its status set to ${finalResponse.status}.`,
                   };
                 }
               }

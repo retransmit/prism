@@ -36,16 +36,14 @@ export default function processMessage(httpConfig: HttpProxyConfig) {
           const redisResponse = serviceConfig.onResponse
             ? await serviceConfig.onResponse(
                 messageString,
-                activeRequest.request
+                activeRequest.request,
+                activeRequest.responses
               )
             : (messageObj as RedisServiceHttpResponse);
 
           if (responseIsError(redisResponse.response)) {
             if (serviceConfig.onError) {
-              serviceConfig.onError(
-                messageString,
-                activeRequest.request
-              );
+              serviceConfig.onError(messageString, activeRequest.request);
             }
           }
 
@@ -59,6 +57,7 @@ export default function processMessage(httpConfig: HttpProxyConfig) {
             method: activeRequest.request.method,
             service: activeRequest.service,
             response: redisResponse.response,
+            stage: activeRequest.stage,
           };
 
           activeRequest.onResponse({

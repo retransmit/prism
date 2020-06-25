@@ -68,7 +68,7 @@ export default async function (app: TestAppInstance) {
         id: redisInput.id,
         service: "userservice",
         response: {
-          content: {
+          body: {
             user: 1,
           },
         },
@@ -81,7 +81,7 @@ export default async function (app: TestAppInstance) {
         id: redisInput.id,
         service: "messagingservice",
         response: {
-          content: {
+          body: {
             message: "hello world",
           },
         },

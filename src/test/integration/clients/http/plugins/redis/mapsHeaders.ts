@@ -77,7 +77,7 @@ export default async function (app: TestAppInstance) {
         id: redisInput.id,
         service: "userservice",
         response: {
-          content: `Value of the header was ${redisInput.request.headers["x-app-id"]}`,
+          body: `Value of the header was ${redisInput.request.headers["x-app-id"]}`,
         },
       })
     );

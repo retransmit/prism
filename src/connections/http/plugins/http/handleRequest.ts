@@ -11,6 +11,7 @@ import { makeHttpResponse } from "./makeHttpResponse";
 import {
   HttpRouteConfig,
   InvokeServiceResult,
+  FetchedHttpRequestHandlerResponse,
 } from "../../../../types/http";
 import { makeGotOptions } from "../../../../lib/http/gotUtil";
 import mapBodyAndHeaders from "../../mapBodyAndHeaders";
@@ -21,19 +22,17 @@ import mapBodyAndHeaders from "../../mapBodyAndHeaders";
 export default function handleRequest(
   requestId: string,
   originalRequest: HttpRequest,
+  stage: number | undefined,
+  otherResponses: FetchedHttpRequestHandlerResponse[],
+  services: {
+    [name: string]: HttpRequestHandlerConfig;
+  },
   httpConfig: HttpProxyConfig
 ): Promise<InvokeServiceResult>[] {
-  const path = originalRequest.path;
-  const method = originalRequest.method;
-  const routeConfig = httpConfig.routes[path][method] as HttpRouteConfig;
-
-  return Object.keys(routeConfig.services)
+  return Object.keys(services)
     .map(
       (service) =>
-        [service, routeConfig.services[service]] as [
-          string,
-          HttpRequestHandlerConfig
-        ]
+        [service, services[service]] as [string, HttpRequestHandlerConfig]
     )
     .filter(isHttpServiceConfig)
     .map(
@@ -58,7 +57,10 @@ export default function handleRequest(
           };
 
           const onRequestResult = serviceConfig.onRequest
-            ? await serviceConfig.onRequest(requestWithEditedPath)
+            ? await serviceConfig.onRequest(
+                requestWithEditedPath,
+                otherResponses
+              )
             : { handled: false as false, request: requestWithEditedPath };
 
           if (onRequestResult.handled) {
@@ -66,7 +68,8 @@ export default function handleRequest(
               const modifiedResponse = serviceConfig.onResponse
                 ? await serviceConfig.onResponse(
                     onRequestResult.response,
-                    originalRequest
+                    originalRequest,
+                    otherResponses
                   )
                 : onRequestResult.response;
 
@@ -78,10 +81,11 @@ export default function handleRequest(
                 service,
                 time: Date.now() - timeNow,
                 response: modifiedResponse,
+                stage
               };
               success({
                 skip: false,
-                response: fetchedResponse,
+                response: fetchedResponse
               });
             } else {
               success({ skip: true });
@@ -106,7 +110,7 @@ export default function handleRequest(
 
                   // Use the original request here - not modifiedRequest
                   const modifiedResponse = serviceConfig.onResponse
-                    ? await serviceConfig.onResponse(response, originalRequest)
+                    ? await serviceConfig.onResponse(response, originalRequest, otherResponses)
                     : response;
 
                   const fetchedResponse = {
@@ -117,6 +121,7 @@ export default function handleRequest(
                     service,
                     time: Date.now() - timeNow,
                     response,
+                    stage
                   };
 
                   success({ skip: false, response: fetchedResponse });
@@ -126,7 +131,7 @@ export default function handleRequest(
                     ? makeHttpResponse(error.response)
                     : {
                         status: 400,
-                        content: error.message,
+                        body: error.message,
                       };
 
                   if (responseIsError(errorResponse)) {
@@ -142,7 +147,8 @@ export default function handleRequest(
                   const modifiedResponse = serviceConfig.onResponse
                     ? await serviceConfig.onResponse(
                         errorResponse,
-                        originalRequest
+                        originalRequest,
+                        otherResponses
                       )
                     : errorResponse;
 
@@ -154,6 +160,7 @@ export default function handleRequest(
                     service,
                     time: Date.now() - timeNow,
                     response: errorResponse,
+                    stage
                   };
 
                   success({ skip: false, response: fetchedResponse });
@@ -165,7 +172,7 @@ export default function handleRequest(
                     ? makeHttpResponse(error.response)
                     : {
                         status: 400,
-                        content: error.message,
+                        body: error.message,
                       };
 
                   if (responseIsError(errorResponse)) {

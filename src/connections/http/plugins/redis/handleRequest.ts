@@ -9,9 +9,9 @@ import { get as activeRequests } from "./activeRequests";
 import * as configModule from "../../../../config";
 import { getChannelForService } from "../../../../lib/redis/getChannelForService";
 import {
-  HttpRouteConfig,
   RedisServiceHttpRequest,
   InvokeServiceResult,
+  FetchedHttpRequestHandlerResponse,
 } from "../../../../types/http";
 import { publish } from "./publish";
 import mapBodyAndHeaders from "../../mapBodyAndHeaders";
@@ -22,29 +22,31 @@ import mapBodyAndHeaders from "../../mapBodyAndHeaders";
 export default function handleRequest(
   requestId: string,
   request: HttpRequest,
+  stage: number | undefined,
+  otherResponses: FetchedHttpRequestHandlerResponse[],
+  services: {
+    [name: string]: HttpRequestHandlerConfig;
+  },
   httpConfig: HttpProxyConfig
 ): Promise<InvokeServiceResult>[] {
   const config = configModule.get();
-  const routeConfig = httpConfig.routes[request.path][
-    request.method
-  ] as HttpRouteConfig;
 
   const alreadyPublishedChannels: string[] = [];
 
-  return Object.keys(routeConfig.services)
+  return Object.keys(services)
     .map(
       (service) =>
-        [service, routeConfig.services[service]] as [
-          string,
-          HttpRequestHandlerConfig
-        ]
+        [service, services[service]] as [string, HttpRequestHandlerConfig]
     )
     .filter(isRedisServiceConfig)
     .map(
       ([service, serviceConfig]) =>
         new Promise(async (success) => {
-          const httpRequestWithMappedFields = mapBodyAndHeaders(request, serviceConfig);
-          
+          const httpRequestWithMappedFields = mapBodyAndHeaders(
+            request,
+            serviceConfig
+          );
+
           const redisHttpRequest: RedisServiceHttpRequest = {
             id: requestId,
             request: httpRequestWithMappedFields,
@@ -55,7 +57,7 @@ export default function handleRequest(
           const timeBeforeOnRequestResult = Date.now();
 
           const onRequestResult = serviceConfig.onRequest
-            ? await serviceConfig.onRequest(redisHttpRequest)
+            ? await serviceConfig.onRequest(redisHttpRequest, otherResponses)
             : {
                 handled: false as false,
                 request: JSON.stringify(redisHttpRequest),
@@ -73,6 +75,7 @@ export default function handleRequest(
                   service,
                   time: Date.now() - timeBeforeOnRequestResult,
                   response: onRequestResult.response,
+                  stage,
                 },
               });
             } else {
@@ -95,6 +98,8 @@ export default function handleRequest(
                 timeoutAt: Date.now() + (serviceConfig.timeout || 30000),
                 startTime: Date.now(),
                 onResponse: success,
+                stage,
+                responses: otherResponses,
               });
             } else {
               if (!alreadyPublishedChannels.includes(requestChannel)) {

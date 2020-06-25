@@ -1,5 +1,5 @@
 import { HttpRequest } from "../../../../types";
-import { InvokeServiceResult } from "../../../../types/http";
+import { InvokeServiceResult, FetchedHttpRequestHandlerResponse } from "../../../../types/http";
 
 export type ActiveHttpRequest = {
   id: string;
@@ -8,6 +8,8 @@ export type ActiveHttpRequest = {
   startTime: number;
   request: HttpRequest;
   onResponse: (result: InvokeServiceResult) => void;
+  stage: number | undefined;
+  responses: FetchedHttpRequestHandlerResponse[];
 };
 
 let map: Map<string, ActiveHttpRequest> = new Map<string, ActiveHttpRequest>();

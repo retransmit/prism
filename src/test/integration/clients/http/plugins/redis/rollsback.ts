@@ -81,7 +81,7 @@ export default async function (app: TestAppInstance) {
         id: redisInput.id,
         service: "userservice",
         response: {
-          content: {
+          body: {
             user: 1,
           },
         },
@@ -95,7 +95,7 @@ export default async function (app: TestAppInstance) {
         service: "messagingservice",
         response: {
           status: 400,
-          content: "Invalid request.",
+          body: "Invalid request.",
         },
       })
     );

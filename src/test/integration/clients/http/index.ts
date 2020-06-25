@@ -12,6 +12,7 @@ import httpMapsHeaders from "./plugins/http/mapsHeaders";
 import httpExcludesHeaders from "./plugins/http/excludesHeaders";
 import httpUrlEncodedRequests from "./plugins/http/urlEncodedRequests";
 import httpRedirect from "./plugins/http/redirect";
+import httpRunsStages from "./plugins/http/runsStages";
 
 import redisHttpMethods from "./plugins/redis/httpMethods";
 import redisMergeResults from "./plugins/redis/mergeResults";
@@ -40,6 +41,7 @@ export default function run(app: TestAppInstance) {
       httpExcludesHeaders(app);
       httpUrlEncodedRequests(app);
       httpRedirect(app);
+      httpRunsStages(app);
     });
 
     describe("redis", () => {

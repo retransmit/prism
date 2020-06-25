@@ -37,9 +37,10 @@ export default function cleanupTimedOut(httpConfig: HttpProxyConfig) {
           path: activeRequest.request.path,
           method: activeRequest.request.method,
           response: {
-            content: `${activeRequest.service} timed out.`,
+            body: `${activeRequest.service} timed out.`,
             status: 408,
           },
+          stage: activeRequest.stage,
         };
 
         activeRequest.onResponse({

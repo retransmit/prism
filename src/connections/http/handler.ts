@@ -23,6 +23,7 @@ import {
   InvokeServiceResult,
   HttpRouteConfig,
   IHttpRequestHandlerPlugin,
+  HttpRequestHandlerConfig,
 } from "../../types/http";
 
 const cors = require("@koa/cors");
@@ -118,6 +119,7 @@ async function handler(
   const originalRequest = makeHttpRequestFromContext(ctx);
 
   const requestId = randomId(32);
+
   const routeConfig = httpConfig.routes[originalRequest.path][method];
 
   // Are there custom handlers for the request?
@@ -133,27 +135,81 @@ async function handler(
     if (routeConfig) {
       const modifiedRequest = modResult.request;
 
-      let promises: Promise<InvokeServiceResult>[] = [];
-      for (const pluginName of Object.keys(plugins)) {
-        promises = promises.concat(
-          plugins[pluginName].handleRequest(
-            requestId,
-            modifiedRequest,
-            httpConfig
-          )
+      type StageConfig = {
+        stage: number | undefined;
+        services: {
+          [name: string]: HttpRequestHandlerConfig;
+        };
+      };
+
+      let stages: StageConfig[] = (function sortIntoStages() {
+        const unsortedStages = Object.keys(routeConfig.services).reduce(
+          (acc, serviceName) => {
+            const serviceConfig = routeConfig.services[serviceName];
+            const existingStage = acc.find(
+              (x) => x.stage === serviceConfig.stage
+            );
+            if (!existingStage) {
+              const newStage = {
+                stage: serviceConfig.stage,
+                services: {
+                  [serviceName]: serviceConfig,
+                },
+              };
+              return acc.concat(newStage);
+            } else {
+              existingStage.services[serviceName] = serviceConfig;
+              return acc;
+            }
+          },
+          [] as StageConfig[]
         );
+
+        return unsortedStages.sort(
+          (x, y) => (x.stage || Infinity) - (y.stage || Infinity)
+        );
+      })();
+
+      async function invokeRequestHandling() {
+        function responseIsNotSkipped(
+          x: InvokeServiceResult
+        ): x is { skip: false; response: FetchedHttpRequestHandlerResponse } {
+          return !x.skip;
+        }
+
+        let responses: FetchedHttpRequestHandlerResponse[] = [];
+
+        for (const stage of stages) {
+          let promises: Promise<InvokeServiceResult>[] = [];
+
+          for (const pluginName of Object.keys(plugins)) {
+            promises = promises.concat(
+              plugins[pluginName].handleRequest(
+                requestId,
+                modifiedRequest,
+                stage.stage,
+                responses,
+                stage.services,
+                httpConfig
+              )
+            );
+          }
+
+          const allResponses = await Promise.all(promises);
+
+          const validResponses = allResponses
+            .filter(responseIsNotSkipped)
+            .map((x) => x.response);
+
+          for (const response of validResponses) {
+            responses.push(response);
+          }
+        }
+
+        return responses;
       }
 
-      const allResponses = await Promise.all(promises);
-
-      function responseIsNotSkipped(
-        x: InvokeServiceResult
-      ): x is { skip: false; response: FetchedHttpRequestHandlerResponse } {
-        return !x.skip;
-      }
-      const validResponses = allResponses
-        .filter(responseIsNotSkipped)
-        .map((x) => x.response);
+      const validResponses = await invokeRequestHandling();
 
       const fetchedResponses = routeConfig.mergeResponses
         ? await routeConfig.mergeResponses(validResponses, originalRequest)
@@ -215,7 +271,7 @@ function sendResponse(
       }
 
       // Response body
-      ctx.body = response.content;
+      ctx.body = response.body;
 
       // Headers of type IncomingHttpHeaders
       if (response.headers) {
