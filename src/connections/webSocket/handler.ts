@@ -99,7 +99,9 @@ export default function makeHandler(plugins: {
           // If conn is not initialized, onConnect must exist.
           // Treat the first message as the onConnect argument.
 
-          const onConnectResult = await onConnect(requestId, message);
+          const onConnectResult = (await onConnect(requestId, message)) || {
+            drop: false,
+          };
 
           if (onConnectResult.drop === true) {
             activeConnections().delete(requestId);

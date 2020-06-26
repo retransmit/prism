@@ -148,5 +148,6 @@ export type HttpCookie = {
   That's all we support for now.
 */
 export type HttpRequestBodyEncoding =
+  | "text/plain"
   | "application/x-www-form-urlencoded"
   | "application/json";

@@ -28,7 +28,7 @@ export type HttpRouteConfig = {
   mergeResponses?: (
     responses: FetchedHttpRequestHandlerResponse[],
     request: HttpRequest
-  ) => Promise<FetchedHttpRequestHandlerResponse[]>;
+  ) => Promise<FetchedHttpRequestHandlerResponse[] | void>;
   genericErrors?: boolean;
   onError?: (
     responses: FetchedHttpRequestHandlerResponse[],
@@ -111,7 +111,7 @@ export type HttpRequestHandlerConfigBase = {
 export type HttpServiceHttpRequestHandlerConfig = {
   type: "http";
   url: string;
-  rollback?: (originalRequest: HttpRequest) => HttpRequest | undefined;
+  rollback?: (originalRequest: HttpRequest) => HttpRequest | void;
   rollbackRequestEncoding?: HttpRequestBodyEncoding;
   onRequest?: (
     request: HttpRequest,
@@ -128,7 +128,7 @@ export type HttpServiceHttpRequestHandlerConfig = {
     response: HttpResponse,
     request: HttpRequest,
     otherResponses: FetchedHttpRequestHandlerResponse[]
-  ) => Promise<HttpResponse>;
+  ) => Promise<HttpResponse | void>;
   onRollbackRequest?: (
     request: HttpRequest
   ) => Promise<
@@ -160,7 +160,7 @@ export type RedisServiceHttpRequestHandlerConfig = {
     response: string,
     request: HttpRequest,
     otherResponses: FetchedHttpRequestHandlerResponse[]
-  ) => Promise<RedisServiceHttpResponse>;
+  ) => Promise<RedisServiceHttpResponse | void>;
   onRollbackRequest?: (
     request: RedisServiceHttpRequest
   ) => Promise<

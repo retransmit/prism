@@ -33,13 +33,14 @@ export default function processMessage(httpConfig: HttpProxyConfig) {
         // Make sure the service responded in the configured channel
         // Otherwise ignore the message.
         if (channel === channelInRequest) {
-          const redisResponse = serviceConfig.onResponse
-            ? await serviceConfig.onResponse(
+          const redisResponse =
+            (serviceConfig.onResponse &&
+              (await serviceConfig.onResponse(
                 messageString,
                 activeRequest.request,
                 activeRequest.responses
-              )
-            : (messageObj as RedisServiceHttpResponse);
+              ))) ||
+            (messageObj as RedisServiceHttpResponse);
 
           if (responseIsError(redisResponse.response)) {
             if (serviceConfig.onError) {

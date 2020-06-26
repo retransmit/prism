@@ -4,6 +4,7 @@ import {
   WebSocketResponse,
   WebSocketMessageRequest,
   ActiveWebSocketConnection,
+  HttpServiceWebSocketRequestHandlerConfig,
 } from "../../../../types/webSocket";
 import respondToWebSocketClient from "../../respond";
 import { makeGotOptions } from "../../../../lib/http/gotUtil";
@@ -18,9 +19,10 @@ export default async function sendToService(
   const routeConfig = webSocketConfig.routes[request.route];
 
   for (const service of Object.keys(routeConfig.services)) {
-    const serviceConfig = routeConfig.services[service];
+    const cfg = routeConfig.services[service];
+    if (cfg.type === "http") {
+      const serviceConfig = cfg;
 
-    if (serviceConfig.type === "http") {
       const webSocketRequest: HttpServiceWebSocketMessageRequest = request;
 
       const httpRequest: HttpRequest = {
@@ -31,12 +33,11 @@ export default async function sendToService(
         remotePort: conn.port,
       };
 
-      const onRequestResult = serviceConfig.onRequest
-        ? await serviceConfig.onRequest(httpRequest)
-        : {
-            handled: false as false,
-            request: httpRequest,
-          };
+      const onRequestResult = (serviceConfig.onRequest &&
+        (await serviceConfig.onRequest(httpRequest))) || {
+        handled: false as false,
+        request: httpRequest,
+      };
 
       if (onRequestResult.handled) {
         if (onRequestResult.response) {

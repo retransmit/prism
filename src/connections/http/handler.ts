@@ -212,9 +212,13 @@ async function handler(
 
       const validResponses = await invokeRequestHandling();
 
-      const fetchedResponses = routeConfig.mergeResponses
-        ? await routeConfig.mergeResponses(validResponses, originalRequest)
-        : validResponses;
+      const fetchedResponses =
+        (routeConfig.mergeResponses &&
+          (await routeConfig.mergeResponses(
+            validResponses,
+            originalRequest
+          ))) ||
+        validResponses;
 
       let response = mergeResponses(fetchedResponses, httpConfig);
 
@@ -230,9 +234,9 @@ async function handler(
 
       // Are there custom handlers for the response?
       const onResponse = routeConfig.onResponse || httpConfig.onResponse;
-      const responseToSend = onResponse
-        ? (await onResponse(response, originalRequest)) || response
-        : response;
+      const responseToSend =
+        (onResponse && (await onResponse(response, originalRequest))) ||
+        response;
 
       sendResponse(ctx, responseToSend, routeConfig, httpConfig);
     }

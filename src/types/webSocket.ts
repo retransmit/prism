@@ -12,12 +12,14 @@ import WebSocket from "ws";
 */
 export type WebSocketRouteConfig = {
   services: {
-    [key: string]: any;
+    [key: string]:
+      | HttpServiceWebSocketRequestHandlerConfig
+      | RedisServiceWebSocketRequestHandlerConfig;
   };
   onConnect?: (
     requestId: string,
     message: string
-  ) => Promise<{ drop: true; message?: string } | { drop: false }>;
+  ) => Promise<{ drop: true; message?: string } | { drop: false } | void>;
   onDisconnect?: (requestId: string) => any;
   onRequest?: (
     requestId: string,
@@ -30,7 +32,7 @@ export type WebSocketRouteConfig = {
   onResponse?: (
     requestId: string,
     response: WebSocketResponse
-  ) => Promise<WebSocketResponse>;
+  ) => Promise<WebSocketResponse | void>;
 };
 
 /*
@@ -52,7 +54,7 @@ export type HttpServiceWebSocketRequestHandlerConfig = {
   onResponse?: (
     requestId: string,
     response: HttpResponse
-  ) => Promise<WebSocketResponse>;
+  ) => Promise<WebSocketResponse | void>;
   url: string;
   encoding?: HttpRequestBodyEncoding;
   onConnectUrl?: string;
@@ -74,7 +76,7 @@ export type RedisServiceWebSocketRequestHandlerConfig = {
   onResponse?: (
     requestId: string,
     response: string
-  ) => Promise<WebSocketResponse>;
+  ) => Promise<WebSocketResponse | void>;
   requestChannel: string;
   numRequestChannels?: number;
 } & WebSocketRequestHandlerConfigBase;

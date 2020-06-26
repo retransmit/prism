@@ -29,11 +29,17 @@ export default function processMessage(webSocketConfig: WebSocketProxyConfig) {
     ] as RedisServiceWebSocketRequestHandlerConfig;
 
     if (conn) {
-      const onResponseResult = serviceConfig.onResponse
-        ? await serviceConfig.onResponse(redisResponse.id, messageString)
-        : redisResponse;
+      const onResponseResult =
+        (serviceConfig.onResponse &&
+          (await serviceConfig.onResponse(redisResponse.id, messageString))) ||
+        redisResponse;
 
-      respondToWebSocketClient(redisResponse.id, onResponseResult, conn, webSocketConfig);
+      respondToWebSocketClient(
+        redisResponse.id,
+        onResponseResult,
+        conn,
+        webSocketConfig
+      );
     } else {
       const webSocketRequest: WebSocketNotConnectedRequest = {
         id: redisResponse.id,

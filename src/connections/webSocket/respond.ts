@@ -1,4 +1,7 @@
-import { WebSocketResponse, ActiveWebSocketConnection } from "../../types/webSocket";
+import {
+  WebSocketResponse,
+  ActiveWebSocketConnection,
+} from "../../types/webSocket";
 import { WebSocketProxyConfig } from "../../types";
 
 export default async function respondToWebSocketClient(
@@ -11,9 +14,9 @@ export default async function respondToWebSocketClient(
 
   const onResponse = routeConfig.onResponse || webSocketConfig.onResponse;
 
-  const onResponseResult = onResponse
-    ? await onResponse(requestId, webSocketResponse)
-    : webSocketResponse;
+  const onResponseResult =
+    (onResponse && (await onResponse(requestId, webSocketResponse))) ||
+    webSocketResponse;
 
   if (onResponseResult.type === "message") {
     if (onResponseResult.response) {

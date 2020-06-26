@@ -64,12 +64,13 @@ function timerCallback(
             const options = makeGotOptions(httpRequest, serviceConfig.encoding);
             got(serviceConfig.url, options)
               .then(async (serverResponse) => {
-                const webSocketResponse = serviceConfig.onResponse
-                  ? await serviceConfig.onResponse(
+                const webSocketResponse =
+                  (serviceConfig.onResponse &&
+                    (await serviceConfig.onResponse(
                       requestId,
                       makeHttpResponse(serverResponse)
-                    )
-                  : makeWebSocketResponse(serverResponse, requestId);
+                    ))) ||
+                  makeWebSocketResponse(serverResponse, requestId);
 
                 respondToWebSocketClient(
                   requestId,

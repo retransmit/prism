@@ -64,13 +64,14 @@ export default function handleRequest(
 
           if (onRequestResult.handled) {
             if (serviceConfig.awaitResponse !== false) {
-              const modifiedResponse = serviceConfig.onResponse
-                ? await serviceConfig.onResponse(
+              const modifiedResponse =
+                (serviceConfig.onResponse &&
+                  (await serviceConfig.onResponse(
                     onRequestResult.response,
                     originalRequest,
                     otherResponses
-                  )
-                : onRequestResult.response;
+                  ))) ||
+                onRequestResult.response;
 
               const fetchedResponse = {
                 type: "http" as "http",
@@ -108,13 +109,14 @@ export default function handleRequest(
                   }
 
                   // Use the original request here - not modifiedRequest
-                  const modifiedResponse = serviceConfig.onResponse
-                    ? await serviceConfig.onResponse(
+                  const modifiedResponse =
+                    (serviceConfig.onResponse &&
+                      (await serviceConfig.onResponse(
                         response,
                         originalRequest,
                         otherResponses
-                      )
-                    : response;
+                      ))) ||
+                    response;
 
                   const fetchedResponse = {
                     type: "http" as "http",
@@ -123,7 +125,7 @@ export default function handleRequest(
                     path: originalRequest.path,
                     service,
                     time: Date.now() - timeNow,
-                    response,
+                    response: modifiedResponse,
                     stage,
                   };
 
@@ -147,13 +149,14 @@ export default function handleRequest(
                   }
 
                   // Use the original request here - not modifiedRequest
-                  const modifiedResponse = serviceConfig.onResponse
-                    ? await serviceConfig.onResponse(
+                  const modifiedResponse =
+                    (serviceConfig.onResponse &&
+                      (await serviceConfig.onResponse(
                         errorResponse,
                         originalRequest,
                         otherResponses
-                      )
-                    : errorResponse;
+                      ))) ||
+                    errorResponse;
 
                   const fetchedResponse = {
                     type: "http" as "http",
@@ -162,7 +165,7 @@ export default function handleRequest(
                     path: originalRequest.path,
                     service,
                     time: Date.now() - timeNow,
-                    response: errorResponse,
+                    response: modifiedResponse,
                     stage,
                   };
 
