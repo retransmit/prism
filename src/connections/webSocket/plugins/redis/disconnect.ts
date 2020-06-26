@@ -24,9 +24,11 @@ export default async function disconnect(
     type: "disconnect",
   };
 
-  const onRequestResult = serviceConfig.onRequest
-    ? await serviceConfig.onRequest(request)
-    : { handled: false as false, request: JSON.stringify(request) };
+  const onRequestResult = (serviceConfig.onRequest &&
+    (await serviceConfig.onRequest(request))) || {
+    handled: false as false,
+    request: JSON.stringify(request),
+  };
 
   if (!onRequestResult.handled) {
     publish(channel, onRequestResult.request);

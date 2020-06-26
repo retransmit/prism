@@ -1,4 +1,10 @@
-import { HttpRequest, HttpResponse, WebSocketProxyConfig, IAppConfig, HttpRequestBodyEncoding } from ".";
+import {
+  HttpRequest,
+  HttpResponse,
+  WebSocketProxyConfig,
+  IAppConfig,
+  HttpRequestBodyEncoding,
+} from ".";
 import WebSocket from "ws";
 
 /*
@@ -19,6 +25,7 @@ export type WebSocketRouteConfig = {
   ) => Promise<
     | { handled: true; response?: WebSocketResponse }
     | { handled: false; request: WebSocketMessageRequest }
+    | void
   >;
   onResponse?: (
     requestId: string,
@@ -40,6 +47,7 @@ export type HttpServiceWebSocketRequestHandlerConfig = {
   ) => Promise<
     | { handled: true; response?: WebSocketResponse }
     | { handled: false; request: HttpRequest }
+    | void
   >;
   onResponse?: (
     requestId: string,
@@ -61,6 +69,7 @@ export type RedisServiceWebSocketRequestHandlerConfig = {
   ) => Promise<
     | { handled: true; response?: WebSocketResponse }
     | { handled: false; request: string }
+    | void
   >;
   onResponse?: (
     requestId: string,

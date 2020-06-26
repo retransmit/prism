@@ -54,6 +54,7 @@ export type HttpProxyConfig = {
   ) => Promise<
     | { handled: true; response: HttpResponse }
     | { handled: false; request: HttpRequest }
+    | void
   >;
   onResponse?: (
     response: HttpResponse,
@@ -90,6 +91,7 @@ export type WebSocketProxyConfig = {
   ) => Promise<
     | { handled: true; response?: WebSocketResponse }
     | { handled: false; request: WebSocketMessageRequest }
+    | void
   >;
   onResponse?: (
     requestId: string,

@@ -29,13 +29,20 @@ export default async function connect(
     responseChannel: `${webSocketConfig.redis?.responseChannel}.${config.instanceId}`,
   };
 
-  const onRequestResult = serviceConfig.onRequest
-    ? await serviceConfig.onRequest(request)
-    : { handled: false as false, request: JSON.stringify(request) };
+  const onRequestResult = (serviceConfig.onRequest &&
+    (await serviceConfig.onRequest(request))) || {
+    handled: false as false,
+    request: JSON.stringify(request),
+  };
 
   if (onRequestResult.handled) {
     if (onRequestResult.response) {
-      respondToWebSocketClient(requestId, onRequestResult.response, conn, webSocketConfig);
+      respondToWebSocketClient(
+        requestId,
+        onRequestResult.response,
+        conn,
+        webSocketConfig
+      );
     }
   } else {
     publish(channel, onRequestResult.request);

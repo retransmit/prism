@@ -56,12 +56,14 @@ export default function handleRequest(
 
           const timeBeforeOnRequestResult = Date.now();
 
-          const onRequestResult = serviceConfig.onRequest
-            ? await serviceConfig.onRequest(redisHttpRequest, otherResponses)
-            : {
-                handled: false as false,
-                request: JSON.stringify(redisHttpRequest),
-              };
+          const onRequestResult = (serviceConfig.onRequest &&
+            (await serviceConfig.onRequest(
+              redisHttpRequest,
+              otherResponses
+            ))) || {
+            handled: false as false,
+            request: JSON.stringify(redisHttpRequest),
+          };
 
           if (onRequestResult.handled) {
             if (serviceConfig.awaitResponse !== false) {

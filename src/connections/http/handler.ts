@@ -125,9 +125,10 @@ async function handler(
   // Are there custom handlers for the request?
   const onRequest = routeConfig?.onRequest || httpConfig.onRequest;
 
-  const modResult = onRequest
-    ? await onRequest(originalRequest)
-    : { handled: false as false, request: originalRequest };
+  const modResult = (onRequest && (await onRequest(originalRequest))) || {
+    handled: false as false,
+    request: originalRequest,
+  };
 
   if (modResult.handled) {
     sendResponse(ctx, modResult.response, routeConfig, httpConfig);
@@ -230,7 +231,7 @@ async function handler(
       // Are there custom handlers for the response?
       const onResponse = routeConfig.onResponse || httpConfig.onResponse;
       const responseToSend = onResponse
-        ? await onResponse(response, originalRequest)
+        ? (await onResponse(response, originalRequest)) || response
         : response;
 
       sendResponse(ctx, responseToSend, routeConfig, httpConfig);

@@ -56,12 +56,11 @@ export default function handleRequest(
             path: urlWithParamsReplaced,
           };
 
-          const onRequestResult = serviceConfig.onRequest
-            ? await serviceConfig.onRequest(
-                requestWithEditedPath,
-                otherResponses
-              )
-            : { handled: false as false, request: requestWithEditedPath };
+          const onRequestResult = (serviceConfig.onRequest &&
+            (await serviceConfig.onRequest(
+              requestWithEditedPath,
+              otherResponses
+            ))) || { handled: false as false, request: requestWithEditedPath };
 
           if (onRequestResult.handled) {
             if (serviceConfig.awaitResponse !== false) {
@@ -81,11 +80,11 @@ export default function handleRequest(
                 service,
                 time: Date.now() - timeNow,
                 response: modifiedResponse,
-                stage
+                stage,
               };
               success({
                 skip: false,
-                response: fetchedResponse
+                response: fetchedResponse,
               });
             } else {
               success({ skip: true });
@@ -110,7 +109,11 @@ export default function handleRequest(
 
                   // Use the original request here - not modifiedRequest
                   const modifiedResponse = serviceConfig.onResponse
-                    ? await serviceConfig.onResponse(response, originalRequest, otherResponses)
+                    ? await serviceConfig.onResponse(
+                        response,
+                        originalRequest,
+                        otherResponses
+                      )
                     : response;
 
                   const fetchedResponse = {
@@ -121,7 +124,7 @@ export default function handleRequest(
                     service,
                     time: Date.now() - timeNow,
                     response,
-                    stage
+                    stage,
                   };
 
                   success({ skip: false, response: fetchedResponse });
@@ -160,7 +163,7 @@ export default function handleRequest(
                     service,
                     time: Date.now() - timeNow,
                     response: errorResponse,
-                    stage
+                    stage,
                   };
 
                   success({ skip: false, response: fetchedResponse });

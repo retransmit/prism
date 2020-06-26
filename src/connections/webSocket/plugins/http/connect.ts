@@ -30,12 +30,11 @@ export default async function connect(
       remoteAddress: conn.ip,
       remotePort: conn.port,
     };
-    const onRequestResult = serviceConfig.onRequest
-      ? await serviceConfig.onRequest(httpRequest)
-      : {
-          handled: false as false,
-          request: httpRequest,
-        };
+    const onRequestResult = (serviceConfig.onRequest &&
+      (await serviceConfig.onRequest(httpRequest))) || {
+      handled: false as false,
+      request: httpRequest,
+    };
 
     if (onRequestResult.handled) {
       if (onRequestResult.response) {

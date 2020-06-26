@@ -41,9 +41,11 @@ export default async function rollback(
           path: urlWithParamsReplaced,
         };
 
-        const modifiedRequest = serviceConfig.onRollbackRequest
-          ? await serviceConfig.onRollbackRequest(requestWithPathParams)
-          : { handled: false as false, request: requestWithPathParams };
+        const modifiedRequest = (serviceConfig.onRollbackRequest &&
+          (await serviceConfig.onRollbackRequest(requestWithPathParams))) || {
+          handled: false as false,
+          request: requestWithPathParams,
+        };
 
         if (!modifiedRequest.handled) {
           const options = makeGotOptions(

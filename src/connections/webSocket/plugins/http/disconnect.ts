@@ -30,12 +30,11 @@ export default async function disconnect(
       remotePort: conn.port,
     };
 
-    const onRequestResult = serviceConfig.onRequest
-      ? await serviceConfig.onRequest(httpRequest)
-      : {
-          handled: false as false,
-          request: httpRequest,
-        };
+    const onRequestResult = (serviceConfig.onRequest &&
+      (await serviceConfig.onRequest(httpRequest))) || {
+      handled: false as false,
+      request: httpRequest,
+    };
 
     if (!onRequestResult.handled) {
       const options = makeGotOptions(

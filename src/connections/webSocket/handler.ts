@@ -130,17 +130,16 @@ export default function makeHandler(plugins: {
             webSocketConfig.onRequest ||
             webSocketConfig.routes[route].onRequest;
 
-          const onRequestResult = onRequest
-            ? await onRequest(requestId, message)
-            : {
-                handled: false as false,
-                request: {
-                  id: requestId,
-                  request: message,
-                  route,
-                  type: "message" as "message",
-                },
-              };
+          const onRequestResult = (onRequest &&
+            (await onRequest(requestId, message))) || {
+            handled: false as false,
+            request: {
+              id: requestId,
+              request: message,
+              route,
+              type: "message" as "message",
+            },
+          };
 
           if (onRequestResult.handled) {
             if (onRequestResult.response) {

@@ -19,11 +19,12 @@ export type HttpRouteConfig = {
   ) => Promise<
     | { handled: true; response: HttpResponse }
     | { handled: false; request: HttpRequest }
+    | void
   >;
   onResponse?: (
     response: HttpResponse,
     request: HttpRequest
-  ) => Promise<HttpResponse>;
+  ) => Promise<HttpResponse | void>;
   mergeResponses?: (
     responses: FetchedHttpRequestHandlerResponse[],
     request: HttpRequest
@@ -121,6 +122,7 @@ export type HttpServiceHttpRequestHandlerConfig = {
         response: HttpResponse;
       }
     | { handled: false; request: HttpRequest }
+    | void
   >;
   onResponse?: (
     response: HttpResponse,
@@ -134,6 +136,7 @@ export type HttpServiceHttpRequestHandlerConfig = {
         handled: true;
       }
     | { handled: false; request: HttpRequest }
+    | void
   >;
   onError?: (response: HttpResponse | undefined, request: HttpRequest) => any;
 } & HttpRequestHandlerConfigBase;
@@ -151,6 +154,7 @@ export type RedisServiceHttpRequestHandlerConfig = {
         response: HttpResponse;
       }
     | { handled: false; request: string }
+    | void
   >;
   onResponse?: (
     response: string,
@@ -164,6 +168,7 @@ export type RedisServiceHttpRequestHandlerConfig = {
         handled: true;
       }
     | { handled: false; request: string }
+    | void
   >;
   onError?: (response: string | undefined, request: HttpRequest) => any;
 } & HttpRequestHandlerConfigBase;
