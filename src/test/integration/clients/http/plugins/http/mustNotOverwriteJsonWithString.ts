@@ -77,7 +77,7 @@ export default async function (app: TestAppInstance) {
     const serverResponse = await getResponse(promisedResponse);
     serverResponse.statusCode.should.equal(500);
     serverResponse.body.should.equal(
-      `messagingservice returned a response which will overwrite current response.`
+      "Cannot merge multiple types of content. messagingservice is returned a string response while the current response is an object."
     );
   });
 }

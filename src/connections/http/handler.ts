@@ -215,7 +215,7 @@ async function handler(
         ? await routeConfig.mergeResponses(validResponses, originalRequest)
         : validResponses;
 
-      let response = mergeResponses(requestId, fetchedResponses, httpConfig);
+      let response = mergeResponses(fetchedResponses, httpConfig);
 
       if (responseIsError(response)) {
         const onError = routeConfig.onError || httpConfig.onError;
