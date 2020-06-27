@@ -66,23 +66,23 @@ export default async function init(config: IAppConfig) {
       const routeConfig = config.http.routes[route];
 
       if (routeConfig.GET) {
-        router.get(route, createHandler("GET", config));
+        router.get(route, createHandler(route, "GET", config));
       }
 
       if (routeConfig.POST) {
-        router.post(route, createHandler("POST", config));
+        router.post(route, createHandler(route, "POST", config));
       }
 
       if (routeConfig.PUT) {
-        router.put(route, createHandler("PUT", config));
+        router.put(route, createHandler(route, "PUT", config));
       }
 
       if (routeConfig.DELETE) {
-        router.del(route, createHandler("DELETE", config));
+        router.del(route, createHandler(route, "DELETE", config));
       }
 
       if (routeConfig.PATCH) {
-        router.patch(route, createHandler("PATCH", config));
+        router.patch(route, createHandler(route, "PATCH", config));
       }
     }
 
@@ -105,14 +105,15 @@ export default async function init(config: IAppConfig) {
   }
 }
 
-function createHandler(method: HttpMethods, config: IAppConfig) {
+function createHandler(route: string, method: HttpMethods, config: IAppConfig) {
   return async function httpHandler(ctx: IRouterContext) {
-    return await handler(ctx, method, config.http as HttpProxyConfig);
+    return await handler(ctx, route, method, config.http as HttpProxyConfig);
   };
 }
 
 async function handler(
   ctx: IRouterContext,
+  route: string,
   method: HttpMethods,
   httpConfig: HttpProxyConfig
 ) {
@@ -120,7 +121,7 @@ async function handler(
 
   const requestId = randomId(32);
 
-  const routeConfig = httpConfig.routes[originalRequest.path][method];
+  const routeConfig = httpConfig.routes[route][method];
 
   // Are there custom handlers for the request?
   const onRequest = routeConfig?.onRequest || httpConfig.onRequest;
@@ -188,6 +189,8 @@ async function handler(
               plugins[pluginName].handleRequest(
                 requestId,
                 modifiedRequest,
+                route,
+                method,
                 stage.stage,
                 responses,
                 stage.services,
@@ -228,7 +231,13 @@ async function handler(
           onError(fetchedResponses, originalRequest);
         }
         for (const pluginName of Object.keys(plugins)) {
-          plugins[pluginName].rollback(requestId, modifiedRequest, httpConfig);
+          plugins[pluginName].rollback(
+            requestId,
+            modifiedRequest,
+            route,
+            method,
+            httpConfig
+          );
         }
       }
 

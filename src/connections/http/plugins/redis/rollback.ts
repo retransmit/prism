@@ -1,4 +1,4 @@
-import { HttpRequest, HttpProxyConfig } from "../../../../types";
+import { HttpRequest, HttpProxyConfig, HttpMethods } from "../../../../types";
 import { getChannelForService } from "../../../../lib/redis/getChannelForService";
 import {
   HttpRouteConfig,
@@ -13,11 +13,12 @@ import { publish } from "./publish";
 export default async function rollback(
   requestId: string,
   request: HttpRequest,
+  route: string,
+  method: HttpMethods,
   httpConfig: HttpProxyConfig
 ) {
-  const routeConfig = httpConfig.routes[request.path][
-    request.method
-  ] as HttpRouteConfig;
+  // TODO
+  const routeConfig = httpConfig.routes[route][method] as HttpRouteConfig;
 
   const alreadyPublishedChannels: string[] = [];
 

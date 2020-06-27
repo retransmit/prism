@@ -10,7 +10,7 @@ export default async function respondToWebSocketClient(
   conn: ActiveWebSocketConnection,
   webSocketConfig: WebSocketProxyConfig
 ) {
-  const routeConfig = webSocketConfig.routes[webSocketResponse.route];
+  const routeConfig = webSocketConfig.routes[conn.route];
 
   const onResponse = routeConfig.onResponse || webSocketConfig.onResponse;
 

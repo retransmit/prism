@@ -3,6 +3,7 @@ import {
   HttpServiceHttpRequestHandlerConfig,
   HttpRequestHandlerConfig,
   HttpProxyConfig,
+  HttpMethods,
 } from "../../../../types";
 
 import got from "got";
@@ -22,6 +23,8 @@ import selectRandomUrl from "../../../../lib/http/selectRandomUrl";
 export default function handleRequest(
   requestId: string,
   originalRequest: HttpRequest,
+  route: string,
+  method: HttpMethods,
   stage: number | undefined,
   otherResponses: FetchedHttpRequestHandlerResponse[],
   services: {
@@ -40,7 +43,7 @@ export default function handleRequest(
         new Promise(async (success) => {
           const timeNow = Date.now();
           const params = originalRequest.params || {};
-          
+
           const serviceUrl = await selectRandomUrl(
             serviceConfig.url,
             serviceConfig.getUrl
@@ -82,7 +85,8 @@ export default function handleRequest(
               const fetchedResponse = {
                 type: "http" as "http",
                 id: requestId,
-                method: originalRequest.method,
+                route,
+                method,
                 path: originalRequest.path,
                 service,
                 time: Date.now() - timeNow,
@@ -127,7 +131,8 @@ export default function handleRequest(
                   const fetchedResponse = {
                     type: "http" as "http",
                     id: requestId,
-                    method: originalRequest.method,
+                    route,
+                    method,
                     path: originalRequest.path,
                     service,
                     time: Date.now() - timeNow,
@@ -167,7 +172,8 @@ export default function handleRequest(
                   const fetchedResponse = {
                     type: "http" as "http",
                     id: requestId,
-                    method: originalRequest.method,
+                    route,
+                    method,
                     path: originalRequest.path,
                     service,
                     time: Date.now() - timeNow,

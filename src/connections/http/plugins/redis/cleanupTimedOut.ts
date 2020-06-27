@@ -25,17 +25,14 @@ export default function cleanupTimedOut(httpConfig: HttpProxyConfig) {
       }
 
       for (const [activeRequestId, activeRequest] of timedOut) {
-        const routeConfig = httpConfig.routes[activeRequest.request.path][
-          activeRequest.request.method
-        ] as HttpRouteConfig;
-
         const fetchedResponse: FetchedHttpRequestHandlerResponse = {
           type: "redis",
           id: activeRequestId,
           time: Date.now() - activeRequest.startTime,
           service: activeRequest.service,
           path: activeRequest.request.path,
-          method: activeRequest.request.method,
+          route: activeRequest.route,
+          method: activeRequest.method,
           response: {
             body: `${activeRequest.service} timed out.`,
             status: 408,

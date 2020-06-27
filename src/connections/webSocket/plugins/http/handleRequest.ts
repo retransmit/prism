@@ -16,7 +16,7 @@ export default async function sendToService(
   conn: ActiveWebSocketConnection,
   webSocketConfig: WebSocketProxyConfig
 ) {
-  const routeConfig = webSocketConfig.routes[request.route];
+  const routeConfig = webSocketConfig.routes[conn.route];
 
   for (const service of Object.keys(routeConfig.services)) {
     const cfg = routeConfig.services[service];
@@ -72,7 +72,7 @@ export default async function sendToService(
               : {
                   id: request.id,
                   response: error.message,
-                  route: request.route,
+                  route: conn.route,
                   service,
                   type: "message",
                 };

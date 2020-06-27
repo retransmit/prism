@@ -53,6 +53,7 @@ export type FetchedHttpRequestHandlerResponse = {
   id: string;
   service: string;
   time: number;
+  route: string;
   path: string;
   method: HttpMethods;
   response: HttpResponse;
@@ -185,6 +186,8 @@ export type IHttpRequestHandlerPlugin = {
   handleRequest: (
     requestId: string,
     request: HttpRequest,
+    route: string,
+    method: HttpMethods,
     stage: number | undefined,
     otherResponses: FetchedHttpRequestHandlerResponse[],
     services: {
@@ -195,6 +198,8 @@ export type IHttpRequestHandlerPlugin = {
   rollback: (
     requestId: string,
     request: HttpRequest,
+    route: string,
+    method: HttpMethods,
     httpConfig: HttpProxyConfig
   ) => void;
 };

@@ -3,6 +3,7 @@ import {
   HttpRequest,
   RedisServiceHttpRequestHandlerConfig,
   HttpProxyConfig,
+  HttpMethods,
 } from "../../../../types";
 
 import { get as activeRequests } from "./activeRequests";
@@ -22,6 +23,8 @@ import mapBodyAndHeaders from "../../mapBodyAndHeaders";
 export default function handleRequest(
   requestId: string,
   request: HttpRequest,
+  route: string,
+  method: HttpMethods,
   stage: number | undefined,
   otherResponses: FetchedHttpRequestHandlerResponse[],
   services: {
@@ -72,7 +75,8 @@ export default function handleRequest(
                 response: {
                   type: "redis",
                   id: requestId,
-                  method: request.method,
+                  route,
+                  method,
                   path: request.path,
                   service,
                   time: Date.now() - timeBeforeOnRequestResult,
@@ -95,6 +99,8 @@ export default function handleRequest(
               }
               activeRequests().set(`${requestId}+${service}`, {
                 id: requestId,
+                route,
+                method,
                 request: request,
                 service,
                 timeoutAt: Date.now() + (serviceConfig.timeout || 30000),

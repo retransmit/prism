@@ -1,6 +1,6 @@
 import got from "got";
 
-import { HttpRequest, HttpProxyConfig } from "../../../../types";
+import { HttpRequest, HttpProxyConfig, HttpMethods } from "../../../../types";
 
 import responseIsError from "../../../../lib/http/responseIsError";
 import { makeHttpResponse } from "./makeHttpResponse";
@@ -14,11 +14,11 @@ import { makeGotOptions } from "../../../../lib/http/gotUtil";
 export default async function rollback(
   requestId: string,
   request: HttpRequest,
+  route: string,
+  method: HttpMethods,
   httpConfig: HttpProxyConfig
 ) {
-  const routeConfig = httpConfig.routes[request.path][
-    request.method
-  ] as HttpRouteConfig;
+  const routeConfig = httpConfig.routes[route][method] as HttpRouteConfig;
 
   for (const service of Object.keys(routeConfig.services)) {
     const serviceConfig = routeConfig.services[service];

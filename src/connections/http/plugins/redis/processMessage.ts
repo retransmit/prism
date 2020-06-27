@@ -22,8 +22,8 @@ export default function processMessage(httpConfig: HttpProxyConfig) {
       // We're going to process it. So remove it.
       activeRequests().delete(activeRequestId);
 
-      const routeConfig = httpConfig.routes[activeRequest.request.path][
-        activeRequest.request.method
+      const routeConfig = httpConfig.routes[activeRequest.route][
+        activeRequest.method
       ] as HttpRouteConfig;
 
       const serviceConfig = routeConfig.services[activeRequest.service];
@@ -55,7 +55,8 @@ export default function processMessage(httpConfig: HttpProxyConfig) {
             id: redisResponse.id,
             time: processingTime,
             path: activeRequest.request.path,
-            method: activeRequest.request.method,
+            route: activeRequest.route,
+            method: activeRequest.method,
             service: activeRequest.service,
             response: redisResponse.response,
             stage: activeRequest.stage,
