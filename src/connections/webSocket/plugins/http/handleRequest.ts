@@ -3,12 +3,13 @@ import {
   HttpServiceWebSocketMessageRequest,
   WebSocketResponse,
   WebSocketMessageRequest,
-  ActiveWebSocketConnection
+  ActiveWebSocketConnection,
 } from "../../../../types/webSocket";
 import respondToWebSocketClient from "../../respond";
 import { makeGotOptions } from "../../../../lib/http/gotUtil";
 import got from "got";
 import { makeWebSocketResponse } from "./makeWebSocketResponse";
+import selectRandomUrl from "../../../../lib/http/selectRandomUrl";
 
 export default async function sendToService(
   request: WebSocketMessageRequest,
@@ -25,7 +26,7 @@ export default async function sendToService(
       const webSocketRequest: HttpServiceWebSocketMessageRequest = request;
 
       const httpRequest: HttpRequest = {
-        path: serviceConfig.url,
+        path: conn.path,
         method: "POST",
         body: webSocketRequest,
         remoteAddress: conn.ip,
@@ -49,7 +50,10 @@ export default async function sendToService(
         }
       } else {
         const options = makeGotOptions(httpRequest, undefined);
-        got(serviceConfig.url, options)
+        got(
+          await selectRandomUrl(serviceConfig.url, serviceConfig.getUrl),
+          options
+        )
           .then(async (serverResponse) => {
             const webSocketResponse = makeWebSocketResponse(
               serverResponse,

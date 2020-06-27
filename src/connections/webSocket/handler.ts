@@ -1,6 +1,6 @@
 import { IncomingMessage } from "http";
 import WebSocket from "ws";
-
+import * as url from "url";
 import randomId from "../../lib/random";
 import { get as activeConnections } from "./activeConnections";
 import {
@@ -46,6 +46,7 @@ export default function makeHandler(plugins: {
       const conn = {
         initialized: false,
         route,
+        path: (request.url && url.parse(request.url).pathname) || "",
         webSocket: ws,
         ip,
         port: request.socket.remotePort,
@@ -71,7 +72,7 @@ export default function makeHandler(plugins: {
 
       ws.on(
         "message",
-        onMessage(requestId, route, ws, routeConfig, webSocketConfig)
+        onMessage(requestId, request, route, ws, routeConfig, webSocketConfig)
       );
 
       ws.on("close", onClose(requestId, webSocketConfig));
@@ -80,6 +81,7 @@ export default function makeHandler(plugins: {
 
   function onMessage(
     requestId: string,
+    request: IncomingMessage,
     route: string,
     ws: WebSocket,
     routeConfig: WebSocketRouteConfig,
@@ -137,6 +139,7 @@ export default function makeHandler(plugins: {
             handled: false as false,
             request: {
               id: requestId,
+              path: conn.path,
               request: message,
               route,
               type: "message" as "message",
@@ -199,11 +202,11 @@ export default function makeHandler(plugins: {
         }
 
         // Call disconnect for services
-        const route = conn.route;
         for (const service of Object.keys(
           webSocketConfig.routes[conn.route].services
         )) {
-          const serviceConfig = webSocketConfig.routes[route].services[service];
+          const serviceConfig =
+            webSocketConfig.routes[conn.route].services[service];
           plugins[serviceConfig.type].disconnect(
             requestId,
             conn,

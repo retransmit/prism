@@ -21,6 +21,7 @@ export default async function disconnect(
   const request: WebSocketDisconnectRequest = {
     id: requestId,
     route: conn.route,
+    path: conn.path,
     type: "disconnect",
   };
 

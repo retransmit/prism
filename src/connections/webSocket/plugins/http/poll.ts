@@ -11,6 +11,7 @@ import got from "got";
 import { makeWebSocketResponse } from "./makeWebSocketResponse";
 import { makeHttpResponse } from "../../../http/plugins/http/makeHttpResponse";
 import responseIsError from "../../../../lib/http/responseIsError";
+import selectRandomUrl from "../../../../lib/http/selectRandomUrl";
 
 export function setupPolling(webSocketConfig: WebSocketProxyConfig) {
   for (const route of Object.keys(webSocketConfig.routes)) {
@@ -38,7 +39,7 @@ function timerCallback(
       for (const [requestId, conn] of connections) {
         if (conn.route === route) {
           const httpRequest: HttpRequest = {
-            path: serviceConfig.url,
+            path: conn.path,
             method: "POST",
             body: conn.lastRequest || { id: requestId },
             remoteAddress: conn.ip,
@@ -62,7 +63,11 @@ function timerCallback(
             }
           } else {
             const options = makeGotOptions(httpRequest, serviceConfig.encoding);
-            got(serviceConfig.url, options)
+
+            got(
+              await selectRandomUrl(serviceConfig.url, serviceConfig.getUrl),
+              options
+            )
               .then(async (serverResponse) => {
                 const webSocketResponse =
                   (serviceConfig.onResponse &&

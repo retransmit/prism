@@ -8,6 +8,7 @@ import { makeGotOptions } from "../../../../lib/http/gotUtil";
 import got from "got";
 import { makeHttpResponse } from "../../../http/plugins/http/makeHttpResponse";
 import responseIsError from "../../../../lib/http/responseIsError";
+import selectRandomUrl from "../../../../lib/http/selectRandomUrl";
 
 export default async function disconnect(
   requestId: string,
@@ -20,10 +21,11 @@ export default async function disconnect(
       id: requestId,
       type: "disconnect",
       route: conn.route,
+      path: conn.path,
     };
 
     const httpRequest = {
-      path: serviceConfig.onDisconnectUrl,
+      path: conn.path,
       method: "POST" as "POST",
       body: webSocketRequest,
       remoteAddress: conn.ip,
@@ -44,7 +46,13 @@ export default async function disconnect(
 
       // We don't care about the response here.
       // The client has already disco'ed.
-      got(serviceConfig.url, options).catch(async (error) => {
+      got(
+        await selectRandomUrl(
+          serviceConfig.onDisconnectUrl,
+          serviceConfig.getOnDisconnectUrl
+        ),
+        options
+      ).catch(async (error) => {
         const errorResponse = error.response
           ? makeHttpResponse(error.response)
           : {

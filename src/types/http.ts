@@ -5,6 +5,8 @@ import {
   HttpProxyConfig,
   IAppConfig,
   HttpRequestBodyEncoding,
+  UrlList,
+  UrlSelector,
 } from ".";
 
 /*
@@ -110,7 +112,8 @@ export type HttpRequestHandlerConfigBase = {
 
 export type HttpServiceHttpRequestHandlerConfig = {
   type: "http";
-  url: string;
+  url: UrlList;
+  getUrl?: UrlSelector;
   rollback?: (originalRequest: HttpRequest) => HttpRequest | void;
   rollbackRequestEncoding?: HttpRequestBodyEncoding;
   onRequest?: (

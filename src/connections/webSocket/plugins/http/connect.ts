@@ -9,6 +9,7 @@ import got from "got";
 import respondToWebSocketClient from "../../respond";
 import { makeHttpResponse } from "../../../http/plugins/http/makeHttpResponse";
 import responseIsError from "../../../../lib/http/responseIsError";
+import selectRandomUrl from "../../../../lib/http/selectRandomUrl";
 
 export default async function connect(
   requestId: string,
@@ -21,10 +22,11 @@ export default async function connect(
       id: requestId,
       type: "connect",
       route: conn.route,
+      path: conn.path,
     };
 
     const httpRequest = {
-      path: serviceConfig.onConnectUrl,
+      path: conn.path,
       method: "POST" as "POST",
       body: webSocketRequest,
       remoteAddress: conn.ip,
@@ -51,7 +53,13 @@ export default async function connect(
         serviceConfig.onConnectRequestEncoding
       );
 
-      got(serviceConfig.url, options).catch(async (error) => {
+      got(
+        await selectRandomUrl(
+          serviceConfig.onConnectUrl,
+          serviceConfig.getOnConnectUrl
+        ),
+        options
+      ).catch(async (error) => {
         const errorResponse = error.response
           ? makeHttpResponse(error.response)
           : {

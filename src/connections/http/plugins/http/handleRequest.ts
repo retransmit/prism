@@ -14,6 +14,7 @@ import {
 } from "../../../../types/http";
 import { makeGotOptions } from "../../../../lib/http/gotUtil";
 import mapBodyAndHeaders from "../../mapBodyAndHeaders";
+import selectRandomUrl from "../../../../lib/http/selectRandomUrl";
 
 /*
   Make Promises for Http Services
@@ -39,11 +40,17 @@ export default function handleRequest(
         new Promise(async (success) => {
           const timeNow = Date.now();
           const params = originalRequest.params || {};
+          
+          const serviceUrl = await selectRandomUrl(
+            serviceConfig.url,
+            serviceConfig.getUrl
+          );
+
           const urlWithParamsReplaced = params
             ? Object.keys(params).reduce((acc, param) => {
                 return acc.replace(`/:${param}`, `/${params[param]}`);
-              }, serviceConfig.url)
-            : serviceConfig.url;
+              }, serviceUrl)
+            : serviceUrl;
 
           const requestWithMappedFields = mapBodyAndHeaders(
             originalRequest,

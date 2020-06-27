@@ -26,6 +26,7 @@ export default async function connect(
     id: requestId,
     type: "connect",
     route: conn.route,
+    path: conn.path,
     responseChannel: `${webSocketConfig.redis?.responseChannel}.${config.instanceId}`,
   };
 

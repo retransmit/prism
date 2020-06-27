@@ -43,6 +43,7 @@ export default function processMessage(webSocketConfig: WebSocketProxyConfig) {
         id: redisResponse.id,
         type: "notconnected",
         route: redisResponse.route,
+        path: "",
       };
 
       const requestChannel = getChannelForService(

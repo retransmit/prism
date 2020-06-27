@@ -4,6 +4,8 @@ import {
   WebSocketProxyConfig,
   IAppConfig,
   HttpRequestBodyEncoding,
+  UrlList,
+  UrlSelector,
 } from ".";
 import WebSocket from "ws";
 
@@ -44,6 +46,7 @@ export type HttpServiceWebSocketRequestHandlerConfig = {
   type: "http";
   pollingInterval?: number;
   resendRequestWhilePolling?: boolean;
+  
   onRequest?: (
     request: HttpRequest
   ) => Promise<
@@ -51,16 +54,24 @@ export type HttpServiceWebSocketRequestHandlerConfig = {
     | { handled: false; request: HttpRequest }
     | void
   >;
+
   onResponse?: (
     requestId: string,
     response: HttpResponse
   ) => Promise<WebSocketResponse | void>;
-  url: string;
+  
+  url: UrlList;
+  getUrl?: UrlSelector;
   encoding?: HttpRequestBodyEncoding;
-  onConnectUrl?: string;
+  
+  onConnectUrl?: UrlList;
+  getOnConnectUrl?: UrlSelector;
   onConnectRequestEncoding?: HttpRequestBodyEncoding;
-  onDisconnectUrl?: string;
+  
+  onDisconnectUrl?: UrlList;
+  getOnDisconnectUrl?: UrlSelector;
   onDisconnectRequestEncoding?: HttpRequestBodyEncoding;
+  
   onError?: (response: HttpResponse | undefined, request: HttpRequest) => any;
 } & WebSocketRequestHandlerConfigBase;
 
@@ -134,6 +145,7 @@ export type HttpServiceWebSocketResponse = {
 export type WebSocketRequestBase = {
   id: string;
   route: string;
+  path: string;
 };
 
 export type RedisServiceWebSocketMessageRequest = {
@@ -157,6 +169,7 @@ export type WebSocketRequest =
 export type ActiveWebSocketConnection = {
   initialized: boolean;
   route: string;
+  path: string;
   webSocket: WebSocket;
   ip: string | undefined;
   port: number | undefined;
