@@ -9,7 +9,6 @@ import got from "got";
 import responseIsError from "../../../../lib/http/responseIsError";
 import { makeHttpResponse } from "./makeHttpResponse";
 import {
-  HttpRouteConfig,
   InvokeServiceResult,
   FetchedHttpRequestHandlerResponse,
 } from "../../../../types/http";

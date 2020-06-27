@@ -6,7 +6,7 @@ import {
   HttpRouteConfig,
   FetchedHttpRequestHandlerResponse,
 } from "../../../../types/http";
-import { HttpProxyConfig, HttpResponse, HttpRequest } from "../../../../types";
+import { HttpProxyConfig } from "../../../../types";
 
 export default function processMessage(httpConfig: HttpProxyConfig) {
   return async function processMessageImpl(

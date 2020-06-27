@@ -3,8 +3,7 @@ import {
   HttpServiceWebSocketMessageRequest,
   WebSocketResponse,
   WebSocketMessageRequest,
-  ActiveWebSocketConnection,
-  HttpServiceWebSocketRequestHandlerConfig,
+  ActiveWebSocketConnection
 } from "../../../../types/webSocket";
 import respondToWebSocketClient from "../../respond";
 import { makeGotOptions } from "../../../../lib/http/gotUtil";

@@ -1,5 +1,4 @@
 import { HttpRequest, HttpProxyConfig } from "../../../../types";
-import * as configModule from "../../../../config";
 import { getChannelForService } from "../../../../lib/redis/getChannelForService";
 import {
   HttpRouteConfig,
@@ -16,7 +15,6 @@ export default async function rollback(
   request: HttpRequest,
   httpConfig: HttpProxyConfig
 ) {
-  const config = configModule.get();
   const routeConfig = httpConfig.routes[request.path][
     request.method
   ] as HttpRouteConfig;

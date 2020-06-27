@@ -1,4 +1,3 @@
-import * as configModule from "../../../../config";
 import { WebSocketProxyConfig } from "../../../../types";
 import {
   WebSocketResponse,
@@ -15,7 +14,6 @@ export default function processMessage(webSocketConfig: WebSocketProxyConfig) {
     channel: string,
     messageString: string
   ) {
-    const config = configModule.get();
     const redisResponse = JSON.parse(messageString) as WebSocketResponse;
 
     // Default to 'message' type.
