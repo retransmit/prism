@@ -17,7 +17,6 @@ export default async function rollback(
   method: HttpMethods,
   httpConfig: HttpProxyConfig
 ) {
-  // TODO
   const routeConfig = httpConfig.routes[route][method] as HttpRouteConfig;
 
   const alreadyPublishedChannels: string[] = [];

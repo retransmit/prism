@@ -42,7 +42,8 @@ export default async function init(
     // Load other plugins
     if (config.webSocket.plugins) {
       for (const pluginName of Object.keys(config.webSocket.plugins)) {
-        plugins[pluginName] = require(config.webSocket.plugins[pluginName].path);
+        plugins[pluginName] = require(config.webSocket.plugins[pluginName]
+          .path);
       }
     }
 
