@@ -30,6 +30,10 @@ async function run() {
     throw new Error("Tests can only be run with NODE_ENV=development.");
   }
 
+  console.log(
+    "WARN: These tests exist just to make sure we don't introduce silly performance issues. These numbers are not at all useful for benchmarking."
+  );
+
   const tests = argv.t || ["all"];
   const count = argv.n || 1;
 
