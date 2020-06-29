@@ -23,6 +23,8 @@ export default async function disconnect(
     route: conn.route,
     path: conn.path,
     type: "disconnect",
+    remoteAddress: conn.remoteAddress,
+    remotePort: conn.remotePort,
   };
 
   const onRequestResult = (serviceConfig.onRequest &&

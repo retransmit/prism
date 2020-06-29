@@ -29,8 +29,8 @@ export default async function sendToService(
         path: conn.path,
         method: "POST",
         body: webSocketRequest,
-        remoteAddress: conn.ip,
-        remotePort: conn.port,
+        remoteAddress: conn.remoteAddress,
+        remotePort: conn.remotePort,
       };
 
       const onRequestResult = (serviceConfig.onRequest &&

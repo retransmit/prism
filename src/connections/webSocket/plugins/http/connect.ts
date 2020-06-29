@@ -23,14 +23,16 @@ export default async function connect(
       type: "connect",
       route: conn.route,
       path: conn.path,
+      remoteAddress: conn.remoteAddress,
+      remotePort: conn.remotePort,
     };
 
     const httpRequest = {
       path: conn.path,
       method: "POST" as "POST",
       body: webSocketRequest,
-      remoteAddress: conn.ip,
-      remotePort: conn.port,
+      remoteAddress: conn.remoteAddress,
+      remotePort: conn.remotePort,
     };
     const onRequestResult = (serviceConfig.onRequest &&
       (await serviceConfig.onRequest(httpRequest))) || {

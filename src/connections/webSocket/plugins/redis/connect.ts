@@ -28,6 +28,8 @@ export default async function connect(
     route: conn.route,
     path: conn.path,
     responseChannel: `${webSocketConfig.redis?.responseChannel}.${config.instanceId}`,
+    remoteAddress: conn.remoteAddress,
+    remotePort: conn.remotePort,
   };
 
   const onRequestResult = (serviceConfig.onRequest &&

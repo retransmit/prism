@@ -37,7 +37,7 @@ export default function makeHandler(plugins: {
       const requestId = randomId();
 
       const xForwardedFor = request.headers["x-forwarded-for"];
-      const ip = Array.isArray(xForwardedFor)
+      const remoteAddress = Array.isArray(xForwardedFor)
         ? xForwardedFor[0]
         : xForwardedFor
         ? xForwardedFor.split(/\s*,\s*/)[0]
@@ -48,8 +48,8 @@ export default function makeHandler(plugins: {
         route,
         path: (request.url && url.parse(request.url).pathname) || "",
         webSocket: ws,
-        ip,
-        port: request.socket.remotePort,
+        remoteAddress,
+        remotePort: request.socket.remotePort,
         saveLastRequest: saveLastRequest(routeConfig),
         lastRequest: undefined,
       };
@@ -142,6 +142,8 @@ export default function makeHandler(plugins: {
               path: conn.path,
               request: message,
               route,
+              remoteAddress: request.connection.remoteAddress,
+              remotePort: request.connection.remotePort,
               type: "message" as "message",
             },
           };

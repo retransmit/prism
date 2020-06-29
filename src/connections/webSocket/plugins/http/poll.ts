@@ -42,8 +42,8 @@ function timerCallback(
             path: conn.path,
             method: "POST",
             body: conn.lastRequest || { id: requestId },
-            remoteAddress: conn.ip,
-            remotePort: conn.port,
+            remoteAddress: conn.remoteAddress,
+            remotePort: conn.remotePort,
           };
 
           const onRequestResult = (serviceConfig.onRequest &&

@@ -46,7 +46,7 @@ export type HttpServiceWebSocketRequestHandlerConfig = {
   type: "http";
   pollingInterval?: number;
   resendRequestWhilePolling?: boolean;
-  
+
   onRequest?: (
     request: HttpRequest
   ) => Promise<
@@ -59,19 +59,19 @@ export type HttpServiceWebSocketRequestHandlerConfig = {
     requestId: string,
     response: HttpResponse
   ) => Promise<WebSocketResponse | void>;
-  
+
   url: UrlList;
   getUrl?: UrlSelector;
   encoding?: HttpRequestBodyEncoding;
-  
+
   onConnectUrl?: UrlList;
   getOnConnectUrl?: UrlSelector;
   onConnectRequestEncoding?: HttpRequestBodyEncoding;
-  
+
   onDisconnectUrl?: UrlList;
   getOnDisconnectUrl?: UrlSelector;
   onDisconnectRequestEncoding?: HttpRequestBodyEncoding;
-  
+
   onError?: (response: HttpResponse | undefined, request: HttpRequest) => any;
 } & WebSocketRequestHandlerConfigBase;
 
@@ -146,6 +146,8 @@ export type WebSocketRequestBase = {
   id: string;
   route: string;
   path: string;
+  remoteAddress: string | undefined;
+  remotePort: number | undefined;
 };
 
 export type RedisServiceWebSocketMessageRequest = {
@@ -171,8 +173,8 @@ export type ActiveWebSocketConnection = {
   route: string;
   path: string;
   webSocket: WebSocket;
-  ip: string | undefined;
-  port: number | undefined;
+  remoteAddress: string | undefined;
+  remotePort: number | undefined;
   saveLastRequest: boolean;
   lastRequest: WebSocketMessageRequest | undefined;
 };
