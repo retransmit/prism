@@ -24,7 +24,7 @@ const argv = yargs.options({
   c: { type: "string", alias: "config" },
   i: { type: "string", alias: "instance" },
   p: { type: "number", default: 8080, alias: "port" },
-  v: { type: "boolean", alias: "version" },
+  v: { type: "boolean", alias: "version" }
 }).argv;
 
 export async function startApp(
