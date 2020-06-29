@@ -2,8 +2,8 @@ import "mocha";
 import "should";
 import WebSocket from "ws";
 
-import integrationTestsHttp from "./integration/clients/http";
-import integrationTestsWebSocket from "./integration/clients/webSocket";
+import integrationTestsHttp from "./integration/connections/http";
+import integrationTestsWebSocket from "./integration/connections/webSocket";
 
 import { closeHttpServer } from "./utils/http";
 import { closeWebSocketServer } from "./utils/webSocket";
