@@ -111,11 +111,11 @@ async function getRecentRequestsDataFromRedis(
   if (jsonString) {
     const requestList = JSON.parse(jsonString) as RateLimitedRequestInfo[];
     requestList.push(newRequest);
-    redisSetex(key, 60, JSON.stringify(requestList));
+    redisSetex.call(client, key, 60, JSON.stringify(requestList));
     return requestList;
   } else {
     const requestList = [newRequest];
-    redisSetex(key, 60, JSON.stringify(requestList));
+    redisSetex.call(client, key, 60, JSON.stringify(requestList));
     return requestList;
   }
 }
@@ -125,7 +125,7 @@ function exceedsMaxRate(
   duration: number,
   requestList: RateLimitedRequestInfo[]
 ) {
-  const rpm = (numRequests / duration) * 60000;
+  const rpm = Math.floor(numRequests * (60000 / duration));
   const aMinuteBack = Date.now() - 60000;
   return requestList.filter((x) => x.time > aMinuteBack).length > rpm;
 }
