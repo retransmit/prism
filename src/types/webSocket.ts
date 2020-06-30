@@ -6,6 +6,8 @@ import {
   HttpRequestBodyEncoding,
   UrlList,
   UrlSelector,
+  IRateLimiting,
+  ICircuitBreaker,
 } from ".";
 import WebSocket from "ws";
 
@@ -35,6 +37,8 @@ export type WebSocketRouteConfig = {
     requestId: string,
     response: WebSocketResponse
   ) => Promise<WebSocketResponse | void>;
+  rateLimiting?: IRateLimiting;
+  circuitBreaker?: ICircuitBreaker;
 };
 
 /*
@@ -95,7 +99,6 @@ export type RedisServiceWebSocketRequestHandlerConfig = {
 /*
   WebSocket Requests and Responses
 */
-
 export type WebSocketMessageRequest = {
   type: "message";
   request: string;

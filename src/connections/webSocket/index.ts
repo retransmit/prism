@@ -55,7 +55,7 @@ export default async function init(
       const routeConfig = config.webSocket.routes[route];
       const wss = new WebSocket.Server({ noServer: true });
       webSocketServers[route] = wss;
-      setupWebSocketHandling(wss, route, routeConfig, config.webSocket);
+      setupWebSocketHandling(wss, route, routeConfig, config.webSocket, config);
     }
 
     activeConnectionsInit();
@@ -71,10 +71,11 @@ function setupWebSocketHandling(
   wss: WebSocket.Server,
   route: string,
   routeConfig: WebSocketRouteConfig,
-  webSocketConfig: WebSocketProxyConfig
+  webSocketConfig: WebSocketProxyConfig,
+  config: IAppConfig
 ) {
   const handler = makeHandler(plugins);
-  wss.on("connection", handler(route, routeConfig, webSocketConfig));
+  wss.on("connection", handler(route, routeConfig, webSocketConfig, config));
 
   const interval = setInterval(function ping() {
     wss.clients.forEach(function each(ws: any) {

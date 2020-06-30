@@ -18,6 +18,7 @@ import { WebSocketProxyConfig, IAppConfig } from "../../types";
 // import httpDisconnect from "./plugins/http/disconnect";
 // import redisDisconnect from "./plugins/redis/disconnect";
 import { saveLastRequest } from "./plugins/http/poll";
+import applyRateLimiting from "../../lib/rateLimiting";
 
 export default function makeHandler(plugins: {
   [name: string]: IWebSocketRequestHandlerPlugin;
@@ -25,7 +26,8 @@ export default function makeHandler(plugins: {
   return function onConnection(
     route: string,
     routeConfig: WebSocketRouteConfig,
-    webSocketConfig: WebSocketProxyConfig
+    webSocketConfig: WebSocketProxyConfig,
+    config: IAppConfig
   ) {
     return async function connection(ws: WebSocket, request: IncomingMessage) {
       // This is for finding dead connections.
@@ -72,7 +74,15 @@ export default function makeHandler(plugins: {
 
       ws.on(
         "message",
-        onMessage(requestId, request, route, ws, routeConfig, webSocketConfig)
+        onMessage(
+          requestId,
+          request,
+          route,
+          ws,
+          routeConfig,
+          webSocketConfig,
+          config
+        )
       );
 
       ws.on("close", onClose(requestId, webSocketConfig));
@@ -85,7 +95,8 @@ export default function makeHandler(plugins: {
     route: string,
     ws: WebSocket,
     routeConfig: WebSocketRouteConfig,
-    webSocketConfig: WebSocketProxyConfig
+    webSocketConfig: WebSocketProxyConfig,
+    config: IAppConfig
   ) {
     return async function (message: string) {
       const conn = activeConnections().get(requestId);
@@ -130,6 +141,20 @@ export default function makeHandler(plugins: {
         // This is an active connection.
         // Pass on the message to backend services.
         else {
+          const rateLimitedResponse = await applyRateLimiting(
+            route,
+            "",
+            conn.remoteAddress || "",
+            routeConfig,
+            webSocketConfig,
+            config
+          );
+
+          if (rateLimitedResponse !== undefined) {
+            ws.send(rateLimitedResponse);
+            return;
+          }
+
           const onRequest =
             webSocketConfig.onRequest ||
             webSocketConfig.routes[route].onRequest;

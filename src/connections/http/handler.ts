@@ -25,6 +25,7 @@ import {
   IHttpRequestHandlerPlugin,
   HttpRequestHandlerConfig,
 } from "../../types/http";
+import applyRateLimiting from "../../lib/rateLimiting";
 
 const cors = require("@koa/cors");
 
@@ -107,7 +108,13 @@ export default async function init(config: IAppConfig) {
 
 function createHandler(route: string, method: HttpMethods, config: IAppConfig) {
   return async function httpHandler(ctx: IRouterContext) {
-    return await handler(ctx, route, method, config.http as HttpProxyConfig);
+    return await handler(
+      ctx,
+      route,
+      method,
+      config.http as HttpProxyConfig,
+      config
+    );
   };
 }
 
@@ -115,13 +122,34 @@ async function handler(
   ctx: IRouterContext,
   route: string,
   method: HttpMethods,
-  httpConfig: HttpProxyConfig
+  httpConfig: HttpProxyConfig,
+  config: IAppConfig
 ) {
   const originalRequest = makeHttpRequestFromContext(ctx);
 
   const requestId = randomId(32);
 
   const routeConfig = httpConfig.routes[route][method];
+
+  if (routeConfig) {
+    const rateLimitedResponse = await applyRateLimiting(
+      ctx.path,
+      ctx.method,
+      ctx.ip,
+      routeConfig,
+      httpConfig,
+      config
+    );
+
+    if (rateLimitedResponse !== undefined) {
+      const response = {
+        status: 429,
+        body: rateLimitedResponse,
+      };
+      sendResponse(ctx, response, routeConfig, httpConfig);
+      return;
+    }
+  }
 
   // Are there custom handlers for the request?
   const onRequest = routeConfig?.onRequest || httpConfig.onRequest;

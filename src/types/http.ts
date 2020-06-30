@@ -7,6 +7,8 @@ import {
   HttpRequestBodyEncoding,
   UrlList,
   UrlSelector,
+  IRateLimiting,
+  ICircuitBreaker,
 } from ".";
 
 /*
@@ -36,6 +38,8 @@ export type HttpRouteConfig = {
     responses: FetchedHttpRequestHandlerResponse[],
     request: HttpRequest
   ) => any;
+  rateLimiting?: IRateLimiting;
+  circuitBreaker?: ICircuitBreaker;
 };
 
 /*

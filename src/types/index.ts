@@ -23,6 +23,7 @@ export interface IAppConfig {
   instanceId: string;
   http?: HttpProxyConfig;
   webSocket?: WebSocketProxyConfig;
+  webJobs: WebJob[];
   redis?: {
     options?: ClientOpts;
   };
@@ -37,7 +38,27 @@ export interface IAppConfig {
     allowHeaders?: string | string[];
     credentials?: boolean;
   };
+  state?:
+    | {
+        type: "inproc";
+      }
+    | {
+        type: "redis";
+        options?: ClientOpts;
+      };
 }
+
+export type IRateLimiting = {
+  type: "ip";
+  numRequests: number;
+  duration: number;
+};
+
+export type ICircuitBreaker = {
+  numErrorsBeforeTripping: number;
+  serviceTimeout: number;
+  tripDuration: number;
+};
 
 export type HttpProxyConfig = {
   routes: {
@@ -70,6 +91,8 @@ export type HttpProxyConfig = {
       path: string;
     };
   };
+  rateLimiting?: IRateLimiting;
+  circuitBreaker?: ICircuitBreaker;
 };
 
 export type WebSocketProxyConfig = {
@@ -102,6 +125,19 @@ export type WebSocketProxyConfig = {
       path: string;
     };
   };
+  rateLimiting?: IRateLimiting;
+  circuitBreaker?: ICircuitBreaker;
+};
+
+/*
+  Web Jobs
+*/
+export type WebJob = {
+  url: UrlList;
+  getUrl?: UrlSelector;
+  interval: number;
+  payload: HttpRequest;
+  getPayload: (url: string) => Promise<HttpRequest>;
 };
 
 /*
@@ -152,3 +188,13 @@ export type HttpRequestBodyEncoding =
 
 export type UrlList = string | string[];
 export type UrlSelector = (urlList: UrlList) => Promise<UrlList>;
+
+export type RateLimitedRequestInfo = {
+  path: string;
+  method: string;
+  time: number;
+};
+
+export type IApplicationState = {
+  rateLimiting: Map<string, RateLimitedRequestInfo[]>;
+};

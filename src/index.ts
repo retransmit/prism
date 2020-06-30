@@ -9,7 +9,8 @@ import { Server as HttpsServer } from "https";
 import WebSocket from "ws";
 
 import * as configModule from "./config";
-import { IAppConfig } from "./types";
+import * as applicationState from "./state";
+import { IAppConfig, IRateLimiting, RateLimitedRequestInfo } from "./types";
 
 import initHttpRequestHandling from "./connections/http/handler";
 import initWebSocketRequestHandling from "./connections/webSocket";
@@ -24,7 +25,7 @@ const argv = yargs.options({
   c: { type: "string", alias: "config" },
   i: { type: "string", alias: "instance" },
   p: { type: "number", default: 8080, alias: "port" },
-  v: { type: "boolean", alias: "version" }
+  v: { type: "boolean", alias: "version" },
 }).argv;
 
 export async function startApp(
@@ -55,9 +56,30 @@ export async function startWithConfiguration(
 
   // People are going to mistype 'webSocket' as all lowercase.
   if ((config as any).websocket !== undefined) {
+    if (config.webSocket !== undefined) {
+      console.log(
+        "Both config.websocket and config.webSocket are specified. 'webSocket' is the correct property to use."
+      );
+      process.exit(1);
+    }
     config.webSocket = (config as any).websocket;
     (config as any).websocket = undefined;
   }
+
+  // People are going to mistype 'webjobs' as all lowercase.
+  if ((config as any).webjobs !== undefined) {
+    if (config.webJobs !== undefined) {
+      console.log(
+        "Both config.webjobs and config.webJobs are specified. 'webJobs' is the correct property to use."
+      );
+      process.exit(1);
+    }
+    config.webJobs = (config as any).webjobs;
+    (config as any).webjobs = undefined;
+  }
+
+  // Initialize state
+  await applicationState.init();
 
   // Set up the config
   configModule.set(config);
