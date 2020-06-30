@@ -1,7 +1,6 @@
 import {
   IAppConfig,
   RateLimitedRequestInfo,
-  HttpResponse,
   HttpProxyConfig,
   WebSocketProxyConfig,
 } from "../types";
@@ -15,6 +14,8 @@ import { promisify } from "util";
 
 const redisGet = promisify(createClient().get);
 const redisSetex = promisify(createClient().setex);
+
+const ONE_MINUTE = 60 * 1000;
 
 /*
   Rate limiting state is stored in inproc by default,
@@ -55,7 +56,7 @@ export default async function applyRateLimiting(
     if (
       exceedsMaxRate(
         rateLimitingConfig.numRequests,
-        rateLimitingConfig.duration,
+        rateLimitingConfig.duration || ONE_MINUTE,
         recentRequests
       )
     ) {

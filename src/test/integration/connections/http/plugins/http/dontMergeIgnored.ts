@@ -60,7 +60,7 @@ export default async function (app: TestAppInstance) {
             method: "GET",
             response: {
               body: {
-                message: "hello world",
+                message: "hello, world",
               },
             },
           },

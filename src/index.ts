@@ -10,7 +10,7 @@ import WebSocket from "ws";
 
 import * as configModule from "./config";
 import * as applicationState from "./state";
-import { IAppConfig, IRateLimiting, RateLimitedRequestInfo } from "./types";
+import { IAppConfig } from "./types";
 
 import initHttpRequestHandling from "./connections/http/handler";
 import initWebSocketRequestHandling from "./connections/webSocket";

@@ -6,7 +6,9 @@ const TWO_MINS = 2 * 60 * 1000;
 
 export async function init() {
   // Setup state.
-  state.rateLimiting = new Map<string, RateLimitedRequestInfo[]>();
+  state = {
+    rateLimiting: new Map<string, RateLimitedRequestInfo[]>()
+  };
   setInterval(cleanUpRateLimitingEntries, TWO_MINS);
 }
 

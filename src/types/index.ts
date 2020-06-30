@@ -23,7 +23,7 @@ export interface IAppConfig {
   instanceId: string;
   http?: HttpProxyConfig;
   webSocket?: WebSocketProxyConfig;
-  webJobs: WebJob[];
+  webJobs?: WebJob[];
   redis?: {
     options?: ClientOpts;
   };
@@ -51,7 +51,7 @@ export interface IAppConfig {
 export type IRateLimiting = {
   type: "ip";
   numRequests: number;
-  duration: number;
+  duration?: number; // defaults to one minute
 };
 
 export type ICircuitBreaker = {

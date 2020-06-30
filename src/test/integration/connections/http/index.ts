@@ -25,6 +25,8 @@ import redisExcludesBodyFields from "./plugins/redis/excludesBodyFields";
 import redisExcludesHeaders from "./plugins/redis/excludesHeaders";
 import redisMapsHeaders from "./plugins/redis/mapsHeaders";
 
+import rateLimits from "./rateLimits";
+
 import { TestAppInstance } from "../../../test";
 
 export default function run(app: TestAppInstance) {
@@ -55,6 +57,10 @@ export default function run(app: TestAppInstance) {
       redisExcludesBodyFields(app);
       redisExcludesHeaders(app);
       redisMapsHeaders(app);
+    });
+
+    describe("rate limiting", () => {
+      rateLimits(app);
     });
   });
 }
