@@ -44,6 +44,7 @@ export interface IAppConfig {
 export type InMemoryStateConfig = {
   type: "memory";
   clientTrackingEntryExpiry?: number;
+  httpServiceErrorTrackingListExpiry?: number;
 };
 
 export type RedisStateConfig = {
@@ -51,19 +52,20 @@ export type RedisStateConfig = {
   options?: ClientOpts;
   clientTrackingListLength?: number;
   clientTrackingListExpiry?: number;
+  httpServiceErrorTrackingListLength?: number;
+  httpServiceErrorTrackingListExpiry?: number;
 };
 
-export type RateLimiting = {
+export type RateLimitingConfig = {
   type: "ip";
   maxRequests: number;
   duration: number;
 };
 
 export type HttpServiceCircuitBreakerConfig = {
-  errorCount: number;
-  timeout: number;
+  maxErrors: number;
   duration: number;
-  isFailure?: (response: HttpServiceTrackingInfo) => boolean;
+  isFailure?: (response: HttpServiceErrorTrackingInfo) => boolean;
 };
 
 export type HttpProxyConfig = {
@@ -97,7 +99,7 @@ export type HttpProxyConfig = {
       path: string;
     };
   };
-  rateLimiting?: RateLimiting;
+  rateLimiting?: RateLimitingConfig;
   circuitBreaker?: HttpServiceCircuitBreakerConfig;
 };
 
@@ -131,7 +133,7 @@ export type WebSocketProxyConfig = {
       path: string;
     };
   };
-  rateLimiting?: RateLimiting;
+  rateLimiting?: RateLimitingConfig;
 };
 
 /*
@@ -200,16 +202,15 @@ export type ClientTrackingInfo = {
   time: number;
 };
 
-export type HttpServiceTrackingInfo = {
+export type HttpServiceErrorTrackingInfo = {
   route: string;
   method: HttpMethods;
-  service: string;
-  statusCode: number;
+  status: number | undefined;
   requestTime: number;
   responseTime: number;
 };
 
 export type IApplicationState = {
   clientTracking: Map<string, ClientTrackingInfo[]>;
-  httpServiceTracing: Map<string, HttpServiceTrackingInfo[]>;
+  httpServiceErrorTracking: Map<string, HttpServiceErrorTrackingInfo[]>;
 };

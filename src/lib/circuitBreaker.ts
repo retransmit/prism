@@ -2,26 +2,29 @@ import {
   IAppConfig,
   ClientTrackingInfo,
   HttpProxyConfig,
-  WebSocketProxyConfig,
-  HttpServiceTrackingInfo,
-  HttpServiceCircuitBreakerConfig,
   HttpMethods,
+  InMemoryStateConfig,
+  RateLimitingConfig,
+  RedisStateConfig,
+  HttpServiceErrorTrackingInfo,
+  HttpServiceCircuitBreakerConfig,
 } from "../types";
 import * as applicationState from "../state";
-import {
-  HttpRouteConfig,
-  FetchedHttpRequestHandlerResponse,
-} from "../types/http";
-import { WebSocketRouteConfig } from "../types/webSocket";
+import { HttpRouteConfig } from "../types/http";
 import error from "../error";
-import { createClient, ClientOpts } from "redis";
+import { createClient } from "redis";
 
 import { promisify } from "util";
 
-const redisGet = promisify(createClient().get);
-const redisSetex = promisify(createClient().setex);
+const redisLRange = promisify(createClient().lrange);
+const redisLPush: (key: string, val: string) => Promise<void> = promisify(
+  createClient().lpush
+) as any;
+const redisLTrim = promisify(createClient().ltrim);
+const redisPExpire = promisify(createClient().pexpire);
 
 const ONE_MINUTE = 60 * 1000;
+const TWO_MINUTES = 2 * ONE_MINUTE;
 
 /*
   Rate limiting state is stored in memory by default,
@@ -34,92 +37,153 @@ export async function applyCircuitBreaker(
   proxyConfig: HttpProxyConfig,
   config: IAppConfig
 ): Promise<string | undefined> {
+  const rejectionMessage = "Busy.";
   const circuitBreakerConfig =
     routeConfig.circuitBreaker || proxyConfig.circuitBreaker;
 
   if (circuitBreakerConfig) {
-    const serviceTrackingList: HttpServiceTrackingInfo[] =
-      config.state === undefined || config.state.type === "memory"
-        ? await getServiceTrackingInfoFromInMemoryState(route, method)
-        : config.state.type === "redis"
-        ? await getServiceTrackingInfoFromRedis(
-            route,
-            method,
-            config.state.options
-          )
-        : error(
-            `Unsupported state type ${
-              (config.state as any)?.type
-            }. Valid values are 'memory' and 'redis'.`
-          );
+    return config.state === undefined || config.state.type === "memory"
+      ? await handleServiceTrackingWithInMemoryState(
+          circuitBreakerConfig,
+          config.state
+        )
+      : config.state.type === "redis"
+      ? handleServiceTrackingWithRedisState(circuitBreakerConfig, config.state)
+      : error(
+          `Unsupported state type ${
+            (config.state as any)?.type
+          }. Valid values are 'memory' and 'redis'.`
+        );
+  }
 
-    if (isTripped(circuitBreakerConfig, serviceTrackingList)) {
-      return "Busy.";
+  async function handleServiceTrackingWithInMemoryState(
+    circuitBreakerConfig: HttpServiceCircuitBreakerConfig,
+    stateConfig: InMemoryStateConfig | undefined
+  ) {
+    const key = `${method}:${route}`;
+    const state = applicationState.get();
+    const trackingList = state.httpServiceErrorTracking.get(key);
+
+    if (mustReject(trackingList || [], circuitBreakerConfig)) {
+      return rejectionMessage;
+    }
+  }
+
+  async function handleServiceTrackingWithRedisState(
+    circuitBreakerConfig: HttpServiceCircuitBreakerConfig,
+    stateConfig: RedisStateConfig | undefined
+  ) {
+    const client = createClient(stateConfig?.options);
+    const key = `http_service_error_tracking:${route}:${method}`;
+
+    const jsonEntries = await redisLRange.call(client, key, 0, -1);
+
+    const trackingList = jsonEntries.map(
+      (x) => JSON.parse(x) as HttpServiceErrorTrackingInfo
+    );
+
+    if (mustReject(trackingList || [], circuitBreakerConfig)) {
+      return rejectionMessage;
     }
   }
 }
 
-export async function updateCircuitBreakerStats(
-  rroute: string,
+export async function updateHttpServiceErrorTracking(
+  route: string,
   method: HttpMethods,
-  responses: FetchedHttpRequestHandlerResponse[],
+  status: number | undefined,
+  requestTime: number,
+  responseTime: number,
   routeConfig: HttpRouteConfig,
   proxyConfig: HttpProxyConfig,
   config: IAppConfig
-) {}
-
-async function getServiceTrackingInfoFromInMemoryState(
-  route: string,
-  method: HttpMethods
-): Promise<HttpServiceTrackingInfo[]> {
-  const state = applicationState.get();
-  const serviceList = state.httpServiceTracing.get(`${method}_${route}`);
-  return serviceList || [];
-}
-
-/*
-  TODO: We could refactor this to store lists in redis.
-        But that is for the next version.
-*/
-
-async function getServiceTrackingInfoFromRedis(
-  route: string,
-  method: HttpMethods,
-  options?: ClientOpts
-): Promise<HttpServiceTrackingInfo[]> {
-  const client = createClient(options);
-  const key = `service_tracking:${method}_${route}`;
-  const jsonString = await redisGet.call(client, key);
-  return jsonString ? JSON.parse(jsonString) : [];
-}
-
-async function updateServiceTrackingInfoToInMemoryState(
-  route: string,
-  method: HttpMethods
 ) {
-  
+  const circuitBreakerConfig =
+    routeConfig.circuitBreaker || proxyConfig.circuitBreaker;
+
+  const trackingInfo: HttpServiceErrorTrackingInfo = {
+    route,
+    method,
+    status,
+    requestTime,
+    responseTime,
+  };
+
+  if (circuitBreakerConfig) {
+    const isFailure =
+      (circuitBreakerConfig.isFailure &&
+        circuitBreakerConfig.isFailure(trackingInfo)) ||
+      (trackingInfo.status && trackingInfo.status >= 500);
+
+    if (isFailure) {
+      if (config.state === undefined || config.state.type === "memory") {
+        await updateHttpServiceErrorTrackingInMemory(
+          trackingInfo,
+          circuitBreakerConfig,
+          config.state
+        );
+      } else if (config.state.type === "redis") {
+        await updateHttpServiceErrorTrackingInRedis(
+          trackingInfo,
+          circuitBreakerConfig,
+          config.state
+        );
+      }
+    }
+  }
+
+  async function updateHttpServiceErrorTrackingInMemory(
+    trackingInfo: HttpServiceErrorTrackingInfo,
+    circuitBreakerConfig: HttpServiceCircuitBreakerConfig,
+    stateConfig: InMemoryStateConfig | undefined
+  ) {
+    const key = `${route}:${method}`;
+    const state = applicationState.get();
+    const trackingList = state.httpServiceErrorTracking.get(key);
+
+    if (trackingList) {
+      trackingList.push(trackingInfo);
+    } else {
+      const newTrackingList = [trackingInfo];
+      state.httpServiceErrorTracking.set(key, newTrackingList);
+    }
+  }
+
+  async function updateHttpServiceErrorTrackingInRedis(
+    trackingInfo: HttpServiceErrorTrackingInfo,
+    circuitBreakerConfig: HttpServiceCircuitBreakerConfig,
+    stateConfig: RedisStateConfig | undefined
+  ) {
+    const client = createClient(stateConfig?.options);
+    const key = `http_service_error_tracking:${route}:${method}`;
+
+    const jsonEntry = JSON.stringify(trackingInfo);
+    await redisLPush.call(client, key, jsonEntry);
+    await redisLTrim.call(
+      client,
+      key,
+      0,
+      stateConfig?.httpServiceErrorTrackingListLength || 2000
+    );
+    await redisPExpire.call(
+      client,
+      key,
+      stateConfig?.httpServiceErrorTrackingListExpiry || TWO_MINUTES
+    );
+  }
 }
 
-async function updateServiceTrackingInfoToRedis(
-  route: string,
-  method: HttpMethods
+function mustReject(
+  trackingInfoList: HttpServiceErrorTrackingInfo[],
+  circuitBreakerConfig: HttpServiceCircuitBreakerConfig
 ) {
+  const now = Date.now();
+  let errorCount = 0;
 
-}
-
-function isTripped(
-  config: HttpServiceCircuitBreakerConfig,
-  serviceTrackingList: HttpServiceTrackingInfo[]
-): boolean {
-  const aMinuteBack = Date.now() - 60000;
-
-  const errorsPerMin = Math.floor(
-    config.errorCount * (60000 / config.duration)
-  );
-
-  const recentErrorCount = serviceTrackingList
-    .filter((x) => x.responseTime > aMinuteBack)
-    .filter(config.isFailure || ((x) => x.statusCode >= 500)).length;
-
-  return recentErrorCount > errorsPerMin;
+  for (const info of trackingInfoList) {
+    if (info.responseTime > now - circuitBreakerConfig.duration) {
+      errorCount++;
+    }
+  }
+  return errorCount > circuitBreakerConfig.maxErrors;
 }

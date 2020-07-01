@@ -26,7 +26,10 @@ import {
   HttpRequestHandlerConfig,
 } from "../../types/http";
 import applyRateLimiting from "../../lib/rateLimiting";
-import { applyCircuitBreaker } from "../../lib/circuitBreaker";
+import {
+  applyCircuitBreaker,
+  updateHttpServiceErrorTracking,
+} from "../../lib/circuitBreaker";
 
 const cors = require("@koa/cors");
 
@@ -126,6 +129,8 @@ async function handler(
   httpConfig: HttpProxyConfig,
   config: IAppConfig
 ) {
+  const requestTime = Date.now();
+
   const originalRequest = makeHttpRequestFromContext(ctx);
 
   const requestId = randomId(32);
@@ -151,22 +156,22 @@ async function handler(
       return;
     }
 
-    // const circuitBreakerResponse = await applyCircuitBreaker(
-    //   route,
-    //   method,
-    //   routeConfig,
-    //   httpConfig,
-    //   config
-    // );
+    const circuitBreakerResponse = await applyCircuitBreaker(
+      route,
+      method,
+      routeConfig,
+      httpConfig,
+      config
+    );
 
-    // if (circuitBreakerResponse !== undefined) {
-    //   const response = {
-    //     status: 503,
-    //     body: circuitBreakerResponse,
-    //   };
-    //   sendResponse(ctx, response, routeConfig, httpConfig);
-    //   return;
-    // }
+    if (circuitBreakerResponse !== undefined) {
+      const response = {
+        status: 503,
+        body: circuitBreakerResponse,
+      };
+      sendResponse(ctx, response, routeConfig, httpConfig);
+      return;
+    }
   }
 
   // Are there custom handlers for the request?
@@ -251,8 +256,6 @@ async function handler(
             .filter(responseIsNotSkipped)
             .map((x) => x.response);
 
-          
-
           for (const response of validResponses) {
             responses.push(response);
           }
@@ -294,6 +297,19 @@ async function handler(
       const responseToSend =
         (onResponse && (await onResponse(response, originalRequest))) ||
         response;
+
+      const responseTime = Date.now();
+      
+      updateHttpServiceErrorTracking(
+        route,
+        method,
+        response.status,
+        requestTime,
+        responseTime,
+        routeConfig,
+        httpConfig,
+        config
+      );
 
       sendResponse(ctx, responseToSend, routeConfig, httpConfig);
     }

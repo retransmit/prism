@@ -5,14 +5,14 @@ import {
   WebSocketProxyConfig,
   HttpMethods,
   InMemoryStateConfig,
-  RateLimiting,
+  RateLimitingConfig,
   RedisStateConfig,
 } from "../types";
 import * as applicationState from "../state";
 import { HttpRouteConfig } from "../types/http";
 import { WebSocketRouteConfig } from "../types/webSocket";
 import error from "../error";
-import { createClient, RedisClient } from "redis";
+import { createClient } from "redis";
 
 import { promisify } from "util";
 
@@ -58,7 +58,7 @@ export default async function applyRateLimiting(
   }
 
   async function handleClientTrackingWithInMemoryState(
-    rateLimitingConfig: RateLimiting,
+    rateLimitingConfig: RateLimitingConfig,
     stateConfig: InMemoryStateConfig | undefined
   ) {
     const state = applicationState.get();
@@ -83,7 +83,7 @@ export default async function applyRateLimiting(
   }
 
   async function handleClientTrackingWithRedisState(
-    rateLimitingConfig: RateLimiting,
+    rateLimitingConfig: RateLimitingConfig,
     stateConfig: RedisStateConfig | undefined
   ) {
     const client = createClient(stateConfig?.options);
@@ -126,7 +126,7 @@ export default async function applyRateLimiting(
 
 function mustReject(
   trackingInfoList: ClientTrackingInfo[],
-  rateLimitingConfig: RateLimiting
+  rateLimitingConfig: RateLimitingConfig
 ) {
   const now = Date.now();
 

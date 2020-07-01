@@ -1,7 +1,7 @@
 import {
   IApplicationState,
   ClientTrackingInfo,
-  HttpServiceTrackingInfo,
+  HttpServiceErrorTrackingInfo,
   IAppConfig,
 } from "../types";
 
@@ -13,7 +13,7 @@ export async function init(config: IAppConfig) {
   // Setup state.
   state = {
     clientTracking: new Map<string, ClientTrackingInfo[]>(),
-    httpServiceTracing: new Map<string, HttpServiceTrackingInfo[]>(),
+    httpServiceErrorTracking: new Map<string, HttpServiceErrorTrackingInfo[]>(),
   };
 
   if (config.state?.type === "memory") {
@@ -22,6 +22,17 @@ export async function init(config: IAppConfig) {
     setInterval(
       () => cleanUpClientTrackingEntries(clientTrackingEntryExpiry, config),
       clientTrackingEntryExpiry
+    );
+
+    const httpServiceErrorTrackingListExpiry =
+      config.state?.httpServiceErrorTrackingListExpiry || TWO_MINUTES;
+    setInterval(
+      () =>
+        cleanUpHttpServiceTrackingEntries(
+          httpServiceErrorTrackingListExpiry,
+          config
+        ),
+      httpServiceErrorTrackingListExpiry
     );
   }
 }
@@ -43,7 +54,34 @@ function cleanUpClientTrackingEntries(
     } else {
       state.clientTracking.set(
         remoteAddress,
-        trackingEntries.filter((x) => now - x.time > clientTrackingEntryExpiry)
+        trackingEntries.filter((x) => x.time > now - clientTrackingEntryExpiry)
+      );
+    }
+  }
+}
+
+function cleanUpHttpServiceTrackingEntries(
+  httpServiceErrorTrackingListExpiry: number,
+  config: IAppConfig
+) {
+  const now = Date.now();
+
+  for (const [
+    routeAndMethod,
+    trackingEntries,
+  ] of state.httpServiceErrorTracking.entries()) {
+    if (
+      trackingEntries.every(
+        (x) => now - x.responseTime > httpServiceErrorTrackingListExpiry
+      )
+    ) {
+      state.httpServiceErrorTracking.delete(routeAndMethod);
+    } else {
+      state.httpServiceErrorTracking.set(
+        routeAndMethod,
+        trackingEntries.filter(
+          (x) => x.responseTime > now - httpServiceErrorTrackingListExpiry
+        )
       );
     }
   }

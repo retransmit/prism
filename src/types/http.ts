@@ -7,7 +7,7 @@ import {
   HttpRequestBodyEncoding,
   UrlList,
   UrlSelector,
-  RateLimiting,
+  RateLimitingConfig,
   HttpServiceCircuitBreakerConfig,
 } from ".";
 
@@ -38,7 +38,7 @@ export type HttpRouteConfig = {
     responses: FetchedHttpRequestHandlerResponse[],
     request: HttpRequest
   ) => any;
-  rateLimiting?: RateLimiting;
+  rateLimiting?: RateLimitingConfig;
   circuitBreaker?: HttpServiceCircuitBreakerConfig;
 };
 
