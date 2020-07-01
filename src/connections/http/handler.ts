@@ -149,8 +149,8 @@ async function handler(
 
     if (rateLimitedResponse !== undefined) {
       const response = {
-        status: 429,
-        body: rateLimitedResponse,
+        status: rateLimitedResponse.status,
+        body: rateLimitedResponse.body,
       };
       sendResponse(ctx, response, routeConfig, httpConfig);
       return;
@@ -166,8 +166,8 @@ async function handler(
 
     if (circuitBreakerResponse !== undefined) {
       const response = {
-        status: 503,
-        body: circuitBreakerResponse,
+        status: circuitBreakerResponse.status,
+        body: circuitBreakerResponse.body,
       };
       sendResponse(ctx, response, routeConfig, httpConfig);
       return;
@@ -299,7 +299,7 @@ async function handler(
         response;
 
       const responseTime = Date.now();
-      
+
       updateHttpServiceErrorTracking(
         route,
         method,

@@ -60,12 +60,16 @@ export type RateLimitingConfig = {
   type: "ip";
   maxRequests: number;
   duration: number;
+  errorCode?: number;
+  errorResponse?: any;
 };
 
 export type HttpServiceCircuitBreakerConfig = {
   maxErrors: number;
   duration: number;
   isFailure?: (response: HttpServiceErrorTrackingInfo) => boolean;
+  errorCode?: number;
+  errorResponse?: any;
 };
 
 export type HttpProxyConfig = {

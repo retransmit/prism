@@ -34,7 +34,7 @@ export async function applyCircuitBreaker(
   routeConfig: HttpRouteConfig,
   proxyConfig: HttpProxyConfig,
   config: IAppConfig
-): Promise<string | undefined> {
+): Promise<{ status: number; body: any } | undefined> {
   const rejectionMessage = "Busy.";
   const circuitBreakerConfig =
     routeConfig.circuitBreaker || proxyConfig.circuitBreaker;
@@ -63,7 +63,10 @@ export async function applyCircuitBreaker(
     const trackingList = state.httpServiceErrorTracking.get(key);
 
     if (mustReject(trackingList || [], circuitBreakerConfig)) {
-      return rejectionMessage;
+      return {
+        status: circuitBreakerConfig.errorCode || 503,
+        body: circuitBreakerConfig.errorResponse || rejectionMessage,
+      };
     }
   }
 
@@ -81,7 +84,10 @@ export async function applyCircuitBreaker(
     );
 
     if (mustReject(trackingList || [], circuitBreakerConfig)) {
-      return rejectionMessage;
+      return {
+        status: circuitBreakerConfig.errorCode || 503,
+        body: circuitBreakerConfig.errorResponse || rejectionMessage,
+      };
     }
   }
 }

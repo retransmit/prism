@@ -37,7 +37,7 @@ export default async function applyRateLimiting(
   routeConfig: HttpRouteConfig | WebSocketRouteConfig,
   proxyConfig: HttpProxyConfig | WebSocketProxyConfig,
   config: IAppConfig
-): Promise<string | undefined> {
+): Promise<{ status: number; body: any } | undefined> {
   const rejectionMessage = "Too Many Requests.";
   const rateLimitingConfig =
     routeConfig.rateLimiting || proxyConfig.rateLimiting;
@@ -71,7 +71,10 @@ export default async function applyRateLimiting(
     };
 
     if (mustReject(trackingList || [], rateLimitingConfig)) {
-      return rejectionMessage;
+      return {
+        status: rateLimitingConfig.errorCode || 429,
+        body: rateLimitingConfig.errorResponse || rejectionMessage,
+      };
     } else {
       if (trackingList) {
         trackingList.push(trackingInfo);
@@ -105,7 +108,10 @@ export default async function applyRateLimiting(
     };
 
     if (mustReject(trackingList || [], rateLimitingConfig)) {
-      return rejectionMessage;
+      return {
+        status: rateLimitingConfig.errorCode || 429,
+        body: rateLimitingConfig.errorResponse || rejectionMessage,
+      };
     } else {
       const jsonEntry = JSON.stringify(trackingInfo);
       await redisLPush.call(client, key, jsonEntry);
