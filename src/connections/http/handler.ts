@@ -29,7 +29,7 @@ import applyRateLimiting from "../../lib/rateLimiting";
 import {
   applyCircuitBreaker,
   updateHttpServiceErrorTracking,
-} from "../../lib/circuitBreaker";
+} from "./circuitBreaker";
 
 const cors = require("@koa/cors");
 

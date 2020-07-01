@@ -26,6 +26,7 @@ import redisExcludesHeaders from "./plugins/redis/excludesHeaders";
 import redisMapsHeaders from "./plugins/redis/mapsHeaders";
 
 import rateLimits from "./rateLimits";
+import tripsCircuit from "./tripsCircuit";
 
 import { TestAppInstance } from "../../../test";
 
@@ -61,6 +62,9 @@ export default function run(app: TestAppInstance) {
 
     describe("rate limiting", () => {
       rateLimits(app);
+    });
+    describe("circuit breaker", () => {
+      tripsCircuit(app);
     });
   });
 }

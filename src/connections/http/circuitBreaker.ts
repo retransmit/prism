@@ -1,17 +1,15 @@
 import {
   IAppConfig,
-  ClientTrackingInfo,
   HttpProxyConfig,
   HttpMethods,
   InMemoryStateConfig,
-  RateLimitingConfig,
   RedisStateConfig,
   HttpServiceErrorTrackingInfo,
   HttpServiceCircuitBreakerConfig,
-} from "../types";
-import * as applicationState from "../state";
-import { HttpRouteConfig } from "../types/http";
-import error from "../error";
+} from "../../types";
+import * as applicationState from "../../state";
+import { HttpRouteConfig } from "../../types/http";
+import error from "../../error";
 import { createClient } from "redis";
 
 import { promisify } from "util";
@@ -60,7 +58,7 @@ export async function applyCircuitBreaker(
     circuitBreakerConfig: HttpServiceCircuitBreakerConfig,
     stateConfig: InMemoryStateConfig | undefined
   ) {
-    const key = `${method}:${route}`;
+    const key = `${route}:${method}`;
     const state = applicationState.get();
     const trackingList = state.httpServiceErrorTracking.get(key);
 
@@ -184,6 +182,9 @@ function mustReject(
     if (info.responseTime > now - circuitBreakerConfig.duration) {
       errorCount++;
     }
+    if (errorCount >= circuitBreakerConfig.maxErrors) {
+      return true;
+    }
   }
-  return errorCount > circuitBreakerConfig.maxErrors;
+  return false;
 }
