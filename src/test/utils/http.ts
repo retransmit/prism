@@ -4,6 +4,7 @@ import Koa = require("koa");
 import { CancelableRequest } from "got/dist/source";
 import { Response } from "got/dist/source/core";
 import bodyParser = require("koa-bodyparser");
+import { HttpMethods } from "../../types";
 
 function closeHttpServerCb(server: Server, cb: any) {
   (server as any).close(cb);
@@ -20,7 +21,7 @@ type MockHttpBackendConfig = {
   afterResponse?: (ctx: any) => Promise<boolean | undefined>;
   routes: {
     path: string;
-    method: string;
+    method: HttpMethods;
     handleResponse?: (
       ctx: Koa.ParameterizedContext<Koa.DefaultState, Koa.DefaultContext>
     ) => Promise<void>;

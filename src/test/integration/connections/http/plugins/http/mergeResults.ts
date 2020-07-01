@@ -8,7 +8,7 @@ import { IAppConfig } from "../../../../../../types";
 export default async function (app: TestAppInstance) {
   it(`merges responses`, async () => {
     const config: IAppConfig = {
-      instanceId: random(),
+      instanceId: random(),      
       http: {
         routes: {
           "/users": {

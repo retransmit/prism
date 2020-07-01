@@ -26,6 +26,7 @@ import {
   HttpRequestHandlerConfig,
 } from "../../types/http";
 import applyRateLimiting from "../../lib/rateLimiting";
+import { applyCircuitBreaker } from "../../lib/circuitBreaker";
 
 const cors = require("@koa/cors");
 
@@ -134,7 +135,7 @@ async function handler(
   if (routeConfig) {
     const rateLimitedResponse = await applyRateLimiting(
       ctx.path,
-      ctx.method,
+      method,
       ctx.ip,
       routeConfig,
       httpConfig,
@@ -149,6 +150,23 @@ async function handler(
       sendResponse(ctx, response, routeConfig, httpConfig);
       return;
     }
+
+    // const circuitBreakerResponse = await applyCircuitBreaker(
+    //   route,
+    //   method,
+    //   routeConfig,
+    //   httpConfig,
+    //   config
+    // );
+
+    // if (circuitBreakerResponse !== undefined) {
+    //   const response = {
+    //     status: 503,
+    //     body: circuitBreakerResponse,
+    //   };
+    //   sendResponse(ctx, response, routeConfig, httpConfig);
+    //   return;
+    // }
   }
 
   // Are there custom handlers for the request?
@@ -232,6 +250,8 @@ async function handler(
           const validResponses = allResponses
             .filter(responseIsNotSkipped)
             .map((x) => x.response);
+
+          
 
           for (const response of validResponses) {
             responses.push(response);

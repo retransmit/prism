@@ -79,7 +79,7 @@ export async function startWithConfiguration(
   }
 
   // Initialize state
-  await applicationState.init();
+  await applicationState.init(config);
 
   // Set up the config
   configModule.set(config);

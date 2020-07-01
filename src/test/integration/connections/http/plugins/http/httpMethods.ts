@@ -48,7 +48,13 @@ export default async function (app: TestAppInstance) {
       const backendApps = startBackends([
         {
           port: 6666,
-          routes: ["GET", "POST", "PUT", "DELETE", "PATCH"].map((method) => ({
+          routes: ([
+            "GET",
+            "POST",
+            "PUT",
+            "DELETE",
+            "PATCH",
+          ] as HttpMethods[]).map((method) => ({
             path: "/users",
             method,
             response: { body: `${method}: Everything worked.` },

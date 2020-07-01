@@ -6,6 +6,7 @@ import {
   PerformanceTestAppInstance,
   PerformanceTestResult,
 } from "../../../../../performance";
+import { HttpMethods } from "../../../../../../types";
 
 export default async function (
   name: string,
@@ -42,11 +43,13 @@ export default async function (
   const backendApps = startBackends([
     {
       port: 6666,
-      routes: ["GET", "POST", "PUT", "DELETE", "PATCH"].map((method) => ({
-        path: "/users",
-        method,
-        response: { body: `Hello world.` },
-      })),
+      routes: (["GET", "POST", "PUT", "DELETE", "PATCH"] as HttpMethods[]).map(
+        (method) => ({
+          path: "/users",
+          method,
+          response: { body: `Hello world.` },
+        })
+      ),
     },
   ]);
 

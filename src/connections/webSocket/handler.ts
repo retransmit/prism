@@ -143,7 +143,7 @@ export default function makeHandler(plugins: {
         else {
           const rateLimitedResponse = await applyRateLimiting(
             route,
-            "",
+            "GET",
             conn.remoteAddress || "",
             routeConfig,
             webSocketConfig,

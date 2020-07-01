@@ -3,7 +3,11 @@ import { startBackends, getResponse } from "../../../utils/http";
 import { TestAppInstance } from "../../../test";
 import random from "../../../../lib/random";
 import got from "got";
-import { IAppConfig } from "../../../../types";
+import {
+  IAppConfig,
+  RedisStateConfig,
+  InMemoryStateConfig,
+} from "../../../../types";
 import { Response } from "got/dist/source/core";
 import { createClient } from "redis";
 import { promisify } from "util";
@@ -36,22 +40,23 @@ export default async function (app: TestAppInstance) {
         },
         rateLimiting: {
           type: "ip",
-          numRequests: 4,
-          duration: 60000,
+          maxRequests: 4,
+          duration: 150,
         },
       },
     };
+
     return modification(baseConfig);
   }
 
   const tests: [string, boolean, IAppConfig][] = [
     [
-      "rate limits with inproc state",
+      "rate limits with in-memory state",
       false,
       makeConfig((cfg) => {
         cfg.state = {
-          type: "inproc",
-        };
+          type: "memory",
+        } as InMemoryStateConfig;
         return cfg;
       }),
     ],
@@ -61,7 +66,7 @@ export default async function (app: TestAppInstance) {
       makeConfig((cfg) => {
         cfg.state = {
           type: "redis",
-        };
+        } as RedisStateConfig;
         return cfg;
       }),
     ],
@@ -107,14 +112,23 @@ export default async function (app: TestAppInstance) {
 
       const promisedResponses: Promise<Response<string>>[] = [];
 
-      for (let i = 0; i <= 4; i++) {
+      for (let i = 0; i <= 5; i++) {
         const promisedResponse = got(`http://localhost:${port}/users`, {
           method: "GET",
           retry: 0,
         });
         promisedResponses.push(getResponse(promisedResponse));
-        if (isRedis) {
-          await sleep(60);
+
+        if (i < 3 && isRedis) {
+          await sleep(10);
+        }
+
+        if (i === 3 && isRedis) {
+          await sleep(50);
+        }
+
+        if (i === 4) {
+          await sleep(200);
         }
       }
 
@@ -126,6 +140,8 @@ export default async function (app: TestAppInstance) {
       responses[3].body.should.equal("hello, world");
       responses[4].statusCode.should.equal(429);
       responses[4].body.should.equal("Too Many Requests.");
-    });
+      responses[5].statusCode.should.equal(200);
+      responses[5].body.should.equal("hello, world");
+    }).timeout(5000);
   }
 }

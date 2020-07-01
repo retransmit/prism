@@ -6,8 +6,8 @@ import {
   HttpRequestBodyEncoding,
   UrlList,
   UrlSelector,
-  IRateLimiting,
-  ICircuitBreaker,
+  RateLimiting,
+  HttpServiceCircuitBreakerConfig,
 } from ".";
 import WebSocket from "ws";
 
@@ -37,8 +37,7 @@ export type WebSocketRouteConfig = {
     requestId: string,
     response: WebSocketResponse
   ) => Promise<WebSocketResponse | void>;
-  rateLimiting?: IRateLimiting;
-  circuitBreaker?: ICircuitBreaker;
+  rateLimiting?: RateLimiting;
 };
 
 /*

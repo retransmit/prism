@@ -1,22 +1,50 @@
-import { IApplicationState, RateLimitedRequestInfo } from "../types";
+import {
+  IApplicationState,
+  ClientTrackingInfo,
+  HttpServiceTrackingInfo,
+  IAppConfig,
+} from "../types";
 
 let state: IApplicationState;
 
-const TWO_MINS = 2 * 60 * 1000;
+const TWO_MINUTES = 2 * 60 * 1000;
 
-export async function init() {
+export async function init(config: IAppConfig) {
   // Setup state.
   state = {
-    rateLimiting: new Map<string, RateLimitedRequestInfo[]>()
+    clientTracking: new Map<string, ClientTrackingInfo[]>(),
+    httpServiceTracing: new Map<string, HttpServiceTrackingInfo[]>(),
   };
-  setInterval(cleanUpRateLimitingEntries, TWO_MINS);
+
+  if (config.state?.type === "memory") {
+    const clientTrackingEntryExpiry =
+      config.state?.clientTrackingEntryExpiry || TWO_MINUTES;
+    setInterval(
+      () => cleanUpClientTrackingEntries(clientTrackingEntryExpiry, config),
+      clientTrackingEntryExpiry
+    );
+  }
 }
 
-function cleanUpRateLimitingEntries() {
+function cleanUpClientTrackingEntries(
+  clientTrackingEntryExpiry: number,
+  config: IAppConfig
+) {
   const now = Date.now();
-  for (const entry of state.rateLimiting.entries()) {
-    if (entry[1].every((x) => now - x.time > TWO_MINS)) {
-      state.rateLimiting.delete(entry[0]);
+
+  for (const [
+    remoteAddress,
+    trackingEntries,
+  ] of state.clientTracking.entries()) {
+    if (
+      trackingEntries.every((x) => now - x.time > clientTrackingEntryExpiry)
+    ) {
+      state.clientTracking.delete(remoteAddress);
+    } else {
+      state.clientTracking.set(
+        remoteAddress,
+        trackingEntries.filter((x) => now - x.time > clientTrackingEntryExpiry)
+      );
     }
   }
 }

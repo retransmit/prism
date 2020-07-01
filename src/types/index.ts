@@ -38,26 +38,32 @@ export interface IAppConfig {
     allowHeaders?: string | string[];
     credentials?: boolean;
   };
-  state?:
-    | {
-        type: "inproc";
-      }
-    | {
-        type: "redis";
-        options?: ClientOpts;
-      };
+  state?: InMemoryStateConfig | RedisStateConfig;
 }
 
-export type IRateLimiting = {
-  type: "ip";
-  numRequests: number;
-  duration?: number; // defaults to one minute
+export type InMemoryStateConfig = {
+  type: "memory";
+  clientTrackingEntryExpiry?: number;
 };
 
-export type ICircuitBreaker = {
-  numErrorsBeforeTripping: number;
-  serviceTimeout: number;
-  tripDuration: number;
+export type RedisStateConfig = {
+  type: "redis";
+  options?: ClientOpts;
+  clientTrackingListLength?: number;
+  clientTrackingListExpiry?: number;
+};
+
+export type RateLimiting = {
+  type: "ip";
+  maxRequests: number;
+  duration: number;
+};
+
+export type HttpServiceCircuitBreakerConfig = {
+  errorCount: number;
+  timeout: number;
+  duration: number;
+  isFailure?: (response: HttpServiceTrackingInfo) => boolean;
 };
 
 export type HttpProxyConfig = {
@@ -91,8 +97,8 @@ export type HttpProxyConfig = {
       path: string;
     };
   };
-  rateLimiting?: IRateLimiting;
-  circuitBreaker?: ICircuitBreaker;
+  rateLimiting?: RateLimiting;
+  circuitBreaker?: HttpServiceCircuitBreakerConfig;
 };
 
 export type WebSocketProxyConfig = {
@@ -125,8 +131,7 @@ export type WebSocketProxyConfig = {
       path: string;
     };
   };
-  rateLimiting?: IRateLimiting;
-  circuitBreaker?: ICircuitBreaker;
+  rateLimiting?: RateLimiting;
 };
 
 /*
@@ -189,12 +194,22 @@ export type HttpRequestBodyEncoding =
 export type UrlList = string | string[];
 export type UrlSelector = (urlList: UrlList) => Promise<UrlList>;
 
-export type RateLimitedRequestInfo = {
+export type ClientTrackingInfo = {
   path: string;
-  method: string;
+  method: HttpMethods;
   time: number;
 };
 
+export type HttpServiceTrackingInfo = {
+  route: string;
+  method: HttpMethods;
+  service: string;
+  statusCode: number;
+  requestTime: number;
+  responseTime: number;
+};
+
 export type IApplicationState = {
-  rateLimiting: Map<string, RateLimitedRequestInfo[]>;
+  clientTracking: Map<string, ClientTrackingInfo[]>;
+  httpServiceTracing: Map<string, HttpServiceTrackingInfo[]>;
 };

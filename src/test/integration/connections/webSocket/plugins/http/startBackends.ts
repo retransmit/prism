@@ -1,11 +1,12 @@
 import Koa = require("koa");
+import { HttpMethods } from "../../../../../../types";
 
 type MockHttpBackendConfig = {
   port: number;
   afterResponse?: (ctx: any) => Promise<boolean | undefined>;
   routes: {
     path: string;
-    method: string;
+    method: HttpMethods;
     response: {
       status?: number;
       body: string | { [key: string]: any };
