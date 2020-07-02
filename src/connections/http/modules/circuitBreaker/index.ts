@@ -5,7 +5,6 @@ import {
   HttpServiceErrorTrackingInfo,
   HttpServiceCircuitBreakerConfig,
 } from "../../../../types";
-import * as applicationState from "../../../../state";
 import {
   HttpRouteConfig,
   HttpServiceCircuitBreakerStateProviderPlugin,
@@ -13,8 +12,6 @@ import {
 
 import * as inMemoryPlugin from "./inMemory";
 import * as redisPlugin from "./redis";
-
-const ONE_MINUTE = 60 * 1000;
 
 const plugins: {
   [name: string]: HttpServiceCircuitBreakerStateProviderPlugin;

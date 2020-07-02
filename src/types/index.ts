@@ -263,3 +263,21 @@ export type Notification =
       type: "sms";
       phoneNumber: string;
     };
+
+export type RateLimitingStateProviderPlugin = {
+  getTrackingInfo: (
+    path: string,
+    method: HttpMethods,
+    remoteAddress: string,
+    rateLimitingConfig: RateLimitingConfig,
+    stateConfig: any
+  ) => Promise<ClientTrackingInfo[] | undefined>;
+  setTrackingInfo: (
+    path: string,
+    method: HttpMethods,
+    remoteAddress: string,
+    trackingInfo: ClientTrackingInfo,
+    rateLimitingConfig: RateLimitingConfig,
+    stateConfig: any
+  ) => Promise<void>;
+};

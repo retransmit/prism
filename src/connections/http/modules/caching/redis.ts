@@ -1,14 +1,8 @@
 import {
-  IAppConfig,
-  HttpProxyConfig,
-  HttpMethods,
   RedisStateConfig,
-  HttpRequest,
   HttpServiceCacheConfig,
   HttpResponse,
 } from "../../../../types";
-import * as applicationState from "../../../../state";
-import { HttpRouteConfig } from "../../../../types/http";
 import { createClient } from "redis";
 
 import { promisify } from "util";
