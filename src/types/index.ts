@@ -105,6 +105,8 @@ export type HttpProxyConfig = {
   };
   rateLimiting?: RateLimitingConfig;
   circuitBreaker?: HttpServiceCircuitBreakerConfig;
+  caching?: HttpServiceCacheConfig;
+  authentication: HttpServiceAuthentication;
 };
 
 export type WebSocketProxyConfig = {
@@ -146,6 +148,8 @@ export type WebSocketProxyConfig = {
 export type WebJob = {
   url: UrlList;
   getUrl?: UrlSelector;
+  method?: HttpMethods;
+  body?: any;
   interval: number;
   payload: HttpRequest;
   getPayload: (url: string) => Promise<HttpRequest>;
@@ -218,3 +222,24 @@ export type IApplicationState = {
   clientTracking: Map<string, ClientTrackingInfo[]>;
   httpServiceErrorTracking: Map<string, HttpServiceErrorTrackingInfo[]>;
 };
+
+export type HttpServiceCacheConfig = {
+  route: string;
+  method: HttpMethods;
+  varyBy: {
+    headers?: string[];
+    query?: string[];
+    body?: string[];
+  };
+  expiry: number;
+};
+
+export type HttpServiceAuthentication =
+  | {
+      type: "jwt";
+      publicKey: string;
+      verify: {
+        [field: string]: any;
+      };
+    }
+  | "none";

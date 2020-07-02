@@ -9,6 +9,8 @@ import {
   UrlSelector,
   RateLimitingConfig,
   HttpServiceCircuitBreakerConfig,
+  HttpServiceCacheConfig,
+  HttpServiceAuthentication
 } from ".";
 
 /*
@@ -40,6 +42,8 @@ export type HttpRouteConfig = {
   ) => any;
   rateLimiting?: RateLimitingConfig;
   circuitBreaker?: HttpServiceCircuitBreakerConfig;
+  caching?: HttpServiceCacheConfig;
+  authentication?: HttpServiceAuthentication;
 };
 
 /*

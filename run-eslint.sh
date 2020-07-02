@@ -1,0 +1,1 @@
+eslint --parser-options=ecmaVersion:7,sourceType:module --ext .js --rule 'no-loop-func:2' dist
