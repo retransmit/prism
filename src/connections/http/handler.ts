@@ -27,8 +27,8 @@ import applyRateLimiting from "../../lib/rateLimiting";
 import { applyCircuitBreaker } from "./circuitBreaker";
 import { copyHeadersFromContext } from "./copyHeadersFromContext";
 import { sendResponse } from "./sendResponse";
-import { getFromCache, updateCache } from "./caching";
-import authenticate from "./authenticate";
+import { getFromCache } from "./caching";
+import authenticate from "./authentication";
 
 const cors = require("@koa/cors");
 
@@ -138,30 +138,20 @@ async function handler(
 
   const authConfig = routeConfig?.authentication || httpConfig.authentication;
 
-  if (authConfig && authConfig !== "none") {
-    const jwt = authConfig.jwtHeaderField
-      ? originalRequest.headers?.[authConfig.jwtHeaderField]
-      : authConfig.jwtBodyField
-      ? originalRequest.body?.[authConfig.jwtBodyField]
-      : undefined;
-
-    if (jwt) {
-      const response = await authenticate(jwt, authConfig);
-      if (response) {
-        sendResponse(
-          ctx,
-          route,
-          method,
-          requestTime,
-          originalRequest,
-          response,
-          routeConfig,
-          httpConfig,
-          config
-        );
-        return;
-      }
-    }
+  const authResponse = await authenticate(originalRequest, authConfig);
+  if (authResponse) {
+    sendResponse(
+      ctx,
+      route,
+      method,
+      requestTime,
+      originalRequest,
+      authResponse,
+      routeConfig,
+      httpConfig,
+      config
+    );
+    return;
   }
 
   if (routeConfig) {
