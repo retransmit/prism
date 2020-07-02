@@ -234,9 +234,7 @@ export type InMemoryCacheEntry = {
 };
 
 export type HttpServiceCacheConfig = {
-  route: string;
-  method: HttpMethods;
-  varyBy: {
+  varyBy?: {
     headers?: string[];
     query?: string[];
     body?: string[];

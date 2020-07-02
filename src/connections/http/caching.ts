@@ -95,9 +95,15 @@ function reduceRequestToHash(
   cacheConfig: HttpServiceCacheConfig
 ) {
   const requestParams = {
-    headers: requestFieldToArray(request.headers, cacheConfig.varyBy.headers),
-    query: requestFieldToArray(request.headers, cacheConfig.varyBy.query),
-    body: requestFieldToArray(request.headers, cacheConfig.varyBy.body),
+    headers: requestFieldToArray(
+      request.headers,
+      cacheConfig.varyBy?.headers || []
+    ),
+    query: requestFieldToArray(
+      request.headers,
+      cacheConfig.varyBy?.query || []
+    ),
+    body: requestFieldToArray(request.headers, cacheConfig.varyBy?.body || []),
   };
 
   const jsonOfRequest = JSON.stringify(requestParams);

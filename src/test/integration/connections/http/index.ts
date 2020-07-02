@@ -28,6 +28,7 @@ import redisMapsHeaders from "./plugins/redis/mapsHeaders";
 import rateLimits from "./rateLimits";
 import tripsCircuit from "./tripsCircuit";
 import runsWebJobs from "./runsWebJobs";
+import cachesResponses from "./cachesResponses";
 
 import { TestAppInstance } from "../../../test";
 
@@ -69,6 +70,9 @@ export default function run(app: TestAppInstance) {
     });
     describe("web jobs", () => {
       runsWebJobs(app);
+    });
+    describe("caches responses", () => {
+      cachesResponses(app);
     });
   });
 }

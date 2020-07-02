@@ -7,7 +7,6 @@ import {
   HttpMethods,
   HttpProxyConfig,
   HttpRequest,
-  HttpResponse,
   IAppConfig,
 } from "../../types";
 import randomId from "../../lib/random";
@@ -21,15 +20,13 @@ import responseIsError from "../../lib/http/responseIsError";
 import {
   FetchedHttpRequestHandlerResponse,
   InvokeServiceResult,
-  HttpRouteConfig,
   IHttpRequestHandlerPlugin,
   HttpRequestHandlerConfig,
 } from "../../types/http";
 import applyRateLimiting from "../../lib/rateLimiting";
-import {
-  applyCircuitBreaker,
-  updateHttpServiceErrorTracking,
-} from "./circuitBreaker";
+import { applyCircuitBreaker } from "./circuitBreaker";
+import { copyHeadersFromContext } from "./copyHeadersFromContext";
+import { sendResponse } from "./sendResponse";
 
 const cors = require("@koa/cors");
 
@@ -152,7 +149,17 @@ async function handler(
         status: rateLimitedResponse.status,
         body: rateLimitedResponse.body,
       };
-      sendResponse(ctx, response, routeConfig, httpConfig);
+      sendResponse(
+        ctx,
+        route,
+        method,
+        requestTime,
+        originalRequest,
+        response,
+        routeConfig,
+        httpConfig,
+        config
+      );
       return;
     }
 
@@ -169,7 +176,17 @@ async function handler(
         status: circuitBreakerResponse.status,
         body: circuitBreakerResponse.body,
       };
-      sendResponse(ctx, response, routeConfig, httpConfig);
+      sendResponse(
+        ctx,
+        route,
+        method,
+        requestTime,
+        originalRequest,
+        response,
+        routeConfig,
+        httpConfig,
+        config
+      );
       return;
     }
   }
@@ -183,7 +200,17 @@ async function handler(
   };
 
   if (modResult.handled) {
-    sendResponse(ctx, modResult.response, routeConfig, httpConfig);
+    sendResponse(
+      ctx,
+      route,
+      method,
+      requestTime,
+      originalRequest,
+      modResult.response,
+      routeConfig,
+      httpConfig,
+      config
+    );
   } else {
     if (routeConfig) {
       const modifiedRequest = modResult.request;
@@ -300,86 +327,18 @@ async function handler(
 
       const responseTime = Date.now();
 
-      updateHttpServiceErrorTracking(
+      sendResponse(
+        ctx,
         route,
         method,
-        response.status,
         requestTime,
-        responseTime,
+        originalRequest,
+        responseToSend,
         routeConfig,
         httpConfig,
         config
       );
-
-      sendResponse(ctx, responseToSend, routeConfig, httpConfig);
     }
-  }
-}
-
-function sendResponse(
-  ctx: IRouterContext,
-  response: HttpResponse | undefined,
-  routeConfig: HttpRouteConfig | undefined,
-  httpConfig: HttpProxyConfig
-) {
-  if (response) {
-    if (
-      response.status &&
-      response.status >= 500 &&
-      response.status <= 599 &&
-      (routeConfig?.genericErrors || httpConfig.genericErrors)
-    ) {
-      ctx.status = 500;
-      ctx.body = `Internal Server Error.`;
-    } else {
-      // Redirect and return
-      if (response.redirect) {
-        ctx.redirect(response.redirect);
-        return;
-      }
-
-      // HTTP status
-      if (response.status) {
-        ctx.status = response.status;
-      }
-
-      // Content type
-      if (response.contentType) {
-        ctx.type = response.contentType;
-      }
-
-      // Response body
-      ctx.body = response.body;
-
-      // Headers of type IncomingHttpHeaders
-      if (response.headers) {
-        Object.keys(response.headers).forEach((field) => {
-          const value = response?.headers
-            ? response?.headers[field]
-            : undefined;
-          if (value) {
-            ctx.response.set(field, value);
-          }
-        });
-      }
-
-      // Cookies!
-      if (response.cookies) {
-        for (const cookie of response.cookies) {
-          ctx.cookies.set(cookie.name, cookie.value, {
-            domain: cookie.domain,
-            path: cookie.path,
-            maxAge: cookie.maxAge,
-            secure: cookie.secure,
-            httpOnly: cookie.httpOnly,
-            overwrite: cookie.overwrite,
-          });
-        }
-      }
-    }
-  } else {
-    ctx.status = 404;
-    ctx.body = "Not found.";
   }
 }
 
@@ -394,18 +353,4 @@ function makeHttpRequestFromContext(ctx: IRouterContext): HttpRequest {
     remoteAddress: ctx.ip, // This handles 'X-Forwarded-For' etc.
     remotePort: ctx.req.socket.remotePort,
   };
-}
-
-/*
-  Don't copy the content-type and content-length headers.
-  That's going to differ based on the backend service.
-*/
-function copyHeadersFromContext(headers: { [field: string]: string }) {
-  return Object.keys(headers || {}).reduce(
-    (acc, field) =>
-      !["content-type", "content-length"].includes(field.toLowerCase())
-        ? ((acc[field] = headers[field]), acc)
-        : acc,
-    {} as { [field: string]: string }
-  );
 }
