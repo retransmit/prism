@@ -3,6 +3,8 @@ import {
   ClientTrackingInfo,
   HttpServiceErrorTrackingInfo,
   IAppConfig,
+  HttpResponse,
+  InMemoryCacheEntry,
 } from "../types";
 
 let state: IApplicationState;
@@ -14,6 +16,7 @@ export async function init(config: IAppConfig) {
   state = {
     clientTracking: new Map<string, ClientTrackingInfo[]>(),
     httpServiceErrorTracking: new Map<string, HttpServiceErrorTrackingInfo[]>(),
+    cache: new Map<string, InMemoryCacheEntry>(),
   };
 
   if (config.state?.type === "memory") {
@@ -34,6 +37,8 @@ export async function init(config: IAppConfig) {
         ),
       httpServiceErrorTrackingListExpiry
     );
+
+    setInterval(() => cleanUpCacheEntries(config), TWO_MINUTES);
   }
 }
 
@@ -83,6 +88,16 @@ function cleanUpHttpServiceTrackingEntries(
           (x) => x.responseTime > now - httpServiceErrorTrackingListExpiry
         )
       );
+    }
+  }
+}
+
+function cleanUpCacheEntries(config: IAppConfig) {
+  const now = Date.now();
+
+  for (const [key, entry] of state.cache.entries()) {
+    if (entry.time > now - entry.expiry) {
+      state.cache.delete(key);
     }
   }
 }

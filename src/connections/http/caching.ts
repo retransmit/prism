@@ -6,20 +6,21 @@ import {
   RedisStateConfig,
   HttpServiceErrorTrackingInfo,
   HttpServiceCircuitBreakerConfig,
+  HttpRequest,
+  HttpServiceCacheConfig,
+  HttpResponse,
+  IApplicationState,
 } from "../../types";
 import * as applicationState from "../../state";
 import { HttpRouteConfig } from "../../types/http";
 import error from "../../error";
 import { createClient } from "redis";
+import { createHash } from "crypto";
 
 import { promisify } from "util";
 
-const redisLRange = promisify(createClient().lrange);
-const redisLPush: (key: string, val: string) => Promise<void> = promisify(
-  createClient().lpush
-) as any;
-const redisLTrim = promisify(createClient().ltrim);
-const redisPExpire = promisify(createClient().pexpire);
+const redisGet = promisify(createClient().get);
+const redisSetex = promisify(createClient().setex);
 
 const ONE_MINUTE = 60 * 1000;
 const TWO_MINUTES = 2 * ONE_MINUTE;
@@ -28,169 +29,151 @@ const TWO_MINUTES = 2 * ONE_MINUTE;
   Rate limiting state is stored in memory by default,
   but most deployments should use redis.
 */
-export async function applyCircuitBreaker(
+export async function checkCache(
   route: string,
-  method: HttpMethods,
+  method: string,
+  request: HttpRequest,
   routeConfig: HttpRouteConfig,
   proxyConfig: HttpProxyConfig,
   config: IAppConfig
-): Promise<{ status: number; body: any } | undefined> {
-  const rejectionMessage = "Busy.";
-  const circuitBreakerConfig =
-    routeConfig.circuitBreaker || proxyConfig.circuitBreaker;
+): Promise<HttpResponse | undefined> {
+  const cacheConfig = routeConfig.caching || proxyConfig.caching;
 
-  if (circuitBreakerConfig) {
+  if (cacheConfig) {
+    const key = reduceRequestToHash(route, method, request, cacheConfig);
     return config.state === undefined || config.state.type === "memory"
-      ? await handleServiceTrackingWithInMemoryState(
-          circuitBreakerConfig,
-          config.state
-        )
+      ? await checkCacheWithInMemoryState(key)
       : config.state.type === "redis"
-      ? handleServiceTrackingWithRedisState(circuitBreakerConfig, config.state)
+      ? checkCacheWithRedisState(key, config.state)
       : error(
           `Unsupported state type ${
             (config.state as any)?.type
           }. Valid values are 'memory' and 'redis'.`
         );
   }
+}
 
-  async function handleServiceTrackingWithInMemoryState(
-    circuitBreakerConfig: HttpServiceCircuitBreakerConfig,
-    stateConfig: InMemoryStateConfig | undefined
-  ) {
-    const key = `${route}:${method}`;
-    const state = applicationState.get();
-    const trackingList = state.httpServiceErrorTracking.get(key);
-
-    if (mustReject(trackingList || [], circuitBreakerConfig)) {
-      return {
-        status: circuitBreakerConfig.errorCode || 503,
-        body: circuitBreakerConfig.errorResponse || rejectionMessage,
-      };
-    }
-  }
-
-  async function handleServiceTrackingWithRedisState(
-    circuitBreakerConfig: HttpServiceCircuitBreakerConfig,
-    stateConfig: RedisStateConfig | undefined
-  ) {
-    const client = createClient(stateConfig?.options);
-    const key = `http_service_error_tracking:${route}:${method}`;
-
-    const jsonEntries = await redisLRange.call(client, key, 0, -1);
-
-    const trackingList = jsonEntries.map(
-      (x) => JSON.parse(x) as HttpServiceErrorTrackingInfo
-    );
-
-    if (mustReject(trackingList || [], circuitBreakerConfig)) {
-      return {
-        status: circuitBreakerConfig.errorCode || 503,
-        body: circuitBreakerConfig.errorResponse || rejectionMessage,
-      };
-    }
+async function checkCacheWithInMemoryState(
+  key: string
+): Promise<HttpResponse | undefined> {
+  const state = applicationState.get();
+  const cachedItem = state.cache.get(key);
+  if (cachedItem) {
+    return cachedItem.response;
   }
 }
 
-export async function updateHttpServiceErrorTracking(
+async function checkCacheWithRedisState(
+  key: string,
+  stateConfig: RedisStateConfig
+): Promise<HttpResponse | undefined> {
+  const client = createClient(stateConfig?.options);
+  const redisKey = `cache_item:${key}`;
+  const response = await redisGet.call(client, redisKey);
+  if (response) {
+    return JSON.parse(response);
+  }
+}
+
+function requestFieldToArray(
+  requestProp:
+    | {
+        [field: string]: any;
+      }
+    | undefined,
+  fields: string[] | undefined
+) {
+  return (fields || []).reduce((acc, prop) => {
+    return acc.concat(requestProp ? [[prop, requestProp[prop]]] : []);
+  }, [] as [string, any][]);
+}
+
+function reduceRequestToHash(
+  route: string,
+  method: string,
+  request: HttpRequest,
+  cacheConfig: HttpServiceCacheConfig
+) {
+  const requestParams = {
+    headers: requestFieldToArray(request.headers, cacheConfig.varyBy.headers),
+    query: requestFieldToArray(request.headers, cacheConfig.varyBy.query),
+    body: requestFieldToArray(request.headers, cacheConfig.varyBy.body),
+  };
+
+  const jsonOfRequest = JSON.stringify(requestParams);
+  const hashOfRequest = createHash("sha1")
+    .update(jsonOfRequest)
+    .digest("base64");
+
+  return `${route}:${method}:${hashOfRequest}`;
+}
+
+export async function updateCache(
   route: string,
   method: HttpMethods,
-  status: number | undefined,
-  requestTime: number,
-  responseTime: number,
+  request: HttpRequest,
+  response: HttpResponse,
   routeConfig: HttpRouteConfig,
   proxyConfig: HttpProxyConfig,
   config: IAppConfig
 ) {
-  const circuitBreakerConfig =
-    routeConfig.circuitBreaker || proxyConfig.circuitBreaker;
+  const cacheConfig = routeConfig.caching || proxyConfig.caching;
 
-  const trackingInfo: HttpServiceErrorTrackingInfo = {
-    route,
-    method,
-    status,
-    requestTime,
-    responseTime,
-  };
+  if (cacheConfig) {
+    const maxSize = cacheConfig.maxSize || 5000000;
 
-  if (circuitBreakerConfig) {
-    const isFailure =
-      (circuitBreakerConfig.isFailure &&
-        circuitBreakerConfig.isFailure(trackingInfo)) ||
-      (trackingInfo.status && trackingInfo.status >= 500);
-
-    if (isFailure) {
+    // Check if any of the params are bigger than it should be.
+    if (!tooBig(maxSize, response)) {
+      const key = reduceRequestToHash(route, method, request, cacheConfig);
       if (config.state === undefined || config.state.type === "memory") {
-        await updateHttpServiceErrorTrackingInMemory(
-          trackingInfo,
-          circuitBreakerConfig,
-          config.state
-        );
-      } else if (config.state.type === "redis") {
-        await updateHttpServiceErrorTrackingInRedis(
-          trackingInfo,
-          circuitBreakerConfig,
-          config.state
-        );
+        await updateCacheEntryInMemory(key, response, cacheConfig);
+      } else {
+        await updateCacheEntryInRedis(key, response, cacheConfig, config.state);
       }
     }
   }
-
-  async function updateHttpServiceErrorTrackingInMemory(
-    trackingInfo: HttpServiceErrorTrackingInfo,
-    circuitBreakerConfig: HttpServiceCircuitBreakerConfig,
-    stateConfig: InMemoryStateConfig | undefined
-  ) {
-    const key = `${route}:${method}`;
-    const state = applicationState.get();
-    const trackingList = state.httpServiceErrorTracking.get(key);
-
-    if (trackingList) {
-      trackingList.push(trackingInfo);
-    } else {
-      const newTrackingList = [trackingInfo];
-      state.httpServiceErrorTracking.set(key, newTrackingList);
-    }
-  }
-
-  async function updateHttpServiceErrorTrackingInRedis(
-    trackingInfo: HttpServiceErrorTrackingInfo,
-    circuitBreakerConfig: HttpServiceCircuitBreakerConfig,
-    stateConfig: RedisStateConfig | undefined
-  ) {
-    const client = createClient(stateConfig?.options);
-    const key = `http_service_error_tracking:${route}:${method}`;
-
-    const jsonEntry = JSON.stringify(trackingInfo);
-    await redisLPush.call(client, key, jsonEntry);
-    await redisLTrim.call(
-      client,
-      key,
-      0,
-      stateConfig?.httpServiceErrorTrackingListLength || 2000
-    );
-    await redisPExpire.call(
-      client,
-      key,
-      stateConfig?.httpServiceErrorTrackingListExpiry || TWO_MINUTES
-    );
-  }
 }
 
-function mustReject(
-  trackingInfoList: HttpServiceErrorTrackingInfo[],
-  circuitBreakerConfig: HttpServiceCircuitBreakerConfig
+async function updateCacheEntryInMemory(
+  key: string,
+  response: HttpResponse,
+  cacheConfig: HttpServiceCacheConfig
 ) {
-  const now = Date.now();
-  let errorCount = 0;
+  const state = applicationState.get();
+  state.cache.set(key, {
+    time: Date.now(),
+    expiry: cacheConfig.expiry || ONE_MINUTE,
+    response,
+  });
+}
 
-  for (const info of trackingInfoList) {
-    if (info.responseTime > now - circuitBreakerConfig.duration) {
-      errorCount++;
-    }
-    if (errorCount >= circuitBreakerConfig.maxErrors) {
-      return true;
-    }
-  }
-  return false;
+async function updateCacheEntryInRedis(
+  key: string,
+  response: HttpResponse,
+  cacheConfig: HttpServiceCacheConfig,
+  stateConfig: RedisStateConfig
+) {
+  const expiry = cacheConfig.expiry || ONE_MINUTE;
+  const client = createClient(stateConfig?.options);
+  const redisKey = `cache_item:${key}`;
+  await redisSetex.call(
+    client,
+    redisKey,
+    cacheConfig.expiry || ONE_MINUTE,
+    JSON.stringify(response)
+  );
+}
+
+function tooBig(maxSize: number, response: HttpResponse) {
+  return [response.headers, response.body].some((responseProp) => {
+    responseProp !== undefined
+      ? Object.keys(responseProp).some(
+          (x) =>
+            (typeof responseProp[x] !== "string"
+              ? JSON.stringify(responseProp[x])
+              : x
+            ).length > maxSize
+        )
+      : false;
+  });
 }

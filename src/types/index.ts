@@ -45,7 +45,7 @@ export interface IAppConfig {
 export type InMemoryStateConfig = {
   type: "memory";
   clientTrackingEntryExpiry?: number;
-  httpServiceErrorTrackingListExpiry?: number;
+  httpServiceErrorTrackingListExpiry?: number;  
 };
 
 export type RedisStateConfig = {
@@ -222,6 +222,13 @@ export type HttpServiceErrorTrackingInfo = {
 export type IApplicationState = {
   clientTracking: Map<string, ClientTrackingInfo[]>;
   httpServiceErrorTracking: Map<string, HttpServiceErrorTrackingInfo[]>;
+  cache: Map<string, InMemoryCacheEntry>;
+};
+
+export type InMemoryCacheEntry = {
+  time: number;
+  expiry: number;
+  response: HttpResponse;
 };
 
 export type HttpServiceCacheConfig = {
@@ -233,6 +240,7 @@ export type HttpServiceCacheConfig = {
     body?: string[];
   };
   expiry: number;
+  maxSize?: number;
 };
 
 export type HttpServiceAuthentication =
