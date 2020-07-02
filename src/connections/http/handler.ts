@@ -28,7 +28,7 @@ import { applyCircuitBreaker } from "./circuitBreaker";
 import { copyHeadersFromContext } from "./copyHeadersFromContext";
 import { sendResponse } from "./sendResponse";
 import { checkCache } from "./caching";
-import validateJwt from "./validateJwt";
+import authenticate from "./authenticate";
 
 const cors = require("@koa/cors");
 
@@ -146,7 +146,7 @@ async function handler(
       : undefined;
 
     if (jwt) {
-      const response = await validateJwt(jwt, authConfig);
+      const response = await authenticate(jwt, authConfig);
       if (response) {
         sendResponse(
           ctx,

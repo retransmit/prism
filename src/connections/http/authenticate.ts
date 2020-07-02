@@ -1,5 +1,5 @@
 import jsonwebtoken = require("jsonwebtoken");
-import { IAppConfig, HttpServiceJwtAuthentication } from "../../types";
+import { HttpServiceJwtAuthentication } from "../../types";
 
 export default async function validateJwt(
   jwtString: string | undefined,
