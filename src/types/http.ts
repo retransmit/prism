@@ -10,7 +10,7 @@ import {
   RateLimitingConfig,
   HttpServiceCircuitBreakerConfig,
   HttpServiceCacheConfig,
-  HttpServiceAuthentication
+  HttpServiceAuthentication,
 } from ".";
 
 /*
@@ -189,7 +189,7 @@ export type HttpRequestHandlerConfig =
   | RedisServiceHttpRequestHandlerConfig
   | HttpServiceHttpRequestHandlerConfig;
 
-export type IHttpRequestHandlerPlugin = {
+export type HttpRequestHandlerPlugin = {
   init: (config: IAppConfig) => any;
   handleRequest: (
     requestId: string,
@@ -210,4 +210,14 @@ export type IHttpRequestHandlerPlugin = {
     method: HttpMethods,
     httpConfig: HttpProxyConfig
   ) => void;
+};
+
+export type HttpServiceCacheProviderPlugin = {
+  get: (key: string, stateConfig: any) => Promise<HttpResponse | undefined>;
+  set: (
+    key: string,
+    response: HttpResponse,
+    stateConfig: any,
+    cacheConfig: HttpServiceCacheConfig
+  ) => Promise<void>;
 };

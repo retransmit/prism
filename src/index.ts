@@ -21,6 +21,9 @@ import random from "./lib/random";
 
 import * as webJobs from "./connections/http/webJobs";
 
+const ONE_MINUTE = 60 * 1000;
+const TWO_MINUTES = 2 * ONE_MINUTE;
+
 const packageJson = require("../package.json");
 
 const argv = yargs.options({
@@ -81,6 +84,13 @@ export async function startWithConfiguration(
   }
 
   // Initialize state
+  if (!config.state) {
+    config.state = {
+      type: "memory",
+      clientTrackingEntryExpiry: TWO_MINUTES,
+      httpServiceErrorTrackingListExpiry: TWO_MINUTES,
+    };
+  }
   await applicationState.init(config);
 
   // Set up the config

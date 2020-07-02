@@ -20,20 +20,20 @@ import responseIsError from "../../lib/http/responseIsError";
 import {
   FetchedHttpRequestHandlerResponse,
   InvokeServiceResult,
-  IHttpRequestHandlerPlugin,
+  HttpRequestHandlerPlugin,
   HttpRequestHandlerConfig,
 } from "../../types/http";
 import applyRateLimiting from "../../lib/rateLimiting";
 import { applyCircuitBreaker } from "./circuitBreaker";
 import { copyHeadersFromContext } from "./copyHeadersFromContext";
 import { sendResponse } from "./sendResponse";
-import { checkCache } from "./caching";
+import { getFromCache, updateCache } from "./caching";
 import authenticate from "./authenticate";
 
 const cors = require("@koa/cors");
 
 const plugins: {
-  [name: string]: IHttpRequestHandlerPlugin;
+  [name: string]: HttpRequestHandlerPlugin;
 } = {
   http: {
     init: httpPlugin.init,
@@ -165,7 +165,7 @@ async function handler(
   }
 
   if (routeConfig) {
-    const entryFromCache = await checkCache(
+    const entryFromCache = await getFromCache(
       route,
       method,
       originalRequest,
