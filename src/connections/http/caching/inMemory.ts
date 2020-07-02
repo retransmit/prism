@@ -13,7 +13,7 @@ export async function get(
 ): Promise<HttpResponse | undefined> {
   const now = Date.now();
   const state = applicationState.get();
-  const cachedItem = state.cache.get(key);
+  const cachedItem = state.httpResponseCache.get(key);
   if (cachedItem && cachedItem.time > now - cachedItem.expiry) {
     return cachedItem.response;
   }
@@ -26,7 +26,7 @@ export async function set(
   cacheConfig: HttpServiceCacheConfig
 ) {
   const state = applicationState.get();
-  state.cache.set(key, {
+  state.httpResponseCache.set(key, {
     time: Date.now(),
     expiry: cacheConfig.expiry || ONE_MINUTE,
     response,

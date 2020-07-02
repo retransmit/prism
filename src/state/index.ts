@@ -16,7 +16,7 @@ export async function init(config: IAppConfig) {
   state = {
     clientTracking: new Map<string, ClientTrackingInfo[]>(),
     httpServiceErrorTracking: new Map<string, HttpServiceErrorTrackingInfo[]>(),
-    cache: new Map<string, InMemoryCacheEntry>(),
+    httpResponseCache: new Map<string, InMemoryCacheEntry>(),
   };
 
   if (config.state?.type === "memory") {
@@ -95,9 +95,9 @@ function cleanUpHttpServiceTrackingEntries(
 function cleanUpCacheEntries(config: IAppConfig) {
   const now = Date.now();
 
-  for (const [key, entry] of state.cache.entries()) {
+  for (const [key, entry] of state.httpResponseCache.entries()) {
     if (entry.time > now - entry.expiry) {
-      state.cache.delete(key);
+      state.httpResponseCache.delete(key);
     }
   }
 }

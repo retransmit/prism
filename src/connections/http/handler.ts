@@ -24,11 +24,11 @@ import {
   HttpRequestHandlerConfig,
 } from "../../types/http";
 import applyRateLimiting from "../../lib/rateLimiting";
-import { applyCircuitBreaker } from "./circuitBreaker";
 import { copyHeadersFromContext } from "./copyHeadersFromContext";
 import { sendResponse } from "./sendResponse";
 import { getFromCache } from "./caching";
 import authenticate from "./authentication";
+import { isTripped } from "./circuitBreaker";
 
 const cors = require("@koa/cors");
 
@@ -208,7 +208,7 @@ async function handler(
       return;
     }
 
-    const circuitBreakerResponse = await applyCircuitBreaker(
+    const circuitBreakerResponse = await isTripped(
       route,
       method,
       routeConfig,

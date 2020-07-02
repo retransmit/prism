@@ -224,7 +224,7 @@ export type HttpServiceErrorTrackingInfo = {
 export type IApplicationState = {
   clientTracking: Map<string, ClientTrackingInfo[]>;
   httpServiceErrorTracking: Map<string, HttpServiceErrorTrackingInfo[]>;
-  cache: Map<string, InMemoryCacheEntry>;
+  httpResponseCache: Map<string, InMemoryCacheEntry>;
 };
 
 export type InMemoryCacheEntry = {

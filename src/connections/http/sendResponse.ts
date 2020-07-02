@@ -7,7 +7,7 @@ import {
   HttpProxyConfig,
 } from "../../types";
 import { HttpRouteConfig } from "../../types/http";
-import { updateHttpServiceErrorTracking } from "./circuitBreaker";
+import { updateServiceTrackingInfo } from "./circuitBreaker";
 import { updateCache } from "./caching";
 import responseIsError from "../../lib/http/responseIsError";
 
@@ -27,7 +27,7 @@ export async function sendResponse(
 
   if (response) {
     if (routeConfig && !fromCache) {
-      updateHttpServiceErrorTracking(
+      updateServiceTrackingInfo(
         route,
         method,
         response.status,

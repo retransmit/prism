@@ -8,24 +8,23 @@ import {
 } from "../../../types";
 import {
   HttpRouteConfig,
-  HttpServiceCacheProviderPlugin,
+  HttpServiceCacheStateProviderPlugin,
 } from "../../../types/http";
-import error from "../../../error";
 import { createHash } from "crypto";
 
-import * as inMemoryCachePlugin from "./inMemory";
-import * as redisCachePlugin from "./redis";
+import * as inMemoryPlugin from "./inMemory";
+import * as redisPlugin from "./redis";
 
 const plugins: {
-  [name: string]: HttpServiceCacheProviderPlugin;
+  [name: string]: HttpServiceCacheStateProviderPlugin;
 } = {
   memory: {
-    get: inMemoryCachePlugin.get,
-    set: inMemoryCachePlugin.set,
+    get: inMemoryPlugin.get,
+    set: inMemoryPlugin.set,
   },
   redis: {
-    get: redisCachePlugin.get,
-    set: redisCachePlugin.set,
+    get: redisPlugin.get,
+    set: redisPlugin.set,
   },
 };
 
@@ -35,7 +34,7 @@ const plugins: {
 */
 export async function getFromCache(
   route: string,
-  method: string,
+  method: HttpMethods,
   request: HttpRequest,
   routeConfig: HttpRouteConfig,
   proxyConfig: HttpProxyConfig,
@@ -80,7 +79,7 @@ export async function updateCache(
 
 function reduceRequestToHash(
   route: string,
-  method: string,
+  method: HttpMethods,
   request: HttpRequest,
   cacheConfig: HttpServiceCacheConfig
 ) {

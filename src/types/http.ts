@@ -11,6 +11,7 @@ import {
   HttpServiceCircuitBreakerConfig,
   HttpServiceCacheConfig,
   HttpServiceAuthentication,
+  HttpServiceErrorTrackingInfo,
 } from ".";
 
 /*
@@ -212,12 +213,28 @@ export type HttpRequestHandlerPlugin = {
   ) => void;
 };
 
-export type HttpServiceCacheProviderPlugin = {
+export type HttpServiceCacheStateProviderPlugin = {
   get: (key: string, stateConfig: any) => Promise<HttpResponse | undefined>;
   set: (
     key: string,
     response: HttpResponse,
     stateConfig: any,
     cacheConfig: HttpServiceCacheConfig
+  ) => Promise<void>;
+};
+
+export type HttpServiceCircuitBreakerStateProviderPlugin = {
+  getTrackingInfo: (
+    route: string,
+    method: HttpMethods,
+    circuitBreakerConfig: HttpServiceCircuitBreakerConfig,
+    stateConfig: any
+  ) => Promise<HttpServiceErrorTrackingInfo[] | undefined>;
+  setTrackingInfo: (
+    route: string,
+    method: HttpMethods,
+    trackingInfo: HttpServiceErrorTrackingInfo,
+    circuitBreakerConfig: HttpServiceCircuitBreakerConfig,
+    stateConfig: any
   ) => Promise<void>;
 };
