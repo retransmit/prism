@@ -59,7 +59,7 @@ export async function applyCircuitBreaker(
 
     if (mustReject(trackingList || [], circuitBreakerConfig)) {
       return {
-        status: circuitBreakerConfig.errorCode || 503,
+        status: circuitBreakerConfig.errorStatus || 503,
         body: circuitBreakerConfig.errorResponse || rejectionMessage,
       };
     }
@@ -80,7 +80,7 @@ export async function applyCircuitBreaker(
 
     if (mustReject(trackingList || [], circuitBreakerConfig)) {
       return {
-        status: circuitBreakerConfig.errorCode || 503,
+        status: circuitBreakerConfig.errorStatus || 503,
         body: circuitBreakerConfig.errorResponse || rejectionMessage,
       };
     }

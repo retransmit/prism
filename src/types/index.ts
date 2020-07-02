@@ -63,7 +63,7 @@ export type RateLimitingConfig = {
   type: "ip";
   maxRequests: number;
   duration: number;
-  errorCode?: number;
+  errorStatus?: number;
   errorResponse?: any;
 };
 
@@ -71,7 +71,7 @@ export type HttpServiceCircuitBreakerConfig = {
   maxErrors: number;
   duration: number;
   isFailure?: (response: HttpServiceErrorTrackingInfo) => boolean;
-  errorCode?: number;
+  errorStatus?: number;
   errorResponse?: any;
 };
 
@@ -243,15 +243,16 @@ export type HttpServiceCacheConfig = {
   maxSize?: number;
 };
 
-export type HttpServiceAuthentication =
-  | {
-      type: "jwt";
-      publicKey: string;
-      verify: {
-        [field: string]: any;
-      };
-    }
-  | "none";
+export type HttpServiceJwtAuthentication = {
+  type: "jwt";
+  publicKey: string;
+  jwtHeaderField?: string;
+  jwtBodyField?: string;
+  verify?: (jwt: string | object) => Promise<boolean>;
+  errorStatus?: number;
+  errorResponse?: any;
+};
+export type HttpServiceAuthentication = HttpServiceJwtAuthentication | "none";
 
 export type Notification =
   | {

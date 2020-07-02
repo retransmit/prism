@@ -28,6 +28,7 @@ import { applyCircuitBreaker } from "./circuitBreaker";
 import { copyHeadersFromContext } from "./copyHeadersFromContext";
 import { sendResponse } from "./sendResponse";
 import { checkCache } from "./caching";
+import validateJwt from "./validateJwt";
 
 const cors = require("@koa/cors");
 
@@ -134,6 +135,34 @@ async function handler(
   const requestId = randomId(32);
 
   const routeConfig = httpConfig.routes[route][method];
+
+  const authConfig = routeConfig?.authentication || httpConfig.authentication;
+
+  if (authConfig && authConfig !== "none") {
+    const jwt = authConfig.jwtHeaderField
+      ? originalRequest.headers?.[authConfig.jwtHeaderField]
+      : authConfig.jwtBodyField
+      ? originalRequest.body?.[authConfig.jwtBodyField]
+      : undefined;
+
+    if (jwt) {
+      const response = await validateJwt(jwt, authConfig);
+      if (response) {
+        sendResponse(
+          ctx,
+          route,
+          method,
+          requestTime,
+          originalRequest,
+          response,
+          routeConfig,
+          httpConfig,
+          config
+        );
+        return;
+      }
+    }
+  }
 
   if (routeConfig) {
     const entryFromCache = await checkCache(
@@ -350,8 +379,6 @@ async function handler(
       const responseToSend =
         (onResponse && (await onResponse(response, originalRequest))) ||
         response;
-
-      const responseTime = Date.now();
 
       sendResponse(
         ctx,

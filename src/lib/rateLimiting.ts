@@ -67,7 +67,7 @@ export default async function applyRateLimiting(
 
     if (mustReject(trackingList || [], rateLimitingConfig)) {
       return {
-        status: rateLimitingConfig.errorCode || 429,
+        status: rateLimitingConfig.errorStatus || 429,
         body: rateLimitingConfig.errorResponse || rejectionMessage,
       };
     } else {
@@ -104,7 +104,7 @@ export default async function applyRateLimiting(
 
     if (mustReject(trackingList || [], rateLimitingConfig)) {
       return {
-        status: rateLimitingConfig.errorCode || 429,
+        status: rateLimitingConfig.errorStatus || 429,
         body: rateLimitingConfig.errorResponse || rejectionMessage,
       };
     } else {
