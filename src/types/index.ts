@@ -6,6 +6,7 @@ import {
   WebSocketResponse,
   WebSocketMessageRequest,
 } from "./webSocket";
+import { string } from "yargs";
 
 export {
   HttpServiceHttpRequestHandlerConfig,
@@ -106,7 +107,7 @@ export type HttpProxyConfig = {
   rateLimiting?: RateLimitingConfig;
   circuitBreaker?: HttpServiceCircuitBreakerConfig;
   caching?: HttpServiceCacheConfig;
-  authentication: HttpServiceAuthentication;
+  authentication?: HttpServiceAuthentication;
 };
 
 export type WebSocketProxyConfig = {
@@ -243,3 +244,13 @@ export type HttpServiceAuthentication =
       };
     }
   | "none";
+
+export type Notification =
+  | {
+      type: "email";
+      email: string;
+    }
+  | {
+      type: "sms";
+      phoneNumber: string;
+    };

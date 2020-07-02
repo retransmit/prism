@@ -17,11 +17,6 @@ import { createClient } from "redis";
 import { promisify } from "util";
 
 const redisLRange = promisify(createClient().lrange);
-const redisLPush: (key: string, val: string) => Promise<void> = promisify(
-  createClient().lpush
-) as any;
-const redisLTrim = promisify(createClient().ltrim);
-const redisPExpire = promisify(createClient().pexpire);
 
 const ONE_MINUTE = 60 * 1000;
 const TWO_MINUTES = 2 * ONE_MINUTE;
@@ -114,18 +109,12 @@ export default async function applyRateLimiting(
       };
     } else {
       const jsonEntry = JSON.stringify(trackingInfo);
-      await redisLPush.call(client, key, jsonEntry);
-      await redisLTrim.call(
-        client,
-        key,
-        0,
-        stateConfig?.clientTrackingListLength || 2000
-      );
-      await redisPExpire.call(
-        client,
-        key,
-        stateConfig?.clientTrackingListExpiry || TWO_MINUTES
-      );
+      const multi = client.multi();
+      multi
+        .lpush(key, jsonEntry)
+        .ltrim(key, 0, stateConfig?.clientTrackingListLength || 2000)
+        .pexpire(key, stateConfig?.clientTrackingListExpiry || TWO_MINUTES);
+      multi.exec();
     }
   }
 }
