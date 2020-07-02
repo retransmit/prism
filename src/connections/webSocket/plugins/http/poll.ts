@@ -3,6 +3,7 @@ import {
   HttpServiceWebSocketRequestHandlerConfig,
   WebSocketRouteConfig,
   WebSocketResponse,
+  ActiveWebSocketConnection,
 } from "../../../../types/webSocket";
 import * as activeConnections from "../../activeConnections";
 import respondToWebSocketClient from "../../respond";
@@ -38,91 +39,103 @@ function timerCallback(
       const connections = activeConnections.get().entries();
       for (const [requestId, conn] of connections) {
         if (conn.route === route) {
-          const httpRequest: HttpRequest = {
-            path: conn.path,
-            method: "POST",
-            body: conn.lastRequest || { id: requestId },
-            remoteAddress: conn.remoteAddress,
-            remotePort: conn.remotePort,
-          };
-
-          const onRequestResult = (serviceConfig.onRequest &&
-            (await serviceConfig.onRequest(httpRequest))) || {
-            handled: false as false,
-            request: httpRequest,
-          };
-
-          if (onRequestResult.handled) {
-            if (onRequestResult.response) {
-              respondToWebSocketClient(
-                requestId,
-                onRequestResult.response,
-                conn,
-                webSocketConfig
-              );
-            }
-          } else {
-            const options = makeGotOptions(httpRequest, serviceConfig.encoding);
-
-            got(
-              await selectRandomUrl(serviceConfig.url, serviceConfig.getUrl),
-              options
-            )
-              .then(async (serverResponse) => {
-                const webSocketResponse =
-                  (serviceConfig.onResponse &&
-                    (await serviceConfig.onResponse(
-                      requestId,
-                      makeHttpResponse(serverResponse)
-                    ))) ||
-                  makeWebSocketResponse(serverResponse, requestId);
-
-                respondToWebSocketClient(
-                  requestId,
-                  webSocketResponse,
-                  conn,
-                  webSocketConfig
-                );
-              })
-              .catch(async (error) => {
-                const webSocketResponse: WebSocketResponse = error.response
-                  ? makeWebSocketResponse(error.response, requestId)
-                  : {
-                      id: requestId,
-                      response: error.message,
-                      route,
-                      service,
-                      type: "message",
-                    };
-
-                respondToWebSocketClient(
-                  requestId,
-                  webSocketResponse,
-                  conn,
-                  webSocketConfig
-                );
-
-                const errorResponse = error.response
-                  ? makeHttpResponse(error.response)
-                  : {
-                      status: 400,
-                      body: error.message,
-                    };
-
-                if (responseIsError(errorResponse)) {
-                  if (serviceConfig.onError) {
-                    serviceConfig.onError(
-                      errorResponse,
-                      onRequestResult.request
-                    );
-                  }
-                }
-              });
-          }
+          doPoll(
+            route,
+            service,
+            requestId,
+            conn,
+            serviceConfig,
+            webSocketConfig
+          );
         }
       }
     })();
   };
+}
+
+async function doPoll(
+  route: string,
+  service: string,
+  requestId: string,
+  conn: ActiveWebSocketConnection,
+  serviceConfig: HttpServiceWebSocketRequestHandlerConfig,
+  webSocketConfig: WebSocketProxyConfig
+) {
+  const httpRequest: HttpRequest = {
+    path: conn.path,
+    method: "POST",
+    body: conn.lastRequest || { id: requestId },
+    remoteAddress: conn.remoteAddress,
+    remotePort: conn.remotePort,
+  };
+
+  const onRequestResult = (serviceConfig.onRequest &&
+    (await serviceConfig.onRequest(httpRequest))) || {
+    handled: false as false,
+    request: httpRequest,
+  };
+
+  if (onRequestResult.handled) {
+    if (onRequestResult.response) {
+      respondToWebSocketClient(
+        requestId,
+        onRequestResult.response,
+        conn,
+        webSocketConfig
+      );
+    }
+  } else {
+    const options = makeGotOptions(httpRequest, serviceConfig.encoding);
+
+    got(await selectRandomUrl(serviceConfig.url, serviceConfig.getUrl), options)
+      .then(async (serverResponse) => {
+        const webSocketResponse =
+          (serviceConfig.onResponse &&
+            (await serviceConfig.onResponse(
+              requestId,
+              makeHttpResponse(serverResponse)
+            ))) ||
+          makeWebSocketResponse(serverResponse, requestId);
+
+        respondToWebSocketClient(
+          requestId,
+          webSocketResponse,
+          conn,
+          webSocketConfig
+        );
+      })
+      .catch(async (error) => {
+        const webSocketResponse: WebSocketResponse = error.response
+          ? makeWebSocketResponse(error.response, requestId)
+          : {
+              id: requestId,
+              response: error.message,
+              route,
+              service,
+              type: "message",
+            };
+
+        respondToWebSocketClient(
+          requestId,
+          webSocketResponse,
+          conn,
+          webSocketConfig
+        );
+
+        const errorResponse = error.response
+          ? makeHttpResponse(error.response)
+          : {
+              status: 400,
+              body: error.message,
+            };
+
+        if (responseIsError(errorResponse)) {
+          if (serviceConfig.onError) {
+            serviceConfig.onError(errorResponse, onRequestResult.request);
+          }
+        }
+      });
+  }
 }
 
 export function saveLastRequest(routeConfig: WebSocketRouteConfig) {

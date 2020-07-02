@@ -38,6 +38,7 @@ export default function mergeResponses(
       }
 
       const mergeResultFunctions = [
+        mergeRedirectIntoResponse,
         mergeBodyIntoResponse,
         mergeStatusIntoResponse,
         mergeCookiesIntoResponse,
@@ -66,7 +67,10 @@ function mergeRedirectIntoResponse(
   // If the response content has already been modified previously,
   // then you cannot redirect. If there's already a pending redirect,
   // you cannot redirect again.
-  if (fetchedResponse.response?.redirect && wrappedFinalResponse.response.body) {
+  if (
+    fetchedResponse.response?.redirect &&
+    wrappedFinalResponse.response.body
+  ) {
     return {
       status: 500,
       body: `${fetchedResponse.service} is redirecting to ${fetchedResponse.response.redirect} but the current response already has some content.`,
@@ -75,7 +79,10 @@ function mergeRedirectIntoResponse(
 
   // If the fetched response is redirecting, but the
   // final response has already been redirected.
-  if (fetchedResponse.response?.redirect && wrappedFinalResponse.response.redirect) {
+  if (
+    fetchedResponse.response?.redirect &&
+    wrappedFinalResponse.response.redirect
+  ) {
     return {
       status: 500,
       body: `${fetchedResponse.service} is redirecting to ${fetchedResponse.response.redirect} but the response has already been redirected to ${wrappedFinalResponse.response.redirect}.`,
@@ -244,7 +251,9 @@ function mergeStatusIntoResponse(
     if (!wrappedFinalResponse.response.status) {
       wrappedFinalResponse.response.status = fetchedResponse.response.status;
     } else {
-      if (wrappedFinalResponse.response.status !== fetchedResponse.response.status) {
+      if (
+        wrappedFinalResponse.response.status !== fetchedResponse.response.status
+      ) {
         if (
           isRegularStatusCode(fetchedResponse.response.status) &&
           isRegularStatusCode(wrappedFinalResponse.response.status)
