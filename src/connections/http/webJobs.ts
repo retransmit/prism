@@ -4,17 +4,17 @@ import selectRandomUrl from "../../lib/http/selectRandomUrl";
 
 export async function init(config: IAppConfig) {
   if (config.webJobs) {
-    for (const job of config.webJobs) {
-      setIntervalForJob(job);
+    for (const name of Object.keys(config.webJobs)) {
+      setIntervalForJob(name, config.webJobs[name]);
     }
   }
 }
 
-function setIntervalForJob(job: WebJob) {
-  setInterval(() => runWebJob(job), job.interval);
+function setIntervalForJob(name: string, job: WebJob) {
+  setInterval(() => runWebJob(name, job), job.interval);
 }
 
-async function runWebJob(job: WebJob) {
+async function runWebJob(name: string, job: WebJob) {
   const url = await selectRandomUrl(job.url, job.getUrl);
 
   const method = job.method || "GET";
@@ -30,6 +30,8 @@ async function runWebJob(job: WebJob) {
           body: job.body,
           retry: 0,
         };
-        
-  got(url, options);
+
+  got(url, options).catch(() => {
+    // TODO write to error log.
+  });
 }

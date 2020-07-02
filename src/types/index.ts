@@ -24,7 +24,9 @@ export interface IAppConfig {
   instanceId: string;
   http?: HttpProxyConfig;
   webSocket?: WebSocketProxyConfig;
-  webJobs?: WebJob[];
+  webJobs?: {
+    [name: string]: WebJob;
+  };
   redis?: {
     options?: ClientOpts;
   };
@@ -45,7 +47,7 @@ export interface IAppConfig {
 export type InMemoryStateConfig = {
   type: "memory";
   clientTrackingEntryExpiry?: number;
-  httpServiceErrorTrackingListExpiry?: number;  
+  httpServiceErrorTrackingListExpiry?: number;
 };
 
 export type RedisStateConfig = {
@@ -152,8 +154,8 @@ export type WebJob = {
   method?: HttpMethods;
   body?: any;
   interval: number;
-  payload: HttpRequest;
-  getPayload: (url: string) => Promise<HttpRequest>;
+  payload?: HttpRequest;
+  getPayload?: (url: string) => Promise<HttpRequest>;
 };
 
 /*

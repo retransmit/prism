@@ -19,6 +19,8 @@ import { Server } from "http";
 import { readFileSync } from "fs";
 import random from "./lib/random";
 
+import * as webJobs from "./connections/http/webJobs";
+
 const packageJson = require("../package.json");
 
 const argv = yargs.options({
@@ -83,6 +85,9 @@ export async function startWithConfiguration(
 
   // Set up the config
   configModule.set(config);
+
+  // Schedule web jobs
+  webJobs.init(config);
 
   // Get routes to handle
   const httpRequestHandler = await initHttpRequestHandling(config);

@@ -27,6 +27,7 @@ import redisMapsHeaders from "./plugins/redis/mapsHeaders";
 
 import rateLimits from "./rateLimits";
 import tripsCircuit from "./tripsCircuit";
+import runsWebJobs from "./runsWebJobs";
 
 import { TestAppInstance } from "../../../test";
 
@@ -65,6 +66,9 @@ export default function run(app: TestAppInstance) {
     });
     describe("circuit breaker", () => {
       tripsCircuit(app);
+    });
+    describe("web jobs", () => {
+      runsWebJobs(app);
     });
   });
 }
