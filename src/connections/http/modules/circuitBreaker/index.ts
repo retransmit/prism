@@ -4,12 +4,12 @@ import {
   HttpMethods,
   HttpServiceErrorTrackingInfo,
   HttpServiceCircuitBreakerConfig,
-} from "../../../types";
-import * as applicationState from "../../../state";
+} from "../../../../types";
+import * as applicationState from "../../../../state";
 import {
   HttpRouteConfig,
   HttpServiceCircuitBreakerStateProviderPlugin,
-} from "../../../types/http";
+} from "../../../../types/http";
 
 import * as inMemoryPlugin from "./inMemory";
 import * as redisPlugin from "./redis";

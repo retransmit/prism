@@ -5,7 +5,7 @@ import {
   ActiveWebSocketConnection,
 } from "../../../../types/webSocket";
 import * as configModule from "../../../../config";
-import { getChannelForService } from "../../../../lib/redis/getChannelForService";
+import { getChannelForService } from "../../../../utils/redis/getChannelForService";
 import respondToWebSocketClient from "../../respond";
 import { publish } from "./publish";
 

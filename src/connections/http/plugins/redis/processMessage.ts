@@ -1,6 +1,6 @@
 import * as configModule from "../../../../config";
 import { get as activeRequests } from "./activeRequests";
-import responseIsError from "../../../../lib/http/responseIsError";
+import responseIsError from "../../../../utils/http/responseIsError";
 import {
   RedisServiceHttpResponse,
   HttpRouteConfig,

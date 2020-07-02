@@ -1,6 +1,6 @@
 import {
   HttpMethods,
-} from "../../../types";
+} from "../../../../types";
 import { createClient } from "redis";
 import { promisify } from "util";
 
@@ -10,7 +10,7 @@ import {
   HttpServiceErrorTrackingInfo,
   HttpServiceCircuitBreakerConfig,
   RedisStateConfig,
-} from "../../../types";
+} from "../../../../types";
 
 const ONE_MINUTE = 60 * 1000;
 const TWO_MINUTES = 2 * ONE_MINUTE;

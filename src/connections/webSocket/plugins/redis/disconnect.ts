@@ -4,7 +4,7 @@ import {
   WebSocketDisconnectRequest,
   ActiveWebSocketConnection,
 } from "../../../../types/webSocket";
-import { getChannelForService } from "../../../../lib/redis/getChannelForService";
+import { getChannelForService } from "../../../../utils/redis/getChannelForService";
 import { publish } from "./publish";
 
 export default async function disconnect(

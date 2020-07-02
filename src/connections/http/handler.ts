@@ -9,13 +9,13 @@ import {
   HttpRequest,
   IAppConfig,
 } from "../../types";
-import randomId from "../../lib/random";
+import randomId from "../../utils/random";
 
 import * as httpPlugin from "./plugins/http";
 import * as redisPlugin from "./plugins/redis";
 
 import mergeResponses from "./mergeResponses";
-import responseIsError from "../../lib/http/responseIsError";
+import responseIsError from "../../utils/http/responseIsError";
 
 import {
   FetchedHttpRequestHandlerResponse,
@@ -23,12 +23,12 @@ import {
   HttpRequestHandlerPlugin,
   HttpRequestHandlerConfig,
 } from "../../types/http";
-import applyRateLimiting from "../../lib/rateLimiting";
+import applyRateLimiting from "../modules/rateLimiting";
 import { copyHeadersFromContext } from "./copyHeadersFromContext";
 import { sendResponse } from "./sendResponse";
-import { getFromCache } from "./caching";
-import authenticate from "./authentication";
-import { isTripped } from "./circuitBreaker";
+import { getFromCache } from "./modules/caching";
+import authenticate from "./modules/authentication";
+import { isTripped } from "./modules/circuitBreaker";
 
 const cors = require("@koa/cors");
 

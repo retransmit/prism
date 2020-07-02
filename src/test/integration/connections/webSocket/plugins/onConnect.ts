@@ -1,5 +1,5 @@
 import { startWithConfiguration } from "../../../../..";
-import random from "../../../../../lib/random";
+import random from "../../../../../utils/random";
 import WebSocket from "ws";
 import { TestAppInstance } from "../../../../test";
 import { IAppConfig } from "../../../../../types";

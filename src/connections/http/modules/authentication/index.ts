@@ -3,7 +3,7 @@ import {
   HttpServiceJwtAuthentication,
   HttpRequest,
   HttpServiceAuthentication,
-} from "../../../types";
+} from "../../../../types";
 import jwt from "./jwt";
 
 export default async function authenticate(

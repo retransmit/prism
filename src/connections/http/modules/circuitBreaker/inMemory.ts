@@ -1,11 +1,11 @@
-import * as applicationState from "../../../state";
+import * as applicationState from "../../../../state";
 
 import {
   HttpServiceErrorTrackingInfo,
   HttpServiceCircuitBreakerConfig,
   InMemoryStateConfig,
   HttpMethods,
-} from "../../../types";
+} from "../../../../types";
 
 export async function getTrackingInfo(
   route: string,

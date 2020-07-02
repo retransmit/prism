@@ -7,11 +7,11 @@ import {
   InMemoryStateConfig,
   RateLimitingConfig,
   RedisStateConfig,
-} from "../types";
-import * as applicationState from "../state";
-import { HttpRouteConfig } from "../types/http";
-import { WebSocketRouteConfig } from "../types/webSocket";
-import error from "../error";
+} from "../../types";
+import * as applicationState from "../../state";
+import { HttpRouteConfig } from "../../types/http";
+import { WebSocketRouteConfig } from "../../types/webSocket";
+import error from "../../error";
 import { createClient } from "redis";
 
 import { promisify } from "util";

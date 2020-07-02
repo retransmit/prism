@@ -1,5 +1,5 @@
 import jsonwebtoken = require("jsonwebtoken");
-import { HttpServiceJwtAuthentication, HttpRequest } from "../../../types";
+import { HttpServiceJwtAuthentication, HttpRequest } from "../../../../types";
 
 export default async function authenticate(
   request: HttpRequest,

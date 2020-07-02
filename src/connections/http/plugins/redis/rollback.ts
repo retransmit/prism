@@ -1,5 +1,5 @@
 import { HttpRequest, HttpProxyConfig, HttpMethods } from "../../../../types";
-import { getChannelForService } from "../../../../lib/redis/getChannelForService";
+import { getChannelForService } from "../../../../utils/redis/getChannelForService";
 import {
   HttpRouteConfig,
   RedisServiceHttpRequest,

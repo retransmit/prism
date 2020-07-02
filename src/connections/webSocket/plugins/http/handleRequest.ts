@@ -6,10 +6,10 @@ import {
   ActiveWebSocketConnection,
 } from "../../../../types/webSocket";
 import respondToWebSocketClient from "../../respond";
-import { makeGotOptions } from "../../../../lib/http/gotUtil";
+import { makeGotOptions } from "../../../../utils/http/gotUtil";
 import got from "got";
 import { makeWebSocketResponse } from "./makeWebSocketResponse";
-import selectRandomUrl from "../../../../lib/http/selectRandomUrl";
+import selectRandomUrl from "../../../../utils/http/selectRandomUrl";
 
 export default async function sendToService(
   request: WebSocketMessageRequest,

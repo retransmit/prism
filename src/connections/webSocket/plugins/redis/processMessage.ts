@@ -6,7 +6,7 @@ import {
 } from "../../../../types/webSocket";
 import { get as activeConnections } from "../../activeConnections";
 import respondToWebSocketClient from "../../respond";
-import { getChannelForService } from "../../../../lib/redis/getChannelForService";
+import { getChannelForService } from "../../../../utils/redis/getChannelForService";
 import { publish } from "./publish";
 
 export default function processMessage(webSocketConfig: WebSocketProxyConfig) {

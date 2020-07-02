@@ -2,7 +2,7 @@ import { TestAppInstance } from "../../../../../test";
 import got from "got";
 import { createClient } from "redis";
 import { startWithConfiguration } from "../../../../../..";
-import random from "../../../../../../lib/random";
+import random from "../../../../../../utils/random";
 import { getResponse } from "../../../../../utils/http";
 import { IAppConfig } from "../../../../../../types";
 

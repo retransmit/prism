@@ -2,13 +2,13 @@ import got from "got";
 
 import { HttpRequest, HttpProxyConfig, HttpMethods } from "../../../../types";
 
-import responseIsError from "../../../../lib/http/responseIsError";
+import responseIsError from "../../../../utils/http/responseIsError";
 import { makeHttpResponse } from "./makeHttpResponse";
 import {
   HttpRouteConfig,
   HttpServiceHttpRequestHandlerConfig,
 } from "../../../../types/http";
-import { makeGotOptions } from "../../../../lib/http/gotUtil";
+import { makeGotOptions } from "../../../../utils/http/gotUtil";
 
 /*
   Make Promises for Http Services

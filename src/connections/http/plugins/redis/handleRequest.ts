@@ -8,7 +8,7 @@ import {
 
 import { get as activeRequests } from "./activeRequests";
 import * as configModule from "../../../../config";
-import { getChannelForService } from "../../../../lib/redis/getChannelForService";
+import { getChannelForService } from "../../../../utils/redis/getChannelForService";
 import {
   RedisServiceHttpRequest,
   InvokeServiceResult,

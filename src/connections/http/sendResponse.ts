@@ -7,9 +7,9 @@ import {
   HttpProxyConfig,
 } from "../../types";
 import { HttpRouteConfig } from "../../types/http";
-import { updateServiceTrackingInfo } from "./circuitBreaker";
-import { updateCache } from "./caching";
-import responseIsError from "../../lib/http/responseIsError";
+import { updateServiceTrackingInfo } from "./modules/circuitBreaker";
+import { updateCache } from "./modules/caching";
+import responseIsError from "../../utils/http/responseIsError";
 
 export async function sendResponse(
   ctx: IRouterContext,

@@ -1,6 +1,6 @@
 import * as redis from "redis";
 import { TestAppInstance } from "../../../../../test";
-import random from "../../../../../../lib/random";
+import random from "../../../../../../utils/random";
 import { startWithConfiguration } from "../../../../../..";
 import got from "got";
 import { RedisServiceHttpRequest } from "../../../../../../types/http";

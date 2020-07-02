@@ -7,15 +7,15 @@ import {
 } from "../../../../types";
 
 import got from "got";
-import responseIsError from "../../../../lib/http/responseIsError";
+import responseIsError from "../../../../utils/http/responseIsError";
 import { makeHttpResponse } from "./makeHttpResponse";
 import {
   InvokeServiceResult,
   FetchedHttpRequestHandlerResponse,
 } from "../../../../types/http";
-import { makeGotOptions } from "../../../../lib/http/gotUtil";
+import { makeGotOptions } from "../../../../utils/http/gotUtil";
 import mapBodyAndHeaders from "../../mapBodyAndHeaders";
-import selectRandomUrl from "../../../../lib/http/selectRandomUrl";
+import selectRandomUrl from "../../../../utils/http/selectRandomUrl";
 
 /*
   Make Promises for Http Services

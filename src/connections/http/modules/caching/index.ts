@@ -5,11 +5,11 @@ import {
   HttpRequest,
   HttpServiceCacheConfig,
   HttpResponse,
-} from "../../../types";
+} from "../../../../types";
 import {
   HttpRouteConfig,
   HttpServiceCacheStateProviderPlugin,
-} from "../../../types/http";
+} from "../../../../types/http";
 import { createHash } from "crypto";
 
 import * as inMemoryPlugin from "./inMemory";

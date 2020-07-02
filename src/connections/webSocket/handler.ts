@@ -1,7 +1,7 @@
 import { IncomingMessage } from "http";
 import WebSocket from "ws";
 import * as url from "url";
-import randomId from "../../lib/random";
+import randomId from "../../utils/random";
 import { get as activeConnections } from "./activeConnections";
 import {
   WebSocketRouteConfig,
@@ -18,7 +18,7 @@ import { WebSocketProxyConfig, IAppConfig } from "../../types";
 // import httpDisconnect from "./plugins/http/disconnect";
 // import redisDisconnect from "./plugins/redis/disconnect";
 import { saveLastRequest } from "./plugins/http/poll";
-import applyRateLimiting from "../../lib/rateLimiting";
+import applyRateLimiting from "../modules/rateLimiting";
 
 export default function makeHandler(plugins: {
   [name: string]: IWebSocketRequestHandlerPlugin;

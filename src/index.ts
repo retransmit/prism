@@ -17,7 +17,7 @@ import initWebSocketRequestHandling from "./connections/webSocket";
 
 import { Server } from "http";
 import { readFileSync } from "fs";
-import random from "./lib/random";
+import random from "./utils/random";
 
 import * as webJobs from "./connections/http/webJobs";
 

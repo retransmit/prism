@@ -4,12 +4,12 @@ import {
   WebSocketConnectRequest,
   ActiveWebSocketConnection,
 } from "../../../../types/webSocket";
-import { makeGotOptions } from "../../../../lib/http/gotUtil";
+import { makeGotOptions } from "../../../../utils/http/gotUtil";
 import got from "got";
 import respondToWebSocketClient from "../../respond";
 import { makeHttpResponse } from "../../../http/plugins/http/makeHttpResponse";
-import responseIsError from "../../../../lib/http/responseIsError";
-import selectRandomUrl from "../../../../lib/http/selectRandomUrl";
+import responseIsError from "../../../../utils/http/responseIsError";
+import selectRandomUrl from "../../../../utils/http/selectRandomUrl";
 
 export default async function connect(
   requestId: string,

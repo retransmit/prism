@@ -2,8 +2,8 @@ import {
   HttpServiceCacheConfig,
   HttpResponse,
   InMemoryStateConfig,
-} from "../../../types";
-import * as applicationState from "../../../state";
+} from "../../../../types";
+import * as applicationState from "../../../../state";
 
 const ONE_MINUTE = 60 * 1000;
 

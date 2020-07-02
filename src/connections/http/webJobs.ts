@@ -1,6 +1,6 @@
 import { IAppConfig, WebJob } from "../../types";
 import got from "got/dist/source";
-import selectRandomUrl from "../../lib/http/selectRandomUrl";
+import selectRandomUrl from "../../utils/http/selectRandomUrl";
 
 export async function init(config: IAppConfig) {
   if (config.webJobs) {

@@ -2,7 +2,7 @@ import { HttpMethods, IAppConfig } from "../../../../../../types";
 import { startWithConfiguration } from "../../../../../..";
 import { startBackends, getResponse } from "../../../../../utils/http";
 import { TestAppInstance } from "../../../../../test";
-import random from "../../../../../../lib/random";
+import random from "../../../../../../utils/random";
 import got from "got";
 
 export default async function (app: TestAppInstance) {

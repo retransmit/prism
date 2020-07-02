@@ -1,7 +1,7 @@
 import { startWithConfiguration } from "../../../../../..";
 import { startBackends, getResponse } from "../../../../../utils/http";
 import { TestAppInstance } from "../../../../../test";
-import random from "../../../../../../lib/random";
+import random from "../../../../../../utils/random";
 import got from "got";
 import { IAppConfig } from "../../../../../../types";
 

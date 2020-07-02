@@ -1,4 +1,4 @@
-import random from "../../../../../../lib/random";
+import random from "../../../../../../utils/random";
 import { startWithConfiguration } from "../../../../../..";
 import { startBackends, getResponse } from "../../../../../utils/http";
 import got from "got/dist/source";
