@@ -27,6 +27,7 @@ import applyRateLimiting from "../../lib/rateLimiting";
 import { applyCircuitBreaker } from "./circuitBreaker";
 import { copyHeadersFromContext } from "./copyHeadersFromContext";
 import { sendResponse } from "./sendResponse";
+import { checkCache } from "./caching";
 
 const cors = require("@koa/cors");
 
@@ -135,6 +136,31 @@ async function handler(
   const routeConfig = httpConfig.routes[route][method];
 
   if (routeConfig) {
+    const entryFromCache = await checkCache(
+      route,
+      method,
+      originalRequest,
+      routeConfig,
+      httpConfig,
+      config
+    );
+
+    if (entryFromCache) {
+      sendResponse(
+        ctx,
+        route,
+        method,
+        requestTime,
+        originalRequest,
+        entryFromCache,
+        routeConfig,
+        httpConfig,
+        config,
+        true
+      );
+      return;
+    }
+
     const rateLimitedResponse = await applyRateLimiting(
       ctx.path,
       method,

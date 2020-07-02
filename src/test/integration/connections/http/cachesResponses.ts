@@ -58,16 +58,16 @@ export default async function (app: TestAppInstance) {
         return cfg;
       }),
     ],
-    // [
-    //   "trips the circuit with redis state",
-    //   true,
-    //   makeConfig((cfg) => {
-    //     cfg.state = {
-    //       type: "redis",
-    //     } as RedisStateConfig;
-    //     return cfg;
-    //   }),
-    // ],
+    [
+      "caches in redis",
+      true,
+      makeConfig((cfg) => {
+        cfg.state = {
+          type: "redis",
+        } as RedisStateConfig;
+        return cfg;
+      }),
+    ],
   ];
 
   for (const [name, isRedis, config] of tests) {
@@ -134,14 +134,12 @@ export default async function (app: TestAppInstance) {
 
       userServiceCallCount.should.equal(2);
 
-      responses[0].statusCode.should.equal(500);
-      responses[0].body.should.equal("Something happened.");
-      responses[2].statusCode.should.equal(500);
-      responses[2].body.should.equal("Something happened.");
-      responses[3].statusCode.should.equal(503);
-      responses[3].body.should.equal("Busy.");
+      responses[0].statusCode.should.equal(200);
+      JSON.parse(responses[0].body).should.deepEqual({ user: 100 });
+      responses[1].statusCode.should.equal(200);
+      JSON.parse(responses[1].body).should.deepEqual({ user: 100 });
       responses[5].statusCode.should.equal(200);
-      JSON.parse(responses[5].body).should.deepEqual({ user: 1, messages: 10 });
+      JSON.parse(responses[5].body).should.deepEqual({ user: 200 });
     }).timeout(5000);
   }
 }

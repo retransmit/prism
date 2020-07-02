@@ -2,14 +2,10 @@ import {
   IAppConfig,
   HttpProxyConfig,
   HttpMethods,
-  InMemoryStateConfig,
   RedisStateConfig,
-  HttpServiceErrorTrackingInfo,
-  HttpServiceCircuitBreakerConfig,
   HttpRequest,
   HttpServiceCacheConfig,
   HttpResponse,
-  IApplicationState,
 } from "../../types";
 import * as applicationState from "../../state";
 import { HttpRouteConfig } from "../../types/http";
@@ -20,7 +16,7 @@ import { createHash } from "crypto";
 import { promisify } from "util";
 
 const redisGet = promisify(createClient().get);
-const redisSetex = promisify(createClient().setex);
+const redisPSetex = promisify(createClient().psetex);
 
 const ONE_MINUTE = 60 * 1000;
 const TWO_MINUTES = 2 * ONE_MINUTE;
@@ -56,9 +52,10 @@ export async function checkCache(
 async function checkCacheWithInMemoryState(
   key: string
 ): Promise<HttpResponse | undefined> {
+  const now = Date.now();
   const state = applicationState.get();
   const cachedItem = state.cache.get(key);
-  if (cachedItem) {
+  if (cachedItem && cachedItem.time > now - cachedItem.expiry) {
     return cachedItem.response;
   }
 }
@@ -162,12 +159,7 @@ async function updateCacheEntryInRedis(
   const expiry = cacheConfig.expiry || ONE_MINUTE;
   const client = createClient(stateConfig?.options);
   const redisKey = `cache_item:${key}`;
-  await redisSetex.call(
-    client,
-    redisKey,
-    cacheConfig.expiry || ONE_MINUTE,
-    JSON.stringify(response)
-  );
+  await redisPSetex.call(client, redisKey, expiry, JSON.stringify(response));
 }
 
 function tooBig(maxSize: number, response: HttpResponse) {

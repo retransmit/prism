@@ -71,7 +71,7 @@ export default function run(app: TestAppInstance) {
     describe("web jobs", () => {
       runsWebJobs(app);
     });
-    describe("caches responses", () => {
+    describe("caching", () => {
       cachesResponses(app);
     });
   });

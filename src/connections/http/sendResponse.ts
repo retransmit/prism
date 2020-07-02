@@ -1,9 +1,15 @@
 import { IRouterContext } from "koa-router";
-import { HttpMethods, HttpRequest, HttpResponse, IAppConfig, HttpProxyConfig } from "../../types";
+import {
+  HttpMethods,
+  HttpRequest,
+  HttpResponse,
+  IAppConfig,
+  HttpProxyConfig,
+} from "../../types";
 import { HttpRouteConfig } from "../../types/http";
 import { updateHttpServiceErrorTracking } from "./circuitBreaker";
 import { updateCache } from "./caching";
-import { copyHeadersFromContext } from "./copyHeadersFromContext";
+import responseIsError from "../../lib/http/responseIsError";
 
 export async function sendResponse(
   ctx: IRouterContext,
@@ -14,12 +20,13 @@ export async function sendResponse(
   response: HttpResponse | undefined,
   routeConfig: HttpRouteConfig | undefined,
   httpConfig: HttpProxyConfig,
-  config: IAppConfig
+  config: IAppConfig,
+  fromCache = false
 ) {
   const responseTime = Date.now();
 
   if (response) {
-    if (routeConfig) {
+    if (routeConfig && !fromCache) {
       updateHttpServiceErrorTracking(
         route,
         method,
@@ -31,15 +38,17 @@ export async function sendResponse(
         config
       );
 
-      updateCache(
-        route,
-        method,
-        request,
-        response,
-        routeConfig,
-        httpConfig,
-        config
-      );
+      if (!responseIsError(response)) {
+        updateCache(
+          route,
+          method,
+          request,
+          response,
+          routeConfig,
+          httpConfig,
+          config
+        );
+      }
     }
 
     if (
