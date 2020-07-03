@@ -281,3 +281,7 @@ export type RateLimitingStateProviderPlugin = {
     stateConfig: any
   ) => Promise<void>;
 };
+
+export type PluginList<T> = {
+  [name: string]: T
+}

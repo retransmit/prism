@@ -1,22 +1,19 @@
-import { WebSocketProxyConfig } from "../../../../types";
+import { WebSocketProxyConfig, IAppConfig } from "../../../../types";
 import { getChannelForService } from "../../../../utils/redis/getChannelForService";
 import {
-  RedisServiceWebSocketRequest,
   RedisServiceWebSocketMessageRequest,
   WebSocketMessageRequest,
   ActiveWebSocketConnection,
-  RedisServiceWebSocketRequestHandlerConfig,
 } from "../../../../types/webSocket";
-import * as configModule from "../../../../config";
 import respondToWebSocketClient from "../../respond";
 import { publish } from "./publish";
 
 export default async function sendToService(
   request: WebSocketMessageRequest,
   conn: ActiveWebSocketConnection,
-  webSocketConfig: WebSocketProxyConfig
+  webSocketConfig: WebSocketProxyConfig,
+  config: IAppConfig
 ) {
-  const config = configModule.get();
   const routeConfig = webSocketConfig.routes[request.route];
 
   const alreadyPublishedChannels: string[] = [];

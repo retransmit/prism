@@ -9,14 +9,7 @@ import {
   IWebSocketRequestHandlerPlugin,
 } from "../../types/webSocket";
 
-// import sendToHttpService from "./plugins/http/handleRequest";
-// import sendToRedisService from "./plugins/redis/handleRequest";
-import { WebSocketProxyConfig, IAppConfig } from "../../types";
-
-// import httpConnect from "./plugins/http/connect";
-// import redisConnect from "./plugins/redis/connect";
-// import httpDisconnect from "./plugins/http/disconnect";
-// import redisDisconnect from "./plugins/redis/disconnect";
+import { WebSocketProxyConfig, IAppConfig, PluginList } from "../../types";
 import { saveLastRequest } from "./plugins/http/poll";
 import applyRateLimiting from "../modules/rateLimiting";
 
@@ -68,7 +61,9 @@ export default function makeHandler(plugins: {
           requestId,
           conn,
           routeConfig,
-          webSocketConfig
+          webSocketConfig,
+          config,
+          plugins
         );
       }
 
@@ -85,7 +80,7 @@ export default function makeHandler(plugins: {
         )
       );
 
-      ws.on("close", onClose(requestId, webSocketConfig));
+      ws.on("close", onClose(requestId, webSocketConfig, config, plugins));
     };
   };
 
@@ -135,7 +130,9 @@ export default function makeHandler(plugins: {
             requestId,
             conn,
             routeConfig,
-            webSocketConfig
+            webSocketConfig,
+            config,
+            plugins
           );
         }
         // This is an active connection.
@@ -190,7 +187,8 @@ export default function makeHandler(plugins: {
               plugins[pluginName].handleRequest(
                 onRequestResult.request,
                 conn,
-                webSocketConfig
+                webSocketConfig,
+                config
               );
             }
           }
@@ -198,50 +196,59 @@ export default function makeHandler(plugins: {
       }
     };
   }
+}
 
-  async function sendConnectionRequestsToServices(
-    requestId: string,
-    conn: ActiveWebSocketConnection,
-    routeConfig: WebSocketRouteConfig,
-    webSocketConfig: WebSocketProxyConfig
-  ) {
-    for (const service of Object.keys(routeConfig.services)) {
-      const serviceConfig = routeConfig.services[service];
-      plugins[serviceConfig.type].connect(
-        requestId,
-        conn,
-        serviceConfig,
-        webSocketConfig
-      );
-    }
+async function sendConnectionRequestsToServices(
+  requestId: string,
+  conn: ActiveWebSocketConnection,
+  routeConfig: WebSocketRouteConfig,
+  webSocketConfig: WebSocketProxyConfig,
+  config: IAppConfig,
+  plugins: PluginList<IWebSocketRequestHandlerPlugin>
+) {
+  for (const service of Object.keys(routeConfig.services)) {
+    const serviceConfig = routeConfig.services[service];
+    plugins[serviceConfig.type].connect(
+      requestId,
+      conn,
+      serviceConfig,
+      webSocketConfig,
+      config
+    );
   }
+}
 
-  function onClose(requestId: string, webSocketConfig: WebSocketProxyConfig) {
-    return async function () {
-      // Find the handler in question.
-      const conn = activeConnections().get(requestId);
-      if (conn) {
-        const routeConfig = webSocketConfig.routes[conn.route];
-        const onDisconnect =
-          routeConfig.onDisconnect || webSocketConfig.onDisconnect;
-        if (onDisconnect) {
-          onDisconnect(requestId);
-        }
-
-        // Call disconnect for services
-        for (const service of Object.keys(
-          webSocketConfig.routes[conn.route].services
-        )) {
-          const serviceConfig =
-            webSocketConfig.routes[conn.route].services[service];
-          plugins[serviceConfig.type].disconnect(
-            requestId,
-            conn,
-            serviceConfig,
-            webSocketConfig
-          );
-        }
+function onClose(
+  requestId: string,
+  webSocketConfig: WebSocketProxyConfig,
+  config: IAppConfig,
+  plugins: PluginList<IWebSocketRequestHandlerPlugin>
+) {
+  return async function () {
+    // Find the handler in question.
+    const conn = activeConnections().get(requestId);
+    if (conn) {
+      const routeConfig = webSocketConfig.routes[conn.route];
+      const onDisconnect =
+        routeConfig.onDisconnect || webSocketConfig.onDisconnect;
+      if (onDisconnect) {
+        onDisconnect(requestId);
       }
-    };
-  }
+
+      // Call disconnect for services
+      for (const service of Object.keys(
+        webSocketConfig.routes[conn.route].services
+      )) {
+        const serviceConfig =
+          webSocketConfig.routes[conn.route].services[service];
+        plugins[serviceConfig.type].disconnect(
+          requestId,
+          conn,
+          serviceConfig,
+          webSocketConfig,
+          config
+        );
+      }
+    }
+  };
 }

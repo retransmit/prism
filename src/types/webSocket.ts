@@ -186,18 +186,21 @@ export type IWebSocketRequestHandlerPlugin = {
   handleRequest: (
     request: WebSocketMessageRequest,
     conn: ActiveWebSocketConnection,
-    webSocketConfig: WebSocketProxyConfig
+    webSocketConfig: WebSocketProxyConfig,
+    config: IAppConfig
   ) => void;
   connect: (
     requestId: string,
     conn: ActiveWebSocketConnection,
     serviceConfig: any,
-    webSocketConfig: WebSocketProxyConfig
+    webSocketConfig: WebSocketProxyConfig,
+    config: IAppConfig
   ) => void;
   disconnect: (
     requestId: string,
     conn: ActiveWebSocketConnection,
     serviceConfig: any,
-    webSocketConfig: WebSocketProxyConfig
+    webSocketConfig: WebSocketProxyConfig,
+    config: IAppConfig
   ) => void;
 };
