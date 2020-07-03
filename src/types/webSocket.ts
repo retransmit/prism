@@ -5,7 +5,7 @@ import {
   UrlList,
   UrlSelector,
   RateLimitingConfig,
-  WebSocketServiceAppConfig,
+  WebSocketProxyAppConfig,
 } from ".";
 import WebSocket from "ws";
 
@@ -14,9 +14,7 @@ import WebSocket from "ws";
 */
 export type WebSocketRouteConfig = {
   services: {
-    [key: string]:
-      | HttpServiceWebSocketHandlerConfig
-      | RedisServiceWebSocketHandlerConfig;
+    [key: string]: WebSocketServiceEndPointConfig;
   };
   onConnect?: (
     requestId: string,
@@ -43,7 +41,7 @@ export type WebSocketRouteConfig = {
 */
 export type WebSocketHandlerConfigBase = {};
 
-export type HttpServiceWebSocketHandlerConfig = {
+export type HttpWebSocketEndPointConfig = {
   type: "http";
   pollingInterval?: number;
   resendRequestWhilePolling?: boolean;
@@ -76,10 +74,10 @@ export type HttpServiceWebSocketHandlerConfig = {
   onError?: (response: HttpResponse | undefined, request: HttpRequest) => any;
 } & WebSocketHandlerConfigBase;
 
-export type RedisServiceWebSocketHandlerConfig = {
+export type RedisWebSocketEndPointConfig = {
   type: "redis";
   onRequest?: (
-    request: RedisServiceWebSocketRequest
+    request: RedisWebSocketRequest
   ) => Promise<
     | { handled: true; response?: WebSocketResponse }
     | { handled: false; request: string }
@@ -92,6 +90,10 @@ export type RedisServiceWebSocketHandlerConfig = {
   requestChannel: string;
   numRequestChannels?: number;
 } & WebSocketHandlerConfigBase;
+
+export type WebSocketServiceEndPointConfig =
+  | HttpWebSocketEndPointConfig
+  | RedisWebSocketEndPointConfig;
 
 /*
   WebSocket Requests and Responses
@@ -124,16 +126,16 @@ export type WebSocketResponse = {
 /*
   Requests and Responses for Http Services
 */
-export type HttpServiceWebSocketMessageRequest = WebSocketMessageRequest;
-export type HttpServiceWebSocketConnectRequest = WebSocketConnectRequest;
+export type HttpWebSocketMessageRequest = WebSocketMessageRequest;
+export type HttpWebSocketConnectRequest = WebSocketConnectRequest;
 
-export type HttpServiceWebSocketRequest =
-  | HttpServiceWebSocketMessageRequest
-  | HttpServiceWebSocketConnectRequest
+export type HttpWebSocketRequest =
+  | HttpWebSocketMessageRequest
+  | HttpWebSocketConnectRequest
   | WebSocketDisconnectRequest
   | WebSocketNotConnectedRequest;
 
-export type HttpServiceWebSocketResponse = {
+export type HttpWebSocketResponse = {
   id: string;
   service: string;
   response: string;
@@ -150,23 +152,23 @@ export type WebSocketRequestBase = {
   remotePort: number | undefined;
 };
 
-export type RedisServiceWebSocketMessageRequest = {
+export type RedisWebSocketMessageRequest = {
   responseChannel: string;
 } & WebSocketMessageRequest;
 
-export type RedisServiceWebSocketConnectRequest = {
+export type RedisWebSocketConnectRequest = {
   responseChannel: string;
 } & WebSocketConnectRequest;
 
-export type RedisServiceWebSocketRequest =
-  | RedisServiceWebSocketMessageRequest
-  | RedisServiceWebSocketConnectRequest
+export type RedisWebSocketRequest =
+  | RedisWebSocketMessageRequest
+  | RedisWebSocketConnectRequest
   | WebSocketDisconnectRequest
   | WebSocketNotConnectedRequest;
 
 export type WebSocketRequest =
-  | HttpServiceWebSocketRequest
-  | RedisServiceWebSocketRequest;
+  | HttpWebSocketRequest
+  | RedisWebSocketRequest;
 
 export type ActiveWebSocketConnection = {
   initialized: boolean;
@@ -180,22 +182,22 @@ export type ActiveWebSocketConnection = {
 };
 
 export type IWebSocketHandlerPlugin = {
-  init: (config: WebSocketServiceAppConfig) => any;
+  init: (config: WebSocketProxyAppConfig) => any;
   handleRequest: (
     request: WebSocketMessageRequest,
     conn: ActiveWebSocketConnection,
-    config: WebSocketServiceAppConfig
+    config: WebSocketProxyAppConfig
   ) => void;
   connect: (
     requestId: string,
     conn: ActiveWebSocketConnection,
     serviceConfig: any,
-    config: WebSocketServiceAppConfig
+    config: WebSocketProxyAppConfig
   ) => void;
   disconnect: (
     requestId: string,
     conn: ActiveWebSocketConnection,
     serviceConfig: any,
-    config: WebSocketServiceAppConfig
+    config: WebSocketProxyAppConfig
   ) => void;
 };

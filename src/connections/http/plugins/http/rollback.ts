@@ -4,14 +4,14 @@ import {
   HttpRequest,
   HttpMethods,
   AppConfig,
-  HttpServiceAppConfig,
+  HttpProxyAppConfig,
 } from "../../../../types";
 
 import responseIsError from "../../../../utils/http/responseIsError";
 import { makeHttpResponse } from "./makeHttpResponse";
 import {
   HttpRouteConfig,
-  NativeHttpServiceEndPoint,
+  NativeHttpServiceEndPointConfig,
 } from "../../../../types/http";
 import { makeGotOptions } from "../../../../utils/http/gotUtil";
 
@@ -24,7 +24,7 @@ export default async function rollback(
   request: HttpRequest,
   route: string,
   method: HttpMethods,
-  config: HttpServiceAppConfig
+  config: HttpProxyAppConfig
 ) {
   const routeConfig = config.http.routes[route][method] as HttpRouteConfig;
 
@@ -43,7 +43,7 @@ export default async function rollback(
 async function doRollback(
   rollbackRequest: HttpRequest,
   request: HttpRequest,
-  serviceConfig: NativeHttpServiceEndPoint
+  serviceConfig: NativeHttpServiceEndPointConfig
 ) {
   const params = request.params;
 

@@ -1,7 +1,7 @@
-import { WebSocketServiceAppConfig } from "../../../../types";
+import { WebSocketProxyAppConfig } from "../../../../types";
 import {
   WebSocketResponse,
-  RedisServiceWebSocketHandlerConfig,
+  RedisWebSocketEndPointConfig,
   WebSocketNotConnectedRequest,
 } from "../../../../types/webSocket";
 import { get as activeConnections } from "../../activeConnections";
@@ -9,7 +9,7 @@ import respondToWebSocketClient from "../../respond";
 import { getChannelForService } from "../../../../utils/redis/getChannelForService";
 import { publish } from "./publish";
 
-export default function processMessage(config: WebSocketServiceAppConfig) {
+export default function processMessage(config: WebSocketProxyAppConfig) {
   return async function processMessageImpl(
     channel: string,
     messageString: string
@@ -24,7 +24,7 @@ export default function processMessage(config: WebSocketServiceAppConfig) {
 
     const serviceConfig = config.webSocket.routes[redisResponse.route].services[
       redisResponse.service
-    ] as RedisServiceWebSocketHandlerConfig;
+    ] as RedisWebSocketEndPointConfig;
 
     if (conn) {
       const onResponseResult =

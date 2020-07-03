@@ -1,6 +1,6 @@
-import { WebSocketServiceAppConfig } from "../../../../types";
+import { WebSocketProxyAppConfig } from "../../../../types";
 import {
-  HttpServiceWebSocketHandlerConfig,
+  HttpWebSocketEndPointConfig,
   WebSocketConnectRequest,
   ActiveWebSocketConnection,
 } from "../../../../types/webSocket";
@@ -14,8 +14,8 @@ import selectRandomUrl from "../../../../utils/http/selectRandomUrl";
 export default async function connect(
   requestId: string,
   conn: ActiveWebSocketConnection,
-  serviceConfig: HttpServiceWebSocketHandlerConfig,
-  config: WebSocketServiceAppConfig
+  serviceConfig: HttpWebSocketEndPointConfig,
+  config: WebSocketProxyAppConfig
 ) {
   if (serviceConfig.onConnectUrl) {
     const webSocketRequest: WebSocketConnectRequest = {

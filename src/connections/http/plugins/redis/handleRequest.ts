@@ -3,8 +3,8 @@ import { HttpRequest, HttpMethods, AppConfig } from "../../../../types";
 import { get as activeRequests } from "./activeRequests";
 import { getChannelForService } from "../../../../utils/redis/getChannelForService";
 import {
-  RedisServiceHttpRequest,
-  InvokeServiceResult,
+  RedisHttpRequest,
+  InvokeHttpServiceResult,
   FetchedHttpResponse,
   HttpServiceEndPointConfig,
   RedisHttpServiceEndPointConfig,
@@ -26,7 +26,7 @@ export default function handleRequest(
     [name: string]: HttpServiceEndPointConfig;
   },
   config: AppConfig
-): Promise<InvokeServiceResult>[] {
+): Promise<InvokeHttpServiceResult>[] {
   const alreadyPublishedChannels: string[] = [];
 
   return Object.keys(services)
@@ -42,7 +42,7 @@ export default function handleRequest(
             serviceConfig
           );
 
-          const redisHttpRequest: RedisServiceHttpRequest = {
+          const redisHttpRequest: RedisHttpRequest = {
             id: requestId,
             request: httpRequestWithMappedFields,
             responseChannel: `${config.http?.redis?.responseChannel}.${config.instanceId}`,

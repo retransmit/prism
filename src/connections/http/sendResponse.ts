@@ -3,7 +3,7 @@ import {
   HttpMethods,
   HttpRequest,
   HttpResponse,
-  HttpServiceAppConfig,
+  HttpProxyAppConfig,
 } from "../../types";
 import { HttpRouteConfig } from "../../types/http";
 import { updateServiceTrackingInfo } from "./modules/circuitBreaker";
@@ -18,7 +18,7 @@ export async function sendResponse(
   request: HttpRequest,
   response: HttpResponse | undefined,
   routeConfig: HttpRouteConfig | undefined,
-  config: HttpServiceAppConfig,
+  config: HttpProxyAppConfig,
   fromCache = false
 ) {
   const responseTime = Date.now();

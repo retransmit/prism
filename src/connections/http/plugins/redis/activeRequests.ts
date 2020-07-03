@@ -1,5 +1,5 @@
 import { HttpRequest, HttpMethods } from "../../../../types";
-import { InvokeServiceResult, FetchedHttpResponse } from "../../../../types/http";
+import { FetchedHttpResponse, InvokeHttpServiceResult } from "../../../../types/http";
 
 export type ActiveHttpRequest = {
   id: string;
@@ -9,7 +9,7 @@ export type ActiveHttpRequest = {
   request: HttpRequest;
   route: string;
   method: HttpMethods;
-  onResponse: (result: InvokeServiceResult) => void;
+  onResponse: (result: InvokeHttpServiceResult) => void;
   stage: number | undefined;
   responses: FetchedHttpResponse[];
 };

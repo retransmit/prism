@@ -1,5 +1,5 @@
 import * as configModule from "../../config";
-import { HttpResponse, HttpServiceAppConfig } from "../../types";
+import { HttpResponse, HttpProxyAppConfig } from "../../types";
 import responseIsError from "../../utils/http/responseIsError";
 import {
   FetchedHttpResponse,
@@ -9,7 +9,7 @@ import {
 
 export default function mergeResponses(
   responses: FetchedHttpResponse[],
-  config: HttpServiceAppConfig
+  config: HttpProxyAppConfig
 ): HttpResponse {
   let finalResponse: HttpResponse = {};
 

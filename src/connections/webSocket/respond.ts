@@ -2,13 +2,13 @@ import {
   WebSocketResponse,
   ActiveWebSocketConnection,
 } from "../../types/webSocket";
-import { WebSocketServiceAppConfig } from "../../types";
+import { WebSocketProxyAppConfig } from "../../types";
 
 export default async function respondToWebSocketClient(
   requestId: string,
   webSocketResponse: WebSocketResponse,
   conn: ActiveWebSocketConnection,
-  config: WebSocketServiceAppConfig
+  config: WebSocketProxyAppConfig
 ) {
   const routeConfig = config.webSocket.routes[conn.route];
 

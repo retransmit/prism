@@ -3,7 +3,7 @@ import {
   HttpRequest,
   HttpServiceCacheConfig,
   HttpResponse,
-  HttpServiceAppConfig,
+  HttpProxyAppConfig
 } from "../../../../types";
 import {
   HttpRouteConfig,
@@ -36,7 +36,7 @@ export async function getFromCache(
   method: HttpMethods,
   request: HttpRequest,
   routeConfig: HttpRouteConfig,
-  config: HttpServiceAppConfig
+  config: HttpProxyAppConfig
 ): Promise<HttpResponse | undefined> {
   const cacheConfig = routeConfig.caching || config.http.caching;
 
@@ -53,7 +53,7 @@ export async function updateCache(
   request: HttpRequest,
   response: HttpResponse,
   routeConfig: HttpRouteConfig,
-  config: HttpServiceAppConfig
+  config: HttpProxyAppConfig
 ) {
   const cacheConfig = routeConfig.caching || config.http.caching;
 

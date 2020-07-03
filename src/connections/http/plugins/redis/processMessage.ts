@@ -2,13 +2,13 @@ import * as configModule from "../../../../config";
 import { get as activeRequests } from "./activeRequests";
 import responseIsError from "../../../../utils/http/responseIsError";
 import {
-  RedisServiceHttpResponse,
+  RedisHttpResponse,
   HttpRouteConfig,
   FetchedHttpResponse,
 } from "../../../../types/http";
-import { HttpServiceAppConfig } from "../../../../types";
+import { HttpProxyAppConfig } from "../../../../types";
 
-export default function processMessage(config: HttpServiceAppConfig) {
+export default function processMessage(config: HttpProxyAppConfig) {
   return async function processMessageImpl(
     channel: string,
     messageString: string
@@ -39,7 +39,7 @@ export default function processMessage(config: HttpServiceAppConfig) {
                 activeRequest.request,
                 activeRequest.responses
               ))) ||
-            (messageObj as RedisServiceHttpResponse);
+            (messageObj as RedisHttpResponse);
 
           if (responseIsError(redisResponse.response)) {
             if (serviceConfig.onError) {

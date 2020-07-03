@@ -8,10 +8,10 @@ import got from "got";
 import responseIsError from "../../../../utils/http/responseIsError";
 import { makeHttpResponse } from "./makeHttpResponse";
 import {
-  InvokeServiceResult,
+  InvokeHttpServiceResult,
   FetchedHttpResponse,
   HttpServiceEndPointConfig,
-  NativeHttpServiceEndPoint,
+  NativeHttpServiceEndPointConfig,
 } from "../../../../types/http";
 import { makeGotOptions } from "../../../../utils/http/gotUtil";
 import mapBodyAndHeaders from "../../mapBodyAndHeaders";
@@ -31,7 +31,7 @@ export default function handleRequest(
     [name: string]: HttpServiceEndPointConfig;
   },
   config: AppConfig
-): Promise<InvokeServiceResult>[] {
+): Promise<InvokeHttpServiceResult>[] {
   return Object.keys(services)
     .map(
       (service) =>
@@ -211,6 +211,6 @@ export default function handleRequest(
 
 function isHttpServiceConfig(
   x: [string, HttpServiceEndPointConfig]
-): x is [string, NativeHttpServiceEndPoint] {
+): x is [string, NativeHttpServiceEndPointConfig] {
   return x[1].type === "http";
 }

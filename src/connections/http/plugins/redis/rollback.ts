@@ -1,12 +1,12 @@
 import {
   HttpRequest,
   HttpMethods,
-  HttpServiceAppConfig,
+  HttpProxyAppConfig,
 } from "../../../../types";
 import { getChannelForService } from "../../../../utils/redis/getChannelForService";
 import {
   HttpRouteConfig,
-  RedisServiceHttpRequest,
+  RedisHttpRequest,
 } from "../../../../types/http";
 import { publish } from "./publish";
 
@@ -19,7 +19,7 @@ export default async function rollback(
   request: HttpRequest,
   route: string,
   method: HttpMethods,
-  config: HttpServiceAppConfig
+  config: HttpProxyAppConfig
 ) {
   const routeConfig = config.http.routes[route][method] as HttpRouteConfig;
 
@@ -28,7 +28,7 @@ export default async function rollback(
   for (const service of Object.keys(routeConfig.services)) {
     const serviceConfig = routeConfig.services[service];
     if (serviceConfig.type === "redis") {
-      const redisHttpRequest: RedisServiceHttpRequest = {
+      const redisHttpRequest: RedisHttpRequest = {
         id: requestId,
         request: request,
         type: "rollback",

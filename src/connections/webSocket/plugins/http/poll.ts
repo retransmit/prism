@@ -1,10 +1,9 @@
 import {
-  WebSocketProxyConfig,
   HttpRequest,
-  WebSocketServiceAppConfig,
+  WebSocketProxyAppConfig,
 } from "../../../../types";
 import {
-  HttpServiceWebSocketHandlerConfig,
+  HttpWebSocketEndPointConfig,
   WebSocketRouteConfig,
   WebSocketResponse,
   ActiveWebSocketConnection,
@@ -18,7 +17,7 @@ import { makeHttpResponse } from "../../../http/plugins/http/makeHttpResponse";
 import responseIsError from "../../../../utils/http/responseIsError";
 import selectRandomUrl from "../../../../utils/http/selectRandomUrl";
 
-export function setupPolling(config: WebSocketServiceAppConfig) {
+export function setupPolling(config: WebSocketProxyAppConfig) {
   for (const route of Object.keys(config.webSocket.routes)) {
     for (const service of Object.keys(
       config.webSocket.routes[route].services
@@ -37,8 +36,8 @@ export function setupPolling(config: WebSocketServiceAppConfig) {
 function timerCallback(
   route: string,
   service: string,
-  serviceConfig: HttpServiceWebSocketHandlerConfig,
-  config: WebSocketServiceAppConfig
+  serviceConfig: HttpWebSocketEndPointConfig,
+  config: WebSocketProxyAppConfig
 ) {
   return () => {
     (async function () {
@@ -64,8 +63,8 @@ async function doPoll(
   service: string,
   requestId: string,
   conn: ActiveWebSocketConnection,
-  serviceConfig: HttpServiceWebSocketHandlerConfig,
-  config: WebSocketServiceAppConfig
+  serviceConfig: HttpWebSocketEndPointConfig,
+  config: WebSocketProxyAppConfig
 ) {
   const httpRequest: HttpRequest = {
     path: conn.path,

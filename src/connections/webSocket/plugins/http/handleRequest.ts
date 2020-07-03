@@ -1,6 +1,6 @@
-import { HttpRequest, WebSocketServiceAppConfig } from "../../../../types";
+import { HttpRequest, WebSocketProxyAppConfig } from "../../../../types";
 import {
-  HttpServiceWebSocketMessageRequest,
+  HttpWebSocketMessageRequest,
   WebSocketResponse,
   WebSocketMessageRequest,
   ActiveWebSocketConnection,
@@ -14,7 +14,7 @@ import selectRandomUrl from "../../../../utils/http/selectRandomUrl";
 export default async function sendToService(
   request: WebSocketMessageRequest,
   conn: ActiveWebSocketConnection,
-  config: WebSocketServiceAppConfig
+  config: WebSocketProxyAppConfig
 ) {
   const routeConfig = config.webSocket.routes[conn.route];
 
@@ -23,7 +23,7 @@ export default async function sendToService(
     if (cfg.type === "http") {
       const serviceConfig = cfg;
 
-      const webSocketRequest: HttpServiceWebSocketMessageRequest = request;
+      const webSocketRequest: HttpWebSocketMessageRequest = request;
 
       const httpRequest: HttpRequest = {
         path: conn.path,

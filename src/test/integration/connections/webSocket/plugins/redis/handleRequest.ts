@@ -3,7 +3,7 @@ import { TestAppInstance } from "../../../../../test";
 import random from "../../../../../../utils/random";
 import { startWithConfiguration } from "../../../../../..";
 import { createClient } from "redis";
-import { RedisServiceWebSocketConnectRequest } from "../../../../../../types/webSocket";
+import { RedisWebSocketConnectRequest } from "../../../../../../types/webSocket";
 import { AppConfig } from "../../../../../../types";
 
 export default async function (app: TestAppInstance) {
@@ -35,7 +35,7 @@ export default async function (app: TestAppInstance) {
     app.servers = servers;
 
     const promisedConnectRequest = new Promise<
-      RedisServiceWebSocketConnectRequest
+      RedisWebSocketConnectRequest
     >((success) => {
       const subscriber = createClient();
       subscriber.subscribe("input");
@@ -55,7 +55,7 @@ export default async function (app: TestAppInstance) {
       ws.send("HELO");
     });
 
-    const connectRequest: RedisServiceWebSocketConnectRequest = await promisedConnectRequest;
+    const connectRequest: RedisWebSocketConnectRequest = await promisedConnectRequest;
 
     const publisher = createClient();
 

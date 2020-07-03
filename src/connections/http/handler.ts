@@ -7,7 +7,7 @@ import {
   HttpMethods,
   HttpRequest,
   AppConfig,
-  HttpServiceAppConfig,
+  HttpProxyAppConfig,
 } from "../../types";
 import randomId from "../../utils/random";
 
@@ -19,8 +19,8 @@ import responseIsError from "../../utils/http/responseIsError";
 
 import {
   FetchedHttpResponse,
-  InvokeServiceResult,
-  HttpEndPointPlugin,
+  InvokeHttpServiceResult,
+  HttpServicePlugin,
   HttpServiceEndPointConfig,
 } from "../../types/http";
 import applyRateLimiting from "../modules/rateLimiting";
@@ -33,7 +33,7 @@ import { isTripped } from "./modules/circuitBreaker";
 const cors = require("@koa/cors");
 
 const plugins: {
-  [name: string]: HttpEndPointPlugin;
+  [name: string]: HttpServicePlugin;
 } = {
   http: {
     init: httpPlugin.init,
@@ -348,10 +348,10 @@ async function invokeRequestHandling(
   route: string,
   method: HttpMethods,
   stages: StageConfig[],
-  config: HttpServiceAppConfig
+  config: HttpProxyAppConfig
 ) {
   function responseIsNotSkipped(
-    x: InvokeServiceResult
+    x: InvokeHttpServiceResult
   ): x is { skip: false; response: FetchedHttpResponse } {
     return !x.skip;
   }
@@ -359,7 +359,7 @@ async function invokeRequestHandling(
   let responses: FetchedHttpResponse[] = [];
 
   for (const stage of stages) {
-    let promises: Promise<InvokeServiceResult>[] = [];
+    let promises: Promise<InvokeHttpServiceResult>[] = [];
 
     for (const pluginName of Object.keys(plugins)) {
       promises = promises.concat(
@@ -392,7 +392,7 @@ async function invokeRequestHandling(
 
 function isHttpServiceAppConfig(
   config: AppConfig
-): config is HttpServiceAppConfig {
+): config is HttpProxyAppConfig {
   return typeof config.http !== "undefined";
 }
 

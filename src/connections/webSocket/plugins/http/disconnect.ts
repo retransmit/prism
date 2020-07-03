@@ -1,6 +1,6 @@
-import { WebSocketServiceAppConfig } from "../../../../types";
+import { WebSocketProxyAppConfig } from "../../../../types";
 import {
-  HttpServiceWebSocketHandlerConfig,
+  HttpWebSocketEndPointConfig,
   WebSocketDisconnectRequest,
   ActiveWebSocketConnection,
 } from "../../../../types/webSocket";
@@ -13,8 +13,8 @@ import selectRandomUrl from "../../../../utils/http/selectRandomUrl";
 export default async function disconnect(
   requestId: string,
   conn: ActiveWebSocketConnection,
-  serviceConfig: HttpServiceWebSocketHandlerConfig,
-  config: WebSocketServiceAppConfig
+  serviceConfig: HttpWebSocketEndPointConfig,
+  config: WebSocketProxyAppConfig
 ) {
   if (serviceConfig.onDisconnectUrl) {
     const webSocketRequest: WebSocketDisconnectRequest = {

@@ -3,7 +3,7 @@ import { TestAppInstance } from "../../../../../test";
 import random from "../../../../../../utils/random";
 import { startWithConfiguration } from "../../../../../..";
 import got from "got";
-import { RedisServiceHttpRequest } from "../../../../../../types/http";
+import { RedisHttpRequest } from "../../../../../../types/http";
 import { getResponse } from "../../../../../utils/http";
 import { AppConfig } from "../../../../../../types";
 
@@ -64,7 +64,7 @@ export default async function (app: TestAppInstance) {
 
     const publisher = redis.createClient();
 
-    const rollbackPromise = new Promise<RedisServiceHttpRequest>((success) => {
+    const rollbackPromise = new Promise<RedisHttpRequest>((success) => {
       const client = redis.createClient();
       client.subscribe("input");
       client.on("message", (channel, message) => {

@@ -36,8 +36,8 @@ export type AppConfig = {
   state?: InMemoryStateConfig | RedisStateConfig;
 };
 
-export type HttpServiceAppConfig = AppConfig & { http: HttpProxyConfig };
-export type WebSocketServiceAppConfig = AppConfig & {
+export type HttpProxyAppConfig = AppConfig & { http: HttpProxyConfig };
+export type WebSocketProxyAppConfig = AppConfig & {
   webSocket: WebSocketProxyConfig;
 };
 
@@ -246,6 +246,7 @@ export type HttpServiceJwtAuthentication = {
   errorStatus?: number;
   errorResponse?: any;
 };
+
 export type HttpServiceAuthentication = HttpServiceJwtAuthentication | "none";
 
 export type Notification =

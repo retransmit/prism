@@ -10,7 +10,7 @@ import {
   HttpServiceCacheConfig,
   HttpServiceAuthentication,
   HttpServiceErrorTrackingInfo,
-  HttpServiceAppConfig,
+  HttpProxyAppConfig,
 } from ".";
 
 /*
@@ -46,7 +46,7 @@ export type HttpRouteConfig = {
 /*
   Result of Service Invocation
 */
-export type InvokeServiceResult =
+export type InvokeHttpServiceResult =
   | { skip: true }
   | { skip: false; response: FetchedHttpResponse };
 
@@ -69,7 +69,7 @@ export type FetchedHttpResponse = {
   Http Requests and Responses for Redis-based Services
 */
 
-export type RedisServiceHttpRequest =
+export type RedisHttpRequest =
   | {
       type: "request";
       id: string;
@@ -82,7 +82,7 @@ export type RedisServiceHttpRequest =
       type: "rollback";
     };
 
-export type RedisServiceHttpResponse = {
+export type RedisHttpResponse = {
   id: string;
   service: string;
   response: HttpResponse;
@@ -114,7 +114,7 @@ export type HttpRouteConfigBase = {
   stage?: number;
 };
 
-export type NativeHttpServiceEndPoint = {
+export type NativeHttpServiceEndPointConfig = {
   type: "http";
   url: UrlList;
   getUrl?: UrlSelector;
@@ -153,7 +153,7 @@ export type RedisHttpServiceEndPointConfig = {
   requestChannel: string;
   numRequestChannels?: number;
   onRequest?: (
-    request: RedisServiceHttpRequest,
+    request: RedisHttpRequest,
     otherResponses: FetchedHttpResponse[]
   ) => Promise<
     | {
@@ -167,9 +167,9 @@ export type RedisHttpServiceEndPointConfig = {
     response: string,
     request: HttpRequest,
     otherResponses: FetchedHttpResponse[]
-  ) => Promise<RedisServiceHttpResponse | void>;
+  ) => Promise<RedisHttpResponse | void>;
   onRollbackRequest?: (
-    request: RedisServiceHttpRequest
+    request: RedisHttpRequest
   ) => Promise<
     | {
         handled: true;
@@ -182,10 +182,10 @@ export type RedisHttpServiceEndPointConfig = {
 
 export type HttpServiceEndPointConfig =
   | RedisHttpServiceEndPointConfig
-  | NativeHttpServiceEndPoint;
+  | NativeHttpServiceEndPointConfig;
 
-export type HttpEndPointPlugin = {
-  init: (config: HttpServiceAppConfig) => any;
+export type HttpServicePlugin = {
+  init: (config: HttpProxyAppConfig) => any;
   handleRequest: (
     requestId: string,
     request: HttpRequest,
@@ -196,14 +196,14 @@ export type HttpEndPointPlugin = {
     services: {
       [name: string]: HttpServiceEndPointConfig;
     },
-    config: HttpServiceAppConfig
-  ) => Promise<InvokeServiceResult>[];
+    config: HttpProxyAppConfig
+  ) => Promise<InvokeHttpServiceResult>[];
   rollback: (
     requestId: string,
     request: HttpRequest,
     route: string,
     method: HttpMethods,
-    config: HttpServiceAppConfig
+    config: HttpProxyAppConfig
   ) => void;
 };
 

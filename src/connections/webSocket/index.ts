@@ -1,6 +1,6 @@
 import {
   AppConfig,
-  WebSocketServiceAppConfig,
+  WebSocketProxyAppConfig,
 } from "../../types";
 import * as httpPlugin from "./plugins/http";
 import * as redisPlugin from "./plugins/redis";
@@ -74,7 +74,7 @@ function setupWebSocketHandling(
   wss: WebSocket.Server,
   route: string,
   routeConfig: WebSocketRouteConfig,
-  config: WebSocketServiceAppConfig
+  config: WebSocketProxyAppConfig
 ) {
   const handler = makeHandler(plugins);
   wss.on("connection", handler(route, routeConfig, config));
@@ -118,6 +118,6 @@ function makeUpgrade(webSocketServers: { [key: string]: WebSocket.Server }) {
 
 function isWebSocketProxyConfig(
   config: AppConfig
-): config is WebSocketServiceAppConfig {
+): config is WebSocketProxyAppConfig {
   return typeof config.webSocket !== "undefined";
 }

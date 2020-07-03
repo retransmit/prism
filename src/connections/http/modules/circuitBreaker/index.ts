@@ -2,7 +2,7 @@ import {
   HttpMethods,
   HttpServiceErrorTrackingInfo,
   HttpServiceCircuitBreakerConfig,
-  HttpServiceAppConfig,
+  HttpProxyAppConfig,
 } from "../../../../types";
 import {
   HttpRouteConfig,
@@ -33,7 +33,7 @@ export async function isTripped(
   route: string,
   method: HttpMethods,
   routeConfig: HttpRouteConfig,
-  config: HttpServiceAppConfig
+  config: HttpProxyAppConfig
 ): Promise<{ status: number; body: any } | undefined> {
   const rejectionMessage = "Busy.";
 
@@ -64,7 +64,7 @@ export async function updateServiceTrackingInfo(
   requestTime: number,
   responseTime: number,
   routeConfig: HttpRouteConfig,
-  config: HttpServiceAppConfig
+  config: HttpProxyAppConfig
 ) {
   const circuitBreakerConfig =
     routeConfig.circuitBreaker || config.http.circuitBreaker;
