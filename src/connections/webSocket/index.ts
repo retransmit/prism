@@ -42,7 +42,7 @@ export default async function init(
 
   httpServer.on("upgrade", makeUpgrade(webSocketServers));
 
-  if (config.webSocket) {
+  if (isWebSocketProxyConfig(config)) {
     // Load other plugins
     if (config.webSocket.plugins) {
       for (const pluginName of Object.keys(config.webSocket.plugins)) {
@@ -59,7 +59,7 @@ export default async function init(
       const routeConfig = config.webSocket.routes[route];
       const wss = new WebSocket.Server({ noServer: true });
       webSocketServers[route] = wss;
-      setupWebSocketHandling(wss, route, routeConfig, config.webSocket, config);
+      setupWebSocketHandling(wss, route, routeConfig, config);
     }
   }
 
@@ -115,4 +115,10 @@ function makeUpgrade(webSocketServers: { [key: string]: WebSocket.Server }) {
       socket.destroy();
     }
   };
+}
+
+function isWebSocketProxyConfig(
+  config: AppConfig
+): config is WebSocketServiceAppConfig {
+  return typeof config.webSocket !== "undefined";
 }

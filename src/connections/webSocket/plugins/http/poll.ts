@@ -26,7 +26,7 @@ export function setupPolling(config: WebSocketServiceAppConfig) {
       const serviceConfig = config.webSocket.routes[route].services[service];
       if (serviceConfig.type === "http") {
         setInterval(
-          timerCallback(route, service, serviceConfig, config.webSocket),
+          timerCallback(route, service, serviceConfig, config),
           serviceConfig.pollingInterval || 60000 //every minute
         );
       }
@@ -107,7 +107,7 @@ async function doPoll(
           requestId,
           webSocketResponse,
           conn,
-          webSocketConfig
+          config
         );
       })
       .catch(async (error) => {
@@ -125,7 +125,7 @@ async function doPoll(
           requestId,
           webSocketResponse,
           conn,
-          webSocketConfig
+          config
         );
 
         const errorResponse = error.response

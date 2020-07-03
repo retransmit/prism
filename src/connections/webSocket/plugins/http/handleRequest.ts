@@ -45,7 +45,7 @@ export default async function sendToService(
             request.id,
             onRequestResult.response,
             conn,
-            webSocketConfig
+            config
           );
         }
       } else {
@@ -63,7 +63,7 @@ export default async function sendToService(
               request.id,
               webSocketResponse,
               conn,
-              webSocketConfig
+              config
             );
           })
           .catch(async (error) => {

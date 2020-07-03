@@ -36,7 +36,7 @@ export default function processMessage(config: WebSocketServiceAppConfig) {
         redisResponse.id,
         onResponseResult,
         conn,
-        webSocketConfig
+        config
       );
     } else {
       const webSocketRequest: WebSocketNotConnectedRequest = {

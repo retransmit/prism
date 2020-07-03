@@ -78,7 +78,6 @@ export default function makeHandler(plugins: {
           route,
           ws,
           routeConfig,
-          webSocketConfig,
           config
         )
       );

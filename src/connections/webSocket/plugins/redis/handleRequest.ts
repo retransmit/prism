@@ -1,4 +1,4 @@
-import { WebSocketProxyConfig, AppConfig } from "../../../../types";
+import { WebSocketProxyConfig, AppConfig, WebSocketServiceAppConfig } from "../../../../types";
 import { getChannelForService } from "../../../../utils/redis/getChannelForService";
 import {
   RedisServiceWebSocketMessageRequest,
@@ -43,7 +43,7 @@ export default async function sendToService(
             request.id,
             onRequestResult.response,
             conn,
-            webSocketConfig
+            config
           );
         }
       } else {

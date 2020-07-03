@@ -183,7 +183,7 @@ export type ActiveWebSocketConnection = {
 };
 
 export type IWebSocketRequestHandlerPlugin = {
-  init: (config: AppConfig) => any;
+  init: (config: WebSocketServiceAppConfig) => any;
   handleRequest: (
     request: WebSocketMessageRequest,
     conn: ActiveWebSocketConnection,
