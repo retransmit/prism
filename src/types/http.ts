@@ -202,14 +202,16 @@ export type HttpRequestHandlerPlugin = {
     services: {
       [name: string]: HttpRequestHandlerConfig;
     },
-    httpConfig: HttpProxyConfig
+    httpConfig: HttpProxyConfig,
+    config: IAppConfig
   ) => Promise<InvokeServiceResult>[];
   rollback: (
     requestId: string,
     request: HttpRequest,
     route: string,
     method: HttpMethods,
-    httpConfig: HttpProxyConfig
+    httpConfig: HttpProxyConfig,
+    config: IAppConfig
   ) => void;
 };
 

@@ -4,6 +4,7 @@ import {
   RedisServiceHttpRequestHandlerConfig,
   HttpProxyConfig,
   HttpMethods,
+  IAppConfig,
 } from "../../../../types";
 
 import { get as activeRequests } from "./activeRequests";
@@ -30,10 +31,9 @@ export default function handleRequest(
   services: {
     [name: string]: HttpRequestHandlerConfig;
   },
-  httpConfig: HttpProxyConfig
+  httpConfig: HttpProxyConfig,
+  config: IAppConfig
 ): Promise<InvokeServiceResult>[] {
-  const config = configModule.get();
-
   const alreadyPublishedChannels: string[] = [];
 
   return Object.keys(services)

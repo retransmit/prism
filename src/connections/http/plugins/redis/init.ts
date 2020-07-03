@@ -11,7 +11,7 @@ export default async function init(config: IAppConfig) {
   if (config.http?.redis) {
     subscriber = redis.createClient(config.redis?.options);
 
-    subscriber.on("message", processMessage(config.http));
+    subscriber.on("message", processMessage(config.http, config));
     subscriber.subscribe(
       `${config.http.redis.responseChannel}.${config.instanceId}`
     );

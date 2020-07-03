@@ -317,7 +317,8 @@ async function handler(
                 stage.stage,
                 responses,
                 stage.services,
-                httpConfig
+                httpConfig,
+                config
               )
             );
           }
@@ -359,7 +360,8 @@ async function handler(
             modifiedRequest,
             route,
             method,
-            httpConfig
+            httpConfig,
+            config
           );
         }
       }

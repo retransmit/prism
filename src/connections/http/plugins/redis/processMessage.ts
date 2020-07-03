@@ -6,14 +6,16 @@ import {
   HttpRouteConfig,
   FetchedHttpRequestHandlerResponse,
 } from "../../../../types/http";
-import { HttpProxyConfig } from "../../../../types";
+import { HttpProxyConfig, IAppConfig } from "../../../../types";
 
-export default function processMessage(httpConfig: HttpProxyConfig) {
+export default function processMessage(
+  httpConfig: HttpProxyConfig,
+  config: IAppConfig
+) {
   return async function processMessageImpl(
     channel: string,
     messageString: string
   ) {
-    const config = configModule.get();
     const messageObj = JSON.parse(messageString);
     const activeRequestId = `${messageObj.id}+${messageObj.service}`;
     const activeRequest = activeRequests().get(activeRequestId);
