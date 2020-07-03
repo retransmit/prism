@@ -6,7 +6,7 @@ export function copyHeadersFromContext(headers: { [field: string]: string }) {
   return Object.keys(headers || {}).reduce(
     (acc, field) =>
       !["content-type", "content-length"].includes(field.toLowerCase())
-        ? ((acc[field] = headers[field]), acc)
+        ? ((acc[field.toLowerCase()] = headers[field]), acc)
         : acc,
     {} as { [field: string]: string }
   );

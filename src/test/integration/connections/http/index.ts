@@ -29,6 +29,7 @@ import rateLimits from "./rateLimits";
 import tripsCircuit from "./tripsCircuit";
 import runsWebJobs from "./runsWebJobs";
 import cachesResponses from "./cachesResponses";
+import authenticates from "./authenticates";
 
 import { TestAppInstance } from "../../../test";
 
@@ -73,6 +74,9 @@ export default function run(app: TestAppInstance) {
     });
     describe("caching", () => {
       cachesResponses(app);
+    });
+    describe("authentication", () => {
+      authenticates(app);
     });
   });
 }

@@ -16,10 +16,3 @@ export default async function authenticate(
     }
   }
 }
-
-function unauthorizedResponse(authConfig: HttpServiceJwtAuthentication) {
-  return {
-    status: authConfig.errorStatus || 401,
-    body: authConfig.errorResponse || "Unauthorized.",
-  };
-}
