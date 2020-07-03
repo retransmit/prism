@@ -8,6 +8,7 @@ import {
   UrlSelector,
   RateLimitingConfig,
   HttpServiceCircuitBreakerConfig,
+  WebSocketServiceAppConfig,
 } from ".";
 import WebSocket from "ws";
 
@@ -186,21 +187,18 @@ export type IWebSocketRequestHandlerPlugin = {
   handleRequest: (
     request: WebSocketMessageRequest,
     conn: ActiveWebSocketConnection,
-    webSocketConfig: WebSocketProxyConfig,
-    config: AppConfig
+    config: WebSocketServiceAppConfig
   ) => void;
   connect: (
     requestId: string,
     conn: ActiveWebSocketConnection,
     serviceConfig: any,
-    webSocketConfig: WebSocketProxyConfig,
-    config: AppConfig
+    config: WebSocketServiceAppConfig
   ) => void;
   disconnect: (
     requestId: string,
     conn: ActiveWebSocketConnection,
     serviceConfig: any,
-    webSocketConfig: WebSocketProxyConfig,
-    config: AppConfig
+    config: WebSocketServiceAppConfig
   ) => void;
 };

@@ -1,4 +1,8 @@
-import { WebSocketProxyConfig, HttpRequest } from "../../../../types";
+import {
+  WebSocketProxyConfig,
+  HttpRequest,
+  WebSocketServiceAppConfig,
+} from "../../../../types";
 import {
   HttpServiceWebSocketRequestHandlerConfig,
   WebSocketRouteConfig,
@@ -14,13 +18,15 @@ import { makeHttpResponse } from "../../../http/plugins/http/makeHttpResponse";
 import responseIsError from "../../../../utils/http/responseIsError";
 import selectRandomUrl from "../../../../utils/http/selectRandomUrl";
 
-export function setupPolling(webSocketConfig: WebSocketProxyConfig) {
-  for (const route of Object.keys(webSocketConfig.routes)) {
-    for (const service of Object.keys(webSocketConfig.routes[route].services)) {
-      const serviceConfig = webSocketConfig.routes[route].services[service];
+export function setupPolling(config: WebSocketServiceAppConfig) {
+  for (const route of Object.keys(config.webSocket.routes)) {
+    for (const service of Object.keys(
+      config.webSocket.routes[route].services
+    )) {
+      const serviceConfig = config.webSocket.routes[route].services[service];
       if (serviceConfig.type === "http") {
         setInterval(
-          timerCallback(route, service, serviceConfig, webSocketConfig),
+          timerCallback(route, service, serviceConfig, config.webSocket),
           serviceConfig.pollingInterval || 60000 //every minute
         );
       }
@@ -32,7 +38,7 @@ function timerCallback(
   route: string,
   service: string,
   serviceConfig: HttpServiceWebSocketRequestHandlerConfig,
-  webSocketConfig: WebSocketProxyConfig
+  config: WebSocketServiceAppConfig
 ) {
   return () => {
     (async function () {
@@ -45,7 +51,7 @@ function timerCallback(
             requestId,
             conn,
             serviceConfig,
-            webSocketConfig
+            config
           );
         }
       }
@@ -59,7 +65,7 @@ async function doPoll(
   requestId: string,
   conn: ActiveWebSocketConnection,
   serviceConfig: HttpServiceWebSocketRequestHandlerConfig,
-  webSocketConfig: WebSocketProxyConfig
+  config: WebSocketServiceAppConfig
 ) {
   const httpRequest: HttpRequest = {
     path: conn.path,
@@ -81,7 +87,7 @@ async function doPoll(
         requestId,
         onRequestResult.response,
         conn,
-        webSocketConfig
+        config
       );
     }
   } else {

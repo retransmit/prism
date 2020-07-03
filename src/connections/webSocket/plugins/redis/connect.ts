@@ -1,4 +1,4 @@
-import { WebSocketProxyConfig, AppConfig } from "../../../../types";
+import { WebSocketProxyConfig, AppConfig, WebSocketServiceAppConfig } from "../../../../types";
 import {
   RedisServiceWebSocketRequestHandlerConfig,
   RedisServiceWebSocketConnectRequest,
@@ -12,8 +12,7 @@ export default async function connect(
   requestId: string,
   conn: ActiveWebSocketConnection,
   serviceConfig: RedisServiceWebSocketRequestHandlerConfig,
-  webSocketConfig: WebSocketProxyConfig,
-  config: AppConfig
+  config: WebSocketServiceAppConfig
 ) {
   const channel = getChannelForService(
     serviceConfig.requestChannel,
@@ -25,7 +24,7 @@ export default async function connect(
     type: "connect",
     route: conn.route,
     path: conn.path,
-    responseChannel: `${webSocketConfig.redis?.responseChannel}.${config.instanceId}`,
+    responseChannel: `${config.webSocket.redis?.responseChannel}.${config.instanceId}`,
     remoteAddress: conn.remoteAddress,
     remotePort: conn.remotePort,
   };
@@ -42,7 +41,7 @@ export default async function connect(
         requestId,
         onRequestResult.response,
         conn,
-        webSocketConfig
+        config
       );
     }
   } else {

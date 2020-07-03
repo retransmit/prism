@@ -1,4 +1,4 @@
-import { WebSocketProxyConfig, HttpRequest } from "../../../../types";
+import { WebSocketProxyConfig, HttpRequest, WebSocketServiceAppConfig } from "../../../../types";
 import {
   HttpServiceWebSocketRequestHandlerConfig,
   WebSocketConnectRequest,
@@ -15,7 +15,7 @@ export default async function connect(
   requestId: string,
   conn: ActiveWebSocketConnection,
   serviceConfig: HttpServiceWebSocketRequestHandlerConfig,
-  webSocketConfig: WebSocketProxyConfig
+  config: WebSocketServiceAppConfig
 ) {
   if (serviceConfig.onConnectUrl) {
     const webSocketRequest: WebSocketConnectRequest = {
@@ -46,7 +46,7 @@ export default async function connect(
           requestId,
           onRequestResult.response,
           conn,
-          webSocketConfig
+          config
         );
       }
     } else {

@@ -2,17 +2,17 @@ import {
   WebSocketResponse,
   ActiveWebSocketConnection,
 } from "../../types/webSocket";
-import { WebSocketProxyConfig } from "../../types";
+import { WebSocketProxyConfig, WebSocketServiceAppConfig } from "../../types";
 
 export default async function respondToWebSocketClient(
   requestId: string,
   webSocketResponse: WebSocketResponse,
   conn: ActiveWebSocketConnection,
-  webSocketConfig: WebSocketProxyConfig
+  config: WebSocketServiceAppConfig
 ) {
-  const routeConfig = webSocketConfig.routes[conn.route];
+  const routeConfig = config.webSocket.routes[conn.route];
 
-  const onResponse = routeConfig.onResponse || webSocketConfig.onResponse;
+  const onResponse = routeConfig.onResponse || config.webSocket.onResponse;
 
   const onResponseResult =
     (onResponse && (await onResponse(requestId, webSocketResponse))) ||

@@ -9,7 +9,12 @@ import {
   IWebSocketRequestHandlerPlugin,
 } from "../../types/webSocket";
 
-import { WebSocketProxyConfig, AppConfig, PluginList } from "../../types";
+import {
+  WebSocketProxyConfig,
+  AppConfig,
+  PluginList,
+  WebSocketServiceAppConfig,
+} from "../../types";
 import { saveLastRequest } from "./plugins/http/poll";
 import applyRateLimiting from "../modules/rateLimiting";
 
@@ -19,8 +24,7 @@ export default function makeHandler(plugins: {
   return function onConnection(
     route: string,
     routeConfig: WebSocketRouteConfig,
-    webSocketConfig: WebSocketProxyConfig,
-    config: AppConfig
+    config: WebSocketServiceAppConfig
   ) {
     return async function connection(ws: WebSocket, request: IncomingMessage) {
       // This is for finding dead connections.
@@ -55,13 +59,12 @@ export default function makeHandler(plugins: {
   
         If there is no onConnect hook, then initialize immediately. And notify backends that a new connection has arrived.
       */
-      if (!routeConfig.onConnect && !webSocketConfig.onConnect) {
+      if (!routeConfig.onConnect && !config.webSocket.onConnect) {
         conn.initialized = true;
         sendConnectionRequestsToServices(
           requestId,
           conn,
           routeConfig,
-          webSocketConfig,
           config,
           plugins
         );
@@ -80,7 +83,7 @@ export default function makeHandler(plugins: {
         )
       );
 
-      ws.on("close", onClose(requestId, webSocketConfig, config, plugins));
+      ws.on("close", onClose(requestId, config, plugins));
     };
   };
 
@@ -90,8 +93,7 @@ export default function makeHandler(plugins: {
     route: string,
     ws: WebSocket,
     routeConfig: WebSocketRouteConfig,
-    webSocketConfig: WebSocketProxyConfig,
-    config: AppConfig
+    config: WebSocketServiceAppConfig
   ) {
     return async function (message: string) {
       const conn = activeConnections().get(requestId);
@@ -100,7 +102,7 @@ export default function makeHandler(plugins: {
       if (!conn) {
         ws.terminate();
       } else {
-        const onConnect = routeConfig.onConnect || webSocketConfig.onConnect;
+        const onConnect = routeConfig.onConnect || config.webSocket.onConnect;
 
         if (!conn.initialized && onConnect) {
           // One check above is redundant.
@@ -130,7 +132,6 @@ export default function makeHandler(plugins: {
             requestId,
             conn,
             routeConfig,
-            webSocketConfig,
             config,
             plugins
           );
@@ -143,7 +144,7 @@ export default function makeHandler(plugins: {
             "GET",
             conn.remoteAddress || "",
             routeConfig,
-            webSocketConfig,
+            config.webSocket,
             config
           );
 
@@ -153,8 +154,8 @@ export default function makeHandler(plugins: {
           }
 
           const onRequest =
-            webSocketConfig.onRequest ||
-            webSocketConfig.routes[route].onRequest;
+            config.webSocket.onRequest ||
+            config.webSocket.routes[route].onRequest;
 
           const onRequestResult = (onRequest &&
             (await onRequest(requestId, message))) || {
@@ -187,7 +188,6 @@ export default function makeHandler(plugins: {
               plugins[pluginName].handleRequest(
                 onRequestResult.request,
                 conn,
-                webSocketConfig,
                 config
               );
             }
@@ -202,8 +202,7 @@ async function sendConnectionRequestsToServices(
   requestId: string,
   conn: ActiveWebSocketConnection,
   routeConfig: WebSocketRouteConfig,
-  webSocketConfig: WebSocketProxyConfig,
-  config: AppConfig,
+  config: WebSocketServiceAppConfig,
   plugins: PluginList<IWebSocketRequestHandlerPlugin>
 ) {
   for (const service of Object.keys(routeConfig.services)) {
@@ -212,7 +211,6 @@ async function sendConnectionRequestsToServices(
       requestId,
       conn,
       serviceConfig,
-      webSocketConfig,
       config
     );
   }
@@ -220,32 +218,30 @@ async function sendConnectionRequestsToServices(
 
 function onClose(
   requestId: string,
-  webSocketConfig: WebSocketProxyConfig,
-  config: AppConfig,
+  config: WebSocketServiceAppConfig,
   plugins: PluginList<IWebSocketRequestHandlerPlugin>
 ) {
   return async function () {
     // Find the handler in question.
     const conn = activeConnections().get(requestId);
     if (conn) {
-      const routeConfig = webSocketConfig.routes[conn.route];
+      const routeConfig = config.webSocket.routes[conn.route];
       const onDisconnect =
-        routeConfig.onDisconnect || webSocketConfig.onDisconnect;
+        routeConfig.onDisconnect || config.webSocket.onDisconnect;
       if (onDisconnect) {
         onDisconnect(requestId);
       }
 
       // Call disconnect for services
       for (const service of Object.keys(
-        webSocketConfig.routes[conn.route].services
+        config.webSocket.routes[conn.route].services
       )) {
         const serviceConfig =
-          webSocketConfig.routes[conn.route].services[service];
+          config.webSocket.routes[conn.route].services[service];
         plugins[serviceConfig.type].disconnect(
           requestId,
           conn,
           serviceConfig,
-          webSocketConfig,
           config
         );
       }

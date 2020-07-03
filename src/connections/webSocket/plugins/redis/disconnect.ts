@@ -1,4 +1,4 @@
-import { WebSocketProxyConfig } from "../../../../types";
+import { WebSocketProxyConfig, WebSocketServiceAppConfig } from "../../../../types";
 import {
   RedisServiceWebSocketRequestHandlerConfig,
   WebSocketDisconnectRequest,
@@ -11,7 +11,7 @@ export default async function disconnect(
   requestId: string,
   conn: ActiveWebSocketConnection,
   serviceConfig: RedisServiceWebSocketRequestHandlerConfig,
-  webSocketConfig: WebSocketProxyConfig
+  config: WebSocketServiceAppConfig
 ) {
   const channel = getChannelForService(
     serviceConfig.requestChannel,

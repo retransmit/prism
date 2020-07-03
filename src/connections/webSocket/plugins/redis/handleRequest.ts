@@ -11,10 +11,9 @@ import { publish } from "./publish";
 export default async function sendToService(
   request: WebSocketMessageRequest,
   conn: ActiveWebSocketConnection,
-  webSocketConfig: WebSocketProxyConfig,
-  config: AppConfig
+  config: WebSocketServiceAppConfig
 ) {
-  const routeConfig = webSocketConfig.routes[request.route];
+  const routeConfig = config.webSocket.routes[request.route];
 
   const alreadyPublishedChannels: string[] = [];
 

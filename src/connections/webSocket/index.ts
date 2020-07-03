@@ -75,11 +75,10 @@ function setupWebSocketHandling(
   wss: WebSocket.Server,
   route: string,
   routeConfig: WebSocketRouteConfig,
-  webSocketConfig: WebSocketProxyConfig,
-  config: AppConfig
+  config: WebSocketServiceAppConfig
 ) {
   const handler = makeHandler(plugins);
-  wss.on("connection", handler(route, routeConfig, webSocketConfig, config));
+  wss.on("connection", handler(route, routeConfig, config));
 
   const interval = setInterval(function ping() {
     wss.clients.forEach(function each(ws: any) {

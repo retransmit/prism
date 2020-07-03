@@ -1,4 +1,4 @@
-import { WebSocketProxyConfig, HttpRequest } from "../../../../types";
+import { WebSocketProxyConfig, HttpRequest, WebSocketServiceAppConfig } from "../../../../types";
 import {
   HttpServiceWebSocketRequestHandlerConfig,
   WebSocketDisconnectRequest,
@@ -14,7 +14,7 @@ export default async function disconnect(
   requestId: string,
   conn: ActiveWebSocketConnection,
   serviceConfig: HttpServiceWebSocketRequestHandlerConfig,
-  webSocketConfig: WebSocketProxyConfig
+  config: WebSocketServiceAppConfig
 ) {
   if (serviceConfig.onDisconnectUrl) {
     const webSocketRequest: WebSocketDisconnectRequest = {
