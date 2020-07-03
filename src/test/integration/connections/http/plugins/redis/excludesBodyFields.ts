@@ -3,11 +3,11 @@ import { startWithConfiguration } from "../../../../../..";
 import { createClient } from "redis";
 import got from "got";
 import random from "../../../../../../utils/random";
-import { IAppConfig } from "../../../../../../types";
+import { AppConfig } from "../../../../../../types";
 
 export default async function (app: TestAppInstance) {
   it(`excludes body fields`, async () => {
-    const config: IAppConfig = {
+    const config: AppConfig = {
       instanceId: random(),
       http: {
         routes: {

@@ -3,7 +3,7 @@ import { startBackends, getResponse } from "../../../utils/http";
 import { TestAppInstance } from "../../../test";
 import random from "../../../../utils/random";
 import {
-  IAppConfig,
+  AppConfig,
 } from "../../../../types";
 import { promisify } from "util";
 
@@ -14,7 +14,7 @@ function sleep(ms: number): Promise<void> {
 }
 
 export default async function (app: TestAppInstance) {
-  const config: IAppConfig = {
+  const config: AppConfig = {
     instanceId: random(),
     webJobs: {
       cleanupusers: {

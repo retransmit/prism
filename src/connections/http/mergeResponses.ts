@@ -1,5 +1,5 @@
 import * as configModule from "../../config";
-import { HttpResponse, HttpProxyConfig } from "../../types";
+import { HttpResponse, HttpServiceAppConfig } from "../../types";
 import responseIsError from "../../utils/http/responseIsError";
 import {
   FetchedHttpRequestHandlerResponse,
@@ -9,13 +9,13 @@ import {
 
 export default function mergeResponses(
   responses: FetchedHttpRequestHandlerResponse[],
-  httpConfig: HttpProxyConfig
+  config: HttpServiceAppConfig
 ): HttpResponse {
   let finalResponse: HttpResponse = {};
 
   for (const fetchedResponse of responses) {
     if (typeof fetchedResponse.response !== "undefined") {
-      const routeConfig = httpConfig.routes[fetchedResponse.route][
+      const routeConfig = config.http.routes[fetchedResponse.route][
         fetchedResponse.method
       ] as HttpRouteConfig;
 

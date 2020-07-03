@@ -1,8 +1,8 @@
-import { IAppConfig, WebJob } from "../../types";
+import { AppConfig, WebJob } from "../../types";
 import got from "got/dist/source";
 import selectRandomUrl from "../../utils/http/selectRandomUrl";
 
-export async function init(config: IAppConfig) {
+export async function init(config: AppConfig) {
   if (config.webJobs) {
     for (const name of Object.keys(config.webJobs)) {
       setIntervalForJob(name, config.webJobs[name]);

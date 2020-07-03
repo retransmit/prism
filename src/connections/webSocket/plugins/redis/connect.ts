@@ -1,4 +1,4 @@
-import { WebSocketProxyConfig, IAppConfig } from "../../../../types";
+import { WebSocketProxyConfig, AppConfig } from "../../../../types";
 import {
   RedisServiceWebSocketRequestHandlerConfig,
   RedisServiceWebSocketConnectRequest,
@@ -13,7 +13,7 @@ export default async function connect(
   conn: ActiveWebSocketConnection,
   serviceConfig: RedisServiceWebSocketRequestHandlerConfig,
   webSocketConfig: WebSocketProxyConfig,
-  config: IAppConfig
+  config: AppConfig
 ) {
   const channel = getChannelForService(
     serviceConfig.requestChannel,

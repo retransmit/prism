@@ -5,11 +5,11 @@ import { startWithConfiguration } from "../../../../../..";
 import got from "got";
 import { RedisServiceHttpRequest } from "../../../../../../types/http";
 import { getResponse } from "../../../../../utils/http";
-import { IAppConfig } from "../../../../../../types";
+import { AppConfig } from "../../../../../../types";
 
 export default async function (app: TestAppInstance) {
   it(`rolls back`, async () => {
-    const config: IAppConfig = {
+    const config: AppConfig = {
       instanceId: random(),
       http: {
         routes: {

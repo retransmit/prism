@@ -2,7 +2,7 @@ import {
   IApplicationState,
   ClientTrackingInfo,
   HttpServiceErrorTrackingInfo,
-  IAppConfig,
+  AppConfig,
   HttpResponse,
   InMemoryCacheEntry,
 } from "../types";
@@ -11,7 +11,7 @@ let state: IApplicationState;
 
 const TWO_MINUTES = 2 * 60 * 1000;
 
-export async function init(config: IAppConfig) {
+export async function init(config: AppConfig) {
   // Setup state.
   state = {
     clientTracking: new Map<string, ClientTrackingInfo[]>(),
@@ -44,7 +44,7 @@ export async function init(config: IAppConfig) {
 
 function cleanUpClientTrackingEntries(
   clientTrackingEntryExpiry: number,
-  config: IAppConfig
+  config: AppConfig
 ) {
   const now = Date.now();
 
@@ -67,7 +67,7 @@ function cleanUpClientTrackingEntries(
 
 function cleanUpHttpServiceTrackingEntries(
   httpServiceErrorTrackingListExpiry: number,
-  config: IAppConfig
+  config: AppConfig
 ) {
   const now = Date.now();
 
@@ -92,7 +92,7 @@ function cleanUpHttpServiceTrackingEntries(
   }
 }
 
-function cleanUpCacheEntries(config: IAppConfig) {
+function cleanUpCacheEntries(config: AppConfig) {
   const now = Date.now();
 
   for (const [key, entry] of state.httpResponseCache.entries()) {

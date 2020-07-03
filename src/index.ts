@@ -10,7 +10,7 @@ import WebSocket from "ws";
 
 import * as configModule from "./config";
 import * as applicationState from "./state";
-import { IAppConfig } from "./types";
+import { AppConfig } from "./types";
 
 import initHttpRequestHandling from "./connections/http/handler";
 import initWebSocketRequestHandling from "./connections/webSocket";
@@ -38,14 +38,14 @@ export async function startApp(
   instanceId: string | undefined,
   configFile: string
 ) {
-  const config: IAppConfig = require(configFile);
+  const config: AppConfig = require(configFile);
   return await startWithConfiguration(port, instanceId, config);
 }
 
 export async function startWithConfiguration(
   port: number | undefined,
   instanceId: string | undefined,
-  config: IAppConfig
+  config: AppConfig
 ): Promise<{
   httpServer: Server;
   webSocketServers: WebSocket.Server[];

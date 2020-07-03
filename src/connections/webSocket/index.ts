@@ -1,4 +1,4 @@
-import { IAppConfig, WebSocketProxyConfig } from "../../types";
+import { AppConfig, WebSocketProxyConfig } from "../../types";
 import * as httpPlugin from "./plugins/http";
 import * as redisPlugin from "./plugins/redis";
 import {
@@ -30,7 +30,7 @@ const plugins: {
 
 export default async function init(
   httpServer: any, // TODO
-  config: IAppConfig
+  config: AppConfig
 ) {
   const webSocketServers: {
     [key: string]: WebSocket.Server;
@@ -72,7 +72,7 @@ function setupWebSocketHandling(
   route: string,
   routeConfig: WebSocketRouteConfig,
   webSocketConfig: WebSocketProxyConfig,
-  config: IAppConfig
+  config: AppConfig
 ) {
   const handler = makeHandler(plugins);
   wss.on("connection", handler(route, routeConfig, webSocketConfig, config));

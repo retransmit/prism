@@ -1,10 +1,11 @@
 import {
-  IAppConfig,
+  AppConfig,
   HttpProxyConfig,
   HttpMethods,
   HttpRequest,
   HttpServiceCacheConfig,
   HttpResponse,
+  HttpServiceAppConfig,
 } from "../../../../types";
 import {
   HttpRouteConfig,
@@ -37,10 +38,9 @@ export async function getFromCache(
   method: HttpMethods,
   request: HttpRequest,
   routeConfig: HttpRouteConfig,
-  proxyConfig: HttpProxyConfig,
-  config: IAppConfig
+  config: HttpServiceAppConfig
 ): Promise<HttpResponse | undefined> {
-  const cacheConfig = routeConfig.caching || proxyConfig.caching;
+  const cacheConfig = routeConfig.caching || config.http.caching;
 
   if (cacheConfig) {
     const key = reduceRequestToHash(route, method, request, cacheConfig);
@@ -55,10 +55,9 @@ export async function updateCache(
   request: HttpRequest,
   response: HttpResponse,
   routeConfig: HttpRouteConfig,
-  proxyConfig: HttpProxyConfig,
-  config: IAppConfig
+  config: HttpServiceAppConfig
 ) {
-  const cacheConfig = routeConfig.caching || proxyConfig.caching;
+  const cacheConfig = routeConfig.caching || config.http.caching;
 
   if (cacheConfig) {
     const maxSize = cacheConfig.maxSize || 5000000;

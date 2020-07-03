@@ -1,9 +1,10 @@
 import {
-  IAppConfig,
+  AppConfig,
   HttpProxyConfig,
   HttpMethods,
   HttpServiceErrorTrackingInfo,
   HttpServiceCircuitBreakerConfig,
+  HttpServiceAppConfig,
 } from "../../../../types";
 import {
   HttpRouteConfig,
@@ -34,13 +35,12 @@ export async function isTripped(
   route: string,
   method: HttpMethods,
   routeConfig: HttpRouteConfig,
-  proxyConfig: HttpProxyConfig,
-  config: IAppConfig
+  config: HttpServiceAppConfig
 ): Promise<{ status: number; body: any } | undefined> {
   const rejectionMessage = "Busy.";
 
   const circuitBreakerConfig =
-    routeConfig.circuitBreaker || proxyConfig.circuitBreaker;
+    routeConfig.circuitBreaker || config.http.circuitBreaker;
 
   if (circuitBreakerConfig) {
     const pluginType = config.state?.type || "memory";
@@ -66,11 +66,10 @@ export async function updateServiceTrackingInfo(
   requestTime: number,
   responseTime: number,
   routeConfig: HttpRouteConfig,
-  proxyConfig: HttpProxyConfig,
-  config: IAppConfig
+  config: HttpServiceAppConfig
 ) {
   const circuitBreakerConfig =
-    routeConfig.circuitBreaker || proxyConfig.circuitBreaker;
+    routeConfig.circuitBreaker || config.http.circuitBreaker;
 
   const trackingInfo: HttpServiceErrorTrackingInfo = {
     route,

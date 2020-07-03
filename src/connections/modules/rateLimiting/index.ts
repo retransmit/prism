@@ -1,5 +1,5 @@
 import {
-  IAppConfig,
+  AppConfig,
   ClientTrackingInfo,
   HttpProxyConfig,
   WebSocketProxyConfig,
@@ -38,7 +38,7 @@ export default async function applyRateLimiting(
   remoteAddress: string,
   routeConfig: HttpRouteConfig | WebSocketRouteConfig,
   proxyConfig: HttpProxyConfig | WebSocketProxyConfig,
-  config: IAppConfig
+  config: AppConfig
 ): Promise<{ status: number; body: any } | undefined> {
   const rejectionMessage = "Too Many Requests.";
   const rateLimitingConfig =

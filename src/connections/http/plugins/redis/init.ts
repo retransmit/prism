@@ -1,17 +1,17 @@
 import processMessage from "./processMessage";
 import cleanupTimedOut from "./cleanupTimedOut";
-import { IAppConfig } from "../../../../types";
+import { AppConfig, HttpServiceAppConfig } from "../../../../types";
 import redis = require("redis");
 import { init as initPublisher } from "./publish";
 import { init as activeRequestsInit } from "./activeRequests";
 
 let subscriber: redis.RedisClient;
 
-export default async function init(config: IAppConfig) {
+export default async function init(config: HttpServiceAppConfig) {
   if (config.http?.redis) {
     subscriber = redis.createClient(config.redis?.options);
 
-    subscriber.on("message", processMessage(config.http, config));
+    subscriber.on("message", processMessage(config));
     subscriber.subscribe(
       `${config.http.redis.responseChannel}.${config.instanceId}`
     );

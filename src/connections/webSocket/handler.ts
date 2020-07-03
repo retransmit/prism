@@ -9,7 +9,7 @@ import {
   IWebSocketRequestHandlerPlugin,
 } from "../../types/webSocket";
 
-import { WebSocketProxyConfig, IAppConfig, PluginList } from "../../types";
+import { WebSocketProxyConfig, AppConfig, PluginList } from "../../types";
 import { saveLastRequest } from "./plugins/http/poll";
 import applyRateLimiting from "../modules/rateLimiting";
 
@@ -20,7 +20,7 @@ export default function makeHandler(plugins: {
     route: string,
     routeConfig: WebSocketRouteConfig,
     webSocketConfig: WebSocketProxyConfig,
-    config: IAppConfig
+    config: AppConfig
   ) {
     return async function connection(ws: WebSocket, request: IncomingMessage) {
       // This is for finding dead connections.
@@ -91,7 +91,7 @@ export default function makeHandler(plugins: {
     ws: WebSocket,
     routeConfig: WebSocketRouteConfig,
     webSocketConfig: WebSocketProxyConfig,
-    config: IAppConfig
+    config: AppConfig
   ) {
     return async function (message: string) {
       const conn = activeConnections().get(requestId);
@@ -203,7 +203,7 @@ async function sendConnectionRequestsToServices(
   conn: ActiveWebSocketConnection,
   routeConfig: WebSocketRouteConfig,
   webSocketConfig: WebSocketProxyConfig,
-  config: IAppConfig,
+  config: AppConfig,
   plugins: PluginList<IWebSocketRequestHandlerPlugin>
 ) {
   for (const service of Object.keys(routeConfig.services)) {
@@ -221,7 +221,7 @@ async function sendConnectionRequestsToServices(
 function onClose(
   requestId: string,
   webSocketConfig: WebSocketProxyConfig,
-  config: IAppConfig,
+  config: AppConfig,
   plugins: PluginList<IWebSocketRequestHandlerPlugin>
 ) {
   return async function () {

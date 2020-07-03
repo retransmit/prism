@@ -4,6 +4,7 @@ import {
   HttpRequestHandlerConfig,
   HttpProxyConfig,
   HttpMethods,
+  AppConfig,
 } from "../../../../types";
 
 import got from "got";
@@ -30,7 +31,7 @@ export default function handleRequest(
   services: {
     [name: string]: HttpRequestHandlerConfig;
   },
-  httpConfig: HttpProxyConfig
+  config: AppConfig
 ): Promise<InvokeServiceResult>[] {
   return Object.keys(services)
     .map(

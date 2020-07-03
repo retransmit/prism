@@ -4,7 +4,7 @@ import { TestAppInstance } from "../../../test";
 import random from "../../../../utils/random";
 import got from "got";
 import {
-  IAppConfig,
+  AppConfig,
   RedisStateConfig,
   InMemoryStateConfig,
 } from "../../../../types";
@@ -22,8 +22,8 @@ function sleep(ms: number): Promise<void> {
 }
 
 export default async function (app: TestAppInstance) {
-  function makeConfig(modification: (config: IAppConfig) => IAppConfig) {
-    const baseConfig: IAppConfig = {
+  function makeConfig(modification: (config: AppConfig) => AppConfig) {
+    const baseConfig: AppConfig = {
       instanceId: random(),
       http: {
         routes: {
@@ -49,7 +49,7 @@ export default async function (app: TestAppInstance) {
     return modification(baseConfig);
   }
 
-  const tests: [string, boolean, IAppConfig][] = [
+  const tests: [string, boolean, AppConfig][] = [
     [
       "rate limits with in-memory state",
       false,

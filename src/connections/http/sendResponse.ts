@@ -3,8 +3,7 @@ import {
   HttpMethods,
   HttpRequest,
   HttpResponse,
-  IAppConfig,
-  HttpProxyConfig,
+  HttpServiceAppConfig,
 } from "../../types";
 import { HttpRouteConfig } from "../../types/http";
 import { updateServiceTrackingInfo } from "./modules/circuitBreaker";
@@ -19,8 +18,7 @@ export async function sendResponse(
   request: HttpRequest,
   response: HttpResponse | undefined,
   routeConfig: HttpRouteConfig | undefined,
-  httpConfig: HttpProxyConfig,
-  config: IAppConfig,
+  config: HttpServiceAppConfig,
   fromCache = false
 ) {
   const responseTime = Date.now();
@@ -34,20 +32,11 @@ export async function sendResponse(
         requestTime,
         responseTime,
         routeConfig,
-        httpConfig,
         config
       );
 
       if (!responseIsError(response)) {
-        updateCache(
-          route,
-          method,
-          request,
-          response,
-          routeConfig,
-          httpConfig,
-          config
-        );
+        updateCache(route, method, request, response, routeConfig, config);
       }
     }
 
@@ -55,7 +44,7 @@ export async function sendResponse(
       response.status &&
       response.status >= 500 &&
       response.status <= 599 &&
-      (routeConfig?.genericErrors || httpConfig.genericErrors)
+      (routeConfig?.genericErrors || config.http.genericErrors)
     ) {
       ctx.status = 500;
       ctx.body = `Internal Server Error.`;

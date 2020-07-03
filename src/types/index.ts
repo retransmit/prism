@@ -20,7 +20,7 @@ export type HttpMethods = "GET" | "POST" | "PUT" | "DELETE" | "PATCH";
 /*
   Application Config
 */
-export interface IAppConfig {
+export type AppConfig = {
   instanceId: string;
   http?: HttpProxyConfig;
   webSocket?: WebSocketProxyConfig;
@@ -42,7 +42,12 @@ export interface IAppConfig {
     credentials?: boolean;
   };
   state?: InMemoryStateConfig | RedisStateConfig;
-}
+};
+
+export type HttpServiceAppConfig = AppConfig & { http: HttpProxyConfig };
+export type WebSocketServiceAppConfig = AppConfig & {
+  http: WebSocketProxyConfig;
+};
 
 export type InMemoryStateConfig = {
   type: "memory";
@@ -283,5 +288,5 @@ export type RateLimitingStateProviderPlugin = {
 };
 
 export type PluginList<T> = {
-  [name: string]: T
-}
+  [name: string]: T;
+};

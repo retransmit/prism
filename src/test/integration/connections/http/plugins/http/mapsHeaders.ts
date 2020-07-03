@@ -3,11 +3,11 @@ import { startBackends, getResponse } from "../../../../../utils/http";
 import { TestAppInstance } from "../../../../../test";
 import random from "../../../../../../utils/random";
 import got from "got";
-import { IAppConfig } from "../../../../../../types";
+import { AppConfig } from "../../../../../../types";
 
 export default async function (app: TestAppInstance) {
   it(`maps headers`, async () => {
-    const config: IAppConfig = {
+    const config: AppConfig = {
       instanceId: random(),
       http: {
         routes: {

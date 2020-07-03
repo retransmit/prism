@@ -4,11 +4,11 @@ import { Server } from "http";
 import { TestAppInstance } from "../../../../../test";
 import random from "../../../../../../utils/random";
 import got from "got";
-import { IAppConfig } from "../../../../../../types";
+import { AppConfig } from "../../../../../../types";
 
 export default async function (app: TestAppInstance) {
   it(`rolls back`, async () => {
-    const config: IAppConfig = {
+    const config: AppConfig = {
       instanceId: random(),
       http: {
         routes: {

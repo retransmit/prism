@@ -4,11 +4,11 @@ import random from "../../../../../../utils/random";
 import { startWithConfiguration } from "../../../../../..";
 import { createClient } from "redis";
 import { RedisServiceWebSocketConnectRequest } from "../../../../../../types/webSocket";
-import { IAppConfig } from "../../../../../../types";
+import { AppConfig } from "../../../../../../types";
 
 export default async function (app: TestAppInstance) {
   it(`gets websocket responses from redis backends`, async () => {
-    const config: IAppConfig = {
+    const config: AppConfig = {
       instanceId: random(),
       webSocket: {
         routes: {

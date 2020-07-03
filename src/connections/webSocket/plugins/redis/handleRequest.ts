@@ -1,4 +1,4 @@
-import { WebSocketProxyConfig, IAppConfig } from "../../../../types";
+import { WebSocketProxyConfig, AppConfig } from "../../../../types";
 import { getChannelForService } from "../../../../utils/redis/getChannelForService";
 import {
   RedisServiceWebSocketMessageRequest,
@@ -12,7 +12,7 @@ export default async function sendToService(
   request: WebSocketMessageRequest,
   conn: ActiveWebSocketConnection,
   webSocketConfig: WebSocketProxyConfig,
-  config: IAppConfig
+  config: AppConfig
 ) {
   const routeConfig = webSocketConfig.routes[request.route];
 

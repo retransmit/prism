@@ -1,11 +1,11 @@
-import { IAppConfig } from "../types";
+import { AppConfig } from "../types";
 
-let config: IAppConfig;
+let config: AppConfig;
 
-export function set(c: IAppConfig) {
+export function set(c: AppConfig) {
   config = c;
 }
 
-export function get(): IAppConfig {
+export function get(): AppConfig {
   return config;
 }

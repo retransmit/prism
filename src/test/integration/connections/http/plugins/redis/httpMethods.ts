@@ -1,4 +1,4 @@
-import { HttpMethods, IAppConfig } from "../../../../../../types";
+import { HttpMethods, AppConfig } from "../../../../../../types";
 import { TestAppInstance } from "../../../../../test";
 import { startWithConfiguration } from "../../../../../..";
 import { createClient } from "redis";
@@ -6,7 +6,7 @@ import got from "got";
 import random from "../../../../../../utils/random";
 
 export default async function (app: TestAppInstance) {
-  function makeConfig(options: { method: HttpMethods }): IAppConfig {
+  function makeConfig(options: { method: HttpMethods }): AppConfig {
     return {
       instanceId: random(),
       http: {

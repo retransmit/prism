@@ -3,7 +3,7 @@ import { startBackends, getResponse } from "../../../../../utils/http";
 import { TestAppInstance } from "../../../../../test";
 import random from "../../../../../../utils/random";
 import got from "got";
-import { IAppConfig, HttpRequest } from "../../../../../../types";
+import { AppConfig, HttpRequest } from "../../../../../../types";
 import {
   FetchedHttpRequestHandlerResponse,
   HttpServiceHttpRequestHandlerConfig,
@@ -11,7 +11,7 @@ import {
 
 export default async function (app: TestAppInstance) {
   it(`runs stages`, async () => {
-    const config: IAppConfig = {
+    const config: AppConfig = {
       instanceId: random(),
       http: {
         routes: {

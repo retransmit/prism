@@ -6,12 +6,9 @@ import {
   HttpRouteConfig,
   FetchedHttpRequestHandlerResponse,
 } from "../../../../types/http";
-import { HttpProxyConfig, IAppConfig } from "../../../../types";
+import { HttpServiceAppConfig } from "../../../../types";
 
-export default function processMessage(
-  httpConfig: HttpProxyConfig,
-  config: IAppConfig
-) {
+export default function processMessage(config: HttpServiceAppConfig) {
   return async function processMessageImpl(
     channel: string,
     messageString: string
@@ -24,13 +21,13 @@ export default function processMessage(
       // We're going to process it. So remove it.
       activeRequests().delete(activeRequestId);
 
-      const routeConfig = httpConfig.routes[activeRequest.route][
+      const routeConfig = config.http.routes[activeRequest.route][
         activeRequest.method
       ] as HttpRouteConfig;
 
       const serviceConfig = routeConfig.services[activeRequest.service];
       if (serviceConfig.type === "redis") {
-        const channelInRequest = `${httpConfig.redis?.responseChannel}.${config.instanceId}`;
+        const channelInRequest = `${config.http.redis?.responseChannel}.${config.instanceId}`;
 
         // Make sure the service responded in the configured channel
         // Otherwise ignore the message.

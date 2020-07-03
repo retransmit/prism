@@ -4,11 +4,11 @@ import { createClient } from "redis";
 import { startWithConfiguration } from "../../../../../..";
 import random from "../../../../../../utils/random";
 import { getResponse } from "../../../../../utils/http";
-import { IAppConfig } from "../../../../../../types";
+import { AppConfig } from "../../../../../../types";
 
 export default async function (app: TestAppInstance) {
   it(`must not overwrite json content with string content`, async () => {
-    const config: IAppConfig = {
+    const config: AppConfig = {
       instanceId: random(),
       http: {
         routes: {

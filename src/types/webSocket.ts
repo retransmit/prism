@@ -2,7 +2,7 @@ import {
   HttpRequest,
   HttpResponse,
   WebSocketProxyConfig,
-  IAppConfig,
+  AppConfig,
   HttpRequestBodyEncoding,
   UrlList,
   UrlSelector,
@@ -182,25 +182,25 @@ export type ActiveWebSocketConnection = {
 };
 
 export type IWebSocketRequestHandlerPlugin = {
-  init: (config: IAppConfig) => any;
+  init: (config: AppConfig) => any;
   handleRequest: (
     request: WebSocketMessageRequest,
     conn: ActiveWebSocketConnection,
     webSocketConfig: WebSocketProxyConfig,
-    config: IAppConfig
+    config: AppConfig
   ) => void;
   connect: (
     requestId: string,
     conn: ActiveWebSocketConnection,
     serviceConfig: any,
     webSocketConfig: WebSocketProxyConfig,
-    config: IAppConfig
+    config: AppConfig
   ) => void;
   disconnect: (
     requestId: string,
     conn: ActiveWebSocketConnection,
     serviceConfig: any,
     webSocketConfig: WebSocketProxyConfig,
-    config: IAppConfig
+    config: AppConfig
   ) => void;
 };

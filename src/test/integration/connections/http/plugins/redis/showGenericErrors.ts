@@ -4,7 +4,7 @@ import { startWithConfiguration } from "../../../../../..";
 import { createClient } from "redis";
 import { getResponse } from "../../../../../utils/http";
 import got from "got";
-import { IAppConfig } from "../../../../../../types";
+import { AppConfig } from "../../../../../../types";
 
 const genericErrorsForRoute = [
   "shows generic errors for service",
@@ -66,14 +66,14 @@ const genericErrorsGlobally = [
 
 const configs = [genericErrorsForRoute, genericErrorsGlobally] as [
   string,
-  IAppConfig
+  AppConfig
 ][];
 
 export default async function (app: TestAppInstance) {
-  configs.forEach((testCfg: [string, IAppConfig]) => {
+  configs.forEach((testCfg: [string, AppConfig]) => {
     const [testName, config] = testCfg;
     it(testName, async () => {
-      const config: IAppConfig = {
+      const config: AppConfig = {
         instanceId: random(),
         http: {
           routes: {

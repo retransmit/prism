@@ -4,11 +4,10 @@ import {
   RedisServiceHttpRequestHandlerConfig,
   HttpProxyConfig,
   HttpMethods,
-  IAppConfig,
+  AppConfig,
 } from "../../../../types";
 
 import { get as activeRequests } from "./activeRequests";
-import * as configModule from "../../../../config";
 import { getChannelForService } from "../../../../utils/redis/getChannelForService";
 import {
   RedisServiceHttpRequest,
@@ -31,8 +30,7 @@ export default function handleRequest(
   services: {
     [name: string]: HttpRequestHandlerConfig;
   },
-  httpConfig: HttpProxyConfig,
-  config: IAppConfig
+  config: AppConfig
 ): Promise<InvokeServiceResult>[] {
   const alreadyPublishedChannels: string[] = [];
 
@@ -53,7 +51,7 @@ export default function handleRequest(
           const redisHttpRequest: RedisServiceHttpRequest = {
             id: requestId,
             request: httpRequestWithMappedFields,
-            responseChannel: `${httpConfig.redis?.responseChannel}.${config.instanceId}`,
+            responseChannel: `${config.http?.redis?.responseChannel}.${config.instanceId}`,
             type: "request",
           };
 

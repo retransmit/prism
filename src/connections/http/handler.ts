@@ -7,7 +7,8 @@ import {
   HttpMethods,
   HttpProxyConfig,
   HttpRequest,
-  IAppConfig,
+  AppConfig,
+  HttpServiceAppConfig,
 } from "../../types";
 import randomId from "../../utils/random";
 
@@ -51,8 +52,16 @@ export type CreateHttpRequestHandler = (
   method: HttpMethods
 ) => (ctx: IRouterContext) => void;
 
-export default async function init(config: IAppConfig) {
-  if (config.http) {
+export default async function init(config: AppConfig) {
+  const koa = new Koa();
+
+  if (config.cors) {
+    koa.use(cors(config.cors));
+  }
+
+  koa.use(bodyParser());
+
+  if (isHttpServiceAppConfig(config)) {
     // Load other plugins.
     if (config.http.plugins) {
       for (const pluginName of Object.keys(config.http.plugins)) {
@@ -90,34 +99,23 @@ export default async function init(config: IAppConfig) {
       }
     }
 
-    const koa = new Koa();
-
-    if (config.cors) {
-      koa.use(cors(config.cors));
-    }
-    koa.use(bodyParser());
     koa.use(router.routes());
     koa.use(router.allowedMethods());
-    const koaRequestHandler = koa.callback();
-
-    return function httpRequestHandler(
-      req: IncomingMessage,
-      res: ServerResponse
-    ) {
-      koaRequestHandler(req, res);
-    };
   }
+
+  const koaRequestHandler = koa.callback();
+
+  return function httpRequestHandler(
+    req: IncomingMessage,
+    res: ServerResponse
+  ) {
+    koaRequestHandler(req, res);
+  };
 }
 
-function createHandler(route: string, method: HttpMethods, config: IAppConfig) {
+function createHandler(route: string, method: HttpMethods, config: AppConfig) {
   return async function httpHandler(ctx: IRouterContext) {
-    return await handler(
-      ctx,
-      route,
-      method,
-      config.http as HttpProxyConfig,
-      config
-    );
+    return await handler(ctx, route, method, config);
   };
 }
 
@@ -125,266 +123,278 @@ async function handler(
   ctx: IRouterContext,
   route: string,
   method: HttpMethods,
-  httpConfig: HttpProxyConfig,
-  config: IAppConfig
+  config: AppConfig
 ) {
-  const requestTime = Date.now();
+  if (isHttpServiceAppConfig(config)) {
+    const requestTime = Date.now();
 
-  const originalRequest = makeHttpRequestFromContext(ctx);
+    const originalRequest = makeHttpRequestFromContext(ctx);
 
-  const requestId = randomId(32);
+    const requestId = randomId(32);
 
-  const routeConfig = httpConfig.routes[route][method];
+    const routeConfig = config.http.routes[route][method];
 
-  const authConfig = routeConfig?.authentication || httpConfig.authentication;
+    const authConfig =
+      routeConfig?.authentication || config.http.authentication;
 
-  const authResponse = await authenticate(originalRequest, authConfig);
-  if (authResponse) {
-    sendResponse(
-      ctx,
-      route,
-      method,
-      requestTime,
-      originalRequest,
-      authResponse,
-      routeConfig,
-      httpConfig,
-      config
-    );
-    return;
-  }
-
-  if (routeConfig) {
-    const entryFromCache = await getFromCache(
-      route,
-      method,
-      originalRequest,
-      routeConfig,
-      httpConfig,
-      config
-    );
-
-    if (entryFromCache) {
+    const authResponse = await authenticate(originalRequest, authConfig);
+    if (authResponse) {
       sendResponse(
         ctx,
         route,
         method,
         requestTime,
         originalRequest,
-        entryFromCache,
+        authResponse,
         routeConfig,
-        httpConfig,
-        config,
-        true
-      );
-      return;
-    }
-
-    const rateLimitedResponse = await applyRateLimiting(
-      ctx.path,
-      method,
-      ctx.ip,
-      routeConfig,
-      httpConfig,
-      config
-    );
-
-    if (rateLimitedResponse !== undefined) {
-      const response = {
-        status: rateLimitedResponse.status,
-        body: rateLimitedResponse.body,
-      };
-      sendResponse(
-        ctx,
-        route,
-        method,
-        requestTime,
-        originalRequest,
-        response,
-        routeConfig,
-        httpConfig,
         config
       );
       return;
     }
 
-    const circuitBreakerResponse = await isTripped(
-      route,
-      method,
-      routeConfig,
-      httpConfig,
-      config
-    );
-
-    if (circuitBreakerResponse !== undefined) {
-      const response = {
-        status: circuitBreakerResponse.status,
-        body: circuitBreakerResponse.body,
-      };
-      sendResponse(
-        ctx,
-        route,
-        method,
-        requestTime,
-        originalRequest,
-        response,
-        routeConfig,
-        httpConfig,
-        config
-      );
-      return;
-    }
-  }
-
-  // Are there custom handlers for the request?
-  const onRequest = routeConfig?.onRequest || httpConfig.onRequest;
-
-  const modResult = (onRequest && (await onRequest(originalRequest))) || {
-    handled: false as false,
-    request: originalRequest,
-  };
-
-  if (modResult.handled) {
-    sendResponse(
-      ctx,
-      route,
-      method,
-      requestTime,
-      originalRequest,
-      modResult.response,
-      routeConfig,
-      httpConfig,
-      config
-    );
-  } else {
     if (routeConfig) {
-      const modifiedRequest = modResult.request;
+      const entryFromCache = await getFromCache(
+        route,
+        method,
+        originalRequest,
+        routeConfig,
+        config
+      );
 
-      type StageConfig = {
-        stage: number | undefined;
-        services: {
-          [name: string]: HttpRequestHandlerConfig;
+      if (entryFromCache) {
+        sendResponse(
+          ctx,
+          route,
+          method,
+          requestTime,
+          originalRequest,
+          entryFromCache,
+          routeConfig,
+          config,
+          true
+        );
+        return;
+      }
+
+      const rateLimitedResponse = await applyRateLimiting(
+        ctx.path,
+        method,
+        ctx.ip,
+        routeConfig,
+        config.http,
+        config
+      );
+
+      if (rateLimitedResponse !== undefined) {
+        const response = {
+          status: rateLimitedResponse.status,
+          body: rateLimitedResponse.body,
         };
-      };
-
-      let stages: StageConfig[] = (function sortIntoStages() {
-        const unsortedStages = Object.keys(routeConfig.services).reduce(
-          (acc, serviceName) => {
-            const serviceConfig = routeConfig.services[serviceName];
-            const existingStage = acc.find(
-              (x) => x.stage === serviceConfig.stage
-            );
-            if (!existingStage) {
-              const newStage = {
-                stage: serviceConfig.stage,
-                services: {
-                  [serviceName]: serviceConfig,
-                },
-              };
-              return acc.concat(newStage);
-            } else {
-              existingStage.services[serviceName] = serviceConfig;
-              return acc;
-            }
-          },
-          [] as StageConfig[]
+        sendResponse(
+          ctx,
+          route,
+          method,
+          requestTime,
+          originalRequest,
+          response,
+          routeConfig,
+          config
         );
-
-        return unsortedStages.sort(
-          (x, y) => (x.stage || Infinity) - (y.stage || Infinity)
-        );
-      })();
-
-      async function invokeRequestHandling() {
-        function responseIsNotSkipped(
-          x: InvokeServiceResult
-        ): x is { skip: false; response: FetchedHttpRequestHandlerResponse } {
-          return !x.skip;
-        }
-
-        let responses: FetchedHttpRequestHandlerResponse[] = [];
-
-        for (const stage of stages) {
-          let promises: Promise<InvokeServiceResult>[] = [];
-
-          for (const pluginName of Object.keys(plugins)) {
-            promises = promises.concat(
-              plugins[pluginName].handleRequest(
-                requestId,
-                modifiedRequest,
-                route,
-                method,
-                stage.stage,
-                responses,
-                stage.services,
-                httpConfig,
-                config
-              )
-            );
-          }
-
-          const allResponses = await Promise.all(promises);
-
-          const validResponses = allResponses
-            .filter(responseIsNotSkipped)
-            .map((x) => x.response);
-
-          for (const response of validResponses) {
-            responses.push(response);
-          }
-        }
-
-        return responses;
+        return;
       }
 
-      const validResponses = await invokeRequestHandling();
+      const circuitBreakerResponse = await isTripped(
+        route,
+        method,
+        routeConfig,
+        config
+      );
 
-      const fetchedResponses =
-        (routeConfig.mergeResponses &&
-          (await routeConfig.mergeResponses(
-            validResponses,
-            originalRequest
-          ))) ||
-        validResponses;
-
-      let response = mergeResponses(fetchedResponses, httpConfig);
-
-      if (responseIsError(response)) {
-        const onError = routeConfig.onError || httpConfig.onError;
-        if (onError) {
-          onError(fetchedResponses, originalRequest);
-        }
-        for (const pluginName of Object.keys(plugins)) {
-          plugins[pluginName].rollback(
-            requestId,
-            modifiedRequest,
-            route,
-            method,
-            httpConfig,
-            config
-          );
-        }
+      if (circuitBreakerResponse !== undefined) {
+        const response = {
+          status: circuitBreakerResponse.status,
+          body: circuitBreakerResponse.body,
+        };
+        sendResponse(
+          ctx,
+          route,
+          method,
+          requestTime,
+          originalRequest,
+          response,
+          routeConfig,
+          config
+        );
+        return;
       }
+    }
 
-      // Are there custom handlers for the response?
-      const onResponse = routeConfig.onResponse || httpConfig.onResponse;
-      const responseToSend =
-        (onResponse && (await onResponse(response, originalRequest))) ||
-        response;
+    // Are there custom handlers for the request?
+    const onRequest = routeConfig?.onRequest || config.http.onRequest;
 
+    const modResult = (onRequest && (await onRequest(originalRequest))) || {
+      handled: false as false,
+      request: originalRequest,
+    };
+
+    if (modResult.handled) {
       sendResponse(
         ctx,
         route,
         method,
         requestTime,
         originalRequest,
-        responseToSend,
+        modResult.response,
         routeConfig,
-        httpConfig,
         config
       );
+    } else {
+      if (routeConfig) {
+        const modifiedRequest = modResult.request;
+
+        let stages: StageConfig[] = (function sortIntoStages() {
+          const unsortedStages = Object.keys(routeConfig.services).reduce(
+            (acc, serviceName) => {
+              const serviceConfig = routeConfig.services[serviceName];
+              const existingStage = acc.find(
+                (x) => x.stage === serviceConfig.stage
+              );
+              if (!existingStage) {
+                const newStage = {
+                  stage: serviceConfig.stage,
+                  services: {
+                    [serviceName]: serviceConfig,
+                  },
+                };
+                return acc.concat(newStage);
+              } else {
+                existingStage.services[serviceName] = serviceConfig;
+                return acc;
+              }
+            },
+            [] as StageConfig[]
+          );
+
+          return unsortedStages.sort(
+            (x, y) => (x.stage || Infinity) - (y.stage || Infinity)
+          );
+        })();
+
+        const validResponses = await invokeRequestHandling(
+          requestId,
+          modifiedRequest,
+          route,
+          method,
+          stages,
+          config
+        );
+
+        const fetchedResponses =
+          (routeConfig.mergeResponses &&
+            (await routeConfig.mergeResponses(
+              validResponses,
+              originalRequest
+            ))) ||
+          validResponses;
+
+        let response = mergeResponses(fetchedResponses, config);
+
+        if (responseIsError(response)) {
+          const onError = routeConfig.onError || config.http.onError;
+          if (onError) {
+            onError(fetchedResponses, originalRequest);
+          }
+          for (const pluginName of Object.keys(plugins)) {
+            plugins[pluginName].rollback(
+              requestId,
+              modifiedRequest,
+              route,
+              method,
+              config
+            );
+          }
+        }
+
+        // Are there custom handlers for the response?
+        const onResponse = routeConfig.onResponse || config.http.onResponse;
+        const responseToSend =
+          (onResponse && (await onResponse(response, originalRequest))) ||
+          response;
+
+        sendResponse(
+          ctx,
+          route,
+          method,
+          requestTime,
+          originalRequest,
+          responseToSend,
+          routeConfig,
+          config
+        );
+      }
     }
   }
+}
+
+type StageConfig = {
+  stage: number | undefined;
+  services: {
+    [name: string]: HttpRequestHandlerConfig;
+  };
+};
+
+async function invokeRequestHandling(
+  requestId: string,
+  modifiedRequest: HttpRequest,
+  route: string,
+  method: HttpMethods,
+  stages: StageConfig[],
+  config: HttpServiceAppConfig
+) {
+  function responseIsNotSkipped(
+    x: InvokeServiceResult
+  ): x is { skip: false; response: FetchedHttpRequestHandlerResponse } {
+    return !x.skip;
+  }
+
+  let responses: FetchedHttpRequestHandlerResponse[] = [];
+
+  for (const stage of stages) {
+    let promises: Promise<InvokeServiceResult>[] = [];
+
+    for (const pluginName of Object.keys(plugins)) {
+      promises = promises.concat(
+        plugins[pluginName].handleRequest(
+          requestId,
+          modifiedRequest,
+          route,
+          method,
+          stage.stage,
+          responses,
+          stage.services,
+          config
+        )
+      );
+    }
+
+    const allResponses = await Promise.all(promises);
+
+    const validResponses = allResponses
+      .filter(responseIsNotSkipped)
+      .map((x) => x.response);
+
+    for (const response of validResponses) {
+      responses.push(response);
+    }
+  }
+
+  return responses;
+}
+
+function isHttpServiceAppConfig(
+  config: AppConfig
+): config is HttpServiceAppConfig {
+  return typeof config.http !== "undefined";
 }
 
 function makeHttpRequestFromContext(ctx: IRouterContext): HttpRequest {

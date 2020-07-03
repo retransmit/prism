@@ -3,7 +3,7 @@ import {
   HttpRequest,
   HttpMethods,
   HttpProxyConfig,
-  IAppConfig,
+  AppConfig,
   HttpRequestBodyEncoding,
   UrlList,
   UrlSelector,
@@ -12,6 +12,7 @@ import {
   HttpServiceCacheConfig,
   HttpServiceAuthentication,
   HttpServiceErrorTrackingInfo,
+  HttpServiceAppConfig,
 } from ".";
 
 /*
@@ -191,7 +192,7 @@ export type HttpRequestHandlerConfig =
   | HttpServiceHttpRequestHandlerConfig;
 
 export type HttpRequestHandlerPlugin = {
-  init: (config: IAppConfig) => any;
+  init: (config: HttpServiceAppConfig) => any;
   handleRequest: (
     requestId: string,
     request: HttpRequest,
@@ -202,16 +203,14 @@ export type HttpRequestHandlerPlugin = {
     services: {
       [name: string]: HttpRequestHandlerConfig;
     },
-    httpConfig: HttpProxyConfig,
-    config: IAppConfig
+    config: HttpServiceAppConfig
   ) => Promise<InvokeServiceResult>[];
   rollback: (
     requestId: string,
     request: HttpRequest,
     route: string,
     method: HttpMethods,
-    httpConfig: HttpProxyConfig,
-    config: IAppConfig
+    config: HttpServiceAppConfig
   ) => void;
 };
 

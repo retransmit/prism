@@ -1,5 +1,5 @@
-import { IAppConfig } from "../../../../types";
+import { AppConfig } from "../../../../types";
 
-export default async function init(config: IAppConfig) {
+export default async function init(config: AppConfig) {
   // nothing to do here...
 }
