@@ -1,4 +1,3 @@
-import * as configModule from "../../../../config";
 import { get as activeRequests } from "./activeRequests";
 import responseIsError from "../../../../utils/http/responseIsError";
 import {

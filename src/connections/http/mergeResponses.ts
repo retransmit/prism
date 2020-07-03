@@ -1,4 +1,3 @@
-import * as configModule from "../../config";
 import { HttpResponse, HttpProxyAppConfig } from "../../types";
 import responseIsError from "../../utils/http/responseIsError";
 import {

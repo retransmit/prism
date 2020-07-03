@@ -8,7 +8,6 @@ import { Server as HttpsServer } from "https";
 
 import WebSocket from "ws";
 
-import * as configModule from "./config";
 import * as applicationState from "./state";
 import { AppConfig } from "./types";
 
@@ -92,9 +91,6 @@ export async function startWithConfiguration(
     };
   }
   await applicationState.init(config);
-
-  // Set up the config
-  configModule.set(config);
 
   // Schedule web jobs
   webJobs.init(config);
