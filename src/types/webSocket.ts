@@ -39,9 +39,9 @@ export type WebSocketRouteConfig = {
 /*
   Service Configuration.
 */
-export type WebSocketHandlerConfigBase = {};
+export type WebSocketEndPointConfigBase = {};
 
-export type HttpWebSocketEndPointConfig = {
+export type UrlPollingWebSocketEndPointConfig = {
   type: "http";
   pollingInterval?: number;
   resendRequestWhilePolling?: boolean;
@@ -72,7 +72,7 @@ export type HttpWebSocketEndPointConfig = {
   onDisconnectRequestEncoding?: HttpRequestBodyEncoding;
 
   onError?: (response: HttpResponse | undefined, request: HttpRequest) => any;
-} & WebSocketHandlerConfigBase;
+} & WebSocketEndPointConfigBase;
 
 export type RedisWebSocketEndPointConfig = {
   type: "redis";
@@ -89,10 +89,10 @@ export type RedisWebSocketEndPointConfig = {
   ) => Promise<WebSocketResponse | void>;
   requestChannel: string;
   numRequestChannels?: number;
-} & WebSocketHandlerConfigBase;
+} & WebSocketEndPointConfigBase;
 
 export type WebSocketServiceEndPointConfig =
-  | HttpWebSocketEndPointConfig
+  | UrlPollingWebSocketEndPointConfig
   | RedisWebSocketEndPointConfig;
 
 /*
@@ -126,16 +126,16 @@ export type WebSocketResponse = {
 /*
   Requests and Responses for Http Services
 */
-export type HttpWebSocketMessageRequest = WebSocketMessageRequest;
-export type HttpWebSocketConnectRequest = WebSocketConnectRequest;
+export type UrlPollingWebSocketMessageRequest = WebSocketMessageRequest;
+export type UrlPollingWebSocketConnectRequest = WebSocketConnectRequest;
 
-export type HttpWebSocketRequest =
-  | HttpWebSocketMessageRequest
-  | HttpWebSocketConnectRequest
+export type UrlPollingWebSocketRequest =
+  | UrlPollingWebSocketMessageRequest
+  | UrlPollingWebSocketConnectRequest
   | WebSocketDisconnectRequest
   | WebSocketNotConnectedRequest;
 
-export type HttpWebSocketResponse = {
+export type UrlPollingWebSocketResponse = {
   id: string;
   service: string;
   response: string;
@@ -167,7 +167,7 @@ export type RedisWebSocketRequest =
   | WebSocketNotConnectedRequest;
 
 export type WebSocketRequest =
-  | HttpWebSocketRequest
+  | UrlPollingWebSocketRequest
   | RedisWebSocketRequest;
 
 export type ActiveWebSocketConnection = {
@@ -181,7 +181,7 @@ export type ActiveWebSocketConnection = {
   lastRequest: WebSocketMessageRequest | undefined;
 };
 
-export type IWebSocketHandlerPlugin = {
+export type WebSocketServicePlugin = {
   init: (config: WebSocketProxyAppConfig) => any;
   handleRequest: (
     request: WebSocketMessageRequest,

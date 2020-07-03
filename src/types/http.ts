@@ -14,7 +14,7 @@ import {
 } from ".";
 
 /*
-  RouteHandler Config
+  Route Config
 */
 export type HttpRouteConfig = {
   services: {

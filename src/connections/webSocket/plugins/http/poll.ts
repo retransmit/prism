@@ -3,7 +3,7 @@ import {
   WebSocketProxyAppConfig,
 } from "../../../../types";
 import {
-  HttpWebSocketEndPointConfig,
+  UrlPollingWebSocketEndPointConfig,
   WebSocketRouteConfig,
   WebSocketResponse,
   ActiveWebSocketConnection,
@@ -36,7 +36,7 @@ export function setupPolling(config: WebSocketProxyAppConfig) {
 function timerCallback(
   route: string,
   service: string,
-  serviceConfig: HttpWebSocketEndPointConfig,
+  serviceConfig: UrlPollingWebSocketEndPointConfig,
   config: WebSocketProxyAppConfig
 ) {
   return () => {
@@ -63,7 +63,7 @@ async function doPoll(
   service: string,
   requestId: string,
   conn: ActiveWebSocketConnection,
-  serviceConfig: HttpWebSocketEndPointConfig,
+  serviceConfig: UrlPollingWebSocketEndPointConfig,
   config: WebSocketProxyAppConfig
 ) {
   const httpRequest: HttpRequest = {

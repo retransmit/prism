@@ -1,6 +1,6 @@
 import { HttpRequest, WebSocketProxyAppConfig } from "../../../../types";
 import {
-  HttpWebSocketMessageRequest,
+  UrlPollingWebSocketMessageRequest,
   WebSocketResponse,
   WebSocketMessageRequest,
   ActiveWebSocketConnection,
@@ -23,7 +23,7 @@ export default async function sendToService(
     if (cfg.type === "http") {
       const serviceConfig = cfg;
 
-      const webSocketRequest: HttpWebSocketMessageRequest = request;
+      const webSocketRequest: UrlPollingWebSocketMessageRequest = request;
 
       const httpRequest: HttpRequest = {
         path: conn.path,

@@ -5,7 +5,7 @@ import {
 import * as httpPlugin from "./plugins/http";
 import * as redisPlugin from "./plugins/redis";
 import {
-  IWebSocketHandlerPlugin,
+  WebSocketServicePlugin,
   WebSocketRouteConfig,
 } from "../../types/webSocket";
 import WebSocket from "ws";
@@ -15,7 +15,7 @@ import { Socket } from "net";
 import { init as activeConnectionsInit } from "./activeConnections";
 
 const plugins: {
-  [name: string]: IWebSocketHandlerPlugin;
+  [name: string]: WebSocketServicePlugin;
 } = {
   http: {
     init: httpPlugin.init,
