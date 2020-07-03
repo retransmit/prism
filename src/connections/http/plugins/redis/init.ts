@@ -18,7 +18,7 @@ export default async function init(config: HttpProxyAppConfig) {
 
     // Some services may never respond. Fail them.
     setInterval(
-      cleanupTimedOut(config.http),
+      () => cleanupTimedOut(),
       config.http.redis.cleanupInterval || 10000
     );
 
