@@ -2,7 +2,6 @@ import {
   HttpRequestHandlerConfig,
   HttpRequest,
   RedisServiceHttpRequestHandlerConfig,
-  HttpProxyConfig,
   HttpMethods,
   AppConfig,
 } from "../../../../types";

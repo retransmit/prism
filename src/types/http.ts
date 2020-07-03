@@ -2,8 +2,6 @@ import {
   HttpResponse,
   HttpRequest,
   HttpMethods,
-  HttpProxyConfig,
-  AppConfig,
   HttpRequestBodyEncoding,
   UrlList,
   UrlSelector,

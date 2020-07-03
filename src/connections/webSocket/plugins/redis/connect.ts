@@ -1,4 +1,4 @@
-import { WebSocketProxyConfig, AppConfig, WebSocketServiceAppConfig } from "../../../../types";
+import { WebSocketServiceAppConfig } from "../../../../types";
 import {
   RedisServiceWebSocketRequestHandlerConfig,
   RedisServiceWebSocketConnectRequest,

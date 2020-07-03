@@ -2,7 +2,6 @@ import {
   HttpRequest,
   HttpServiceHttpRequestHandlerConfig,
   HttpRequestHandlerConfig,
-  HttpProxyConfig,
   HttpMethods,
   AppConfig,
 } from "../../../../types";

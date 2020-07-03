@@ -1,6 +1,5 @@
 import { get as activeRequests, ActiveHttpRequest } from "./activeRequests";
 import {
-  HttpRouteConfig,
   FetchedHttpRequestHandlerResponse,
 } from "../../../../types/http";
 import { HttpProxyConfig } from "../../../../types";

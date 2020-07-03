@@ -2,7 +2,7 @@ import {
   WebSocketResponse,
   ActiveWebSocketConnection,
 } from "../../types/webSocket";
-import { WebSocketProxyConfig, WebSocketServiceAppConfig } from "../../types";
+import { WebSocketServiceAppConfig } from "../../types";
 
 export default async function respondToWebSocketClient(
   requestId: string,

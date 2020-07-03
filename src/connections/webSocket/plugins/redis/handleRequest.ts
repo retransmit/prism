@@ -1,4 +1,4 @@
-import { WebSocketProxyConfig, AppConfig, WebSocketServiceAppConfig } from "../../../../types";
+import { WebSocketServiceAppConfig } from "../../../../types";
 import { getChannelForService } from "../../../../utils/redis/getChannelForService";
 import {
   RedisServiceWebSocketMessageRequest,

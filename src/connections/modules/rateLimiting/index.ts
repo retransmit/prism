@@ -10,8 +10,6 @@ import {
 import { HttpRouteConfig } from "../../../types/http";
 import { WebSocketRouteConfig } from "../../../types/webSocket";
 
-const ONE_MINUTE = 60 * 1000;
-
 import * as inMemoryPlugin from "./inMemory";
 import * as redisPlugin from "./redis";
 

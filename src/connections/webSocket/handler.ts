@@ -9,12 +9,7 @@ import {
   IWebSocketRequestHandlerPlugin,
 } from "../../types/webSocket";
 
-import {
-  WebSocketProxyConfig,
-  AppConfig,
-  PluginList,
-  WebSocketServiceAppConfig,
-} from "../../types";
+import { PluginList, WebSocketServiceAppConfig } from "../../types";
 import { saveLastRequest } from "./plugins/http/poll";
 import applyRateLimiting from "../modules/rateLimiting";
 
@@ -72,14 +67,7 @@ export default function makeHandler(plugins: {
 
       ws.on(
         "message",
-        onMessage(
-          requestId,
-          request,
-          route,
-          ws,
-          routeConfig,
-          config
-        )
+        onMessage(requestId, request, route, ws, routeConfig, config)
       );
 
       ws.on("close", onClose(requestId, config, plugins));
@@ -206,12 +194,7 @@ async function sendConnectionRequestsToServices(
 ) {
   for (const service of Object.keys(routeConfig.services)) {
     const serviceConfig = routeConfig.services[service];
-    plugins[serviceConfig.type].connect(
-      requestId,
-      conn,
-      serviceConfig,
-      config
-    );
+    plugins[serviceConfig.type].connect(requestId, conn, serviceConfig, config);
   }
 }
 

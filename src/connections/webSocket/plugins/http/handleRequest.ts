@@ -1,4 +1,4 @@
-import { WebSocketProxyConfig, HttpRequest, WebSocketServiceAppConfig } from "../../../../types";
+import { HttpRequest, WebSocketServiceAppConfig } from "../../../../types";
 import {
   HttpServiceWebSocketMessageRequest,
   WebSocketResponse,

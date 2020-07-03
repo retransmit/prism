@@ -1,6 +1,5 @@
 import {
   AppConfig,
-  WebSocketProxyConfig,
   WebSocketServiceAppConfig,
 } from "../../types";
 import * as httpPlugin from "./plugins/http";

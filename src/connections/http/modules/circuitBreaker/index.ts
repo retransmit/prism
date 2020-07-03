@@ -1,6 +1,4 @@
 import {
-  AppConfig,
-  HttpProxyConfig,
   HttpMethods,
   HttpServiceErrorTrackingInfo,
   HttpServiceCircuitBreakerConfig,

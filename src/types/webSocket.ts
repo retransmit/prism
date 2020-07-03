@@ -1,13 +1,10 @@
 import {
   HttpRequest,
   HttpResponse,
-  WebSocketProxyConfig,
-  AppConfig,
   HttpRequestBodyEncoding,
   UrlList,
   UrlSelector,
   RateLimitingConfig,
-  HttpServiceCircuitBreakerConfig,
   WebSocketServiceAppConfig,
 } from ".";
 import WebSocket from "ws";
