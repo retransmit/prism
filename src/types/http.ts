@@ -18,7 +18,7 @@ import {
 */
 export type HttpRouteConfig = {
   services: {
-    [key: string]: HttpHandlerConfig;
+    [key: string]: HttpEndPointConfig;
   };
   onRequest?: (
     request: HttpRequest
@@ -36,10 +36,7 @@ export type HttpRouteConfig = {
     request: HttpRequest
   ) => Promise<FetchedHttpResponse[] | void>;
   genericErrors?: boolean;
-  onError?: (
-    responses: FetchedHttpResponse[],
-    request: HttpRequest
-  ) => any;
+  onError?: (responses: FetchedHttpResponse[], request: HttpRequest) => any;
   rateLimiting?: RateLimitingConfig;
   circuitBreaker?: HttpServiceCircuitBreakerConfig;
   caching?: HttpServiceCacheConfig;
@@ -71,21 +68,19 @@ export type FetchedHttpResponse = {
 /*
   Http Requests and Responses for Redis-based Services
 */
-export type RedisServiceHttpRequestBase = {
-  id: string;
-  request: HttpRequest;
-};
 
-export type RedisServiceHttpRequest = RedisServiceHttpRequestBase &
-  (
-    | {
-        type: "request";
-        responseChannel: string;
-      }
-    | {
-        type: "rollback";
-      }
-  );
+export type RedisServiceHttpRequest =
+  | {
+      type: "request";
+      id: string;
+      request: HttpRequest;
+      responseChannel: string;
+    }
+  | {
+      id: string;
+      request: HttpRequest;
+      type: "rollback";
+    };
 
 export type RedisServiceHttpResponse = {
   id: string;
@@ -96,7 +91,7 @@ export type RedisServiceHttpResponse = {
 /*
   Service Configuration
 */
-export type HttpHandlerConfigBase = {
+export type HttpRouteConfigBase = {
   awaitResponse?: boolean;
   merge?: boolean;
   timeout?: number;
@@ -119,7 +114,7 @@ export type HttpHandlerConfigBase = {
   stage?: number;
 };
 
-export type HttpServiceHttpHandlerConfig = {
+export type HttpServiceHttpEndPointConfig = {
   type: "http";
   url: UrlList;
   getUrl?: UrlSelector;
@@ -151,9 +146,9 @@ export type HttpServiceHttpHandlerConfig = {
     | void
   >;
   onError?: (response: HttpResponse | undefined, request: HttpRequest) => any;
-} & HttpHandlerConfigBase;
+} & HttpRouteConfigBase;
 
-export type RedisServiceHttpHandlerConfig = {
+export type RedisServiceHttpEndPointConfig = {
   type: "redis";
   requestChannel: string;
   numRequestChannels?: number;
@@ -183,13 +178,13 @@ export type RedisServiceHttpHandlerConfig = {
     | void
   >;
   onError?: (response: string | undefined, request: HttpRequest) => any;
-} & HttpHandlerConfigBase;
+} & HttpRouteConfigBase;
 
-export type HttpHandlerConfig =
-  | RedisServiceHttpHandlerConfig
-  | HttpServiceHttpHandlerConfig;
+export type HttpEndPointConfig =
+  | RedisServiceHttpEndPointConfig
+  | HttpServiceHttpEndPointConfig;
 
-export type HttpHandlerPlugin = {
+export type HttpEndPointPlugin = {
   init: (config: HttpServiceAppConfig) => any;
   handleRequest: (
     requestId: string,
@@ -199,7 +194,7 @@ export type HttpHandlerPlugin = {
     stage: number | undefined,
     otherResponses: FetchedHttpResponse[],
     services: {
-      [name: string]: HttpHandlerConfig;
+      [name: string]: HttpEndPointConfig;
     },
     config: HttpServiceAppConfig
   ) => Promise<InvokeServiceResult>[];

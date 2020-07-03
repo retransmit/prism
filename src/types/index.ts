@@ -7,13 +7,6 @@ import {
   WebSocketMessageRequest,
 } from "./webSocket";
 
-export {
-  HttpServiceHttpHandlerConfig,
-  RedisServiceHttpHandlerConfig,
-  HttpHandlerConfig,
-} from "./http";
-1;
-
 export type HttpMethods = "GET" | "POST" | "PUT" | "DELETE" | "PATCH";
 
 /*

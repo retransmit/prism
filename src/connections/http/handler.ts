@@ -20,8 +20,8 @@ import responseIsError from "../../utils/http/responseIsError";
 import {
   FetchedHttpResponse,
   InvokeServiceResult,
-  HttpHandlerPlugin,
-  HttpHandlerConfig,
+  HttpEndPointPlugin,
+  HttpEndPointConfig,
 } from "../../types/http";
 import applyRateLimiting from "../modules/rateLimiting";
 import { copyHeadersFromContext } from "./copyHeadersFromContext";
@@ -33,7 +33,7 @@ import { isTripped } from "./modules/circuitBreaker";
 const cors = require("@koa/cors");
 
 const plugins: {
-  [name: string]: HttpHandlerPlugin;
+  [name: string]: HttpEndPointPlugin;
 } = {
   http: {
     init: httpPlugin.init,
@@ -47,7 +47,7 @@ const plugins: {
   },
 };
 
-export type CreateHttpHandler = (
+export type CreateHttpRequestHandler = (
   method: HttpMethods
 ) => (ctx: IRouterContext) => void;
 
@@ -104,7 +104,7 @@ export default async function init(config: AppConfig) {
 
   const koaRequestHandler = koa.callback();
 
-  return function httpHandler(
+  return function httpRequestHandler(
     req: IncomingMessage,
     res: ServerResponse
   ) {
@@ -113,7 +113,7 @@ export default async function init(config: AppConfig) {
 }
 
 function createHandler(route: string, method: HttpMethods, config: AppConfig) {
-  return async function httpHandler(ctx: IRouterContext) {
+  return async function httpRequestHandler(ctx: IRouterContext) {
     return await handler(ctx, route, method, config);
   };
 }
@@ -338,7 +338,7 @@ async function handler(
 type StageConfig = {
   stage: number | undefined;
   services: {
-    [name: string]: HttpHandlerConfig;
+    [name: string]: HttpEndPointConfig;
   };
 };
 

@@ -100,7 +100,7 @@ export async function startWithConfiguration(
   webJobs.init(config);
 
   // Get routes to handle
-  const httpHandler = await initHttpHandling(config);
+  const httpRequestHandler = await initHttpHandling(config);
 
   // Create the HttpServer
   let httpServer: HttpServer | HttpsServer;
@@ -109,9 +109,9 @@ export async function startWithConfiguration(
       key: readFileSync(config.useHttps.key),
       cert: readFileSync(config.useHttps.cert),
     };
-    httpServer = httpsCreateServer(options, httpHandler);
+    httpServer = httpsCreateServer(options, httpRequestHandler);
   } else {
-    httpServer = httpCreateServer(httpHandler);
+    httpServer = httpCreateServer(httpRequestHandler);
   }
 
   let webSocketServers: WebSocket.Server[] = [];

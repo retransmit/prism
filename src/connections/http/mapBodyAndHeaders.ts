@@ -1,9 +1,9 @@
 import { HttpRequest } from "../../types";
-import { HttpHandlerConfigBase } from "../../types/http";
+import { HttpRouteConfigBase } from "../../types/http";
 
 export default function mapBodyAndHeaders(
   request: HttpRequest,
-  serviceConfig: HttpHandlerConfigBase
+  serviceConfig: HttpRouteConfigBase
 ) {
   const includedFields = serviceConfig.mapping?.fields?.include;
   const excludedFields = serviceConfig.mapping?.fields?.exclude;
