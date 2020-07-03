@@ -1,17 +1,16 @@
 import { ClientOpts } from "redis";
 import { IncomingHttpHeaders } from "http2";
-import { FetchedHttpRequestHandlerResponse, HttpRouteConfig } from "./http";
+import { FetchedHttpResponse, HttpRouteConfig } from "./http";
 import {
   WebSocketRouteConfig,
   WebSocketResponse,
   WebSocketMessageRequest,
 } from "./webSocket";
-import { string } from "yargs";
 
 export {
-  HttpServiceHttpRequestHandlerConfig,
-  RedisServiceHttpRequestHandlerConfig,
-  HttpRequestHandlerConfig,
+  HttpServiceHttpHandlerConfig,
+  RedisServiceHttpHandlerConfig,
+  HttpHandlerConfig,
 } from "./http";
 1;
 
@@ -102,10 +101,7 @@ export type HttpProxyConfig = {
     request: HttpRequest
   ) => Promise<HttpResponse>;
   genericErrors?: boolean;
-  onError?: (
-    responses: FetchedHttpRequestHandlerResponse[],
-    request: HttpRequest
-  ) => any;
+  onError?: (responses: FetchedHttpResponse[], request: HttpRequest) => any;
   plugins?: {
     [pluginName: string]: {
       path: string;

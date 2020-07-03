@@ -18,10 +18,10 @@ import mergeResponses from "./mergeResponses";
 import responseIsError from "../../utils/http/responseIsError";
 
 import {
-  FetchedHttpRequestHandlerResponse,
+  FetchedHttpResponse,
   InvokeServiceResult,
-  HttpRequestHandlerPlugin,
-  HttpRequestHandlerConfig,
+  HttpHandlerPlugin,
+  HttpHandlerConfig,
 } from "../../types/http";
 import applyRateLimiting from "../modules/rateLimiting";
 import { copyHeadersFromContext } from "./copyHeadersFromContext";
@@ -33,7 +33,7 @@ import { isTripped } from "./modules/circuitBreaker";
 const cors = require("@koa/cors");
 
 const plugins: {
-  [name: string]: HttpRequestHandlerPlugin;
+  [name: string]: HttpHandlerPlugin;
 } = {
   http: {
     init: httpPlugin.init,
@@ -47,7 +47,7 @@ const plugins: {
   },
 };
 
-export type CreateHttpRequestHandler = (
+export type CreateHttpHandler = (
   method: HttpMethods
 ) => (ctx: IRouterContext) => void;
 
@@ -104,7 +104,7 @@ export default async function init(config: AppConfig) {
 
   const koaRequestHandler = koa.callback();
 
-  return function httpRequestHandler(
+  return function httpHandler(
     req: IncomingMessage,
     res: ServerResponse
   ) {
@@ -338,7 +338,7 @@ async function handler(
 type StageConfig = {
   stage: number | undefined;
   services: {
-    [name: string]: HttpRequestHandlerConfig;
+    [name: string]: HttpHandlerConfig;
   };
 };
 
@@ -352,11 +352,11 @@ async function invokeRequestHandling(
 ) {
   function responseIsNotSkipped(
     x: InvokeServiceResult
-  ): x is { skip: false; response: FetchedHttpRequestHandlerResponse } {
+  ): x is { skip: false; response: FetchedHttpResponse } {
     return !x.skip;
   }
 
-  let responses: FetchedHttpRequestHandlerResponse[] = [];
+  let responses: FetchedHttpResponse[] = [];
 
   for (const stage of stages) {
     let promises: Promise<InvokeServiceResult>[] = [];

@@ -4,7 +4,7 @@ import responseIsError from "../../../../utils/http/responseIsError";
 import {
   RedisServiceHttpResponse,
   HttpRouteConfig,
-  FetchedHttpRequestHandlerResponse,
+  FetchedHttpResponse,
 } from "../../../../types/http";
 import { HttpServiceAppConfig } from "../../../../types";
 
@@ -49,7 +49,7 @@ export default function processMessage(config: HttpServiceAppConfig) {
 
           const processingTime = Date.now() - activeRequest.startTime;
 
-          const fetchedResponse: FetchedHttpRequestHandlerResponse = {
+          const fetchedResponse: FetchedHttpResponse = {
             type: "redis",
             id: redisResponse.id,
             time: processingTime,

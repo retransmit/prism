@@ -6,7 +6,7 @@ import { get as activeConnections } from "./activeConnections";
 import {
   WebSocketRouteConfig,
   ActiveWebSocketConnection,
-  IWebSocketRequestHandlerPlugin,
+  IWebSocketHandlerPlugin as IWebSocketHandlerPlugin,
 } from "../../types/webSocket";
 
 import { PluginList, WebSocketServiceAppConfig } from "../../types";
@@ -14,7 +14,7 @@ import { saveLastRequest } from "./plugins/http/poll";
 import applyRateLimiting from "../modules/rateLimiting";
 
 export default function makeHandler(plugins: {
-  [name: string]: IWebSocketRequestHandlerPlugin;
+  [name: string]: IWebSocketHandlerPlugin;
 }) {
   return function onConnection(
     route: string,
@@ -190,7 +190,7 @@ async function sendConnectionRequestsToServices(
   conn: ActiveWebSocketConnection,
   routeConfig: WebSocketRouteConfig,
   config: WebSocketServiceAppConfig,
-  plugins: PluginList<IWebSocketRequestHandlerPlugin>
+  plugins: PluginList<IWebSocketHandlerPlugin>
 ) {
   for (const service of Object.keys(routeConfig.services)) {
     const serviceConfig = routeConfig.services[service];
@@ -201,7 +201,7 @@ async function sendConnectionRequestsToServices(
 function onClose(
   requestId: string,
   config: WebSocketServiceAppConfig,
-  plugins: PluginList<IWebSocketRequestHandlerPlugin>
+  plugins: PluginList<IWebSocketHandlerPlugin>
 ) {
   return async function () {
     // Find the handler in question.

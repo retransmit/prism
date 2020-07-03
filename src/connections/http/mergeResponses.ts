@@ -2,13 +2,13 @@ import * as configModule from "../../config";
 import { HttpResponse, HttpServiceAppConfig } from "../../types";
 import responseIsError from "../../utils/http/responseIsError";
 import {
-  FetchedHttpRequestHandlerResponse,
+  FetchedHttpResponse,
   HttpRouteConfig,
-  HttpRequestHandlerConfig,
+  HttpHandlerConfig,
 } from "../../types/http";
 
 export default function mergeResponses(
-  responses: FetchedHttpRequestHandlerResponse[],
+  responses: FetchedHttpResponse[],
   config: HttpServiceAppConfig
 ): HttpResponse {
   let finalResponse: HttpResponse = {};
@@ -60,9 +60,9 @@ export default function mergeResponses(
 }
 
 function mergeRedirectIntoResponse(
-  fetchedResponse: FetchedHttpRequestHandlerResponse,
+  fetchedResponse: FetchedHttpResponse,
   wrappedFinalResponse: { response: HttpResponse },
-  serviceConfig: HttpRequestHandlerConfig
+  serviceConfig: HttpHandlerConfig
 ): HttpResponse | void {
   // If the response content has already been modified previously,
   // then you cannot redirect. If there's already a pending redirect,
@@ -95,9 +95,9 @@ function mergeRedirectIntoResponse(
 }
 
 function mergeBodyIntoResponse(
-  fetchedResponse: FetchedHttpRequestHandlerResponse,
+  fetchedResponse: FetchedHttpResponse,
   wrappedFinalResponse: { response: HttpResponse },
-  serviceConfig: HttpRequestHandlerConfig
+  serviceConfig: HttpHandlerConfig
 ): HttpResponse | void {
   // If the response has already been redirected,
   // you can't write on to it.
@@ -127,9 +127,9 @@ function mergeBodyIntoResponse(
 }
 
 function mergeObjectIntoResponse(
-  fetchedResponse: FetchedHttpRequestHandlerResponse,
+  fetchedResponse: FetchedHttpResponse,
   wrappedFinalResponse: { response: HttpResponse },
-  serviceConfig: HttpRequestHandlerConfig
+  serviceConfig: HttpHandlerConfig
 ): HttpResponse | void {
   // If the fetched response is an object and final response is not object.
   if (
@@ -176,9 +176,9 @@ function mergeObjectIntoResponse(
 }
 
 function mergeNonObjectIntoResponse(
-  fetchedResponse: FetchedHttpRequestHandlerResponse,
+  fetchedResponse: FetchedHttpResponse,
   wrappedFinalResponse: { response: HttpResponse },
-  serviceConfig: HttpRequestHandlerConfig
+  serviceConfig: HttpHandlerConfig
 ): HttpResponse | void {
   // If the final response is an object,
   // and the fetched response is not
@@ -225,7 +225,7 @@ function mergeNonObjectIntoResponse(
 }
 
 function mergeStatusIntoResponse(
-  fetchedResponse: FetchedHttpRequestHandlerResponse,
+  fetchedResponse: FetchedHttpResponse,
   wrappedFinalResponse: { response: HttpResponse }
 ): HttpResponse | void {
   if (fetchedResponse.response.status) {
@@ -266,7 +266,7 @@ function mergeStatusIntoResponse(
 }
 
 function mergeHeadersIntoResponse(
-  fetchedResponse: FetchedHttpRequestHandlerResponse,
+  fetchedResponse: FetchedHttpResponse,
   wrappedFinalResponse: { response: HttpResponse }
 ): HttpResponse | void {
   // Copy all headers except content-type
@@ -286,7 +286,7 @@ function mergeHeadersIntoResponse(
 // Note: This could conflict with the Set-Cookie headers.
 // But we can't do much about it.
 function mergeCookiesIntoResponse(
-  fetchedResponse: FetchedHttpRequestHandlerResponse,
+  fetchedResponse: FetchedHttpResponse,
   wrappedFinalResponse: { response: HttpResponse }
 ): HttpResponse | void {
   if (fetchedResponse.response.cookies) {

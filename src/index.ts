@@ -12,8 +12,8 @@ import * as configModule from "./config";
 import * as applicationState from "./state";
 import { AppConfig } from "./types";
 
-import initHttpRequestHandling from "./connections/http/handler";
-import initWebSocketRequestHandling from "./connections/webSocket";
+import initHttpHandling from "./connections/http/handler";
+import initWebSocketHandling from "./connections/webSocket";
 
 import { Server } from "http";
 import { readFileSync } from "fs";
@@ -100,7 +100,7 @@ export async function startWithConfiguration(
   webJobs.init(config);
 
   // Get routes to handle
-  const httpRequestHandler = await initHttpRequestHandling(config);
+  const httpHandler = await initHttpHandling(config);
 
   // Create the HttpServer
   let httpServer: HttpServer | HttpsServer;
@@ -109,15 +109,15 @@ export async function startWithConfiguration(
       key: readFileSync(config.useHttps.key),
       cert: readFileSync(config.useHttps.cert),
     };
-    httpServer = httpsCreateServer(options, httpRequestHandler);
+    httpServer = httpsCreateServer(options, httpHandler);
   } else {
-    httpServer = httpCreateServer(httpRequestHandler);
+    httpServer = httpCreateServer(httpHandler);
   }
 
   let webSocketServers: WebSocket.Server[] = [];
 
   // Attach webSocket servers
-  webSocketServers = await initWebSocketRequestHandling(httpServer, config);
+  webSocketServers = await initWebSocketHandling(httpServer, config);
 
   if (port) {
     httpServer.listen(port);

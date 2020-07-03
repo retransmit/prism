@@ -4,7 +4,7 @@ import {
   WebSocketServiceAppConfig,
 } from "../../../../types";
 import {
-  HttpServiceWebSocketRequestHandlerConfig,
+  HttpServiceWebSocketHandlerConfig,
   WebSocketRouteConfig,
   WebSocketResponse,
   ActiveWebSocketConnection,
@@ -37,7 +37,7 @@ export function setupPolling(config: WebSocketServiceAppConfig) {
 function timerCallback(
   route: string,
   service: string,
-  serviceConfig: HttpServiceWebSocketRequestHandlerConfig,
+  serviceConfig: HttpServiceWebSocketHandlerConfig,
   config: WebSocketServiceAppConfig
 ) {
   return () => {
@@ -64,7 +64,7 @@ async function doPoll(
   service: string,
   requestId: string,
   conn: ActiveWebSocketConnection,
-  serviceConfig: HttpServiceWebSocketRequestHandlerConfig,
+  serviceConfig: HttpServiceWebSocketHandlerConfig,
   config: WebSocketServiceAppConfig
 ) {
   const httpRequest: HttpRequest = {

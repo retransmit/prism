@@ -1,7 +1,7 @@
 import { WebSocketServiceAppConfig } from "../../../../types";
 import {
   WebSocketResponse,
-  RedisServiceWebSocketRequestHandlerConfig,
+  RedisServiceWebSocketHandlerConfig,
   WebSocketNotConnectedRequest,
 } from "../../../../types/webSocket";
 import { get as activeConnections } from "../../activeConnections";
@@ -24,7 +24,7 @@ export default function processMessage(config: WebSocketServiceAppConfig) {
 
     const serviceConfig = config.webSocket.routes[redisResponse.route].services[
       redisResponse.service
-    ] as RedisServiceWebSocketRequestHandlerConfig;
+    ] as RedisServiceWebSocketHandlerConfig;
 
     if (conn) {
       const onResponseResult =

@@ -1,7 +1,7 @@
 import {
   HttpRequest,
-  HttpServiceHttpRequestHandlerConfig,
-  HttpRequestHandlerConfig,
+  HttpServiceHttpHandlerConfig,
+  HttpHandlerConfig as HttpHandlerConfig,
   HttpMethods,
   AppConfig,
 } from "../../../../types";
@@ -11,7 +11,7 @@ import responseIsError from "../../../../utils/http/responseIsError";
 import { makeHttpResponse } from "./makeHttpResponse";
 import {
   InvokeServiceResult,
-  FetchedHttpRequestHandlerResponse,
+  FetchedHttpResponse,
 } from "../../../../types/http";
 import { makeGotOptions } from "../../../../utils/http/gotUtil";
 import mapBodyAndHeaders from "../../mapBodyAndHeaders";
@@ -26,16 +26,16 @@ export default function handleRequest(
   route: string,
   method: HttpMethods,
   stage: number | undefined,
-  otherResponses: FetchedHttpRequestHandlerResponse[],
+  otherResponses: FetchedHttpResponse[],
   services: {
-    [name: string]: HttpRequestHandlerConfig;
+    [name: string]: HttpHandlerConfig;
   },
   config: AppConfig
 ): Promise<InvokeServiceResult>[] {
   return Object.keys(services)
     .map(
       (service) =>
-        [service, services[service]] as [string, HttpRequestHandlerConfig]
+        [service, services[service]] as [string, HttpHandlerConfig]
     )
     .filter(isHttpServiceConfig)
     .map(
@@ -210,7 +210,7 @@ export default function handleRequest(
 }
 
 function isHttpServiceConfig(
-  x: [string, HttpRequestHandlerConfig]
-): x is [string, HttpServiceHttpRequestHandlerConfig] {
+  x: [string, HttpHandlerConfig]
+): x is [string, HttpServiceHttpHandlerConfig] {
   return x[1].type === "http";
 }

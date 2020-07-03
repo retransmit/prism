@@ -1,7 +1,7 @@
 import {
-  HttpRequestHandlerConfig,
+  HttpHandlerConfig as HttpHandlerConfig,
   HttpRequest,
-  RedisServiceHttpRequestHandlerConfig,
+  RedisServiceHttpHandlerConfig,
   HttpMethods,
   AppConfig,
 } from "../../../../types";
@@ -11,7 +11,7 @@ import { getChannelForService } from "../../../../utils/redis/getChannelForServi
 import {
   RedisServiceHttpRequest,
   InvokeServiceResult,
-  FetchedHttpRequestHandlerResponse,
+  FetchedHttpResponse,
 } from "../../../../types/http";
 import { publish } from "./publish";
 import mapBodyAndHeaders from "../../mapBodyAndHeaders";
@@ -25,9 +25,9 @@ export default function handleRequest(
   route: string,
   method: HttpMethods,
   stage: number | undefined,
-  otherResponses: FetchedHttpRequestHandlerResponse[],
+  otherResponses: FetchedHttpResponse[],
   services: {
-    [name: string]: HttpRequestHandlerConfig;
+    [name: string]: HttpHandlerConfig;
   },
   config: AppConfig
 ): Promise<InvokeServiceResult>[] {
@@ -36,7 +36,7 @@ export default function handleRequest(
   return Object.keys(services)
     .map(
       (service) =>
-        [service, services[service]] as [string, HttpRequestHandlerConfig]
+        [service, services[service]] as [string, HttpHandlerConfig]
     )
     .filter(isRedisServiceConfig)
     .map(
@@ -118,7 +118,7 @@ export default function handleRequest(
 }
 
 function isRedisServiceConfig(
-  x: [string, HttpRequestHandlerConfig]
-): x is [string, RedisServiceHttpRequestHandlerConfig] {
+  x: [string, HttpHandlerConfig]
+): x is [string, RedisServiceHttpHandlerConfig] {
   return x[1].type === "redis";
 }

@@ -5,8 +5,8 @@ import random from "../../../../../../utils/random";
 import got from "got";
 import { AppConfig, HttpRequest } from "../../../../../../types";
 import {
-  FetchedHttpRequestHandlerResponse,
-  HttpServiceHttpRequestHandlerConfig,
+  FetchedHttpResponse,
+  HttpServiceHttpHandlerConfig,
 } from "../../../../../../types/http";
 
 export default async function (app: TestAppInstance) {
@@ -39,7 +39,7 @@ export default async function (app: TestAppInstance) {
                       },
                     };
                   },
-                } as HttpServiceHttpRequestHandlerConfig,
+                } as HttpServiceHttpHandlerConfig,
               },
             },
           },

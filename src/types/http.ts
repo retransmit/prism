@@ -18,7 +18,7 @@ import {
 */
 export type HttpRouteConfig = {
   services: {
-    [key: string]: HttpRequestHandlerConfig;
+    [key: string]: HttpHandlerConfig;
   };
   onRequest?: (
     request: HttpRequest
@@ -32,12 +32,12 @@ export type HttpRouteConfig = {
     request: HttpRequest
   ) => Promise<HttpResponse | void>;
   mergeResponses?: (
-    responses: FetchedHttpRequestHandlerResponse[],
+    responses: FetchedHttpResponse[],
     request: HttpRequest
-  ) => Promise<FetchedHttpRequestHandlerResponse[] | void>;
+  ) => Promise<FetchedHttpResponse[] | void>;
   genericErrors?: boolean;
   onError?: (
-    responses: FetchedHttpRequestHandlerResponse[],
+    responses: FetchedHttpResponse[],
     request: HttpRequest
   ) => any;
   rateLimiting?: RateLimitingConfig;
@@ -51,12 +51,12 @@ export type HttpRouteConfig = {
 */
 export type InvokeServiceResult =
   | { skip: true }
-  | { skip: false; response: FetchedHttpRequestHandlerResponse };
+  | { skip: false; response: FetchedHttpResponse };
 
 /*
   Output of processMessage()
 */
-export type FetchedHttpRequestHandlerResponse = {
+export type FetchedHttpResponse = {
   type: "http" | "redis";
   id: string;
   service: string;
@@ -96,7 +96,7 @@ export type RedisServiceHttpResponse = {
 /*
   Service Configuration
 */
-export type HttpRequestHandlerConfigBase = {
+export type HttpHandlerConfigBase = {
   awaitResponse?: boolean;
   merge?: boolean;
   timeout?: number;
@@ -119,7 +119,7 @@ export type HttpRequestHandlerConfigBase = {
   stage?: number;
 };
 
-export type HttpServiceHttpRequestHandlerConfig = {
+export type HttpServiceHttpHandlerConfig = {
   type: "http";
   url: UrlList;
   getUrl?: UrlSelector;
@@ -127,7 +127,7 @@ export type HttpServiceHttpRequestHandlerConfig = {
   rollbackRequestEncoding?: HttpRequestBodyEncoding;
   onRequest?: (
     request: HttpRequest,
-    otherResponses: FetchedHttpRequestHandlerResponse[]
+    otherResponses: FetchedHttpResponse[]
   ) => Promise<
     | {
         handled: true;
@@ -139,7 +139,7 @@ export type HttpServiceHttpRequestHandlerConfig = {
   onResponse?: (
     response: HttpResponse,
     request: HttpRequest,
-    otherResponses: FetchedHttpRequestHandlerResponse[]
+    otherResponses: FetchedHttpResponse[]
   ) => Promise<HttpResponse | void>;
   onRollbackRequest?: (
     request: HttpRequest
@@ -151,15 +151,15 @@ export type HttpServiceHttpRequestHandlerConfig = {
     | void
   >;
   onError?: (response: HttpResponse | undefined, request: HttpRequest) => any;
-} & HttpRequestHandlerConfigBase;
+} & HttpHandlerConfigBase;
 
-export type RedisServiceHttpRequestHandlerConfig = {
+export type RedisServiceHttpHandlerConfig = {
   type: "redis";
   requestChannel: string;
   numRequestChannels?: number;
   onRequest?: (
     request: RedisServiceHttpRequest,
-    otherResponses: FetchedHttpRequestHandlerResponse[]
+    otherResponses: FetchedHttpResponse[]
   ) => Promise<
     | {
         handled: true;
@@ -171,7 +171,7 @@ export type RedisServiceHttpRequestHandlerConfig = {
   onResponse?: (
     response: string,
     request: HttpRequest,
-    otherResponses: FetchedHttpRequestHandlerResponse[]
+    otherResponses: FetchedHttpResponse[]
   ) => Promise<RedisServiceHttpResponse | void>;
   onRollbackRequest?: (
     request: RedisServiceHttpRequest
@@ -183,13 +183,13 @@ export type RedisServiceHttpRequestHandlerConfig = {
     | void
   >;
   onError?: (response: string | undefined, request: HttpRequest) => any;
-} & HttpRequestHandlerConfigBase;
+} & HttpHandlerConfigBase;
 
-export type HttpRequestHandlerConfig =
-  | RedisServiceHttpRequestHandlerConfig
-  | HttpServiceHttpRequestHandlerConfig;
+export type HttpHandlerConfig =
+  | RedisServiceHttpHandlerConfig
+  | HttpServiceHttpHandlerConfig;
 
-export type HttpRequestHandlerPlugin = {
+export type HttpHandlerPlugin = {
   init: (config: HttpServiceAppConfig) => any;
   handleRequest: (
     requestId: string,
@@ -197,9 +197,9 @@ export type HttpRequestHandlerPlugin = {
     route: string,
     method: HttpMethods,
     stage: number | undefined,
-    otherResponses: FetchedHttpRequestHandlerResponse[],
+    otherResponses: FetchedHttpResponse[],
     services: {
-      [name: string]: HttpRequestHandlerConfig;
+      [name: string]: HttpHandlerConfig;
     },
     config: HttpServiceAppConfig
   ) => Promise<InvokeServiceResult>[];

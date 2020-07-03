@@ -1,5 +1,5 @@
 import { HttpRequest, HttpMethods } from "../../../../types";
-import { InvokeServiceResult, FetchedHttpRequestHandlerResponse } from "../../../../types/http";
+import { InvokeServiceResult, FetchedHttpResponse } from "../../../../types/http";
 
 export type ActiveHttpRequest = {
   id: string;
@@ -11,7 +11,7 @@ export type ActiveHttpRequest = {
   method: HttpMethods;
   onResponse: (result: InvokeServiceResult) => void;
   stage: number | undefined;
-  responses: FetchedHttpRequestHandlerResponse[];
+  responses: FetchedHttpResponse[];
 };
 
 let map: Map<string, ActiveHttpRequest> = new Map<string, ActiveHttpRequest>();

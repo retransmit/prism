@@ -15,8 +15,8 @@ import WebSocket from "ws";
 export type WebSocketRouteConfig = {
   services: {
     [key: string]:
-      | HttpServiceWebSocketRequestHandlerConfig
-      | RedisServiceWebSocketRequestHandlerConfig;
+      | HttpServiceWebSocketHandlerConfig
+      | RedisServiceWebSocketHandlerConfig;
   };
   onConnect?: (
     requestId: string,
@@ -41,9 +41,9 @@ export type WebSocketRouteConfig = {
 /*
   Service Configuration.
 */
-export type WebSocketRequestHandlerConfigBase = {};
+export type WebSocketHandlerConfigBase = {};
 
-export type HttpServiceWebSocketRequestHandlerConfig = {
+export type HttpServiceWebSocketHandlerConfig = {
   type: "http";
   pollingInterval?: number;
   resendRequestWhilePolling?: boolean;
@@ -74,9 +74,9 @@ export type HttpServiceWebSocketRequestHandlerConfig = {
   onDisconnectRequestEncoding?: HttpRequestBodyEncoding;
 
   onError?: (response: HttpResponse | undefined, request: HttpRequest) => any;
-} & WebSocketRequestHandlerConfigBase;
+} & WebSocketHandlerConfigBase;
 
-export type RedisServiceWebSocketRequestHandlerConfig = {
+export type RedisServiceWebSocketHandlerConfig = {
   type: "redis";
   onRequest?: (
     request: RedisServiceWebSocketRequest
@@ -91,7 +91,7 @@ export type RedisServiceWebSocketRequestHandlerConfig = {
   ) => Promise<WebSocketResponse | void>;
   requestChannel: string;
   numRequestChannels?: number;
-} & WebSocketRequestHandlerConfigBase;
+} & WebSocketHandlerConfigBase;
 
 /*
   WebSocket Requests and Responses
@@ -179,7 +179,7 @@ export type ActiveWebSocketConnection = {
   lastRequest: WebSocketMessageRequest | undefined;
 };
 
-export type IWebSocketRequestHandlerPlugin = {
+export type IWebSocketHandlerPlugin = {
   init: (config: WebSocketServiceAppConfig) => any;
   handleRequest: (
     request: WebSocketMessageRequest,
