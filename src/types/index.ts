@@ -46,7 +46,7 @@ export type AppConfig = {
 
 export type HttpServiceAppConfig = AppConfig & { http: HttpProxyConfig };
 export type WebSocketServiceAppConfig = AppConfig & {
-  http: WebSocketProxyConfig;
+  webSocket: WebSocketProxyConfig;
 };
 
 export type InMemoryStateConfig = {

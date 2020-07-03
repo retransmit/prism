@@ -1,4 +1,8 @@
-import { AppConfig, WebSocketProxyConfig } from "../../types";
+import {
+  AppConfig,
+  WebSocketProxyConfig,
+  WebSocketServiceAppConfig,
+} from "../../types";
 import * as httpPlugin from "./plugins/http";
 import * as redisPlugin from "./plugins/redis";
 import {
@@ -36,9 +40,9 @@ export default async function init(
     [key: string]: WebSocket.Server;
   } = {};
 
-  if (config.webSocket) {
-    httpServer.on("upgrade", makeUpgrade(webSocketServers));
+  httpServer.on("upgrade", makeUpgrade(webSocketServers));
 
+  if (config.webSocket) {
     // Load other plugins
     if (config.webSocket.plugins) {
       for (const pluginName of Object.keys(config.webSocket.plugins)) {
@@ -57,9 +61,9 @@ export default async function init(
       webSocketServers[route] = wss;
       setupWebSocketHandling(wss, route, routeConfig, config.webSocket, config);
     }
-
-    activeConnectionsInit();
   }
+
+  activeConnectionsInit();
 
   return Object.keys(webSocketServers).reduce(
     (acc, route) => acc.concat(webSocketServers[route]),

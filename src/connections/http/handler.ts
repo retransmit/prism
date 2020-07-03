@@ -5,7 +5,6 @@ import { IncomingMessage } from "http";
 import { ServerResponse } from "http";
 import {
   HttpMethods,
-  HttpProxyConfig,
   HttpRequest,
   AppConfig,
   HttpServiceAppConfig,
