@@ -18,7 +18,7 @@ import {
 */
 export type HttpRouteConfig = {
   services: {
-    [key: string]: HttpEndPointConfig;
+    [key: string]: HttpServiceEndPointConfig;
   };
   onRequest?: (
     request: HttpRequest
@@ -114,7 +114,7 @@ export type HttpRouteConfigBase = {
   stage?: number;
 };
 
-export type HttpServiceHttpEndPointConfig = {
+export type NativeHttpServiceEndPoint = {
   type: "http";
   url: UrlList;
   getUrl?: UrlSelector;
@@ -148,7 +148,7 @@ export type HttpServiceHttpEndPointConfig = {
   onError?: (response: HttpResponse | undefined, request: HttpRequest) => any;
 } & HttpRouteConfigBase;
 
-export type RedisServiceHttpEndPointConfig = {
+export type RedisHttpServiceEndPointConfig = {
   type: "redis";
   requestChannel: string;
   numRequestChannels?: number;
@@ -180,9 +180,9 @@ export type RedisServiceHttpEndPointConfig = {
   onError?: (response: string | undefined, request: HttpRequest) => any;
 } & HttpRouteConfigBase;
 
-export type HttpEndPointConfig =
-  | RedisServiceHttpEndPointConfig
-  | HttpServiceHttpEndPointConfig;
+export type HttpServiceEndPointConfig =
+  | RedisHttpServiceEndPointConfig
+  | NativeHttpServiceEndPoint;
 
 export type HttpEndPointPlugin = {
   init: (config: HttpServiceAppConfig) => any;
@@ -194,7 +194,7 @@ export type HttpEndPointPlugin = {
     stage: number | undefined,
     otherResponses: FetchedHttpResponse[],
     services: {
-      [name: string]: HttpEndPointConfig;
+      [name: string]: HttpServiceEndPointConfig;
     },
     config: HttpServiceAppConfig
   ) => Promise<InvokeServiceResult>[];

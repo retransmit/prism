@@ -11,7 +11,7 @@ import responseIsError from "../../../../utils/http/responseIsError";
 import { makeHttpResponse } from "./makeHttpResponse";
 import {
   HttpRouteConfig,
-  HttpServiceHttpEndPointConfig,
+  NativeHttpServiceEndPoint,
 } from "../../../../types/http";
 import { makeGotOptions } from "../../../../utils/http/gotUtil";
 
@@ -43,7 +43,7 @@ export default async function rollback(
 async function doRollback(
   rollbackRequest: HttpRequest,
   request: HttpRequest,
-  serviceConfig: HttpServiceHttpEndPointConfig
+  serviceConfig: NativeHttpServiceEndPoint
 ) {
   const params = request.params;
 

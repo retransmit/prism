@@ -21,7 +21,7 @@ import {
   FetchedHttpResponse,
   InvokeServiceResult,
   HttpEndPointPlugin,
-  HttpEndPointConfig,
+  HttpServiceEndPointConfig,
 } from "../../types/http";
 import applyRateLimiting from "../modules/rateLimiting";
 import { copyHeadersFromContext } from "./copyHeadersFromContext";
@@ -338,7 +338,7 @@ async function handler(
 type StageConfig = {
   stage: number | undefined;
   services: {
-    [name: string]: HttpEndPointConfig;
+    [name: string]: HttpServiceEndPointConfig;
   };
 };
 

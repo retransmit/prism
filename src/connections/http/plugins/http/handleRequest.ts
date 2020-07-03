@@ -10,8 +10,8 @@ import { makeHttpResponse } from "./makeHttpResponse";
 import {
   InvokeServiceResult,
   FetchedHttpResponse,
-  HttpEndPointConfig,
-  HttpServiceHttpEndPointConfig,
+  HttpServiceEndPointConfig,
+  NativeHttpServiceEndPoint,
 } from "../../../../types/http";
 import { makeGotOptions } from "../../../../utils/http/gotUtil";
 import mapBodyAndHeaders from "../../mapBodyAndHeaders";
@@ -28,14 +28,14 @@ export default function handleRequest(
   stage: number | undefined,
   otherResponses: FetchedHttpResponse[],
   services: {
-    [name: string]: HttpEndPointConfig;
+    [name: string]: HttpServiceEndPointConfig;
   },
   config: AppConfig
 ): Promise<InvokeServiceResult>[] {
   return Object.keys(services)
     .map(
       (service) =>
-        [service, services[service]] as [string, HttpEndPointConfig]
+        [service, services[service]] as [string, HttpServiceEndPointConfig]
     )
     .filter(isHttpServiceConfig)
     .map(
@@ -210,7 +210,7 @@ export default function handleRequest(
 }
 
 function isHttpServiceConfig(
-  x: [string, HttpEndPointConfig]
-): x is [string, HttpServiceHttpEndPointConfig] {
+  x: [string, HttpServiceEndPointConfig]
+): x is [string, NativeHttpServiceEndPoint] {
   return x[1].type === "http";
 }

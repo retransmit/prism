@@ -6,8 +6,8 @@ import {
   RedisServiceHttpRequest,
   InvokeServiceResult,
   FetchedHttpResponse,
-  HttpEndPointConfig,
-  RedisServiceHttpEndPointConfig,
+  HttpServiceEndPointConfig,
+  RedisHttpServiceEndPointConfig,
 } from "../../../../types/http";
 import { publish } from "./publish";
 import mapBodyAndHeaders from "../../mapBodyAndHeaders";
@@ -23,7 +23,7 @@ export default function handleRequest(
   stage: number | undefined,
   otherResponses: FetchedHttpResponse[],
   services: {
-    [name: string]: HttpEndPointConfig;
+    [name: string]: HttpServiceEndPointConfig;
   },
   config: AppConfig
 ): Promise<InvokeServiceResult>[] {
@@ -31,7 +31,7 @@ export default function handleRequest(
 
   return Object.keys(services)
     .map(
-      (service) => [service, services[service]] as [string, HttpEndPointConfig]
+      (service) => [service, services[service]] as [string, HttpServiceEndPointConfig]
     )
     .filter(isRedisServiceConfig)
     .map(
@@ -113,7 +113,7 @@ export default function handleRequest(
 }
 
 function isRedisServiceConfig(
-  x: [string, HttpEndPointConfig]
-): x is [string, RedisServiceHttpEndPointConfig] {
+  x: [string, HttpServiceEndPointConfig]
+): x is [string, RedisHttpServiceEndPointConfig] {
   return x[1].type === "redis";
 }

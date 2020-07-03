@@ -4,7 +4,7 @@ import responseIsError from "../../utils/http/responseIsError";
 import {
   FetchedHttpResponse,
   HttpRouteConfig,
-  HttpEndPointConfig,
+  HttpServiceEndPointConfig,
 } from "../../types/http";
 
 export default function mergeResponses(
@@ -62,7 +62,7 @@ export default function mergeResponses(
 function mergeRedirectIntoResponse(
   fetchedResponse: FetchedHttpResponse,
   wrappedFinalResponse: { response: HttpResponse },
-  serviceConfig: HttpEndPointConfig
+  serviceConfig: HttpServiceEndPointConfig
 ): HttpResponse | void {
   // If the response content has already been modified previously,
   // then you cannot redirect. If there's already a pending redirect,
@@ -97,7 +97,7 @@ function mergeRedirectIntoResponse(
 function mergeBodyIntoResponse(
   fetchedResponse: FetchedHttpResponse,
   wrappedFinalResponse: { response: HttpResponse },
-  serviceConfig: HttpEndPointConfig
+  serviceConfig: HttpServiceEndPointConfig
 ): HttpResponse | void {
   // If the response has already been redirected,
   // you can't write on to it.
@@ -129,7 +129,7 @@ function mergeBodyIntoResponse(
 function mergeObjectIntoResponse(
   fetchedResponse: FetchedHttpResponse,
   wrappedFinalResponse: { response: HttpResponse },
-  serviceConfig: HttpEndPointConfig
+  serviceConfig: HttpServiceEndPointConfig
 ): HttpResponse | void {
   // If the fetched response is an object and final response is not object.
   if (
@@ -178,7 +178,7 @@ function mergeObjectIntoResponse(
 function mergeNonObjectIntoResponse(
   fetchedResponse: FetchedHttpResponse,
   wrappedFinalResponse: { response: HttpResponse },
-  serviceConfig: HttpEndPointConfig
+  serviceConfig: HttpServiceEndPointConfig
 ): HttpResponse | void {
   // If the final response is an object,
   // and the fetched response is not

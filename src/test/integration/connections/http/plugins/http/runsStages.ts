@@ -6,7 +6,7 @@ import got from "got";
 import { AppConfig, HttpRequest } from "../../../../../../types";
 import {
   FetchedHttpResponse,
-  HttpServiceHttpEndPointConfig,
+  NativeHttpServiceEndPoint,
 } from "../../../../../../types/http";
 
 export default async function (app: TestAppInstance) {
@@ -39,7 +39,7 @@ export default async function (app: TestAppInstance) {
                       },
                     };
                   },
-                } as HttpServiceHttpEndPointConfig,
+                } as NativeHttpServiceEndPoint,
               },
             },
           },
