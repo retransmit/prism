@@ -33,7 +33,7 @@ export type WebSocketRouteConfig = {
     requestId: string,
     response: WebSocketResponse
   ) => Promise<WebSocketResponse | void>;
-  rateLimiting?: RateLimitingConfig;
+  rateLimiting?: RateLimitingConfig | "none";
 };
 
 /*

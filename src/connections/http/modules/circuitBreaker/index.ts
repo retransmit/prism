@@ -35,12 +35,11 @@ export async function isTripped(
   routeConfig: HttpRouteConfig,
   config: HttpProxyAppConfig
 ): Promise<{ status: number; body: any } | undefined> {
-  const rejectionMessage = "Busy.";
-
   const circuitBreakerConfig =
     routeConfig.circuitBreaker || config.http.circuitBreaker;
 
-  if (circuitBreakerConfig) {
+  if (circuitBreakerConfig && circuitBreakerConfig !== "none") {
+    const rejectionMessage = "Busy.";
     const pluginType = config.state?.type || "memory";
     const trackingList = await plugins[pluginType].getTrackingInfo(
       route,
@@ -69,15 +68,15 @@ export async function updateServiceTrackingInfo(
   const circuitBreakerConfig =
     routeConfig.circuitBreaker || config.http.circuitBreaker;
 
-  const trackingInfo: HttpServiceErrorTrackingInfo = {
-    route,
-    method,
-    status,
-    requestTime,
-    responseTime,
-  };
+  if (circuitBreakerConfig && circuitBreakerConfig !== "none") {
+    const trackingInfo: HttpServiceErrorTrackingInfo = {
+      route,
+      method,
+      status,
+      requestTime,
+      responseTime,
+    };
 
-  if (circuitBreakerConfig) {
     const isFailure =
       (circuitBreakerConfig.isFailure &&
         circuitBreakerConfig.isFailure(trackingInfo)) ||

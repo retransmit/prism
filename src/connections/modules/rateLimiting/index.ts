@@ -38,11 +38,11 @@ export default async function applyRateLimiting(
   proxyConfig: HttpProxyConfig | WebSocketProxyConfig,
   config: AppConfig
 ): Promise<{ status: number; body: any } | undefined> {
-  const rejectionMessage = "Too Many Requests.";
   const rateLimitingConfig =
-    routeConfig.rateLimiting || proxyConfig.rateLimiting;
-
-  if (rateLimitingConfig) {
+  routeConfig.rateLimiting || proxyConfig.rateLimiting;
+  
+  if (rateLimitingConfig && rateLimitingConfig !== "none") {
+    const rejectionMessage = "Too Many Requests.";
     const pluginType = config.state?.type || "memory";
     const trackingList = await plugins[pluginType].getTrackingInfo(
       path,
