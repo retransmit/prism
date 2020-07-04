@@ -18,6 +18,7 @@ export default async function (app: TestAppInstance) {
     instanceId: random(),
     webJobs: {
       cleanupusers: {
+        type: "periodic",
         url: "http://localhost:6666/cleanup",
         interval: 50,
       },

@@ -3,7 +3,6 @@ import {
   ClientTrackingInfo,
   HttpServiceErrorTrackingInfo,
   AppConfig,
-  HttpResponse,
   InMemoryCacheEntry,
 } from "../types";
 
