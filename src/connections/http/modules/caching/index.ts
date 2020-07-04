@@ -40,7 +40,7 @@ export async function getFromCache(
 ): Promise<HttpResponse | undefined> {
   const cacheConfig = routeConfig.caching || config.http.caching;
 
-  if (cacheConfig) {
+  if (cacheConfig && cacheConfig !== "none") {
     const key = reduceRequestToHash(route, method, request, cacheConfig);
     const pluginType = config.state?.type || "memory";
     return await plugins[pluginType].get(key, config.state);
@@ -57,7 +57,7 @@ export async function updateCache(
 ) {
   const cacheConfig = routeConfig.caching || config.http.caching;
 
-  if (cacheConfig) {
+  if (cacheConfig && cacheConfig !== "none") {
     const maxSize = cacheConfig.maxSize || 5000000;
 
     // Check if any of the params are bigger than it should be.

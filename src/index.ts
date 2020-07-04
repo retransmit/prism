@@ -15,7 +15,6 @@ import initHttpHandling from "./connections/http/handler";
 import initWebSocketHandling from "./connections/webSocket";
 
 import { Server } from "http";
-import { readFileSync } from "fs";
 import random from "./utils/random";
 
 import * as webJobs from "./connections/http/webJobs";
@@ -102,12 +101,17 @@ export async function startWithConfiguration(
   let httpServer: HttpServer | HttpsServer;
   if (config.useHttps) {
     const options = {
-      key: readFileSync(config.useHttps.key),
-      cert: readFileSync(config.useHttps.cert),
+      key: config.useHttps.key,
+      cert: config.useHttps.cert,
     };
-    httpServer = httpsCreateServer(options, httpRequestHandler);
+    httpServer = (config.createHttpsServer || httpsCreateServer)(
+      options,
+      httpRequestHandler
+    );
   } else {
-    httpServer = httpCreateServer(httpRequestHandler);
+    httpServer = (config.createHttpServer || httpCreateServer)(
+      httpRequestHandler
+    );
   }
 
   let webSocketServers: WebSocket.Server[] = [];

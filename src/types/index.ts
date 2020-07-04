@@ -6,6 +6,8 @@ import {
   WebSocketResponse,
   WebSocketMessageRequest,
 } from "./webSocket";
+import * as httpModule from "http";
+import * as httpsModule from "https";
 
 export type HttpMethods = "GET" | "POST" | "PUT" | "DELETE" | "PATCH";
 
@@ -34,6 +36,13 @@ export type AppConfig = {
     credentials?: boolean;
   };
   state?: InMemoryStateConfig | RedisStateConfig;
+  createHttpsServer?: (
+    options: httpsModule.ServerOptions,
+    listener: httpModule.RequestListener
+  ) => httpsModule.Server;
+  createHttpServer?: (
+    listener: httpModule.RequestListener
+  ) => httpModule.Server;
 };
 
 export type HttpProxyAppConfig = AppConfig & { http: HttpProxyConfig };
@@ -236,6 +245,7 @@ export type HttpServiceCacheConfig = {
   expiry: number;
   maxSize?: number;
 };
+
 export type Algorithm =
   | "HS256"
   | "HS384"
@@ -281,7 +291,7 @@ export type HttpServiceJwtAuthentication = {
   };
 };
 
-export type HttpServiceAuthentication = HttpServiceJwtAuthentication | "none";
+export type HttpServiceAuthentication = HttpServiceJwtAuthentication;
 
 export type Notification =
   | {

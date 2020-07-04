@@ -17,7 +17,7 @@ export default async function authenticate(
     : undefined;
 
   if (!jwtString) {
-    return unauthorizedResponse(authConfig, "Missing JWT.", request);
+    throw new Error("Missing JWT.");
   }
 
   let jwt: string | object;
@@ -32,11 +32,7 @@ export default async function authenticate(
     if (authConfig.verify) {
       const verificationResult = await authConfig.verify(jwt, request);
       if (!verificationResult) {
-        return unauthorizedResponse(
-          authConfig,
-          "Custom verification returned false.",
-          request
-        );
+        throw new Error("Custom verification returned false.");
       }
     }
   } catch (ex) {

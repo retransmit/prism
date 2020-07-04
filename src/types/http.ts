@@ -39,8 +39,8 @@ export type HttpRouteConfig = {
   onError?: (responses: FetchedHttpResponse[], request: HttpRequest) => any;
   rateLimiting?: RateLimitingConfig;
   circuitBreaker?: HttpServiceCircuitBreakerConfig;
-  caching?: HttpServiceCacheConfig;
-  authentication?: HttpServiceAuthentication;
+  caching?: HttpServiceCacheConfig | "none"; 
+  authentication?: HttpServiceAuthentication | "none";
 };
 
 /*

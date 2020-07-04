@@ -7,7 +7,7 @@ import { AppConfig } from "../../../../types";
 
 export default async function (app: TestAppInstance) {
   const jwt =
-    "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6Ikplc3dpbiIsImFkbWluIjp0cnVlLCJqdGkiOiI2MjZkY2NhZC03NzIwLTQ0NjEtOGVlNC0zZTU2YmM0NjQxYjMiLCJpYXQiOjE1OTM4MzI1ODYsImV4cCI6MTU5MzgzNjIxMX0.RL4MyqIyqse9e3h0I5jMF_SywqS3Z2olgNlkF1om3Bw";
+    "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJPbmxpbmUgSldUIEJ1aWxkZXIiLCJpYXQiOjE1OTM4NDYzNTEsImV4cCI6MTgxNDY4NDc1MSwiYXVkIjoid3d3LmV4YW1wbGUuY29tIiwic3ViIjoianJvY2tldEBleGFtcGxlLmNvbSIsIkdpdmVuTmFtZSI6IkpvaG5ueSIsIlN1cm5hbWUiOiJSb2NrZXQiLCJFbWFpbCI6Impyb2NrZXRAZXhhbXBsZS5jb20iLCJSb2xlIjpbIk1hbmFnZXIiLCJQcm9qZWN0IEFkbWluaXN0cmF0b3IiXX0._Fi5C7CUwSqOImUO3jIN-hMpKqcDmpdOl60lTa4aHMo";
 
   const invalidJwt =
     "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c";
