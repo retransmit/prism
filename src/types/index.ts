@@ -257,7 +257,7 @@ export type HttpServiceJwtAuthentication = {
   jwtHeaderField?: string;
   getJwt?: (request: HttpRequest) => string;
   jwtBodyField?: string;
-  verify?: (jwt: string | object) => Promise<boolean>;
+  verify?: (jwt: string | object, request: HttpRequest) => Promise<boolean>;
   errorStatus?: number;
   errorResponse?: any;
   verifyOptions?: {

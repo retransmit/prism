@@ -28,7 +28,7 @@ export default async function authenticate(
     );
 
     if (authConfig.verify) {
-      const verificationResult = await authConfig.verify(jwt);
+      const verificationResult = await authConfig.verify(jwt, request);
       if (!verificationResult) {
         return unauthorizedResponse(authConfig);
       }
