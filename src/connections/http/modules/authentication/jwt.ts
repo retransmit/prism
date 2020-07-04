@@ -17,11 +17,13 @@ export default async function authenticate(
     : undefined;
 
   if (!jwtString) {
-    return unauthorizedResponse(authConfig);
+    return unauthorizedResponse(authConfig, "Missing JWT.", request);
   }
 
+  let jwt: string | object;
+
   try {
-    const jwt = jsonwebtoken.verify(
+    jwt = jsonwebtoken.verify(
       jwtString,
       authConfig.key,
       authConfig.verifyOptions
@@ -30,17 +32,28 @@ export default async function authenticate(
     if (authConfig.verify) {
       const verificationResult = await authConfig.verify(jwt, request);
       if (!verificationResult) {
-        return unauthorizedResponse(authConfig);
+        return unauthorizedResponse(
+          authConfig,
+          "Custom verification returned false.",
+          request
+        );
       }
     }
   } catch (ex) {
-    return unauthorizedResponse(authConfig);
+    return unauthorizedResponse(authConfig, ex, request);
   }
 }
 
-function unauthorizedResponse(authConfig: HttpServiceJwtAuthentication) {
+function unauthorizedResponse(
+  authConfig: HttpServiceJwtAuthentication,
+  error: any,
+  request: HttpRequest
+) {
+  if (authConfig.onError) {
+    authConfig.onError(error, request);
+  }
   return {
     status: authConfig.errorStatus || 401,
-    body: authConfig.errorResponse || "Unauthorized.",
+    body: authConfig.errorBody || "Unauthorized.",
   };
 }

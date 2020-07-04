@@ -7,11 +7,14 @@ import { AppConfig } from "../../../../types";
 
 export default async function (app: TestAppInstance) {
   const jwt =
-    "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWUsImp0aSI6IjNjZDk2MGFmLTQyYjUtNDUxMC05MzZiLTljOWFkOWFlYWMxNiIsImlhdCI6MTU5Mzc4NTk2MywiZXhwIjoxNTkzNzg5NTYzfQ.mqMTAHoSkswODDsChy8k8368ZC_-UQr3FoNck_IyGUo";
+    "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6Ikplc3dpbiIsImFkbWluIjp0cnVlLCJqdGkiOiI2MjZkY2NhZC03NzIwLTQ0NjEtOGVlNC0zZTU2YmM0NjQxYjMiLCJpYXQiOjE1OTM4MzI1ODYsImV4cCI6MTU5MzgzNjIxMX0.RL4MyqIyqse9e3h0I5jMF_SywqS3Z2olgNlkF1om3Bw";
+
+  const invalidJwt =
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c";
 
   const tests: [string, boolean, string][] = [
     ["authenticates with valid jwt", true, jwt],
-    ["fails authentication with invalid jwt", false, "incorrect_jwt"],
+    ["fails authentication with invalid jwt", false, invalidJwt],
   ];
 
   for (const [name, isValid, jwt] of tests) {

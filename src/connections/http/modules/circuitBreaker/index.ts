@@ -51,7 +51,7 @@ export async function isTripped(
     if (mustReject(trackingList || [], circuitBreakerConfig)) {
       return {
         status: circuitBreakerConfig.errorStatus || 503,
-        body: circuitBreakerConfig.errorResponse || rejectionMessage,
+        body: circuitBreakerConfig.errorBody || rejectionMessage,
       };
     }
   }

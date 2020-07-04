@@ -61,7 +61,7 @@ export type RateLimitingConfig = {
   maxRequests: number;
   duration: number;
   errorStatus?: number;
-  errorResponse?: any;
+  errorBody?: any;
 };
 
 export type HttpServiceCircuitBreakerConfig = {
@@ -69,7 +69,7 @@ export type HttpServiceCircuitBreakerConfig = {
   duration: number;
   isFailure?: (response: HttpServiceErrorTrackingInfo) => boolean;
   errorStatus?: number;
-  errorResponse?: any;
+  errorBody?: any;
 };
 
 export type HttpProxyConfig = {
@@ -258,8 +258,9 @@ export type HttpServiceJwtAuthentication = {
   getJwt?: (request: HttpRequest) => string;
   jwtBodyField?: string;
   verify?: (jwt: string | object, request: HttpRequest) => Promise<boolean>;
+  onError?: (error: any, request: HttpRequest) => any;
   errorStatus?: number;
-  errorResponse?: any;
+  errorBody?: any;
   verifyOptions?: {
     algorithms?: Algorithm[];
     audience?: string; // | RegExp | Array<string | RegExp>;

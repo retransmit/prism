@@ -55,7 +55,7 @@ export default async function applyRateLimiting(
     if (mustReject(trackingList || [], rateLimitingConfig)) {
       return {
         status: rateLimitingConfig.errorStatus || 429,
-        body: rateLimitingConfig.errorResponse || rejectionMessage,
+        body: rateLimitingConfig.errorBody || rejectionMessage,
       };
     } else {
       const trackingInfo: ClientTrackingInfo = {
