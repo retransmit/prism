@@ -1,4 +1,4 @@
-import { HttpRequest } from "../../types";
+import { HttpRequest, BodyObject } from "../../types";
 import { HttpRouteConfigBase } from "../../types/http";
 
 export default function mapBodyAndHeaders(
@@ -15,7 +15,7 @@ export default function mapBodyAndHeaders(
     body: mapObject(
       includedFields,
       excludedFields || [],
-      request.body as object
+      request.body as BodyObject | undefined
     ),
     headers: request.headers
       ? mapObject(includedHeaders, excludedHeaders || [], request.headers)
@@ -30,21 +30,21 @@ type Mapping = {
 function mapObject(
   included: Mapping | undefined,
   excluded: string[],
-  defaultValue: { [field: string]: any } | undefined
+  requestProp: BodyObject | undefined
 ) {
-  if (defaultValue === undefined) return undefined;
+  if (requestProp === undefined) return undefined;
 
   const result: { [field: string]: any } = {};
 
   const includedFields = included !== undefined ? Object.keys(included) : [];
 
-  for (const field of Object.keys(defaultValue)) {
+  for (const field of Object.keys(requestProp)) {
     if (
       !excluded.includes(field) &&
       (included === undefined || includedFields.includes(field))
     ) {
       const fieldName = included === undefined ? field : included[field];
-      result[fieldName] = defaultValue[field];
+      result[fieldName] = requestProp[field];
     }
   }
 

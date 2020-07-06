@@ -48,7 +48,7 @@ async function handler(
   if (isHttpServiceAppConfig(config)) {
     const requestTime = Date.now();
 
-    const request = makeHttpRequestFromContext(ctx);
+    const request = makeHttpRequestFromContext(ctx, routeConfig);
 
     const requestId = randomId(32);
 
@@ -201,7 +201,7 @@ async function handler(
           );
         })();
 
-        const validResponses = await invokeRequestHandling(
+        const validResponses = await handleRequestsWithPlugins(
           requestId,
           modifiedRequest,
           route,
@@ -212,10 +212,7 @@ async function handler(
 
         const fetchedResponses =
           (routeConfig.mergeResponses &&
-            (await routeConfig.mergeResponses(
-              validResponses,
-              request
-            ))) ||
+            (await routeConfig.mergeResponses(validResponses, request))) ||
           validResponses;
 
         let response = mergeResponses(fetchedResponses, config);
@@ -239,8 +236,7 @@ async function handler(
         // Are there custom handlers for the response?
         const onResponse = routeConfig.onResponse || config.http.onResponse;
         const responseToSend =
-          (onResponse && (await onResponse(response, request))) ||
-          response;
+          (onResponse && (await onResponse(response, request))) || response;
 
         sendResponse(
           ctx,
@@ -264,7 +260,7 @@ type StageConfig = {
   };
 };
 
-async function invokeRequestHandling(
+async function handleRequestsWithPlugins(
   requestId: string,
   modifiedRequest: HttpRequest,
   route: string,
@@ -312,14 +308,20 @@ async function invokeRequestHandling(
   return responses;
 }
 
-function makeHttpRequestFromContext(ctx: IRouterContext): HttpRequest {
+function makeHttpRequestFromContext(
+  ctx: IRouterContext,
+  routeConfig: HttpRouteConfig
+): HttpRequest {
   return {
     path: ctx.path,
     method: ctx.method as HttpMethods,
     params: ctx.params,
     query: ctx.query,
     body:
-      ctx.method === "GET" || ctx.method === "HEAD" || ctx.method === "DELETE"
+      routeConfig.requestBodyIsStream ||
+      ctx.method === "GET" ||
+      ctx.method === "HEAD" ||
+      ctx.method === "DELETE"
         ? undefined
         : ctx.request.body,
     headers: copyHeadersFromContext(ctx.headers),

@@ -3,11 +3,8 @@ import { startBackends, getResponse } from "../../../../../utils/http";
 import { TestAppInstance } from "../../../../../test";
 import random from "../../../../../../utils/random";
 import got from "got";
-import { AppConfig, HttpRequest, BodyObject } from "../../../../../../types";
-import {
-  FetchedHttpResponse,
-  NativeHttpServiceEndPointConfig,
-} from "../../../../../../types/http";
+import { AppConfig, BodyObject } from "../../../../../../types";
+import { NativeHttpServiceEndPointConfig } from "../../../../../../types/http";
 
 export default async function (app: TestAppInstance) {
   it(`runs stages`, async () => {
