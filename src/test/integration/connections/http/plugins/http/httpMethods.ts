@@ -72,7 +72,7 @@ export default async function (app: TestAppInstance) {
         method,
         retry: 0,
         json:
-          method !== "GET" && method !== "DELETE"
+          method !== "GET" && method !== "DELETE" && method !== "HEAD"
             ? { hello: "world" }
             : undefined,
       });

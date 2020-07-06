@@ -68,7 +68,7 @@ export default async function (app: TestAppInstance) {
       // Make the http request.
       const { port } = app.servers.httpServer.address() as any;
       const promisedServerRespose =
-        method === "GET" || method === "DELETE"
+        method === "GET" || method === "DELETE" || method === "HEAD"
           ? got(`http://localhost:${port}/users`, { method, retry: 0 })
           : got(`http://localhost:${port}/users`, {
               method,

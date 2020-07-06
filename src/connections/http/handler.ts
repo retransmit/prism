@@ -96,6 +96,10 @@ export default async function init(config: AppConfig) {
       if (routeConfig.PATCH) {
         router.patch(route, createHandler(route, "PATCH", config));
       }
+
+      if (routeConfig.ALL) {
+        router.all(route, createHandler(route, "ALL", config));
+      }
     }
 
     koa.use(router.routes());
@@ -112,7 +116,11 @@ export default async function init(config: AppConfig) {
   };
 }
 
-function createHandler(route: string, method: HttpMethods, config: AppConfig) {
+function createHandler(
+  route: string,
+  method: HttpMethods | "ALL",
+  config: AppConfig
+) {
   return async function httpRequestHandler(ctx: IRouterContext) {
     return await handler(ctx, route, method, config);
   };
@@ -121,7 +129,7 @@ function createHandler(route: string, method: HttpMethods, config: AppConfig) {
 async function handler(
   ctx: IRouterContext,
   route: string,
-  method: HttpMethods,
+  method: HttpMethods | "ALL",
   config: AppConfig
 ) {
   if (isHttpServiceAppConfig(config)) {
@@ -137,11 +145,14 @@ async function handler(
       routeConfig?.authentication || config.http.authentication;
 
     const authResponse = await authenticate(originalRequest, authConfig);
+
+    const requestMethod = ctx.method as HttpMethods;
+
     if (authResponse) {
       sendResponse(
         ctx,
         route,
-        method,
+        requestMethod,
         requestTime,
         originalRequest,
         authResponse,
@@ -154,7 +165,7 @@ async function handler(
     if (routeConfig) {
       const entryFromCache = await getFromCache(
         route,
-        method,
+        requestMethod,
         originalRequest,
         routeConfig,
         config
@@ -164,7 +175,7 @@ async function handler(
         sendResponse(
           ctx,
           route,
-          method,
+          requestMethod,
           requestTime,
           originalRequest,
           entryFromCache,
@@ -177,7 +188,7 @@ async function handler(
 
       const rateLimitedResponse = await applyRateLimiting(
         ctx.path,
-        method,
+        requestMethod,
         ctx.ip,
         routeConfig,
         config.http,
@@ -192,7 +203,7 @@ async function handler(
         sendResponse(
           ctx,
           route,
-          method,
+          requestMethod,
           requestTime,
           originalRequest,
           response,
@@ -204,7 +215,7 @@ async function handler(
 
       const circuitBreakerResponse = await isTripped(
         route,
-        method,
+        requestMethod,
         routeConfig,
         config
       );
@@ -217,7 +228,7 @@ async function handler(
         sendResponse(
           ctx,
           route,
-          method,
+          requestMethod,
           requestTime,
           originalRequest,
           response,
@@ -240,7 +251,7 @@ async function handler(
       sendResponse(
         ctx,
         route,
-        method,
+        requestMethod,
         requestTime,
         originalRequest,
         modResult.response,
@@ -283,7 +294,7 @@ async function handler(
           requestId,
           modifiedRequest,
           route,
-          method,
+          requestMethod,
           stages,
           config
         );
@@ -308,7 +319,7 @@ async function handler(
               requestId,
               modifiedRequest,
               route,
-              method,
+              requestMethod,
               config
             );
           }
@@ -323,7 +334,7 @@ async function handler(
         sendResponse(
           ctx,
           route,
-          method,
+          requestMethod,
           requestTime,
           originalRequest,
           responseToSend,
@@ -402,7 +413,10 @@ function makeHttpRequestFromContext(ctx: IRouterContext): HttpRequest {
     method: ctx.method as HttpMethods,
     params: ctx.params,
     query: ctx.query,
-    body: ctx.method === "GET" ? undefined : ctx.request.body,
+    body:
+      ctx.method === "GET" || ctx.method === "HEAD" || ctx.method === "DELETE"
+        ? undefined
+        : ctx.request.body,
     headers: copyHeadersFromContext(ctx.headers),
     remoteAddress: ctx.ip, // This handles 'X-Forwarded-For' etc.
     remotePort: ctx.req.socket.remotePort,

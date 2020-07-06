@@ -9,7 +9,7 @@ import {
 import * as httpModule from "http";
 import * as httpsModule from "https";
 
-export type HttpMethods = "GET" | "POST" | "PUT" | "DELETE" | "PATCH";
+export type HttpMethods = "GET" | "POST" | "PUT" | "DELETE" | "PATCH" | "HEAD";
 
 /*
   Application Config
@@ -84,7 +84,7 @@ export type HttpServiceCircuitBreakerConfig = {
 export type HttpProxyConfig = {
   routes: {
     [key: string]: {
-      [key in HttpMethods]?: HttpRouteConfig;
+      [key in HttpMethods | "ALL"]?: HttpRouteConfig;
     };
   };
   redis?: {

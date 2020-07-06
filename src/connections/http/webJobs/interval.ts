@@ -20,7 +20,7 @@ async function runWebJob(name: string, job: PeriodicWebJob) {
   const method = job.method || "GET";
 
   const options =
-    method === "GET" || method === "DELETE"
+    method === "GET" || method === "DELETE" || method === "HEAD"
       ? {
           method,
           retry: 0,
