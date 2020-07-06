@@ -11,13 +11,14 @@ import WebSocket from "ws";
 import * as applicationState from "./state";
 import { AppConfig } from "./types";
 
-import initHttpHandling from "./connections/http/handler";
+import initHttpHandler from "./connections/http";
 import initWebSocketHandling from "./connections/webSocket";
 
 import { Server } from "http";
 import random from "./utils/random";
 
 import * as webJobs from "./connections/http/webJobs";
+import initHttpHandling from "./connections/http";
 
 const ONE_MINUTE = 60 * 1000;
 const TWO_MINUTES = 2 * ONE_MINUTE;

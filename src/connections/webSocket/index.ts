@@ -9,7 +9,7 @@ import {
   WebSocketRouteConfig,
 } from "../../types/webSocket";
 import WebSocket from "ws";
-import makeHandler from "./handler";
+import createHandler from "./createHandler";
 import { IncomingMessage } from "http";
 import { Socket } from "net";
 import { init as activeConnectionsInit } from "./activeConnections";
@@ -76,7 +76,7 @@ function setupWebSocketHandling(
   routeConfig: WebSocketRouteConfig,
   config: WebSocketProxyAppConfig
 ) {
-  const handler = makeHandler(plugins);
+  const handler = createHandler(plugins);
   wss.on("connection", handler(route, routeConfig, config));
 
   const interval = setInterval(function ping() {

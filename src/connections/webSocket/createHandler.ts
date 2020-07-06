@@ -13,7 +13,7 @@ import { PluginList, WebSocketProxyAppConfig } from "../../types";
 import { saveLastRequest } from "./plugins/http/poll";
 import applyRateLimiting from "../modules/rateLimiting";
 
-export default function makeHandler(plugins: {
+export default function createHandler(plugins: {
   [name: string]: WebSocketServicePlugin;
 }) {
   return function onConnection(
