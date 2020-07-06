@@ -28,7 +28,7 @@ export async function set(
   key: string,
   response: HttpResponse,
   stateConfig: RedisStateConfig,
-  cacheConfig: HttpServiceCacheConfig,
+  cacheConfig: HttpServiceCacheConfig
 ) {
   const expiry = cacheConfig.expiry || ONE_MINUTE;
   const client = createClient(stateConfig?.options);
@@ -41,9 +41,9 @@ function tooBig(maxSize: number, response: HttpResponse) {
     responseProp !== undefined
       ? Object.keys(responseProp).some(
           (x) =>
-            (typeof responseProp[x] !== "string"
-              ? JSON.stringify(responseProp[x])
-              : x
+            (typeof responseProp === "string"
+              ? x
+              : JSON.stringify(responseProp[x])
             ).length > maxSize
         )
       : false;

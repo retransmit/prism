@@ -1,4 +1,4 @@
-import { HttpResponse, HttpProxyAppConfig } from "../../types";
+import { HttpResponse, HttpProxyAppConfig, BodyObject } from "../../types";
 import responseIsError from "../../utils/http/responseIsError";
 import {
   FetchedHttpResponse,
@@ -168,7 +168,7 @@ function mergeObjectIntoResponse(
         }
       : {
           ...wrappedFinalResponse.response.body,
-          ...fetchedResponse.response.body,
+          ...fetchedResponse.response.body as BodyObject,
         };
   }
   fetchedResponse.response.body;

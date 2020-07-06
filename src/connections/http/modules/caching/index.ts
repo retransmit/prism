@@ -3,7 +3,7 @@ import {
   HttpRequest,
   HttpServiceCacheConfig,
   HttpResponse,
-  HttpProxyAppConfig
+  HttpProxyAppConfig,
 } from "../../../../types";
 import {
   HttpRouteConfig,
@@ -118,9 +118,9 @@ function tooBig(maxSize: number, response: HttpResponse) {
     responseProp !== undefined
       ? Object.keys(responseProp).some(
           (x) =>
-            (typeof responseProp[x] !== "string"
-              ? JSON.stringify(responseProp[x])
-              : x
+            (typeof responseProp === "string"
+              ? x
+              : JSON.stringify(responseProp[x])
             ).length > maxSize
         )
       : false;

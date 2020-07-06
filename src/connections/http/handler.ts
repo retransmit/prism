@@ -22,6 +22,7 @@ import {
   InvokeHttpServiceResult,
   HttpServicePlugin,
   HttpServiceEndPointConfig,
+  HttpRouteConfig,
 } from "../../types/http";
 import applyRateLimiting from "../modules/rateLimiting";
 import { copyHeadersFromContext } from "./copyHeadersFromContext";
@@ -58,8 +59,6 @@ export default async function init(config: AppConfig) {
     koa.use(cors(config.cors));
   }
 
-  koa.use(bodyParser());
-
   if (isHttpServiceAppConfig(config)) {
     // Load other plugins.
     if (config.http.plugins) {
@@ -78,27 +77,39 @@ export default async function init(config: AppConfig) {
       const routeConfig = config.http.routes[route];
 
       if (routeConfig.GET) {
-        router.get(route, createHandler(route, "GET", config));
+        router.get(route, createHandler(route, routeConfig.GET, config));
       }
 
       if (routeConfig.POST) {
-        router.post(route, createHandler(route, "POST", config));
+        router.post(
+          route,
+          bodyParser(),
+          createHandler(route, routeConfig.POST, config)
+        );
       }
 
       if (routeConfig.PUT) {
-        router.put(route, createHandler(route, "PUT", config));
+        router.put(
+          route,
+          bodyParser(),
+          createHandler(route, routeConfig.PUT, config)
+        );
       }
 
       if (routeConfig.DELETE) {
-        router.del(route, createHandler(route, "DELETE", config));
+        router.del(route, createHandler(route, routeConfig.DELETE, config));
       }
 
       if (routeConfig.PATCH) {
-        router.patch(route, createHandler(route, "PATCH", config));
+        router.patch(
+          route,
+          bodyParser(),
+          createHandler(route, routeConfig.PATCH, config)
+        );
       }
 
       if (routeConfig.ALL) {
-        router.all(route, createHandler(route, "ALL", config));
+        router.all(route, createHandler(route, routeConfig.ALL, config));
       }
     }
 
@@ -118,18 +129,18 @@ export default async function init(config: AppConfig) {
 
 function createHandler(
   route: string,
-  method: HttpMethods | "ALL",
+  routeConfig: HttpRouteConfig,
   config: AppConfig
 ) {
   return async function httpRequestHandler(ctx: IRouterContext) {
-    return await handler(ctx, route, method, config);
+    return await handler(ctx, route, routeConfig, config);
   };
 }
 
 async function handler(
   ctx: IRouterContext,
   route: string,
-  method: HttpMethods | "ALL",
+  routeConfig: HttpRouteConfig,
   config: AppConfig
 ) {
   if (isHttpServiceAppConfig(config)) {
@@ -138,8 +149,6 @@ async function handler(
     const originalRequest = makeHttpRequestFromContext(ctx);
 
     const requestId = randomId(32);
-
-    const routeConfig = config.http.routes[route][method];
 
     const authConfig =
       routeConfig?.authentication || config.http.authentication;

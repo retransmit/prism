@@ -34,7 +34,8 @@ export default async function (app: TestAppInstance) {
                         ...request,
                         body: {
                           ...(request.body as BodyObject),
-                          userid: responses[0].response.body.userid,
+                          userid: (responses[0].response.body as BodyObject)
+                            .userid,
                         },
                       },
                     };

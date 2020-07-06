@@ -8,6 +8,7 @@ import {
 } from "./webSocket";
 import * as httpModule from "http";
 import * as httpsModule from "https";
+import { IncomingMessage } from "http";
 
 export type HttpMethods = "GET" | "POST" | "PUT" | "DELETE" | "PATCH" | "HEAD";
 
@@ -87,6 +88,10 @@ export type HttpProxyConfig = {
       [key in HttpMethods | "ALL"]?: HttpRouteConfig;
     };
   };
+  httpStream?: {
+    requestBodyIsStream: boolean;
+    responseBodyIsStream: boolean;
+  };
   redis?: {
     responseChannel: string;
     cleanupInterval?: number;
@@ -98,10 +103,34 @@ export type HttpProxyConfig = {
     | { handled: false; request: HttpRequest }
     | void
   >;
+  onStreamRequest?: (
+    request: HttpRequest
+  ) => Promise<
+    | { handled: true; useStreamForResponse: false; response: HttpResponse }
+    | {
+        handled: true;
+        useStreamForResponse: true;
+        response: HttpStreamResponse;
+      }
+    | { handled: false; useStreamForRequest: false; request: HttpRequest }
+    | { handled: false; useStreamForRequest: true; request: HttpStreamRequest }
+    | void
+  >;
   onResponse?: (
     response: HttpResponse,
     request: HttpRequest
   ) => Promise<HttpResponse>;
+  onStreamResponse?:
+    | ((
+        useStreamForResponse: false,
+        response: HttpResponse,
+        request: HttpRequest | HttpStreamRequest
+      ) => Promise<HttpResponse>)
+    | ((
+        useStreamForResponse: true,
+        response: HttpResponse,
+        request: HttpRequest | HttpStreamRequest
+      ) => Promise<HttpResponse>);
   genericErrors?: boolean;
   onError?: (responses: FetchedHttpResponse[], request: HttpRequest) => any;
   plugins?: {
@@ -179,7 +208,7 @@ export type BodyObject = {
   [field: string]: any;
 };
 
-export type HttpRequest = {
+export type HttpRequestBase = {
   path: string;
   method: HttpMethods;
   params?: {
@@ -188,7 +217,7 @@ export type HttpRequest = {
   query?: {
     [key: string]: string;
   };
-  body?: string | Buffer | ReadableStream | BodyObject | Array<any> | undefined;
+  body?: string | Buffer | BodyObject | Array<any> | undefined;
   headers?: {
     [key: string]: string;
   };
@@ -196,15 +225,30 @@ export type HttpRequest = {
   remotePort: number | undefined;
 };
 
+export type HttpRequest = {
+  body?: string | Buffer | BodyObject | Array<any> | undefined;
+} & HttpRequestBase;
 
-export type HttpResponse = {
+export type HttpStreamRequest = {
+  req: IncomingMessage;
+} & HttpRequestBase;
+
+export type HttpResponseBase = {
   status?: number;
   redirect?: string;
   cookies?: HttpCookie[];
   headers?: IncomingHttpHeaders;
-  body?: any;
+  body?: string | Buffer | BodyObject | Array<any> | undefined;
   contentType?: string;
 };
+
+export type HttpResponse = {
+  body?: string | Buffer | BodyObject | Array<any> | undefined;
+} & HttpResponseBase;
+
+export type HttpStreamResponse = {
+  body?: WritableStream;
+} & HttpResponseBase;
 
 export type HttpCookie = {
   name: string;
@@ -222,7 +266,6 @@ export type HttpRequestBodyEncoding =
   | "text/plain"
   | "application/x-www-form-urlencoded"
   | "application/json";
-
 
 export type UrlList = string | string[];
 export type UrlSelector = (urlList: UrlList) => Promise<UrlList>;
