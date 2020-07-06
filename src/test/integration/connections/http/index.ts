@@ -1,6 +1,9 @@
 import "mocha";
 import "should";
 
+import handlesWildcardRotues from "./routing/wildcardRoutes";
+import handlesParams from "./routing/params";
+
 import httpHttpMethods from "./plugins/http/httpMethods";
 import httpMergeResults from "./plugins/http/mergeResults";
 import httpDontMergeIgnored from "./plugins/http/dontMergeIgnored";
@@ -35,6 +38,10 @@ import { TestAppInstance } from "../../../test";
 
 export default function run(app: TestAppInstance) {
   describe("Http connections (integration)", () => {
+    describe("routing", () => {
+      handlesParams(app);
+      handlesWildcardRotues(app);
+    });
     describe("http", () => {
       httpDontMergeIgnored(app);
       httpHttpMethods(app);
