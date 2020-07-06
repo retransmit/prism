@@ -1,5 +1,5 @@
 import Koa = require("koa");
-import bodyParser = require("koa-bodyparser");
+import bodyParser = require("koa-body");
 import Router, { IRouterContext } from "koa-router";
 import { IncomingMessage } from "http";
 import { ServerResponse } from "http";

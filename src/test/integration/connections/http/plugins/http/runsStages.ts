@@ -3,7 +3,7 @@ import { startBackends, getResponse } from "../../../../../utils/http";
 import { TestAppInstance } from "../../../../../test";
 import random from "../../../../../../utils/random";
 import got from "got";
-import { AppConfig, HttpRequest } from "../../../../../../types";
+import { AppConfig, HttpRequest, BodyObject } from "../../../../../../types";
 import {
   FetchedHttpResponse,
   NativeHttpServiceEndPointConfig,
@@ -33,7 +33,7 @@ export default async function (app: TestAppInstance) {
                       request: {
                         ...request,
                         body: {
-                          ...request.body,
+                          ...(request.body as BodyObject),
                           userid: responses[0].response.body.userid,
                         },
                       },

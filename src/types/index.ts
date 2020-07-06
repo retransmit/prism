@@ -175,6 +175,10 @@ export type WebJob = PeriodicWebJob | CronWebJob;
 /*
   Http Requests and Responses
 */
+export type BodyObject = {
+  [field: string]: any;
+};
+
 export type HttpRequest = {
   path: string;
   method: HttpMethods;
@@ -184,13 +188,14 @@ export type HttpRequest = {
   query?: {
     [key: string]: string;
   };
-  body?: any;
+  body?: string | Buffer | ReadableStream | BodyObject | Array<any> | undefined;
   headers?: {
     [key: string]: string;
   };
   remoteAddress: string | undefined;
   remotePort: number | undefined;
 };
+
 
 export type HttpResponse = {
   status?: number;
@@ -217,6 +222,7 @@ export type HttpRequestBodyEncoding =
   | "text/plain"
   | "application/x-www-form-urlencoded"
   | "application/json";
+
 
 export type UrlList = string | string[];
 export type UrlSelector = (urlList: UrlList) => Promise<UrlList>;

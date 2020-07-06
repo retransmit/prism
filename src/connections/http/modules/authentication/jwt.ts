@@ -1,5 +1,9 @@
 import jsonwebtoken = require("jsonwebtoken");
-import { HttpServiceJwtAuthentication, HttpRequest } from "../../../../types";
+import {
+  HttpServiceJwtAuthentication,
+  HttpRequest,
+  BodyObject,
+} from "../../../../types";
 
 export default async function authenticate(
   request: HttpRequest,
@@ -10,7 +14,7 @@ export default async function authenticate(
     : authConfig.jwtHeaderField
     ? request.headers?.[authConfig.jwtHeaderField]
     : authConfig.jwtBodyField
-    ? request.body?.[authConfig.jwtBodyField]
+    ? (request.body as BodyObject)?.[authConfig.jwtBodyField]
     : request.headers?.["authorization"] &&
       request.headers?.["authorization"].startsWith("Bearer ")
     ? request.headers?.["authorization"].split(" ")[1]

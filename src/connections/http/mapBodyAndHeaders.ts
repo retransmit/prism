@@ -12,7 +12,11 @@ export default function mapBodyAndHeaders(
 
   return {
     ...request,
-    body: mapObject(includedFields, excludedFields || [], request.body),
+    body: mapObject(
+      includedFields,
+      excludedFields || [],
+      request.body as object
+    ),
     headers: request.headers
       ? mapObject(includedHeaders, excludedHeaders || [], request.headers)
       : undefined,
