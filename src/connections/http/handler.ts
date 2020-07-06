@@ -74,42 +74,77 @@ export default async function init(config: AppConfig) {
     const router = new Router();
 
     for (const route of Object.keys(config.http.routes)) {
-      const routeConfig = config.http.routes[route];
+      const methodConfig = config.http.routes[route];
 
-      if (routeConfig.GET) {
-        router.get(route, createHandler(route, routeConfig.GET, config));
+      for (const method of Object.keys(methodConfig)) {
+        const serviceConfig = methodConfig[method as HttpMethods];
+        if (
+          serviceConfig?.requestBodyIsStream ||
+          serviceConfig?.requestBodyIsStream
+        ) {
+          if (Object.keys(serviceConfig.services).length > 1) {
+            throw new Error(
+              `The request or response for the route ${method} ${route} is defined as a stream but there are more than one services defined. This is not supported for now.`
+            );
+          }
+        }
       }
 
-      if (routeConfig.POST) {
-        router.post(
-          route,
-          bodyParser(),
-          createHandler(route, routeConfig.POST, config)
-        );
+      if (methodConfig.GET) {
+        router.get(route, createHandler(route, methodConfig.GET, config));
       }
 
-      if (routeConfig.PUT) {
-        router.put(
-          route,
-          bodyParser(),
-          createHandler(route, routeConfig.PUT, config)
-        );
+      if (methodConfig.POST) {
+        if (
+          methodConfig.POST.requestBodyIsStream ||
+          methodConfig.POST.responseBodyIsStream
+        ) {
+          router.post(route, createHandler(route, methodConfig.POST, config));
+        } else {
+          router.post(
+            route,
+            bodyParser(),
+            createHandler(route, methodConfig.POST, config)
+          );
+        }
       }
 
-      if (routeConfig.DELETE) {
-        router.del(route, createHandler(route, routeConfig.DELETE, config));
+      if (methodConfig.PUT) {
+        if (
+          methodConfig.PUT.requestBodyIsStream ||
+          methodConfig.PUT.responseBodyIsStream
+        ) {
+          router.put(route, createHandler(route, methodConfig.PUT, config));
+        } else {
+          router.put(
+            route,
+            bodyParser(),
+            createHandler(route, methodConfig.PUT, config)
+          );
+        }
       }
 
-      if (routeConfig.PATCH) {
-        router.patch(
-          route,
-          bodyParser(),
-          createHandler(route, routeConfig.PATCH, config)
-        );
+      if (methodConfig.DELETE) {
+        router.del(route, createHandler(route, methodConfig.DELETE, config));
       }
 
-      if (routeConfig.ALL) {
-        router.all(route, createHandler(route, routeConfig.ALL, config));
+      if (methodConfig.PATCH) {
+        if (
+          methodConfig.PATCH.requestBodyIsStream ||
+          methodConfig.PATCH.responseBodyIsStream
+        ) {
+          router.patch(route, createHandler(route, methodConfig.PATCH, config));
+        } else {
+          router.patch(
+            route,
+            bodyParser(),
+            createHandler(route, methodConfig.PATCH, config)
+          );
+        }
+      }
+
+      if (methodConfig.ALL) {
+        router.all(route, createHandler(route, methodConfig.ALL, config));
       }
     }
 
@@ -146,14 +181,14 @@ async function handler(
   if (isHttpServiceAppConfig(config)) {
     const requestTime = Date.now();
 
-    const originalRequest = makeHttpRequestFromContext(ctx);
+    const request = makeHttpRequestFromContext(ctx);
 
     const requestId = randomId(32);
 
     const authConfig =
       routeConfig?.authentication || config.http.authentication;
 
-    const authResponse = await authenticate(originalRequest, authConfig);
+    const authResponse = await authenticate(request, authConfig);
 
     const requestMethod = ctx.method as HttpMethods;
 
@@ -163,7 +198,7 @@ async function handler(
         route,
         requestMethod,
         requestTime,
-        originalRequest,
+        request,
         authResponse,
         routeConfig,
         config
@@ -175,7 +210,7 @@ async function handler(
       const entryFromCache = await getFromCache(
         route,
         requestMethod,
-        originalRequest,
+        request,
         routeConfig,
         config
       );
@@ -186,7 +221,7 @@ async function handler(
           route,
           requestMethod,
           requestTime,
-          originalRequest,
+          request,
           entryFromCache,
           routeConfig,
           config,
@@ -214,7 +249,7 @@ async function handler(
           route,
           requestMethod,
           requestTime,
-          originalRequest,
+          request,
           response,
           routeConfig,
           config
@@ -239,7 +274,7 @@ async function handler(
           route,
           requestMethod,
           requestTime,
-          originalRequest,
+          request,
           response,
           routeConfig,
           config
@@ -251,9 +286,9 @@ async function handler(
     // Are there custom handlers for the request?
     const onRequest = routeConfig?.onRequest || config.http.onRequest;
 
-    const modResult = (onRequest && (await onRequest(originalRequest))) || {
+    const modResult = (onRequest && (await onRequest(request))) || {
       handled: false as false,
-      request: originalRequest,
+      request: request,
     };
 
     if (modResult.handled) {
@@ -262,7 +297,7 @@ async function handler(
         route,
         requestMethod,
         requestTime,
-        originalRequest,
+        request,
         modResult.response,
         routeConfig,
         config
@@ -312,7 +347,7 @@ async function handler(
           (routeConfig.mergeResponses &&
             (await routeConfig.mergeResponses(
               validResponses,
-              originalRequest
+              request
             ))) ||
           validResponses;
 
@@ -321,7 +356,7 @@ async function handler(
         if (responseIsError(response)) {
           const onError = routeConfig.onError || config.http.onError;
           if (onError) {
-            onError(fetchedResponses, originalRequest);
+            onError(fetchedResponses, request);
           }
           for (const pluginName of Object.keys(plugins)) {
             plugins[pluginName].rollback(
@@ -337,7 +372,7 @@ async function handler(
         // Are there custom handlers for the response?
         const onResponse = routeConfig.onResponse || config.http.onResponse;
         const responseToSend =
-          (onResponse && (await onResponse(response, originalRequest))) ||
+          (onResponse && (await onResponse(response, request))) ||
           response;
 
         sendResponse(
@@ -345,7 +380,7 @@ async function handler(
           route,
           requestMethod,
           requestTime,
-          originalRequest,
+          request,
           responseToSend,
           routeConfig,
           config

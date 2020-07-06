@@ -88,10 +88,6 @@ export type HttpProxyConfig = {
       [key in HttpMethods | "ALL"]?: HttpRouteConfig;
     };
   };
-  httpStream?: {
-    requestBodyIsStream: boolean;
-    responseBodyIsStream: boolean;
-  };
   redis?: {
     responseChannel: string;
     cleanupInterval?: number;
@@ -102,35 +98,11 @@ export type HttpProxyConfig = {
     | { handled: true; response: HttpResponse }
     | { handled: false; request: HttpRequest }
     | void
-  >;
-  onStreamRequest?: (
-    request: HttpRequest
-  ) => Promise<
-    | { handled: true; useStreamForResponse: false; response: HttpResponse }
-    | {
-        handled: true;
-        useStreamForResponse: true;
-        response: HttpStreamResponse;
-      }
-    | { handled: false; useStreamForRequest: false; request: HttpRequest }
-    | { handled: false; useStreamForRequest: true; request: HttpStreamRequest }
-    | void
-  >;
+  >;  
   onResponse?: (
     response: HttpResponse,
     request: HttpRequest
-  ) => Promise<HttpResponse>;
-  onStreamResponse?:
-    | ((
-        useStreamForResponse: false,
-        response: HttpResponse,
-        request: HttpRequest | HttpStreamRequest
-      ) => Promise<HttpResponse>)
-    | ((
-        useStreamForResponse: true,
-        response: HttpResponse,
-        request: HttpRequest | HttpStreamRequest
-      ) => Promise<HttpResponse>);
+  ) => Promise<HttpResponse>;  
   genericErrors?: boolean;
   onError?: (responses: FetchedHttpResponse[], request: HttpRequest) => any;
   plugins?: {
@@ -230,7 +202,7 @@ export type HttpRequest = {
 } & HttpRequestBase;
 
 export type HttpStreamRequest = {
-  req: IncomingMessage;
+  body: ReadableStream;
 } & HttpRequestBase;
 
 export type HttpResponseBase = {

@@ -11,12 +11,16 @@ import {
   HttpServiceAuthentication,
   HttpServiceErrorTrackingInfo,
   HttpProxyAppConfig,
+  HttpStreamRequest,
+  HttpStreamResponse,
 } from ".";
 
 /*
   Route Config
 */
 export type HttpRouteConfig = {
+  requestBodyIsStream?: boolean;
+  responseBodyIsStream?: boolean;
   services: {
     [key: string]: HttpServiceEndPointConfig;
   };
@@ -27,10 +31,34 @@ export type HttpRouteConfig = {
     | { handled: false; request: HttpRequest }
     | void
   >;
+  onStreamRequest?: (
+    request: HttpRequest
+  ) => Promise<
+    | { handled: true; useStreamForResponse: false; response: HttpResponse }
+    | {
+        handled: true;
+        useStreamForResponse: true;
+        response: HttpStreamResponse;
+      }
+    | { handled: false; useStreamForRequest: false; request: HttpRequest }
+    | { handled: false; useStreamForRequest: true; request: HttpStreamRequest }
+    | void
+  >;
   onResponse?: (
     response: HttpResponse,
     request: HttpRequest
   ) => Promise<HttpResponse | void>;
+  onStreamResponse?:
+    | ((
+        useStreamForResponse: false,
+        response: HttpResponse,
+        request: HttpRequest | HttpStreamRequest
+      ) => Promise<HttpResponse>)
+    | ((
+        useStreamForResponse: true,
+        response: HttpResponse,
+        request: HttpRequest | HttpStreamRequest
+      ) => Promise<HttpResponse>);
   mergeResponses?: (
     responses: FetchedHttpResponse[],
     request: HttpRequest
