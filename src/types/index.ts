@@ -8,7 +8,6 @@ import {
 } from "./webSocket";
 import * as httpModule from "http";
 import * as httpsModule from "https";
-import {  Readable, Writable } from "stream";
 
 export type HttpMethods = "GET" | "POST" | "PUT" | "DELETE" | "PATCH" | "HEAD";
 

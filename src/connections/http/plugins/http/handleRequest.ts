@@ -1,22 +1,15 @@
 import { HttpRequest, HttpMethods, AppConfig } from "../../../../types";
 
-import got from "got";
-import responseIsError from "../../../../utils/http/responseIsError";
-import { makeHttpResponse } from "./makeHttpResponse";
 import {
   InvokeHttpServiceResult,
   FetchedHttpResponse,
   HttpServiceEndPointConfig,
   NativeHttpServiceEndPointConfig,
 } from "../../../../types/http";
-import { makeGotOptions } from "../../../../utils/http/gotUtil";
 import mapBodyAndHeaders from "../../mapBodyAndHeaders";
 import selectRandomUrl from "../../../../utils/http/selectRandomUrl";
-import stream from "stream";
-import { promisify } from "util";
-import getStream from "get-stream";
-
-const pipeline = promisify(stream.pipeline);
+import makeGotRequest from "./makeGotRequest";
+import fireAndForgetGotRequest from "./fireAndForgetGotRequest";
 
 /*
   Make Promises for Http Services
@@ -42,7 +35,7 @@ export default function handleRequest(
     .map(
       ([service, serviceConfig]) =>
         new Promise(async (success) => {
-          const timeNow = Date.now();
+          const startTime = Date.now();
           const params = request.params || {};
 
           const serviceUrl = await selectRandomUrl(
@@ -90,7 +83,7 @@ export default function handleRequest(
                 method,
                 path: request.path,
                 service,
-                time: Date.now() - timeNow,
+                time: Date.now() - startTime,
                 response: modifiedResponse,
                 stage,
               };
@@ -102,107 +95,21 @@ export default function handleRequest(
               success({ skip: true });
             }
           } else {
-            const options = makeGotOptions(
-              onRequestResult.request,
-              serviceConfig.encoding,
-              serviceConfig.timeout
-            );
             if (serviceConfig.awaitResponse !== false) {
-              got(onRequestResult.request.path, options)
-                .then(async (serverResponse) => {
-                  const response = makeHttpResponse(serverResponse);
-
-                  if (responseIsError(response)) {
-                    if (serviceConfig.onError) {
-                      serviceConfig.onError(response, onRequestResult.request);
-                    }
-                  }
-
-                  // Use the original request here - not modifiedRequest
-                  const modifiedResponse =
-                    (serviceConfig.onResponse &&
-                      (await serviceConfig.onResponse(
-                        response,
-                        request,
-                        otherResponses
-                      ))) ||
-                    response;
-
-                  const fetchedResponse = {
-                    type: "http" as "http",
-                    id: requestId,
-                    route,
-                    method,
-                    path: request.path,
-                    service,
-                    time: Date.now() - timeNow,
-                    response: modifiedResponse,
-                    stage,
-                  };
-
-                  success({ skip: false, response: fetchedResponse });
-                })
-                .catch(async (error) => {
-                  const errorResponse = error.response
-                    ? makeHttpResponse(error.response)
-                    : {
-                        status: 400,
-                        body: error.message,
-                      };
-
-                  if (responseIsError(errorResponse)) {
-                    if (serviceConfig.onError) {
-                      serviceConfig.onError(
-                        errorResponse,
-                        onRequestResult.request
-                      );
-                    }
-                  }
-
-                  // Use the original request here - not modifiedRequest
-                  const modifiedResponse =
-                    (serviceConfig.onResponse &&
-                      (await serviceConfig.onResponse(
-                        errorResponse,
-                        request,
-                        otherResponses
-                      ))) ||
-                    errorResponse;
-
-                  const fetchedResponse = {
-                    type: "http" as "http",
-                    id: requestId,
-                    route,
-                    method,
-                    path: request.path,
-                    service,
-                    time: Date.now() - timeNow,
-                    response: modifiedResponse,
-                    stage,
-                  };
-
-                  success({ skip: false, response: fetchedResponse });
-                });
-            } else {
-              got(onRequestResult.request.path, options).catch(
-                async (error) => {
-                  const errorResponse = error.response
-                    ? makeHttpResponse(error.response)
-                    : {
-                        status: 400,
-                        body: error.message,
-                      };
-
-                  if (responseIsError(errorResponse)) {
-                    if (serviceConfig.onError) {
-                      serviceConfig.onError(
-                        errorResponse,
-                        onRequestResult.request
-                      );
-                    }
-                  }
-                }
+              makeGotRequest(
+                requestId,
+                onRequestResult.request,
+                route,
+                method,
+                service,
+                stage,
+                startTime,
+                otherResponses,
+                serviceConfig,
+                success
               );
+            } else {
+              fireAndForgetGotRequest(onRequestResult.request, serviceConfig);
             }
           }
         })

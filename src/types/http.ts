@@ -15,8 +15,7 @@ import {
 
 // Route Config
 export type HttpRouteConfig = {
-  requestBodyIsStream?: boolean;
-  responseBodyIsStream?: boolean;
+  useStream?: boolean;
   services: {
     [key: string]: HttpServiceEndPointConfig;
   };
