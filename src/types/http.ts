@@ -186,6 +186,7 @@ export type HttpServicePlugin = {
     services: {
       [name: string]: HttpServiceEndPointConfig;
     },
+    routeConfig: HttpRouteConfig,
     config: HttpProxyAppConfig
   ) => Promise<InvokeHttpServiceResult>[];
   rollback: (

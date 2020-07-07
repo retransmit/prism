@@ -207,6 +207,7 @@ async function handler(
           route,
           requestMethod,
           stages,
+          routeConfig,
           config
         );
 
@@ -266,6 +267,7 @@ async function handleRequestsWithPlugins(
   route: string,
   method: HttpMethods,
   stages: StageConfig[],
+  routeConfig: HttpRouteConfig,
   config: HttpProxyAppConfig
 ) {
   function responseIsNotSkipped(
@@ -289,6 +291,7 @@ async function handleRequestsWithPlugins(
           stage.stage,
           responses,
           stage.services,
+          routeConfig,
           config
         )
       );
@@ -318,7 +321,7 @@ function makeHttpRequestFromContext(
     params: ctx.params,
     query: ctx.query,
     body:
-      routeConfig.requestBodyIsStream ||
+      routeConfig.useStream ||
       ctx.method === "GET" ||
       ctx.method === "HEAD" ||
       ctx.method === "DELETE"

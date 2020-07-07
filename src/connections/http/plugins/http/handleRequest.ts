@@ -5,6 +5,7 @@ import {
   FetchedHttpResponse,
   HttpServiceEndPointConfig,
   NativeHttpServiceEndPointConfig,
+  HttpRouteConfig,
 } from "../../../../types/http";
 import mapBodyAndHeaders from "../../mapBodyAndHeaders";
 import selectRandomUrl from "../../../../utils/http/selectRandomUrl";
@@ -21,15 +22,16 @@ export default function handleRequest(
   method: HttpMethods,
   stage: number | undefined,
   otherResponses: FetchedHttpResponse[],
-  services: {
+  servicesInStage: {
     [name: string]: HttpServiceEndPointConfig;
   },
+  routeConfig: HttpRouteConfig,
   config: AppConfig
 ): Promise<InvokeHttpServiceResult>[] {
-  return Object.keys(services)
+  return Object.keys(servicesInStage)
     .map(
       (service) =>
-        [service, services[service]] as [string, HttpServiceEndPointConfig]
+        [service, servicesInStage[service]] as [string, HttpServiceEndPointConfig]
     )
     .filter(isHttpServiceConfig)
     .map(

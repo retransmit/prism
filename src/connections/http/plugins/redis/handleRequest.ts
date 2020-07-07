@@ -8,6 +8,7 @@ import {
   FetchedHttpResponse,
   HttpServiceEndPointConfig,
   RedisHttpServiceEndPointConfig,
+  HttpRouteConfig,
 } from "../../../../types/http";
 import { publish } from "./publish";
 import mapBodyAndHeaders from "../../mapBodyAndHeaders";
@@ -22,16 +23,18 @@ export default function handleRequest(
   method: HttpMethods,
   stage: number | undefined,
   otherResponses: FetchedHttpResponse[],
-  services: {
+  servicesInStage: {
     [name: string]: HttpServiceEndPointConfig;
   },
+  routeConfig: HttpRouteConfig,
   config: AppConfig
 ): Promise<InvokeHttpServiceResult>[] {
   const alreadyPublishedChannels: string[] = [];
 
-  return Object.keys(services)
+  return Object.keys(servicesInStage)
     .map(
-      (service) => [service, services[service]] as [string, HttpServiceEndPointConfig]
+      (service) =>
+        [service, servicesInStage[service]] as [string, HttpServiceEndPointConfig]
     )
     .filter(isRedisServiceConfig)
     .map(

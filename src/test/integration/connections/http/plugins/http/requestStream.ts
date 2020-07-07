@@ -14,7 +14,7 @@ export default async function (app: TestAppInstance) {
         routes: {
           "/images/(.*)": {
             GET: {
-              requestBodyIsStream: true,
+              useStream: true,
               services: {
                 imageservice: {
                   type: "http" as "http",
@@ -25,7 +25,7 @@ export default async function (app: TestAppInstance) {
           },
           "/users": {
             GET: {
-              requestBodyIsStream: true,
+              useStream: true,
               services: {
                 userservice: {
                   type: "http" as "http",

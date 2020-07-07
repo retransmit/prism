@@ -36,10 +36,7 @@ export default async function initHttpHandling(config: AppConfig) {
 
       for (const method of Object.keys(methodConfig)) {
         const serviceConfig = methodConfig[method as HttpMethods];
-        if (
-          serviceConfig?.requestBodyIsStream ||
-          serviceConfig?.requestBodyIsStream
-        ) {
+        if (serviceConfig?.useStream) {
           if (Object.keys(serviceConfig.services).length > 1) {
             throw new Error(
               `The request or response for the route ${method} ${route} is defined as a stream but there are more than one services defined. This is not supported for now.`
@@ -53,10 +50,7 @@ export default async function initHttpHandling(config: AppConfig) {
       }
 
       if (methodConfig.POST) {
-        if (
-          methodConfig.POST.requestBodyIsStream ||
-          methodConfig.POST.responseBodyIsStream
-        ) {
+        if (methodConfig.POST.useStream) {
           router.post(route, createHandler(route, methodConfig.POST, config));
         } else {
           router.post(
@@ -68,10 +62,7 @@ export default async function initHttpHandling(config: AppConfig) {
       }
 
       if (methodConfig.PUT) {
-        if (
-          methodConfig.PUT.requestBodyIsStream ||
-          methodConfig.PUT.responseBodyIsStream
-        ) {
+        if (methodConfig.PUT.useStream) {
           router.put(route, createHandler(route, methodConfig.PUT, config));
         } else {
           router.put(
@@ -87,10 +78,7 @@ export default async function initHttpHandling(config: AppConfig) {
       }
 
       if (methodConfig.PATCH) {
-        if (
-          methodConfig.PATCH.requestBodyIsStream ||
-          methodConfig.PATCH.responseBodyIsStream
-        ) {
+        if (methodConfig.PATCH.useStream) {
           router.patch(route, createHandler(route, methodConfig.PATCH, config));
         } else {
           router.patch(
