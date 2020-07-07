@@ -14,6 +14,7 @@ import {
   NativeHttpServiceEndPointConfig,
 } from "../../../../types/http";
 import { makeGotOptions } from "../../../../utils/http/gotUtil";
+import { replaceParamsInUrl } from "./replaceParamsInUrl";
 
 /*
   Make Promises for Http Services
@@ -47,11 +48,10 @@ async function doRollback(
 ) {
   const params = request.params;
 
-  const urlWithParamsReplaced = params
-    ? Object.keys(params).reduce((acc, param) => {
-        return acc.replace(`/:${param}`, `/${params[param]}`);
-      }, rollbackRequest.path)
-    : rollbackRequest.path;
+  const urlWithParamsReplaced = replaceParamsInUrl(
+    params,
+    rollbackRequest.path
+  );
 
   const requestWithPathParams = {
     ...rollbackRequest,

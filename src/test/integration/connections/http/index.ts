@@ -16,7 +16,7 @@ import httpExcludesHeaders from "./plugins/http/excludesHeaders";
 import httpUrlEncodedRequests from "./plugins/http/urlEncodedRequests";
 import httpRedirect from "./plugins/http/redirect";
 import httpRunsStages from "./plugins/http/runsStages";
-import httpRequestStream from "./plugins/http/requestStream";
+import httpStreams from "./plugins/http/streams";
 
 import redisHttpMethods from "./plugins/redis/httpMethods";
 import redisMergeResults from "./plugins/redis/mergeResults";
@@ -56,7 +56,7 @@ export default function run(app: TestAppInstance) {
       httpUrlEncodedRequests(app);
       httpRedirect(app);
       httpRunsStages(app);
-      httpRequestStream(app);
+      httpStreams(app);
     });
 
     describe("redis", () => {

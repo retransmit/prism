@@ -21,7 +21,7 @@ export async function closeHttpServer(server: Server) {
 type MockHttpBackendConfig = {
   port: number;
   afterResponse?: (ctx: any) => Promise<boolean | undefined>;
-  routes: {
+  routes?: {
     path: string;
     method: HttpMethods;
     handleResponse?: (
@@ -56,17 +56,19 @@ export function startBackends(configs: MockHttpBackendConfig[]) {
         ? await config.afterResponse(ctx)
         : false;
       if (!handled) {
-        for (const route of config.routes) {
-          if (ctx.path === route.path && ctx.method === route.method) {
-            if (route.handleResponse) {
-              await route.handleResponse(ctx);
-            } else {
-              if (route.response) {
-                if (route.response.status) {
-                  ctx.status = route.response.status;
+        if (config.routes) {
+          for (const route of config.routes) {
+            if (ctx.path === route.path && ctx.method === route.method) {
+              if (route.handleResponse) {
+                await route.handleResponse(ctx);
+              } else {
+                if (route.response) {
+                  if (route.response.status) {
+                    ctx.status = route.response.status;
+                  }
+                  ctx.body = route.response.body;
+                  break;
                 }
-                ctx.body = route.response.body;
-                break;
               }
             }
           }

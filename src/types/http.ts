@@ -12,6 +12,9 @@ import {
   HttpServiceErrorTrackingInfo,
   HttpProxyAppConfig,
 } from ".";
+import { IncomingMessage } from "http";
+import { ServerResponse } from "http";
+import { IRouterContext } from "koa-router";
 
 // Route Config
 export type HttpRouteConfig = {
@@ -189,6 +192,16 @@ export type HttpServicePlugin = {
     routeConfig: HttpRouteConfig,
     config: HttpProxyAppConfig
   ) => Promise<InvokeHttpServiceResult>[];
+  handleStreamRequest: (
+    ctx: IRouterContext,
+    requestId: string,
+    request: HttpRequest,
+    route: string,
+    method: HttpMethods,
+    serviceConfig: HttpServiceEndPointConfig,
+    routeConfig: HttpRouteConfig,
+    config: HttpProxyAppConfig
+  ) => Promise<void>;
   rollback: (
     requestId: string,
     request: HttpRequest,

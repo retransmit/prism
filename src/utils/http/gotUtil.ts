@@ -4,7 +4,8 @@ import { Options } from "got/dist/source/core";
 export function makeGotOptions(
   request: HttpRequest,
   encoding: HttpRequestBodyEncoding | undefined,
-  timeout?: number
+  timeout?: number,
+  isStream: boolean = false
 ): Options {
   const basicOptions = {
     searchParams: request.query,
@@ -15,23 +16,27 @@ export function makeGotOptions(
     timeout,
   };
 
-  const options =
-    typeof request.body === "string"
+  const options = isStream
+    ? {
+        isStream: true,
+        ...basicOptions,
+      }
+    : typeof request.body === "string"
+    ? {
+        ...basicOptions,
+        body: request.body,
+      }
+    : typeof request.body === "object"
+    ? encoding === "application/x-www-form-urlencoded"
       ? {
           ...basicOptions,
-          body: request.body,
+          form: request.body,
         }
-      : typeof request.body === "object"
-      ? encoding === "application/x-www-form-urlencoded"
-        ? {
-            ...basicOptions,
-            form: request.body,
-          }
-        : {
-            ...basicOptions,
-            json: request.body,
-          }
-      : basicOptions;
+      : {
+          ...basicOptions,
+          json: request.body,
+        }
+    : basicOptions;
 
   return options;
 }

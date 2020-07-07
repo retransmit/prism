@@ -8,7 +8,6 @@ import {
   InvokeHttpServiceResult,
 } from "../../types/http";
 import applyRateLimiting from "../modules/rateLimiting";
-import { copyHeadersFromContext } from "./copyHeadersFromContext";
 import { sendResponse } from "./sendResponse";
 import { getFromCache } from "./modules/caching";
 import authenticate from "./modules/authentication";
@@ -169,7 +168,7 @@ async function handler(
         if (!routeConfig.useStream) {
           const stages = sortIntoStages(routeConfig);
 
-          const responses: FetchedHttpResponse[] = [];
+          const allResponses: FetchedHttpResponse[] = [];
 
           for (const stage of stages) {
             let promises: Promise<InvokeHttpServiceResult>[] = [];
@@ -182,7 +181,7 @@ async function handler(
                   route,
                   requestMethod,
                   stage.stage,
-                  responses,
+                  allResponses,
                   stage.services,
                   routeConfig,
                   config
@@ -190,21 +189,21 @@ async function handler(
               );
             }
 
-            const allResponses = await Promise.all(promises);
+            const allResponsesInStage = await Promise.all(promises);
 
-            const validResponses = allResponses
+            const validResponses = allResponsesInStage
               .filter(responseIsNotSkipped)
               .map((x) => x.response);
 
             for (const response of validResponses) {
-              responses.push(response);
+              allResponses.push(response);
             }
           }
 
           const fetchedResponses =
             (routeConfig.mergeResponses &&
-              (await routeConfig.mergeResponses(responses, request))) ||
-            responses;
+              (await routeConfig.mergeResponses(allResponses, request))) ||
+            allResponses;
 
           let response = mergeResponses(fetchedResponses, config);
 
@@ -240,6 +239,22 @@ async function handler(
             config
           );
         } else {
+          const services = Object.keys(routeConfig.services);
+          if (services.length === 1) {
+            const serviceConfig = routeConfig.services[services[0]];
+            for (const pluginName of Object.keys(plugins)) {
+              const promise = plugins[pluginName].handleStreamRequest(
+                ctx,
+                requestId,
+                request,
+                route,
+                requestMethod,
+                serviceConfig,
+                routeConfig,
+                config
+              );
+            }
+          }
         }
       }
     }

@@ -11,6 +11,7 @@ import mapBodyAndHeaders from "../../mapBodyAndHeaders";
 import selectRandomUrl from "../../../../utils/http/selectRandomUrl";
 import makeGotRequest from "./makeGotRequest";
 import fireAndForgetGotRequest from "./fireAndForgetGotRequest";
+import { replaceParamsInUrl } from "./replaceParamsInUrl";
 
 /*
   Make Promises for Http Services
@@ -36,7 +37,7 @@ export default function handleRequest(
           HttpServiceEndPointConfig
         ]
     )
-    .filter(isHttpServiceConfig)
+    .filter(isNativeHttpServiceConfig)
     .map(
       ([service, serviceConfig]) =>
         new Promise(async (success) => {
@@ -48,11 +49,7 @@ export default function handleRequest(
             serviceConfig.getUrl
           );
 
-          const urlWithParamsReplaced = params
-            ? Object.keys(params).reduce((acc, param) => {
-                return acc.replace(`/:${param}`, `/${params[param]}`);
-              }, serviceUrl)
-            : serviceUrl;
+          const urlWithParamsReplaced = replaceParamsInUrl(params, serviceUrl);
 
           const requestWithMappedFields = mapBodyAndHeaders(
             request,
@@ -127,7 +124,7 @@ export default function handleRequest(
     );
 }
 
-function isHttpServiceConfig(
+function isNativeHttpServiceConfig(
   x: [string, HttpServiceEndPointConfig]
 ): x is [string, NativeHttpServiceEndPointConfig] {
   return x[1].type === "http";
