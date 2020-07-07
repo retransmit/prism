@@ -1,10 +1,11 @@
 import { HttpRequest, HttpRequestBodyEncoding } from "../../types";
+import { Options } from "got/dist/source/core";
 
 export function makeGotOptions(
   request: HttpRequest,
   encoding: HttpRequestBodyEncoding | undefined,
   timeout?: number
-) {
+): Options {
   const basicOptions = {
     searchParams: request.query,
     method: request.method,

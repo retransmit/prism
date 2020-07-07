@@ -1,8 +1,4 @@
-import {
-  HttpRequest,
-  HttpMethods,
-  AppConfig,
-} from "../../../../types";
+import { HttpRequest, HttpMethods, AppConfig } from "../../../../types";
 
 import got from "got";
 import responseIsError from "../../../../utils/http/responseIsError";
@@ -16,13 +12,18 @@ import {
 import { makeGotOptions } from "../../../../utils/http/gotUtil";
 import mapBodyAndHeaders from "../../mapBodyAndHeaders";
 import selectRandomUrl from "../../../../utils/http/selectRandomUrl";
+import stream from "stream";
+import { promisify } from "util";
+import getStream from "get-stream";
+
+const pipeline = promisify(stream.pipeline);
 
 /*
   Make Promises for Http Services
 */
 export default function handleRequest(
   requestId: string,
-  originalRequest: HttpRequest,
+  request: HttpRequest,
   route: string,
   method: HttpMethods,
   stage: number | undefined,
@@ -42,7 +43,7 @@ export default function handleRequest(
       ([service, serviceConfig]) =>
         new Promise(async (success) => {
           const timeNow = Date.now();
-          const params = originalRequest.params || {};
+          const params = request.params || {};
 
           const serviceUrl = await selectRandomUrl(
             serviceConfig.url,
@@ -56,7 +57,7 @@ export default function handleRequest(
             : serviceUrl;
 
           const requestWithMappedFields = mapBodyAndHeaders(
-            originalRequest,
+            request,
             serviceConfig
           );
 
@@ -77,7 +78,7 @@ export default function handleRequest(
                 (serviceConfig.onResponse &&
                   (await serviceConfig.onResponse(
                     onRequestResult.response,
-                    originalRequest,
+                    request,
                     otherResponses
                   ))) ||
                 onRequestResult.response;
@@ -87,7 +88,7 @@ export default function handleRequest(
                 id: requestId,
                 route,
                 method,
-                path: originalRequest.path,
+                path: request.path,
                 service,
                 time: Date.now() - timeNow,
                 response: modifiedResponse,
@@ -106,7 +107,6 @@ export default function handleRequest(
               serviceConfig.encoding,
               serviceConfig.timeout
             );
-
             if (serviceConfig.awaitResponse !== false) {
               got(onRequestResult.request.path, options)
                 .then(async (serverResponse) => {
@@ -123,7 +123,7 @@ export default function handleRequest(
                     (serviceConfig.onResponse &&
                       (await serviceConfig.onResponse(
                         response,
-                        originalRequest,
+                        request,
                         otherResponses
                       ))) ||
                     response;
@@ -133,7 +133,7 @@ export default function handleRequest(
                     id: requestId,
                     route,
                     method,
-                    path: originalRequest.path,
+                    path: request.path,
                     service,
                     time: Date.now() - timeNow,
                     response: modifiedResponse,
@@ -164,7 +164,7 @@ export default function handleRequest(
                     (serviceConfig.onResponse &&
                       (await serviceConfig.onResponse(
                         errorResponse,
-                        originalRequest,
+                        request,
                         otherResponses
                       ))) ||
                     errorResponse;
@@ -174,7 +174,7 @@ export default function handleRequest(
                     id: requestId,
                     route,
                     method,
-                    path: originalRequest.path,
+                    path: request.path,
                     service,
                     time: Date.now() - timeNow,
                     response: modifiedResponse,

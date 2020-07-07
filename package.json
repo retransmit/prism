@@ -34,8 +34,13 @@
     "yargs": "^15.3.1"
   },
   "devDependencies": {
+    "@types/koa-mount": "^4.0.0",
+    "@types/koa-static": "^4.0.1",
     "@types/mocha": "^7.0.2",
     "@types/should": "^13.0.0",
+    "get-stream": "^5.1.0",
+    "koa-mount": "^4.0.0",
+    "koa-static": "^5.0.0",
     "mocha": "^8.0.1",
     "should": "^13.2.3"
   },

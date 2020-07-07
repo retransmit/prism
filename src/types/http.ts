@@ -11,13 +11,9 @@ import {
   HttpServiceAuthentication,
   HttpServiceErrorTrackingInfo,
   HttpProxyAppConfig,
-  HttpStreamRequest,
-  HttpStreamResponse,
 } from ".";
 
-/*
-  Route Config
-*/
+// Route Config
 export type HttpRouteConfig = {
   requestBodyIsStream?: boolean;
   responseBodyIsStream?: boolean;
@@ -31,34 +27,10 @@ export type HttpRouteConfig = {
     | { handled: false; request: HttpRequest }
     | void
   >;
-  onStreamRequest?: (
-    request: HttpRequest
-  ) => Promise<
-    | { handled: true; useStreamForResponse: false; response: HttpResponse }
-    | {
-        handled: true;
-        useStreamForResponse: true;
-        response: HttpStreamResponse;
-      }
-    | { handled: false; useStreamForRequest: false; request: HttpRequest }
-    | { handled: false; useStreamForRequest: true; request: HttpStreamRequest }
-    | void
-  >;
   onResponse?: (
     response: HttpResponse,
     request: HttpRequest
   ) => Promise<HttpResponse | void>;
-  onStreamResponse?:
-    | ((
-        useStreamForResponse: false,
-        response: HttpResponse,
-        request: HttpRequest | HttpStreamRequest
-      ) => Promise<HttpResponse>)
-    | ((
-        useStreamForResponse: true,
-        response: HttpResponse,
-        request: HttpRequest | HttpStreamRequest
-      ) => Promise<HttpResponse>);
   mergeResponses?: (
     responses: FetchedHttpResponse[],
     request: HttpRequest
@@ -71,16 +43,12 @@ export type HttpRouteConfig = {
   authentication?: HttpServiceAuthentication | "none";
 };
 
-/*
-  Result of Service Invocation
-*/
+// Result of Service Invocation
 export type InvokeHttpServiceResult =
   | { skip: true }
   | { skip: false; response: FetchedHttpResponse };
 
-/*
-  Output of processMessage()
-*/
+// Output of processMessage()
 export type FetchedHttpResponse = {
   type: "http" | "redis";
   id: string;
@@ -93,10 +61,7 @@ export type FetchedHttpResponse = {
   stage: number | undefined;
 };
 
-/*
-  Http Requests and Responses for Redis-based Services
-*/
-
+// Http Requests and Responses for Redis-based Services
 export type RedisHttpRequest =
   | {
       type: "request";
@@ -116,9 +81,7 @@ export type RedisHttpResponse = {
   response: HttpResponse;
 };
 
-/*
-  Service Configuration
-*/
+// Service Configuration
 export type HttpRouteConfigBase = {
   awaitResponse?: boolean;
   merge?: boolean;
@@ -146,7 +109,7 @@ export type NativeHttpServiceEndPointConfig = {
   type: "http";
   url: UrlList;
   getUrl?: UrlSelector;
-  rollback?: (originalRequest: HttpRequest) => HttpRequest | void;
+  rollback?: (request: HttpRequest) => HttpRequest | void;
   rollbackRequestEncoding?: HttpRequestBodyEncoding;
   onRequest?: (
     request: HttpRequest,

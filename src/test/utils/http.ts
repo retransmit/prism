@@ -5,6 +5,8 @@ import { CancelableRequest } from "got/dist/source";
 import { Response } from "got/dist/source/core";
 import bodyParser = require("koa-body");
 import { HttpMethods } from "../../types";
+import koaStatic = require("koa-static");
+import koaMount = require("koa-mount");
 
 function closeHttpServerCb(server: Server, cb: any) {
   (server as any).close(cb);
@@ -30,6 +32,10 @@ type MockHttpBackendConfig = {
       body: string | { [key: string]: any };
     };
   }[];
+  static?: {
+    dirPath: string;
+    baseUrl: string;
+  };
 };
 
 export function startBackends(configs: MockHttpBackendConfig[]) {
@@ -38,6 +44,13 @@ export function startBackends(configs: MockHttpBackendConfig[]) {
     const koa = new Koa();
 
     koa.use(bodyParser());
+
+    if (config.static) {
+      const staticApp = new Koa();
+      staticApp.use(koaStatic(config.static.dirPath));
+      koa.use(koaMount(config.static.baseUrl, staticApp));
+    }
+
     koa.use(async (ctx) => {
       const handled = config.afterResponse
         ? await config.afterResponse(ctx)

@@ -8,13 +8,11 @@ import {
 } from "./webSocket";
 import * as httpModule from "http";
 import * as httpsModule from "https";
-import { IncomingMessage } from "http";
+import {  Readable, Writable } from "stream";
 
 export type HttpMethods = "GET" | "POST" | "PUT" | "DELETE" | "PATCH" | "HEAD";
 
-/*
-  Application Config
-*/
+// Application Config
 export type AppConfig = {
   instanceId: string;
   http?: HttpProxyConfig;
@@ -98,11 +96,11 @@ export type HttpProxyConfig = {
     | { handled: true; response: HttpResponse }
     | { handled: false; request: HttpRequest }
     | void
-  >;  
+  >;
   onResponse?: (
     response: HttpResponse,
     request: HttpRequest
-  ) => Promise<HttpResponse>;  
+  ) => Promise<HttpResponse>;
   genericErrors?: boolean;
   onError?: (responses: FetchedHttpResponse[], request: HttpRequest) => any;
   plugins?: {
@@ -149,9 +147,7 @@ export type WebSocketProxyConfig = {
   rateLimiting?: RateLimitingConfig;
 };
 
-/*
-  Web Jobs
-*/
+// Web Jobs
 export type WebJobBase = {
   url: UrlList;
   getUrl?: UrlSelector;
@@ -173,14 +169,12 @@ export type CronWebJob = {
 
 export type WebJob = PeriodicWebJob | CronWebJob;
 
-/*
-  Http Requests and Responses
-*/
+// Http Requests and Responses
 export type BodyObject = {
   [field: string]: any;
 };
 
-export type HttpRequestBase = {
+export type HttpRequest = {
   path: string;
   method: HttpMethods;
   params?: {
@@ -197,15 +191,7 @@ export type HttpRequestBase = {
   remotePort: number | undefined;
 };
 
-export type HttpRequest = {
-  body?: string | Buffer | BodyObject | Array<any> | undefined;
-} & HttpRequestBase;
-
-export type HttpStreamRequest = {
-  body: ReadableStream;
-} & HttpRequestBase;
-
-export type HttpResponseBase = {
+export type HttpResponse = {
   status?: number;
   redirect?: string;
   cookies?: HttpCookie[];
@@ -213,14 +199,6 @@ export type HttpResponseBase = {
   body?: string | Buffer | BodyObject | Array<any> | undefined;
   contentType?: string;
 };
-
-export type HttpResponse = {
-  body?: string | Buffer | BodyObject | Array<any> | undefined;
-} & HttpResponseBase;
-
-export type HttpStreamResponse = {
-  body?: WritableStream;
-} & HttpResponseBase;
 
 export type HttpCookie = {
   name: string;
@@ -308,7 +286,8 @@ export type HttpServiceJwtAuthentication = {
     audience?: string; // | RegExp | Array<string | RegExp>;
     clockTimestamp?: number;
     clockTolerance?: number;
-    /** return an object with the decoded `{ payload, header, signature }` instead of only the usual content of the payload. */
+    // return an object with the decoded `{ payload, header, signature }
+    // instead of only the usual content of the payload. */
     complete?: boolean;
     issuer?: string | string[];
     ignoreExpiration?: boolean;
