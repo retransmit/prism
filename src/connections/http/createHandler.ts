@@ -1,20 +1,11 @@
 import { IRouterContext } from "koa-router";
-import {
-  HttpMethods,
-  HttpRequest,
-  AppConfig,
-  HttpProxyAppConfig,
-} from "../../types";
+import { HttpMethods, HttpRequest, AppConfig } from "../../types";
 import randomId from "../../utils/random";
 
-import mergeResponses from "./mergeResponses";
-import responseIsError from "../../utils/http/responseIsError";
-
 import {
+  HttpRouteConfig,
   FetchedHttpResponse,
   InvokeHttpServiceResult,
-  HttpServiceEndPointConfig,
-  HttpRouteConfig,
 } from "../../types/http";
 import applyRateLimiting from "../modules/rateLimiting";
 import { copyHeadersFromContext } from "./copyHeadersFromContext";
@@ -23,7 +14,11 @@ import { getFromCache } from "./modules/caching";
 import authenticate from "./modules/authentication";
 import { isTripped } from "./modules/circuitBreaker";
 import isHttpServiceAppConfig from "./isHttpServiceAppConfig";
+import mergeResponses from "./mergeResponses";
+import responseIsError from "../../utils/http/responseIsError";
 import plugins from "./plugins";
+import sortIntoStages from "./sortIntoStages";
+import makeHttpRequestFromContext from "./makeHttpRequestFromContext";
 
 export type CreateHttpRequestHandler = (
   method: HttpMethods
@@ -46,7 +41,7 @@ async function handler(
   config: AppConfig
 ) {
   if (isHttpServiceAppConfig(config)) {
-    const requestTime = Date.now();
+    const startTime = Date.now();
 
     const request = makeHttpRequestFromContext(ctx, routeConfig);
 
@@ -64,7 +59,7 @@ async function handler(
         ctx,
         route,
         requestMethod,
-        requestTime,
+        startTime,
         request,
         authResponse,
         routeConfig,
@@ -87,7 +82,7 @@ async function handler(
           ctx,
           route,
           requestMethod,
-          requestTime,
+          startTime,
           request,
           entryFromCache,
           routeConfig,
@@ -115,7 +110,7 @@ async function handler(
           ctx,
           route,
           requestMethod,
-          requestTime,
+          startTime,
           request,
           response,
           routeConfig,
@@ -140,7 +135,7 @@ async function handler(
           ctx,
           route,
           requestMethod,
-          requestTime,
+          startTime,
           request,
           response,
           routeConfig,
@@ -163,7 +158,7 @@ async function handler(
         ctx,
         route,
         requestMethod,
-        requestTime,
+        startTime,
         request,
         modResult.response,
         routeConfig,
@@ -171,164 +166,88 @@ async function handler(
       );
     } else {
       if (routeConfig) {
-        const modifiedRequest = modResult.request;
+        if (!routeConfig.useStream) {
+          const stages = sortIntoStages(routeConfig);
 
-        let stages: StageConfig[] = (function sortIntoStages() {
-          const unsortedStages = Object.keys(routeConfig.services).reduce(
-            (acc, serviceName) => {
-              const serviceConfig = routeConfig.services[serviceName];
-              const existingStage = acc.find(
-                (x) => x.stage === serviceConfig.stage
+          const responses: FetchedHttpResponse[] = [];
+
+          for (const stage of stages) {
+            let promises: Promise<InvokeHttpServiceResult>[] = [];
+
+            for (const pluginName of Object.keys(plugins)) {
+              promises = promises.concat(
+                plugins[pluginName].handleRequest(
+                  requestId,
+                  request,
+                  route,
+                  requestMethod,
+                  stage.stage,
+                  responses,
+                  stage.services,
+                  routeConfig,
+                  config
+                )
               );
-              if (!existingStage) {
-                const newStage = {
-                  stage: serviceConfig.stage,
-                  services: {
-                    [serviceName]: serviceConfig,
-                  },
-                };
-                return acc.concat(newStage);
-              } else {
-                existingStage.services[serviceName] = serviceConfig;
-                return acc;
-              }
-            },
-            [] as StageConfig[]
-          );
+            }
 
-          return unsortedStages.sort(
-            (x, y) => (x.stage || Infinity) - (y.stage || Infinity)
-          );
-        })();
+            const allResponses = await Promise.all(promises);
 
-        const validResponses = await handleRequestsWithPlugins(
-          requestId,
-          modifiedRequest,
-          route,
-          requestMethod,
-          stages,
-          routeConfig,
-          config
-        );
+            const validResponses = allResponses
+              .filter(responseIsNotSkipped)
+              .map((x) => x.response);
 
-        const fetchedResponses =
-          (routeConfig.mergeResponses &&
-            (await routeConfig.mergeResponses(validResponses, request))) ||
-          validResponses;
-
-        let response = mergeResponses(fetchedResponses, config);
-
-        if (responseIsError(response)) {
-          const onError = routeConfig.onError || config.http.onError;
-          if (onError) {
-            onError(fetchedResponses, request);
+            for (const response of validResponses) {
+              responses.push(response);
+            }
           }
-          for (const pluginName of Object.keys(plugins)) {
-            plugins[pluginName].rollback(
-              requestId,
-              modifiedRequest,
-              route,
-              requestMethod,
-              config
-            );
+
+          const fetchedResponses =
+            (routeConfig.mergeResponses &&
+              (await routeConfig.mergeResponses(responses, request))) ||
+            responses;
+
+          let response = mergeResponses(fetchedResponses, config);
+
+          if (responseIsError(response)) {
+            const onError = routeConfig.onError || config.http.onError;
+            if (onError) {
+              onError(fetchedResponses, request);
+            }
+            for (const pluginName of Object.keys(plugins)) {
+              plugins[pluginName].rollback(
+                requestId,
+                modResult.request,
+                route,
+                requestMethod,
+                config
+              );
+            }
           }
+
+          // Are there custom handlers for the response?
+          const onResponse = routeConfig.onResponse || config.http.onResponse;
+          const responseToSend =
+            (onResponse && (await onResponse(response, request))) || response;
+
+          sendResponse(
+            ctx,
+            route,
+            requestMethod,
+            startTime,
+            request,
+            responseToSend,
+            routeConfig,
+            config
+          );
+        } else {
         }
-
-        // Are there custom handlers for the response?
-        const onResponse = routeConfig.onResponse || config.http.onResponse;
-        const responseToSend =
-          (onResponse && (await onResponse(response, request))) || response;
-
-        sendResponse(
-          ctx,
-          route,
-          requestMethod,
-          requestTime,
-          request,
-          responseToSend,
-          routeConfig,
-          config
-        );
       }
     }
   }
 }
 
-type StageConfig = {
-  stage: number | undefined;
-  services: {
-    [name: string]: HttpServiceEndPointConfig;
-  };
-};
-
-async function handleRequestsWithPlugins(
-  requestId: string,
-  modifiedRequest: HttpRequest,
-  route: string,
-  method: HttpMethods,
-  stages: StageConfig[],
-  routeConfig: HttpRouteConfig,
-  config: HttpProxyAppConfig
-) {
-  function responseIsNotSkipped(
-    x: InvokeHttpServiceResult
-  ): x is { skip: false; response: FetchedHttpResponse } {
-    return !x.skip;
-  }
-
-  let responses: FetchedHttpResponse[] = [];
-
-  for (const stage of stages) {
-    let promises: Promise<InvokeHttpServiceResult>[] = [];
-
-    for (const pluginName of Object.keys(plugins)) {
-      promises = promises.concat(
-        plugins[pluginName].handleRequest(
-          requestId,
-          modifiedRequest,
-          route,
-          method,
-          stage.stage,
-          responses,
-          stage.services,
-          routeConfig,
-          config
-        )
-      );
-    }
-
-    const allResponses = await Promise.all(promises);
-
-    const validResponses = allResponses
-      .filter(responseIsNotSkipped)
-      .map((x) => x.response);
-
-    for (const response of validResponses) {
-      responses.push(response);
-    }
-  }
-
-  return responses;
-}
-
-function makeHttpRequestFromContext(
-  ctx: IRouterContext,
-  routeConfig: HttpRouteConfig
-): HttpRequest {
-  return {
-    path: ctx.path,
-    method: ctx.method as HttpMethods,
-    params: ctx.params,
-    query: ctx.query,
-    body:
-      routeConfig.useStream ||
-      ctx.method === "GET" ||
-      ctx.method === "HEAD" ||
-      ctx.method === "DELETE"
-        ? undefined
-        : ctx.request.body,
-    headers: copyHeadersFromContext(ctx.headers),
-    remoteAddress: ctx.ip, // This handles 'X-Forwarded-For' etc.
-    remotePort: ctx.req.socket.remotePort,
-  };
+function responseIsNotSkipped(
+  x: InvokeHttpServiceResult
+): x is { skip: false; response: FetchedHttpResponse } {
+  return !x.skip;
 }

@@ -31,7 +31,10 @@ export default function handleRequest(
   return Object.keys(servicesInStage)
     .map(
       (service) =>
-        [service, servicesInStage[service]] as [string, HttpServiceEndPointConfig]
+        [service, servicesInStage[service]] as [
+          string,
+          HttpServiceEndPointConfig
+        ]
     )
     .filter(isHttpServiceConfig)
     .map(
@@ -98,20 +101,26 @@ export default function handleRequest(
             }
           } else {
             if (serviceConfig.awaitResponse !== false) {
-              makeGotRequest(
-                requestId,
-                onRequestResult.request,
-                route,
-                method,
-                service,
-                stage,
-                startTime,
-                otherResponses,
-                serviceConfig,
-                success
-              );
+              if (!routeConfig.useStream) {
+                makeGotRequest(
+                  requestId,
+                  onRequestResult.request,
+                  route,
+                  method,
+                  service,
+                  stage,
+                  startTime,
+                  otherResponses,
+                  serviceConfig,
+                  success
+                );
+              } else {
+              }
             } else {
-              fireAndForgetGotRequest(onRequestResult.request, serviceConfig);
+              if (!routeConfig.useStream) {
+                fireAndForgetGotRequest(onRequestResult.request, serviceConfig);
+              } else {
+              }
             }
           }
         })

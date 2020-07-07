@@ -223,3 +223,10 @@ export type HttpServiceCircuitBreakerStateProviderPlugin = {
     stateConfig: any
   ) => Promise<void>;
 };
+
+export type HttpRouteStageConfig = {
+  stage: number | undefined;
+  services: {
+    [name: string]: HttpServiceEndPointConfig;
+  };
+};
