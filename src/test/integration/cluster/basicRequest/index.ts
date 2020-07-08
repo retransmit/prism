@@ -9,7 +9,11 @@ export default async function (app: TestAppInstance, testEnv: TestEnv) {
   it(`responds to GET request from a cluster`, async () => {
     const configFile = join(__dirname, "config.js");
 
-    const instanceConfig = await startRetransmitTestProcess(configFile);
+    const instanceConfig = await startRetransmitTestProcess(
+      testEnv.appRoot,
+      configFile,
+      {}
+    );
 
     // Start mock servers.
     const backendApps = startBackends([

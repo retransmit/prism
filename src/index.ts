@@ -18,6 +18,7 @@ import initHttpHandling from "./connections/http";
 
 import { closeHttpServer } from "./utils/http/closeHttpServer";
 import { closeWebSocketServer } from "./utils/webSocket/closeWebSocketServer";
+import namesGenerator from "./utils/namesGenerator";
 
 const ONE_MINUTE = 60 * 1000;
 const TWO_MINUTES = 2 * ONE_MINUTE;
@@ -29,6 +30,7 @@ const argv = yargs.options({
   i: { type: "string", alias: "instance" },
   p: { type: "number", default: 8080, alias: "port" },
   v: { type: "boolean", alias: "version" },
+  silent: { type: "boolean" },
 }).argv;
 
 export type AppControl = {
@@ -39,8 +41,9 @@ export type AppControl = {
 
 export async function startApp(
   port: number,
-  instanceIdArgs: string | undefined,
-  configFile: string
+  instanceId: string | undefined,
+  configFile: string,
+  silent: boolean
 ) {
   const config: UserAppConfig = require(configFile);
   config.numWorkers = config.numWorkers || os.cpus().length;
@@ -53,27 +56,27 @@ export async function startApp(
 
     cluster.on("exit", (worker, code, signal) => {});
   } else {
-    const instanceId = instanceIdArgs || config.instanceId || random();
-    return startWithConfiguration(port, instanceId, config).then(() => {
-      console.log(
-        `retransmit instance ${instanceId} listening on port ${port}`
-      );
-    });
+    return startWithConfiguration(port, instanceId, config, { silent });
   }
 }
+
+export type StartOpts = {
+  silent: boolean;
+};
 
 export async function startWithConfiguration(
   port: number,
   instanceId: string | undefined,
-  userAppConfig: UserAppConfig
+  userAppConfig: UserAppConfig,
+  opts: StartOpts
 ): Promise<AppControl> {
   const config: AppConfig = userAppConfig as any;
   if (instanceId) {
-    config.instanceId = instanceId;
-  }
-
-  if (!config.instanceId || config.instanceId.trim() === "") {
-    config.instanceId = random();
+    config.instanceId = `${instanceId}_${random()}`;
+  } else if (config.instanceId) {
+    config.instanceId = `${config.instanceId}_${random()}`;
+  } else {
+    config.instanceId = `${namesGenerator("_")}_${random()}`;
   }
 
   // People are going to mistype 'webSocket' as all lowercase.
@@ -152,6 +155,12 @@ export async function startWithConfiguration(
     await closeHttpServer(httpServer);
   }
 
+  if (!opts.silent) {
+    console.log(
+      `retransmit instance ${config.instanceId} listening on port ${port}`
+    );
+  }
+
   return {
     instanceId: config.instanceId,
     port,
@@ -176,10 +185,10 @@ if (require.main === module) {
       process.exit(1);
     }
 
-    const configDir = argv.c;
+    const configFile = argv.c;
     const port = argv.p;
     const instanceId = argv.i;
 
-    startApp(port, instanceId, configDir);
+    startApp(port, instanceId, configFile, argv.silent ?? false);
   }
 }

@@ -2,9 +2,11 @@ import "mocha";
 import "should";
 
 import integrationTests from "./integration";
+import { join } from "path";
 
 export type TestEnv = {
-  rootDir: string;
+  appRoot: string;
+  testRoot: string;
 };
 
 function run() {
@@ -14,7 +16,8 @@ function run() {
   }
 
   const testEnv = {
-    rootDir: __dirname,
+    appRoot: join(__dirname, "../"),
+    testRoot: __dirname,
   };
 
   describe("retransmit", () => {

@@ -9,7 +9,9 @@ export type StartAppParams = {
   config: UserAppConfig;
 };
 
-export default async function startRetransmitTestInstance(params: StartAppParams) {
+export default async function startRetransmitTestInstance(
+  params: StartAppParams
+) {
   const client = createClient();
   const redisFlushAll = promisify(client.flushdb);
   await redisFlushAll.call(client);
@@ -24,5 +26,7 @@ export default async function startRetransmitTestInstance(params: StartAppParams
   const instanceId =
     typeof params.instanceId !== "undefined" ? params.instanceId : undefined;
 
-  return await startWithConfiguration(port || 6060, instanceId, params.config);
+  return await startWithConfiguration(port || 6060, instanceId, params.config, {
+    silent: true,
+  });
 }

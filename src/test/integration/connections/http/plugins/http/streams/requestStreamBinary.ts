@@ -38,7 +38,7 @@ export default async function (app: TestAppInstance, testEnv: TestEnv) {
         port: 6666,
         static: {
           baseUrl: "/images",
-          dirPath: join(testEnv.rootDir, "fixtures/static"),
+          dirPath: join(testEnv.testRoot, "fixtures/static"),
         },
       },
     ]);
