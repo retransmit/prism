@@ -1,23 +1,23 @@
 #!/usr/bin/env node
-import yargs = require("yargs");
 
 import { createServer as httpCreateServer } from "http";
 import { Server as HttpServer } from "http";
 import { createServer as httpsCreateServer } from "https";
 import { Server as HttpsServer } from "https";
-
 import WebSocket from "ws";
+import cluster from "cluster";
+import os from "os";
+import yargs = require("yargs");
 
-import * as applicationState from "./state";
 import { AppConfig, UserAppConfig } from "./types";
-
+import * as applicationState from "./state";
 import initWebSocketHandling from "./connections/webSocket";
-
-import { Server } from "http";
 import random from "./utils/random";
-
 import * as webJobs from "./connections/http/webJobs";
 import initHttpHandling from "./connections/http";
+
+import { closeHttpServer } from "./utils/http/closeHttpServer";
+import { closeWebSocketServer } from "./utils/webSocket/closeWebSocketServer";
 
 const ONE_MINUTE = 60 * 1000;
 const TWO_MINUTES = 2 * ONE_MINUTE;
@@ -31,24 +31,42 @@ const argv = yargs.options({
   v: { type: "boolean", alias: "version" },
 }).argv;
 
+export type AppControl = {
+  instanceId: string;
+  port: number;
+  closeServers: () => Promise<void>;
+};
+
 export async function startApp(
   port: number,
-  instanceId: string | undefined,
+  instanceIdArgs: string | undefined,
   configFile: string
 ) {
-  const config: AppConfig = require(configFile);
-  return await startWithConfiguration(port, instanceId, config);
+  if (cluster.isMaster) {
+    const numCPUs = os.cpus().length;
+
+    // Fork workers.
+    for (let i = 0; i < numCPUs; i++) {
+      cluster.fork();
+    }
+
+    cluster.on("exit", (worker, code, signal) => {});
+  } else {
+    const config: AppConfig = require(configFile);
+    const instanceId = instanceIdArgs || config.instanceId || random();
+    return startWithConfiguration(port, instanceId, config).then(() => {
+      console.log(
+        `retransmit instance ${instanceId} listening on port ${port}`
+      );
+    });
+  }
 }
 
 export async function startWithConfiguration(
-  port: number | undefined,
+  port: number,
   instanceId: string | undefined,
   userAppConfig: UserAppConfig
-): Promise<{
-  httpServer: Server;
-  webSocketServers: WebSocket.Server[];
-  instanceId: string;
-}> {
+): Promise<AppControl> {
   const config: AppConfig = userAppConfig as any;
   if (instanceId) {
     config.instanceId = instanceId;
@@ -97,7 +115,6 @@ export async function startWithConfiguration(
 
   // Get routes to handle
   const httpRequestHandler = await initHttpHandling(config);
-
   // Create the HttpServer
   let httpServer: HttpServer | HttpsServer;
   if (config.useHttps) {
@@ -120,11 +137,7 @@ export async function startWithConfiguration(
   // Attach webSocket servers
   webSocketServers = await initWebSocketHandling(httpServer, config);
 
-  if (port) {
-    httpServer.listen(port);
-  } else {
-    httpServer.listen();
-  }
+  httpServer.listen(port);
 
   httpServer.on("close", () => {
     for (const server of webSocketServers) {
@@ -132,10 +145,17 @@ export async function startWithConfiguration(
     }
   });
 
+  async function closeServers() {
+    for (const webSocketServer of webSocketServers) {
+      await closeWebSocketServer(webSocketServer);
+    }
+    await closeHttpServer(httpServer);
+  }
+
   return {
-    httpServer,
-    webSocketServers: webSocketServers,
     instanceId: config.instanceId,
+    port,
+    closeServers: closeServers,
   };
 }
 
@@ -160,10 +180,6 @@ if (require.main === module) {
     const port = argv.p;
     const instanceId = argv.i;
 
-    startApp(port, instanceId, configDir).then((config) => {
-      console.log(
-        `retransmit instance '${config.instanceId}' listening on port ${port}`
-      );
-    });
+    startApp(port, instanceId, configDir);
   }
 }

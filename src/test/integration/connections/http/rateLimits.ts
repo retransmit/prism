@@ -1,11 +1,10 @@
 import { startBackends, getResponse } from "../../../utils/http";
 import { TestAppInstance } from "../../../test";
-import random from "../../../../utils/random";
 import got from "got";
 import {
-  AppConfig,
   RedisStateConfig,
   InMemoryStateConfig,
+  UserAppConfig,
 } from "../../../../types";
 import { Response } from "got/dist/source/core";
 import { createClient } from "redis";
@@ -17,9 +16,8 @@ const client = createClient();
 const redisFlushAll = promisify(client.flushdb);
 
 export default async function (app: TestAppInstance) {
-  function makeConfig(modification: (config: AppConfig) => AppConfig) {
-    const baseConfig: AppConfig = {
-      instanceId: random(),
+  function makeConfig(modification: (config: UserAppConfig) => UserAppConfig) {
+    const baseConfig: UserAppConfig = {
       http: {
         routes: {
           "/users": {
@@ -44,7 +42,7 @@ export default async function (app: TestAppInstance) {
     return modification(baseConfig);
   }
 
-  const tests: [string, boolean, AppConfig][] = [
+  const tests: [string, boolean, UserAppConfig][] = [
     [
       "rate limits with in-memory state",
       false,
@@ -75,7 +73,7 @@ export default async function (app: TestAppInstance) {
         await sleep(100);
       }
 
-      const servers = await startTestApp({ config });
+      const appControl = await startTestApp({ config });
 
       let callCount = 0;
       // Start mock servers.
@@ -95,12 +93,10 @@ export default async function (app: TestAppInstance) {
         },
       ]);
 
-      app.servers = {
-        ...servers,
-        mockHttpServers: backendApps,
-      };
+      app.appControl = appControl;
+      app.mockHttpServers = backendApps;
 
-      const { port } = app.servers.httpServer.address() as any;
+      const { port } = appControl;
 
       const promisedResponses: Promise<Response<string>>[] = [];
 

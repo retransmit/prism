@@ -23,7 +23,7 @@ export default async function (app: TestAppInstance) {
       },
     };
 
-    const servers = await startTestApp({ config });
+    const appControl = await startTestApp({ config });
 
     // Start mock servers.
     const backendApps = startBackends([
@@ -50,12 +50,11 @@ export default async function (app: TestAppInstance) {
       },
     ]);
 
-    app.servers = {
-      ...servers,
-      mockHttpServers: backendApps,
-    };
+      app.appControl = appControl;
+      app.mockHttpServers = backendApps;
 
-    const { port } = app.servers.httpServer.address() as any;
+
+    const { port } = appControl;
     const promisedResponse = got(`http://localhost:${port}/users`, {
       method: "GET",
       searchParams: {

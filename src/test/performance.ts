@@ -1,16 +1,13 @@
 #!/usr/bin/env node
 import yargs = require("yargs");
-import WebSocket from "ws";
 import { Server as HttpServer } from "http";
 import { Server as HttpsServer } from "https";
 import * as httpTests from "./performance/connections/http";
+import { AppControl } from "..";
 
 export type PerformanceTestAppInstance = {
-  servers: {
-    httpServer: HttpServer | HttpsServer;
-    webSocketServers: WebSocket.Server[];
-    mockHttpServers?: (HttpServer | HttpsServer)[];
-  };
+  appControl: AppControl;
+  mockHttpServers?: (HttpServer | HttpsServer)[];
 };
 
 export type PerformanceTestResult = {

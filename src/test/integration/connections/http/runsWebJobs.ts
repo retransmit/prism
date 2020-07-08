@@ -21,7 +21,7 @@ export default async function (app: TestAppInstance) {
   };
 
   it("runs webjobs", async () => {
-    const servers = await startTestApp({ config });
+    const appControl = await startTestApp({ config });
 
     let callCount = 0;
     // Start mock servers.
@@ -41,10 +41,9 @@ export default async function (app: TestAppInstance) {
       },
     ]);
 
-    app.servers = {
-      ...servers,
-      mockHttpServers: backendApps,
-    };
+      app.appControl = appControl;
+      app.mockHttpServers = backendApps;
+
 
     await sleep(500);
 

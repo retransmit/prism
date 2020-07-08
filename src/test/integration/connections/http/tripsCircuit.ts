@@ -76,7 +76,7 @@ export default async function (app: TestAppInstance) {
         await sleep(100);
       }
 
-      const servers = await startTestApp({ config });
+      const appControl = await startTestApp({ config });
 
       let userServiceCallCount = 0;
       let messagingServiceCallCount = 0;
@@ -119,12 +119,11 @@ export default async function (app: TestAppInstance) {
         },
       ]);
 
-      app.servers = {
-        ...servers,
-        mockHttpServers: backendApps,
-      };
+      app.appControl = appControl;
+      app.mockHttpServers = backendApps;
 
-      const { port } = app.servers.httpServer.address() as any;
+
+      const { port } = appControl;
 
       const promisedResponses: Promise<Response<string>>[] = [];
 

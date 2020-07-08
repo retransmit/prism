@@ -1,5 +1,3 @@
-import { promisify } from "util";
-import { Server } from "http";
 import Koa = require("koa");
 import { CancelableRequest } from "got/dist/source";
 import { Response } from "got/dist/source/core";
@@ -7,16 +5,6 @@ import bodyParser = require("koa-body");
 import { HttpMethods } from "../../types";
 import koaStatic = require("koa-static");
 import koaMount = require("koa-mount");
-
-function closeHttpServerCb(server: Server, cb: any) {
-  (server as any).close(cb);
-}
-
-const promisifiedCloseHttpServer = promisify(closeHttpServerCb);
-
-export async function closeHttpServer(server: Server) {
-  await promisifiedCloseHttpServer(server);
-}
 
 type MockHttpBackendConfig = {
   port: number;

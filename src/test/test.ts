@@ -1,22 +1,17 @@
 import "mocha";
 import "should";
-import WebSocket from "ws";
 
 import integrationTestsHttp from "./integration/connections/http";
 import integrationTestsWebSocket from "./integration/connections/webSocket";
 
-import { closeHttpServer } from "./utils/http";
-import { closeWebSocketServer } from "./utils/webSocket";
-
 import { Server as HttpServer } from "http";
 import { Server as HttpsServer } from "https";
+import { AppControl } from "..";
+import { closeHttpServer } from "../utils/http/closeHttpServer";
 
 export type TestAppInstance = {
-  servers: {
-    httpServer: HttpServer | HttpsServer;
-    webSocketServers: WebSocket.Server[];
-    mockHttpServers?: (HttpServer | HttpsServer)[];
-  };
+  appControl?: AppControl;
+  mockHttpServers?: (HttpServer | HttpsServer)[];
 };
 
 function run() {
@@ -26,18 +21,26 @@ function run() {
   }
 
   describe("retransmit", () => {
-    let app: TestAppInstance = { app: { servers: undefined } } as any;
+    let app: TestAppInstance = {
+      appControl: undefined,
+      mockHttpServers: undefined,
+    } as any;
+
+    beforeEach(async () => {
+      (app as any).appControl = undefined;
+      app.mockHttpServers = undefined;
+    });
 
     afterEach(async function resetAfterEach() {
-      for (const webSocketServer of app.servers.webSocketServers) {
-        await closeWebSocketServer(webSocketServer);
-      }
-      if (app.servers.mockHttpServers) {
-        for (const mockHttpServer of app.servers.mockHttpServers) {
-          await await closeHttpServer(mockHttpServer);
+      if (app.mockHttpServers) {
+        for (const mockHttpServer of app.mockHttpServers) {
+          await closeHttpServer(mockHttpServer);
         }
       }
-      await closeHttpServer(app.servers.httpServer);
+
+      if (app.appControl) {
+        await app.appControl.closeServers();
+      }
     });
 
     integrationTestsHttp(app);

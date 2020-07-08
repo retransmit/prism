@@ -43,7 +43,7 @@
         "--no-timeouts",
         "dist/test/test.js",
         "-g",
-        "wildcard"
+        "params"
       ],
       "cwd": "${workspaceRoot}",
       "preLaunchTask": "build",

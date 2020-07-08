@@ -2,7 +2,7 @@ import WebSocket from "ws";
 import { TestAppInstance } from "../../../../../test";
 import { createClient } from "redis";
 import { RedisWebSocketConnectRequest } from "../../../../../../types/webSocket";
-import {  UserAppConfig } from "../../../../../../types";
+import { UserAppConfig } from "../../../../../../types";
 import startTestApp from "../../../../startTestApp";
 
 export default async function (app: TestAppInstance) {
@@ -25,26 +25,25 @@ export default async function (app: TestAppInstance) {
       },
     };
 
-    const servers = await startTestApp({ config });
-    
-    app.servers = servers;
+    const appControl = await startTestApp({ config });
 
-    const promisedConnectRequest = new Promise<
-      RedisWebSocketConnectRequest
-    >((success) => {
-      const subscriber = createClient();
-      subscriber.subscribe("input");
-      subscriber.on("message", (channel, messageString) => {
-        const message = JSON.parse(messageString);
-        if (message.type === "connect") {
-          success(message);
-        }
-      });
-    });
+    app.appControl = appControl;
+    const { port } = appControl;
 
-    const ws = new WebSocket(
-      `ws://localhost:${(app.servers.httpServer.address() as any).port}/quotes`
+    const promisedConnectRequest = new Promise<RedisWebSocketConnectRequest>(
+      (success) => {
+        const subscriber = createClient();
+        subscriber.subscribe("input");
+        subscriber.on("message", (channel, messageString) => {
+          const message = JSON.parse(messageString);
+          if (message.type === "connect") {
+            success(message);
+          }
+        });
+      }
     );
+
+    const ws = new WebSocket(`ws://localhost:${port}/quotes`);
 
     ws.on("open", () => {
       ws.send("HELO");
@@ -62,14 +61,14 @@ export default async function (app: TestAppInstance) {
         route: "/quotes",
         response: "GOOG: 1425.1",
       })
-      );
-      
-      publisher.publish(
-        connectRequest.responseChannel,
-        JSON.stringify({
-          id: connectRequest.id,
-          service: "quoteservice",
-          route: "/quotes",
+    );
+
+    publisher.publish(
+      connectRequest.responseChannel,
+      JSON.stringify({
+        id: connectRequest.id,
+        service: "quoteservice",
+        route: "/quotes",
         response: "AAPL: 331.8",
       })
     );

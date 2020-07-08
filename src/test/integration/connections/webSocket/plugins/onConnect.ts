@@ -30,15 +30,12 @@ export default async function (app: TestAppInstance) {
         },
       };
 
-      const servers = await startTestApp({ config });
+      const appControl = await startTestApp({ config });
 
-      app.servers = servers;
+      app.appControl = appControl;
+      const { port } = appControl;
 
-      const ws = new WebSocket(
-        `ws://localhost:${
-          (app.servers.httpServer.address() as any).port
-        }/quotes`
-      );
+      const ws = new WebSocket(`ws://localhost:${port}/quotes`);
 
       ws.on("open", () => {
         ws.send("HELO");
@@ -53,7 +50,6 @@ export default async function (app: TestAppInstance) {
   it(`runs the connect hook on route config`, async () => {
     let ran = false;
     let receivedMessage = "";
-    let clientResponse = "";
 
     const connectedPromise: Promise<void> = new Promise(async (success) => {
       const config: UserAppConfig = {
@@ -77,15 +73,12 @@ export default async function (app: TestAppInstance) {
         },
       };
 
-      const servers = await startTestApp({ config });
+      const appControl = await startTestApp({ config });
 
-      app.servers = servers;
+      app.appControl = appControl;
+      const { port } = appControl;
 
-      const ws = new WebSocket(
-        `ws://localhost:${
-          (app.servers.httpServer.address() as any).port
-        }/quotes`
-      );
+      const ws = new WebSocket(`ws://localhost:${port}/quotes`);
 
       ws.on("open", () => {
         ws.send("HELO");
@@ -123,15 +116,11 @@ export default async function (app: TestAppInstance) {
         },
       };
 
-      const servers = await startTestApp({ config });
+      const appControl = await startTestApp({ config });
+      app.appControl = appControl;
+      const { port } = appControl;
 
-      app.servers = servers;
-
-      const ws = new WebSocket(
-        `ws://localhost:${
-          (app.servers.httpServer.address() as any).port
-        }/quotes`
-      );
+      const ws = new WebSocket(`ws://localhost:${port}/quotes`);
 
       ws.on("open", () => {
         ws.send("HELO");
@@ -178,15 +167,11 @@ export default async function (app: TestAppInstance) {
         },
       };
 
-      const servers = await startTestApp({ config });
+      const appControl = await startTestApp({ config });
+      app.appControl = appControl;
+      const { port } = appControl;
 
-      app.servers = servers;
-
-      const ws = new WebSocket(
-        `ws://localhost:${
-          (app.servers.httpServer.address() as any).port
-        }/quotes`
-      );
+      const ws = new WebSocket(`ws://localhost:${port}/quotes`);
 
       ws.on("open", () => {
         ws.send("HELO");

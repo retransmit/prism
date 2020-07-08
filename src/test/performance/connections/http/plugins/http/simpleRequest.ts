@@ -16,7 +16,6 @@ export default async function (
   const numLoops = 1000 * count;
 
   const config = {
-    instanceId: random(),
     http: {
       routes: {
         "/users": {
@@ -33,8 +32,6 @@ export default async function (
     },
   };
 
-  const servers = await startTestApp({ config });
-
   // Start mock servers.
   const backendApps = startBackends([
     {
@@ -49,12 +46,11 @@ export default async function (
     },
   ]);
 
-  app.servers = {
-    ...servers,
-    mockHttpServers: backendApps,
-  };
-
-  const { port } = servers.httpServer.address() as any;
+  const appControl = await startTestApp({ config });
+  app.appControl = appControl;
+  const { port } = appControl;
+  
+  app.mockHttpServers = backendApps;
 
   const startTime = Date.now();
 

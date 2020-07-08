@@ -1,14 +1,12 @@
-import { HttpMethods, AppConfig } from "../../../../../../types";
+import { HttpMethods, UserAppConfig } from "../../../../../../types";
 import { TestAppInstance } from "../../../../../test";
 import { createClient } from "redis";
 import got from "got";
-import random from "../../../../../../utils/random";
 import startTestApp from "../../../../startTestApp";
 
 export default async function (app: TestAppInstance) {
-  function makeConfig(options: { method: HttpMethods }): AppConfig {
+  function makeConfig(options: { method: HttpMethods }): UserAppConfig {
     return {
-      instanceId: random(),
       http: {
         routes: {
           "/users": {
@@ -41,9 +39,9 @@ export default async function (app: TestAppInstance) {
     it(`adds ${method} request to the channel`, async () => {
       const config = makeConfig({ method });
 
-      const servers = await startTestApp({ config });
+      const appControl = await startTestApp({ config });
 
-      app.servers = servers;
+      app.appControl = appControl;
 
       let subscriberCb: (channel: string, message: string) => void = (
         a,
@@ -62,7 +60,7 @@ export default async function (app: TestAppInstance) {
       });
 
       // Make the http request.
-      const { port } = app.servers.httpServer.address() as any;
+      const { port } = appControl;
       const promisedServerRespose =
         method === "GET" || method === "DELETE" || method === "HEAD"
           ? got(`http://localhost:${port}/users`, { method, retry: 0 })

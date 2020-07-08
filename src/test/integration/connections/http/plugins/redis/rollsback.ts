@@ -32,9 +32,9 @@ export default async function (app: TestAppInstance) {
       },
     };
 
-    const servers = await startTestApp({ config });
+    const appControl = await startTestApp({ config });
 
-    app.servers = servers;
+    app.appControl = appControl;
 
     let subscriberCb: (channel: string, message: string) => void = (a, b) => {};
 
@@ -50,7 +50,7 @@ export default async function (app: TestAppInstance) {
     });
 
     // Make the http request.
-    const { port } = app.servers.httpServer.address() as any;
+    const { port } = appControl;
 
     const promisedServerRespose = got(`http://localhost:${port}/users`, {
       method: "POST",

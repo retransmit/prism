@@ -1,5 +1,5 @@
 import { startWithConfiguration } from "../..";
-import { AppConfig, UserAppConfig } from "../../types";
+import { UserAppConfig } from "../../types";
 import { createClient } from "redis";
 import { promisify } from "util";
 
@@ -23,6 +23,6 @@ export default async function startTestApp(params: StartAppParams) {
 
   const instanceId =
     typeof params.instanceId !== "undefined" ? params.instanceId : undefined;
-    
-  return await startWithConfiguration(port, instanceId, params.config);
+
+  return await startWithConfiguration(port || 6060, instanceId, params.config);
 }

@@ -32,7 +32,7 @@ export default async function (app: TestAppInstance) {
       },
     };
 
-    const servers = await startTestApp({ config });
+    const appControl = await startTestApp({ config });
 
     let calledRollback = false;
     let backendApps: Server[] = [];
@@ -78,12 +78,11 @@ export default async function (app: TestAppInstance) {
       ]);
     });
 
-    app.servers = {
-      ...servers,
-      mockHttpServers: backendApps,
-    };
+      app.appControl = appControl;
+      app.mockHttpServers = backendApps;
 
-    const { port } = app.servers.httpServer.address() as any;
+
+    const { port } = appControl;
     const promisedResponse = got(`http://localhost:${port}/users`, {
       method: "POST",
       json: { hello: "world" },
