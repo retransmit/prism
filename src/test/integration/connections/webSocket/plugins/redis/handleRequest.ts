@@ -1,15 +1,13 @@
 import WebSocket from "ws";
 import { TestAppInstance } from "../../../../../test";
-import random from "../../../../../../utils/random";
 import { createClient } from "redis";
 import { RedisWebSocketConnectRequest } from "../../../../../../types/webSocket";
-import { AppConfig } from "../../../../../../types";
+import {  UserAppConfig } from "../../../../../../types";
 import startTestApp from "../../../../../startTestApp";
 
 export default async function (app: TestAppInstance) {
   it(`gets websocket responses from redis backends`, async () => {
-    const config: AppConfig = {
-      instanceId: random(),
+    const config: UserAppConfig = {
       webSocket: {
         routes: {
           "/quotes": {
@@ -27,7 +25,7 @@ export default async function (app: TestAppInstance) {
       },
     };
 
-    const servers = await startTestApp(config);
+    const servers = await startTestApp({ config });
     
     app.servers = servers;
 

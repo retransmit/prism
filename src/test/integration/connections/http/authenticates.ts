@@ -1,8 +1,7 @@
 import { startBackends, getResponse } from "../../../utils/http";
 import { TestAppInstance } from "../../../test";
-import random from "../../../../utils/random";
 import got from "got";
-import { AppConfig } from "../../../../types";
+import { UserAppConfig } from "../../../../types";
 import startTestApp from "../../../startTestApp";
 
 export default async function (app: TestAppInstance) {
@@ -18,8 +17,7 @@ export default async function (app: TestAppInstance) {
   ];
 
   for (const [name, isValid, jwt] of tests) {
-    const config: AppConfig = {
-      instanceId: random(),
+    const config: UserAppConfig = {
       http: {
         routes: {
           "/users": {
@@ -44,7 +42,7 @@ export default async function (app: TestAppInstance) {
     };
 
     it(name, async () => {
-      const servers = await startTestApp(config);
+      const servers = await startTestApp({ config });
 
       let userServiceCallCount = 0;
 

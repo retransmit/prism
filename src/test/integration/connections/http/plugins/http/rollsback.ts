@@ -1,15 +1,13 @@
 import { startBackends, getResponse } from "../../../../../utils/http";
 import { Server } from "http";
 import { TestAppInstance } from "../../../../../test";
-import random from "../../../../../../utils/random";
 import got from "got";
-import { AppConfig } from "../../../../../../types";
+import { UserAppConfig } from "../../../../../../types";
 import startTestApp from "../../../../../startTestApp";
 
 export default async function (app: TestAppInstance) {
   it(`rolls back`, async () => {
-    const config: AppConfig = {
-      instanceId: random(),
+    const config: UserAppConfig = {
       http: {
         routes: {
           "/users": {
@@ -18,10 +16,10 @@ export default async function (app: TestAppInstance) {
                 userservice: {
                   type: "http" as "http",
                   url: "http://localhost:6666/users",
-                  rollback: req => ({
+                  rollback: (req) => ({
                     ...req,
-                    path: "http://localhost:6666/users/remove"
-                  })
+                    path: "http://localhost:6666/users/remove",
+                  }),
                 },
                 messagingservice: {
                   type: "http" as "http",
@@ -34,7 +32,7 @@ export default async function (app: TestAppInstance) {
       },
     };
 
-    const servers = await startTestApp(config);
+    const servers = await startTestApp({ config });
 
     let calledRollback = false;
     let backendApps: Server[] = [];

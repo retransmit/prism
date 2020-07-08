@@ -1,15 +1,13 @@
 import { startBackends, getResponse } from "../../../../../utils/http";
 import { TestAppInstance } from "../../../../../test";
-import random from "../../../../../../utils/random";
 import got from "got";
-import { AppConfig, BodyObject } from "../../../../../../types";
+import { BodyObject, UserAppConfig } from "../../../../../../types";
 import { NativeHttpServiceEndPointConfig } from "../../../../../../types/http";
 import startTestApp from "../../../../../startTestApp";
 
 export default async function (app: TestAppInstance) {
   it(`runs stages`, async () => {
-    const config: AppConfig = {
-      instanceId: random(),
+    const config: UserAppConfig = {
       http: {
         routes: {
           "/users": {
@@ -45,7 +43,7 @@ export default async function (app: TestAppInstance) {
       },
     };
 
-    const servers = await startTestApp(config);
+    const servers = await startTestApp({ config });
 
     // Start mock servers.
     const backendApps = startBackends([

@@ -1,8 +1,7 @@
-import random from "../../../../../utils/random";
 import WebSocket from "ws";
 import { TestAppInstance } from "../../../../test";
-import { AppConfig } from "../../../../../types";
 import startTestApp from "../../../../startTestApp";
+import { UserAppConfig } from "../../../../../types";
 
 export default async function (app: TestAppInstance) {
   it(`runs the connect hook on root config`, async () => {
@@ -10,8 +9,7 @@ export default async function (app: TestAppInstance) {
     let receivedMessage = "";
 
     const connectedPromise: Promise<void> = new Promise(async (success) => {
-      const config: AppConfig = {
-        instanceId: random(),
+      const config: UserAppConfig = {
         webSocket: {
           onConnect: async (requestId: string, message: string) => {
             ran = true;
@@ -32,7 +30,7 @@ export default async function (app: TestAppInstance) {
         },
       };
 
-      const servers = await startTestApp(config);
+      const servers = await startTestApp({ config });
 
       app.servers = servers;
 
@@ -58,8 +56,7 @@ export default async function (app: TestAppInstance) {
     let clientResponse = "";
 
     const connectedPromise: Promise<void> = new Promise(async (success) => {
-      const config: AppConfig = {
-        instanceId: random(),
+      const config: UserAppConfig = {
         webSocket: {
           routes: {
             "/quotes": {
@@ -80,7 +77,7 @@ export default async function (app: TestAppInstance) {
         },
       };
 
-      const servers = await startTestApp(config);
+      const servers = await startTestApp({ config });
 
       app.servers = servers;
 
@@ -106,8 +103,7 @@ export default async function (app: TestAppInstance) {
     let clientResponse = "";
 
     const connectedPromise: Promise<void> = new Promise(async (success) => {
-      const config: AppConfig = {
-        instanceId: random(),
+      const config: UserAppConfig = {
         webSocket: {
           onConnect: async (requestId: string, message: string) => {
             ran = true;
@@ -127,7 +123,7 @@ export default async function (app: TestAppInstance) {
         },
       };
 
-      const servers = await startTestApp(config);
+      const servers = await startTestApp({ config });
 
       app.servers = servers;
 
@@ -162,8 +158,7 @@ export default async function (app: TestAppInstance) {
     let clientResponse = "";
 
     const connectedPromise: Promise<void> = new Promise(async (success) => {
-      const config: AppConfig = {
-        instanceId: random(),
+      const config: UserAppConfig = {
         webSocket: {
           routes: {
             "/quotes": {
@@ -183,7 +178,7 @@ export default async function (app: TestAppInstance) {
         },
       };
 
-      const servers = await startTestApp(config);
+      const servers = await startTestApp({ config });
 
       app.servers = servers;
 

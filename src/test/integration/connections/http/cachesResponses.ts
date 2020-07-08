@@ -11,15 +11,10 @@ import { Response } from "got/dist/source/core";
 import { createClient } from "redis";
 import { promisify } from "util";
 import startTestApp from "../../../startTestApp";
+import sleep from "../../../../utils/sleep";
 
 const client = createClient();
 const redisFlushAll = promisify(client.flushdb);
-
-function sleep(ms: number): Promise<void> {
-  return new Promise((success) => {
-    setTimeout(success, ms);
-  });
-}
 
 export default async function (app: TestAppInstance) {
   function makeConfig(modification: (config: AppConfig) => AppConfig) {
@@ -78,7 +73,7 @@ export default async function (app: TestAppInstance) {
         await sleep(100);
       }
 
-      const servers = await startTestApp(config);
+      const servers = await startTestApp({ config });
 
       let userServiceCallCount = 0;
 

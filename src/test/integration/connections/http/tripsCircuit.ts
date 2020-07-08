@@ -1,30 +1,23 @@
 import { startBackends, getResponse } from "../../../utils/http";
 import { TestAppInstance } from "../../../test";
-import random from "../../../../utils/random";
 import got from "got";
 import {
-  AppConfig,
   RedisStateConfig,
   InMemoryStateConfig,
+  UserAppConfig,
 } from "../../../../types";
 import { Response } from "got/dist/source/core";
 import { createClient } from "redis";
 import { promisify } from "util";
 import startTestApp from "../../../startTestApp";
+import sleep from "../../../../utils/sleep";
 
 const client = createClient();
 const redisFlushAll = promisify(client.flushdb);
 
-function sleep(ms: number): Promise<void> {
-  return new Promise((success) => {
-    setTimeout(success, ms);
-  });
-}
-
 export default async function (app: TestAppInstance) {
-  function makeConfig(modification: (config: AppConfig) => AppConfig) {
-    const baseConfig: AppConfig = {
-      instanceId: random(),
+  function makeConfig(modification: (config: UserAppConfig) => UserAppConfig) {
+    const baseConfig: UserAppConfig = {
       http: {
         routes: {
           "/users": {
@@ -52,7 +45,7 @@ export default async function (app: TestAppInstance) {
     return modification(baseConfig);
   }
 
-  const tests: [string, boolean, AppConfig][] = [
+  const tests: [string, boolean, UserAppConfig][] = [
     [
       "trips the circuit with in-memory state",
       false,
@@ -83,7 +76,7 @@ export default async function (app: TestAppInstance) {
         await sleep(100);
       }
 
-      const servers = await startTestApp(config);
+      const servers = await startTestApp({ config });
 
       let userServiceCallCount = 0;
       let messagingServiceCallCount = 0;

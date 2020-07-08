@@ -12,8 +12,8 @@ import * as httpsModule from "https";
 export type HttpMethods = "GET" | "POST" | "PUT" | "DELETE" | "PATCH" | "HEAD";
 
 // Application Config
-export type AppConfig = {
-  instanceId: string;
+export type UserAppConfig = {
+  instanceId?: string;
   http?: HttpProxyConfig;
   webSocket?: WebSocketProxyConfig;
   webJobs?: {
@@ -41,6 +41,10 @@ export type AppConfig = {
   createHttpServer?: (
     listener: httpModule.RequestListener
   ) => httpModule.Server;
+};
+
+export type AppConfig = UserAppConfig & {
+  instanceId: string;
 };
 
 export type HttpProxyAppConfig = AppConfig & { http: HttpProxyConfig };

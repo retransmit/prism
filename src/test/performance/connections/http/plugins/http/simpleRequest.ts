@@ -33,7 +33,7 @@ export default async function (
     },
   };
 
-  const servers = await startTestApp(config);
+  const servers = await startTestApp({ config });
 
   // Start mock servers.
   const backendApps = startBackends([

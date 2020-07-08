@@ -41,7 +41,7 @@ export default async function (app: TestAppInstance) {
     it(`adds ${method} request to the channel`, async () => {
       const config = makeConfig({ method });
 
-      const servers = await startTestApp(config);
+      const servers = await startTestApp({ config });
 
       app.servers = servers;
 

@@ -1,14 +1,12 @@
 import { startBackends, getResponse } from "../../../../../utils/http";
 import { TestAppInstance } from "../../../../../test";
-import random from "../../../../../../utils/random";
 import got from "got";
-import { AppConfig } from "../../../../../../types";
+import { UserAppConfig } from "../../../../../../types";
 import startTestApp from "../../../../../startTestApp";
 
 export default async function (app: TestAppInstance) {
   it(`excludes body fields`, async () => {
-    const config: AppConfig = {
-      instanceId: random(),
+    const config: UserAppConfig = {
       http: {
         routes: {
           "/users": {
@@ -30,7 +28,7 @@ export default async function (app: TestAppInstance) {
       },
     };
 
-    const servers = await startTestApp(config);
+    const servers = await startTestApp({ config });
 
     // Start mock servers.
     const backendApps = startBackends([

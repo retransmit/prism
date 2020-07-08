@@ -1,16 +1,14 @@
 import * as redis from "redis";
 import { TestAppInstance } from "../../../../../test";
-import random from "../../../../../../utils/random";
 import got from "got";
 import { RedisHttpRequest } from "../../../../../../types/http";
 import { getResponse } from "../../../../../utils/http";
-import { AppConfig } from "../../../../../../types";
+import { UserAppConfig } from "../../../../../../types";
 import startTestApp from "../../../../../startTestApp";
 
 export default async function (app: TestAppInstance) {
   it(`rolls back`, async () => {
-    const config: AppConfig = {
-      instanceId: random(),
+    const config: UserAppConfig = {
       http: {
         routes: {
           "/users": {
@@ -34,7 +32,7 @@ export default async function (app: TestAppInstance) {
       },
     };
 
-    const servers = await startTestApp(config);
+    const servers = await startTestApp({ config });
 
     app.servers = servers;
 
@@ -104,9 +102,7 @@ export default async function (app: TestAppInstance) {
 
     const serverResponse = await getResponse(promisedServerRespose);
     serverResponse.statusCode.should.equal(400);
-    serverResponse.body.should.equal(
-      "Invalid request."
-    );
+    serverResponse.body.should.equal("Invalid request.");
 
     rollbackMessage.type.should.equal("rollback");
     rollbackMessage.request.path.should.equal("/users");

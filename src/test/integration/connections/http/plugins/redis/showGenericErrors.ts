@@ -1,15 +1,13 @@
 import { TestAppInstance } from "../../../../../test";
-import random from "../../../../../../utils/random";
 import { createClient } from "redis";
 import { getResponse } from "../../../../../utils/http";
 import got from "got";
-import { AppConfig } from "../../../../../../types";
+import { UserAppConfig } from "../../../../../../types";
 import startTestApp from "../../../../../startTestApp";
 
 const genericErrorsForRoute = [
   "shows generic errors for service",
   {
-    instanceId: random(),
     http: {
       routes: {
         "/users": {
@@ -38,7 +36,6 @@ const genericErrorsForRoute = [
 const genericErrorsGlobally = [
   "shows generic errors for all services",
   {
-    instanceId: random(),
     http: {
       routes: {
         "/users": {
@@ -66,15 +63,14 @@ const genericErrorsGlobally = [
 
 const configs = [genericErrorsForRoute, genericErrorsGlobally] as [
   string,
-  AppConfig
+  UserAppConfig
 ][];
 
 export default async function (app: TestAppInstance) {
-  configs.forEach((testCfg: [string, AppConfig]) => {
+  configs.forEach((testCfg: [string, UserAppConfig]) => {
     const [testName, config] = testCfg;
     it(testName, async () => {
-      const config: AppConfig = {
-        instanceId: random(),
+      const config: UserAppConfig = {
         http: {
           routes: {
             "/users": {
@@ -99,7 +95,7 @@ export default async function (app: TestAppInstance) {
         },
       };
 
-      const servers = await startTestApp(config);
+      const servers = await startTestApp({ config });
 
       app.servers = servers;
 

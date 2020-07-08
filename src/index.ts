@@ -9,7 +9,7 @@ import { Server as HttpsServer } from "https";
 import WebSocket from "ws";
 
 import * as applicationState from "./state";
-import { AppConfig } from "./types";
+import { AppConfig, UserAppConfig } from "./types";
 
 import initHttpHandler from "./connections/http";
 import initWebSocketHandling from "./connections/webSocket";
@@ -44,12 +44,13 @@ export async function startApp(
 export async function startWithConfiguration(
   port: number | undefined,
   instanceId: string | undefined,
-  config: AppConfig
+  userAppConfig: UserAppConfig
 ): Promise<{
   httpServer: Server;
   webSocketServers: WebSocket.Server[];
   instanceId: string;
 }> {
+  const config: AppConfig = userAppConfig as any;
   if (instanceId) {
     config.instanceId = instanceId;
   }

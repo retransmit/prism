@@ -38,7 +38,7 @@ export default async function (app: TestAppInstance) {
     it(`sends an HTTP ${method} request to the backend`, async () => {
       const config = makeConfig({ method });
 
-      const servers = await startTestApp(config);
+      const servers = await startTestApp({ config });
 
       // Start mock servers.
       const backendApps = startBackends([
