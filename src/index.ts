@@ -12,7 +12,6 @@ import yargs = require("yargs");
 import { AppConfig, UserAppConfig } from "./types";
 import * as applicationState from "./state";
 import initWebSocketHandling from "./connections/webSocket";
-import random from "./utils/random";
 import * as webJobs from "./connections/http/webJobs";
 import initHttpHandling from "./connections/http";
 
@@ -31,6 +30,7 @@ const argv = yargs.options({
   p: { type: "number", default: 8080, alias: "port" },
   v: { type: "boolean", alias: "version" },
   silent: { type: "boolean" },
+  nocluster: { type: "boolean" },
 }).argv;
 
 export type AppControl = {
@@ -47,6 +47,7 @@ export async function startApp(
   port: number,
   instanceId: string | undefined,
   configFile: string,
+  notCluster: boolean,
   silent: boolean
 ) {
   const config: UserAppConfig = require(configFile);
@@ -55,29 +56,36 @@ export async function startApp(
   const generatedName = namesGenerator("_");
   let counter = 0;
 
-  if (cluster.isMaster) {
-    function startWorker(counter: number) {
-      const worker = cluster.fork();
-      worker.send({
-        type: "start",
-        instanceId: `${
-          instanceId || config.instanceId || generatedName
-        }_${counter}`,
-      });
-    }
-    // Fork workers.
-    for (let i = 0; i < config.numWorkers; i++) {
-      counter++;
-      startWorker(counter);
-    }
-    cluster.on("exit", (worker, code, signal) => {
-      startWorker(counter);
-    });
-  } else {
-    return startWithConfiguration(port, config, "doesnt_matter", {
-      isCluster: true,
+  if (notCluster) {
+    return startWithConfiguration(port, config, generatedName, {
+      isCluster: false,
       silent,
     });
+  } else {
+    if (cluster.isMaster) {
+      function startWorker(counter: number) {
+        const worker = cluster.fork();
+        worker.send({
+          type: "start",
+          instanceId: `${
+            instanceId || config.instanceId || generatedName
+          }_${counter}`,
+        });
+      }
+      // Fork workers.
+      for (let i = 0; i < config.numWorkers; i++) {
+        counter++;
+        startWorker(counter);
+      }
+      cluster.on("exit", (worker, code, signal) => {
+        startWorker(counter);
+      });
+    } else {
+      return startWithConfiguration(port, config, "doesnt_matter", {
+        isCluster: true,
+        silent,
+      });
+    }
   }
 }
 
@@ -216,6 +224,12 @@ if (require.main === module) {
     const port = argv.p;
     const instanceId = argv.i;
 
-    startApp(port, instanceId, configFile, argv.silent ?? false);
+    startApp(
+      port,
+      instanceId,
+      configFile,
+      argv.nocluster ?? false,
+      argv.silent ?? false
+    );
   }
 }
