@@ -31,6 +31,7 @@ const argv = yargs.options({
   v: { type: "boolean", alias: "version" },
   silent: { type: "boolean" },
   nocluster: { type: "boolean" },
+  workers: { type: "number" },
 }).argv;
 
 export type AppControl = {
@@ -48,10 +49,11 @@ export async function startApp(
   instanceId: string | undefined,
   configFile: string,
   notCluster: boolean,
-  silent: boolean
+  silent: boolean,
+  workers: number | undefined
 ) {
   const config: UserAppConfig = require(configFile);
-  config.numWorkers = config.numWorkers || os.cpus().length;
+  config.numWorkers = workers ?? config.numWorkers ?? os.cpus().length;
 
   const generatedName = namesGenerator("_");
   let counter = 0;
@@ -229,7 +231,8 @@ if (require.main === module) {
       instanceId,
       configFile,
       argv.nocluster ?? false,
-      argv.silent ?? false
+      argv.silent ?? false,
+      argv.workers
     );
   }
 }
