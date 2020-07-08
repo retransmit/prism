@@ -39,6 +39,10 @@ export type AppControl = {
   closeServers: () => Promise<void>;
 };
 
+export type WorkerStartArgs = {
+  instanceId: string;
+};
+
 export async function startApp(
   port: number,
   instanceId: string | undefined,
@@ -48,36 +52,59 @@ export async function startApp(
   const config: UserAppConfig = require(configFile);
   config.numWorkers = config.numWorkers || os.cpus().length;
 
+  const generatedName = namesGenerator("_");
+  let counter = 0;
+
   if (cluster.isMaster) {
+    function startWorker(counter: number) {
+      const worker = cluster.fork();
+      worker.send({
+        type: "start",
+        instanceId: `${
+          instanceId || config.instanceId || generatedName
+        }_${counter}`,
+      });
+    }
     // Fork workers.
     for (let i = 0; i < config.numWorkers; i++) {
-      cluster.fork();
+      counter++;
+      startWorker(counter);
     }
-
-    cluster.on("exit", (worker, code, signal) => {});
+    cluster.on("exit", (worker, code, signal) => {
+      startWorker(counter);
+    });
   } else {
-    return startWithConfiguration(port, instanceId, config, { silent });
+    return startWithConfiguration(port, config, "doesnt_matter", {
+      isCluster: true,
+      silent,
+    });
   }
 }
 
 export type StartOpts = {
+  isCluster: boolean;
   silent: boolean;
 };
 
 export async function startWithConfiguration(
   port: number,
-  instanceId: string | undefined,
   userAppConfig: UserAppConfig,
+  workerInstanceId: string,
   opts: StartOpts
 ): Promise<AppControl> {
   const config: AppConfig = userAppConfig as any;
-  if (instanceId) {
-    config.instanceId = `${instanceId}_${random()}`;
-  } else if (config.instanceId) {
-    config.instanceId = `${config.instanceId}_${random()}`;
-  } else {
-    config.instanceId = `${namesGenerator("_")}_${random()}`;
-  }
+
+  const instanceId: string = opts.isCluster
+    ? await new Promise((success) => {
+        process.on("message", (data) => {
+          if (data.type === "start") success(data.instanceId);
+        });
+      })
+    : workerInstanceId;
+
+  // Append a counter to the instanceId to make it unique.
+  // We need this so that workers don't fetch from the same redis queues.
+  config.instanceId = instanceId;
 
   // People are going to mistype 'webSocket' as all lowercase.
   if ((config as any).websocket !== undefined) {

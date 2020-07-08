@@ -2,6 +2,7 @@ import { startWithConfiguration } from "../../../..";
 import { UserAppConfig } from "../../../../types";
 import { createClient } from "redis";
 import { promisify } from "util";
+import random from "../../../../utils/random";
 
 export type StartAppParams = {
   port?: number;
@@ -24,9 +25,12 @@ export default async function startRetransmitTestInstance(
       : undefined;
 
   const instanceId =
-    typeof params.instanceId !== "undefined" ? params.instanceId : undefined;
+    typeof params.instanceId !== "undefined"
+      ? params.instanceId
+      : `testinstance_${random()}`;
 
-  return await startWithConfiguration(port || 6060, instanceId, params.config, {
+  return await startWithConfiguration(port || 6060, params.config, instanceId, {
+    isCluster: false,
     silent: true,
   });
 }
