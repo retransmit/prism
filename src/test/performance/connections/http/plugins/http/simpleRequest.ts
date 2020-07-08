@@ -1,5 +1,4 @@
 import random from "../../../../../../utils/random";
-import { startWithConfiguration } from "../../../../../..";
 import { startBackends, getResponse } from "../../../../../utils/http";
 import got from "got/dist/source";
 import {
@@ -7,6 +6,7 @@ import {
   PerformanceTestResult,
 } from "../../../../../performance";
 import { HttpMethods } from "../../../../../../types";
+import startTestApp from "../../../../../startTestApp";
 
 export default async function (
   name: string,
@@ -33,11 +33,7 @@ export default async function (
     },
   };
 
-  const servers = await startWithConfiguration(
-    undefined,
-    "testinstance",
-    config
-  );
+  const servers = await startTestApp(config);
 
   // Start mock servers.
   const backendApps = startBackends([

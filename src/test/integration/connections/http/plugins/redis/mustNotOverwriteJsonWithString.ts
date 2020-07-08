@@ -1,10 +1,10 @@
 import { TestAppInstance } from "../../../../../test";
 import got from "got";
 import { createClient } from "redis";
-import { startWithConfiguration } from "../../../../../..";
 import random from "../../../../../../utils/random";
 import { getResponse } from "../../../../../utils/http";
 import { AppConfig } from "../../../../../../types";
+import startTestApp from "../../../../../startTestApp";
 
 export default async function (app: TestAppInstance) {
   it(`must not overwrite json content with string content`, async () => {
@@ -33,7 +33,7 @@ export default async function (app: TestAppInstance) {
       },
     };
 
-    const servers = await startWithConfiguration(undefined, undefined, config);
+    const servers = await startTestApp(config);
 
     app.servers = servers;
 

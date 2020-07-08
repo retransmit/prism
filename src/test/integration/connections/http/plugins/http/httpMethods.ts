@@ -1,9 +1,9 @@
 import { HttpMethods, AppConfig } from "../../../../../../types";
-import { startWithConfiguration } from "../../../../../..";
 import { startBackends, getResponse } from "../../../../../utils/http";
 import { TestAppInstance } from "../../../../../test";
 import random from "../../../../../../utils/random";
 import got from "got";
+import startTestApp from "../../../../../startTestApp";
 
 export default async function (app: TestAppInstance) {
   function makeConfig(options: { method: HttpMethods }): AppConfig {
@@ -38,11 +38,7 @@ export default async function (app: TestAppInstance) {
     it(`sends an HTTP ${method} request to the backend`, async () => {
       const config = makeConfig({ method });
 
-      const servers = await startWithConfiguration(
-        undefined,
-        "testinstance",
-        config
-      );
+      const servers = await startTestApp(config);
 
       // Start mock servers.
       const backendApps = startBackends([

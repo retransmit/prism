@@ -1,10 +1,10 @@
 import WebSocket from "ws";
 import { TestAppInstance } from "../../../../../test";
 import random from "../../../../../../utils/random";
-import { startWithConfiguration } from "../../../../../..";
 import { createClient } from "redis";
 import { RedisWebSocketConnectRequest } from "../../../../../../types/webSocket";
 import { AppConfig } from "../../../../../../types";
+import startTestApp from "../../../../../startTestApp";
 
 export default async function (app: TestAppInstance) {
   it(`gets websocket responses from redis backends`, async () => {
@@ -27,11 +27,8 @@ export default async function (app: TestAppInstance) {
       },
     };
 
-    const servers = await startWithConfiguration(
-      undefined,
-      "testinstance",
-      config
-    );
+    const servers = await startTestApp(config);
+    
     app.servers = servers;
 
     const promisedConnectRequest = new Promise<

@@ -1,8 +1,8 @@
-import { startWithConfiguration } from "../../../../..";
 import random from "../../../../../utils/random";
 import WebSocket from "ws";
 import { TestAppInstance } from "../../../../test";
 import { AppConfig } from "../../../../../types";
+import startTestApp from "../../../../startTestApp";
 
 export default async function (app: TestAppInstance) {
   it(`runs the connect hook on root config`, async () => {
@@ -32,11 +32,8 @@ export default async function (app: TestAppInstance) {
         },
       };
 
-      const servers = await startWithConfiguration(
-        undefined,
-        "testinstance",
-        config
-      );
+      const servers = await startTestApp(config);
+
       app.servers = servers;
 
       const ws = new WebSocket(
@@ -83,11 +80,8 @@ export default async function (app: TestAppInstance) {
         },
       };
 
-      const servers = await startWithConfiguration(
-        undefined,
-        "testinstance",
-        config
-      );
+      const servers = await startTestApp(config);
+
       app.servers = servers;
 
       const ws = new WebSocket(
@@ -133,11 +127,8 @@ export default async function (app: TestAppInstance) {
         },
       };
 
-      const servers = await startWithConfiguration(
-        undefined,
-        "testinstance",
-        config
-      );
+      const servers = await startTestApp(config);
+
       app.servers = servers;
 
       const ws = new WebSocket(
@@ -192,11 +183,8 @@ export default async function (app: TestAppInstance) {
         },
       };
 
-      const servers = await startWithConfiguration(
-        undefined,
-        "testinstance",
-        config
-      );
+      const servers = await startTestApp(config);
+
       app.servers = servers;
 
       const ws = new WebSocket(

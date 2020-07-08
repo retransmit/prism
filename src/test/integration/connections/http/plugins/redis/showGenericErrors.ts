@@ -1,10 +1,10 @@
 import { TestAppInstance } from "../../../../../test";
 import random from "../../../../../../utils/random";
-import { startWithConfiguration } from "../../../../../..";
 import { createClient } from "redis";
 import { getResponse } from "../../../../../utils/http";
 import got from "got";
 import { AppConfig } from "../../../../../../types";
+import startTestApp from "../../../../../startTestApp";
 
 const genericErrorsForRoute = [
   "shows generic errors for service",
@@ -99,11 +99,7 @@ export default async function (app: TestAppInstance) {
         },
       };
 
-      const servers = await startWithConfiguration(
-        undefined,
-        undefined,
-        config
-      );
+      const servers = await startTestApp(config);
 
       app.servers = servers;
 

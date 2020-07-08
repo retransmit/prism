@@ -1,11 +1,11 @@
 import * as redis from "redis";
 import { TestAppInstance } from "../../../../../test";
 import random from "../../../../../../utils/random";
-import { startWithConfiguration } from "../../../../../..";
 import got from "got";
 import { RedisHttpRequest } from "../../../../../../types/http";
 import { getResponse } from "../../../../../utils/http";
 import { AppConfig } from "../../../../../../types";
+import startTestApp from "../../../../../startTestApp";
 
 export default async function (app: TestAppInstance) {
   it(`rolls back`, async () => {
@@ -34,7 +34,7 @@ export default async function (app: TestAppInstance) {
       },
     };
 
-    const servers = await startWithConfiguration(undefined, undefined, config);
+    const servers = await startTestApp(config);
 
     app.servers = servers;
 

@@ -1,4 +1,3 @@
-import { startWithConfiguration } from "../../../..";
 import { startBackends, getResponse } from "../../../utils/http";
 import { TestAppInstance } from "../../../test";
 import random from "../../../../utils/random";
@@ -11,6 +10,7 @@ import {
 import { Response } from "got/dist/source/core";
 import { createClient } from "redis";
 import { promisify } from "util";
+import startTestApp from "../../../startTestApp";
 
 const client = createClient();
 const redisFlushAll = promisify(client.flushdb);
@@ -83,11 +83,7 @@ export default async function (app: TestAppInstance) {
         await sleep(100);
       }
 
-      const servers = await startWithConfiguration(
-        undefined,
-        "testinstance",
-        config
-      );
+      const servers = await startTestApp(config);
 
       let userServiceCallCount = 0;
       let messagingServiceCallCount = 0;

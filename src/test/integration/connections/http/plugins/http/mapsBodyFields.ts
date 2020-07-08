@@ -1,9 +1,9 @@
-import { startWithConfiguration } from "../../../../../..";
 import { startBackends, getResponse } from "../../../../../utils/http";
 import { TestAppInstance } from "../../../../../test";
 import random from "../../../../../../utils/random";
 import got from "got";
 import { AppConfig } from "../../../../../../types";
+import startTestApp from "../../../../../startTestApp";
 
 export default async function (app: TestAppInstance) {
   it(`maps body fields`, async () => {
@@ -32,11 +32,7 @@ export default async function (app: TestAppInstance) {
       },
     };
 
-    const servers = await startWithConfiguration(
-      undefined,
-      "testinstance",
-      config
-    );
+    const servers = await startTestApp(config);
 
     // Start mock servers.
     const backendApps = startBackends([

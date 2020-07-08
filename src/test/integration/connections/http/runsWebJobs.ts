@@ -1,4 +1,3 @@
-import { startWithConfiguration } from "../../../..";
 import { startBackends, getResponse } from "../../../utils/http";
 import { TestAppInstance } from "../../../test";
 import random from "../../../../utils/random";
@@ -6,6 +5,7 @@ import {
   AppConfig,
 } from "../../../../types";
 import { promisify } from "util";
+import startTestApp from "../../../startTestApp";
 
 function sleep(ms: number): Promise<void> {
   return new Promise((success) => {
@@ -26,11 +26,7 @@ export default async function (app: TestAppInstance) {
   };
 
   it("runs webjobs", async () => {
-    const servers = await startWithConfiguration(
-      undefined,
-      "testinstance",
-      config
-    );
+    const servers = await startTestApp(config);
 
     let callCount = 0;
     // Start mock servers.

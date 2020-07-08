@@ -1,9 +1,9 @@
-import { startWithConfiguration } from "../../../../../../..";
 import { startBackends } from "../../../../../../utils/http";
 import { TestAppInstance } from "../../../../../../test";
 import random from "../../../../../../../utils/random";
 import { AppConfig } from "../../../../../../../types";
 import got from "got";
+import startTestApp from "../../../../../../startTestApp";
 
 export default async function (app: TestAppInstance) {
   it(`handles a stream with text response`, async () => {
@@ -26,11 +26,7 @@ export default async function (app: TestAppInstance) {
       },
     };
 
-    const servers = await startWithConfiguration(
-      undefined,
-      "testinstance",
-      config
-    );
+    const servers = await startTestApp(config);
 
     // Start mock servers.
     const backendApps = startBackends([
