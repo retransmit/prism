@@ -2,7 +2,7 @@ import { HttpMethods, UserAppConfig } from "../../../../../../types";
 import { startBackends, getResponse } from "../../../../../utils/http";
 import { TestAppInstance } from "../../../..";
 import got from "got";
-import startTestApp from "../../../../startTestApp";
+import startTestApp from "../../../../utils/startTestApp";
 
 export default async function (app: TestAppInstance) {
   function makeConfig(options: { method: HttpMethods }): UserAppConfig {

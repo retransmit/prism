@@ -2,7 +2,7 @@ import { HttpMethods, UserAppConfig } from "../../../../../../types";
 import { TestAppInstance } from "../../../../";
 import { createClient } from "redis";
 import got from "got";
-import startTestApp from "../../../../startTestApp";
+import startTestApp from "../../../../utils/startTestApp";
 
 export default async function (app: TestAppInstance) {
   function makeConfig(options: { method: HttpMethods }): UserAppConfig {

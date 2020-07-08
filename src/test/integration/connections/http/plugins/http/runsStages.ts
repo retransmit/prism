@@ -3,7 +3,7 @@ import { TestAppInstance } from "../../../..";
 import got from "got";
 import { BodyObject, UserAppConfig } from "../../../../../../types";
 import { NativeHttpServiceEndPointConfig } from "../../../../../../types/http";
-import startTestApp from "../../../../startTestApp";
+import startTestApp from "../../../../utils/startTestApp";
 
 export default async function (app: TestAppInstance) {
   it(`runs stages`, async () => {

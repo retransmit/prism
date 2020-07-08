@@ -1,7 +1,7 @@
 import { startBackends, getResponse } from "../../../utils/http";
 import { TestAppInstance } from "../../";
 import { UserAppConfig } from "../../../../types";
-import startTestApp from "../../startTestApp";
+import startTestApp from "../../utils/startTestApp";
 
 function sleep(ms: number): Promise<void> {
   return new Promise((success) => {

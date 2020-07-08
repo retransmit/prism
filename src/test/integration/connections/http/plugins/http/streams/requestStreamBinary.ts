@@ -5,7 +5,7 @@ import { UserAppConfig } from "../../../../../../../types";
 import { join } from "path";
 import { createWriteStream, statSync } from "fs";
 import { pipeline } from "stream";
-import startTestApp from "../../../../../startTestApp";
+import startTestApp from "../../../../../utils/startTestApp";
 
 export default async function (app: TestAppInstance) {
   it(`handles a stream with binary response`, async () => {

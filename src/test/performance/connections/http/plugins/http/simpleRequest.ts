@@ -6,7 +6,7 @@ import {
   PerformanceTestResult,
 } from "../../../../../performance";
 import { HttpMethods } from "../../../../../../types";
-import startTestApp from "../../../../../integration/startTestApp";
+import startTestApp from "../../../../../integration/utils/startTestApp";
 
 export default async function (
   name: string,

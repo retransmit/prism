@@ -4,7 +4,7 @@ import got from "got";
 import { RedisHttpRequest } from "../../../../../../types/http";
 import { getResponse } from "../../../../../utils/http";
 import { UserAppConfig } from "../../../../../../types";
-import startTestApp from "../../../../startTestApp";
+import startTestApp from "../../../../utils/startTestApp";
 
 export default async function (app: TestAppInstance) {
   it(`rolls back`, async () => {
