@@ -1,4 +1,4 @@
-import { TestAppInstance } from "../../../../../test";
+import { TestAppInstance } from "../../../../";
 import got from "got";
 import { createClient } from "redis";
 import { getResponse } from "../../../../../utils/http";

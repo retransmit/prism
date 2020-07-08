@@ -1,6 +1,6 @@
 import { startBackends, getResponse } from "../../../../../utils/http";
 import { Server } from "http";
-import { TestAppInstance } from "../../../../../test";
+import { TestAppInstance } from "../../../..";
 import got from "got";
 import { UserAppConfig } from "../../../../../../types";
 import startTestApp from "../../../../startTestApp";

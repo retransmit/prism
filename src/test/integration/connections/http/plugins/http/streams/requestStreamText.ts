@@ -1,5 +1,5 @@
 import { startBackends } from "../../../../../../utils/http";
-import { TestAppInstance } from "../../../../../../test";
+import { TestAppInstance } from "../../../../..";
 import { UserAppConfig } from "../../../../../../../types";
 import got from "got";
 import startTestApp from "../../../../../startTestApp";
@@ -44,9 +44,8 @@ export default async function (app: TestAppInstance) {
       },
     ]);
 
-      app.appControl = appControl;
-      app.mockHttpServers = backendApps;
-
+    app.appControl = appControl;
+    app.mockHttpServers = backendApps;
 
     const { port } = appControl;
     const serverResponse = await got(`http://localhost:${port}/users`, {

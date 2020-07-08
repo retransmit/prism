@@ -1,6 +1,6 @@
 import { HttpMethods, UserAppConfig } from "../../../../../../types";
 import { startBackends, getResponse } from "../../../../../utils/http";
-import { TestAppInstance } from "../../../../../test";
+import { TestAppInstance } from "../../../..";
 import got from "got";
 import startTestApp from "../../../../startTestApp";
 

@@ -1,5 +1,5 @@
 import { startBackends, getResponse } from "../../../../../utils/http";
-import { TestAppInstance } from "../../../../../test";
+import { TestAppInstance } from "../../../..";
 import got from "got";
 import { BodyObject, UserAppConfig } from "../../../../../../types";
 import { NativeHttpServiceEndPointConfig } from "../../../../../../types/http";

@@ -1,5 +1,5 @@
 import * as redis from "redis";
-import { TestAppInstance } from "../../../../../test";
+import { TestAppInstance } from "../../../../";
 import got from "got";
 import { RedisHttpRequest } from "../../../../../../types/http";
 import { getResponse } from "../../../../../utils/http";

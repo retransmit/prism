@@ -1,6 +1,6 @@
 import requestStreamText from "./requestStreamText";
 import requestStreamBinary from "./requestStreamBinary";
-import { TestAppInstance } from "../../../../../../test";
+import { TestAppInstance } from "../../../../..";
 
 export default function run(app: TestAppInstance) {
   describe("streams", () => {

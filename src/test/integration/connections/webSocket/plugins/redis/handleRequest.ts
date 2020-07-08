@@ -1,5 +1,5 @@
 import WebSocket from "ws";
-import { TestAppInstance } from "../../../../../test";
+import { TestAppInstance } from "../../../../";
 import { createClient } from "redis";
 import { RedisWebSocketConnectRequest } from "../../../../../../types/webSocket";
 import { UserAppConfig } from "../../../../../../types";

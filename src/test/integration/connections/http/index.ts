@@ -1,6 +1,3 @@
-import "mocha";
-import "should";
-
 import handlesWildcardRotues from "./routing/wildcardRoutes";
 import handlesParams from "./routing/params";
 
@@ -34,11 +31,10 @@ import tripsCircuit from "./tripsCircuit";
 import runsWebJobs from "./runsWebJobs";
 import cachesResponses from "./cachesResponses";
 import authenticates from "./authenticates";
-
-import { TestAppInstance } from "../../../test";
+import { TestAppInstance } from "../..";
 
 export default function run(app: TestAppInstance) {
-  describe("Http connections (integration)", () => {
+  describe("http connections", () => {
     describe("routing", () => {
       handlesParams(app);
       handlesWildcardRotues(app);

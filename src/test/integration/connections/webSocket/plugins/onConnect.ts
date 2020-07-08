@@ -1,5 +1,5 @@
 import WebSocket from "ws";
-import { TestAppInstance } from "../../../../test";
+import { TestAppInstance } from "../../../";
 import startTestApp from "../../../startTestApp";
 import { UserAppConfig } from "../../../../../types";
 

@@ -1,5 +1,5 @@
 import { startBackends } from "../../../../utils/http";
-import { TestAppInstance } from "../../../../test";
+import { TestAppInstance } from "../../../";
 import got from "got";
 import { UserAppConfig } from "../../../../../types";
 import startTestApp from "../../../startTestApp";
