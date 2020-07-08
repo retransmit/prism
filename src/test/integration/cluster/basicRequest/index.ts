@@ -29,9 +29,11 @@ export default async function (app: TestAppInstance, testEnv: TestEnv) {
       },
     ]);
 
-    app.mockHttpServers = backendApps;
+    const { port, pid } = instanceConfig;
 
-    const { port } = instanceConfig;
+    app.mockHttpServers = backendApps;
+    app.pid = pid;
+
     const promisedResponse = got(`http://localhost:${port}/users`, {
       method: "GET",
       retry: 0,
@@ -40,5 +42,5 @@ export default async function (app: TestAppInstance, testEnv: TestEnv) {
     const serverResponse = await getResponse(promisedResponse);
     serverResponse.statusCode.should.equal(200);
     serverResponse.body.should.equal(`GET: Everything worked.`);
-  });
+  }).timeout(5000);
 }

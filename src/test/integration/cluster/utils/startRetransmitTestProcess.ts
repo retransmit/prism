@@ -1,6 +1,7 @@
 import { spawn } from "child_process";
 import { TestEnv } from "../../../test";
 import { join } from "path";
+import sleep from "../../../../utils/sleep";
 
 export type InstanceConfig = {
   port: number;
@@ -38,7 +39,11 @@ export async function startRetransmitTestProcess(
     args.push("-1", instanceId);
   }
 
-  const { pid } = spawn("node", args);
+  const { pid, stdout } = spawn("node", args);
+
+  await new Promise((success) => {
+    stdout.on("data", () => success());
+  });
 
   return {
     port,
