@@ -10,7 +10,6 @@ import {
   HttpServiceEndPointConfig,
 } from "../../../../types/http";
 import { IRouterContext } from "koa-router";
-import { pipeline } from "stream";
 import got from "got/dist/source";
 import selectRandomUrl from "../../../../utils/http/selectRandomUrl";
 import { replaceParamsInUrl } from "./replaceParamsInUrl";
@@ -37,10 +36,12 @@ export default async function handleStreamRequest(
 
     const urlWithParamsReplaced = replaceParamsInUrl(params, serviceUrl);
     const options = makeGotOptions(request, undefined, undefined, true);
-    const requestStream = got.stream(urlWithParamsReplaced, options);
-    ctx.body = requestStream; //.pipe(ctx.res);
-    // pipeline(ctx.req, requestStream);
-    // ctx.body = requestStream;
+    const requestStream = got.stream(urlWithParamsReplaced, {
+      ...options,
+      throwHttpErrors: false,
+    });
+
+    ctx.body = requestStream;
   }
 }
 
