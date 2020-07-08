@@ -1,8 +1,8 @@
 import { HttpMethods, UserAppConfig } from "../../../../../../types";
 import { startBackends, getResponse } from "../../../../../utils/http";
-import { TestAppInstance } from "../../../..";
+import { TestAppInstance } from "../../..";
 import got from "got";
-import startRetransmitTestInstance from "../../../../utils/startRetransmitTestInstance";
+import startRetransmitTestInstance from "../../../utils/startRetransmitTestInstance";
 
 export default async function (app: TestAppInstance) {
   function makeConfig(options: { method: HttpMethods }): UserAppConfig {

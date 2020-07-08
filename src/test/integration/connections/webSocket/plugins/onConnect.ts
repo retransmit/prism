@@ -1,6 +1,6 @@
 import WebSocket from "ws";
-import { TestAppInstance } from "../../../";
-import startRetransmitTestInstance from "../../../utils/startRetransmitTestInstance";
+import { TestAppInstance } from "../../";
+import startRetransmitTestInstance from "../../utils/startRetransmitTestInstance";
 import { UserAppConfig } from "../../../../../types";
 
 export default async function (app: TestAppInstance) {

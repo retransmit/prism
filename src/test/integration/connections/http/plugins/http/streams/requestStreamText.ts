@@ -1,8 +1,8 @@
 import { startBackends } from "../../../../../../utils/http";
-import { TestAppInstance } from "../../../../..";
+import { TestAppInstance } from "../../../..";
 import { UserAppConfig } from "../../../../../../../types";
 import got from "got";
-import startRetransmitTestInstance from "../../../../../utils/startRetransmitTestInstance";
+import startRetransmitTestInstance from "../../../../utils/startRetransmitTestInstance";
 
 export default async function (app: TestAppInstance) {
   it(`handles a stream with text response`, async () => {

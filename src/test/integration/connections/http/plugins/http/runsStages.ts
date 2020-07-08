@@ -1,9 +1,9 @@
 import { startBackends, getResponse } from "../../../../../utils/http";
-import { TestAppInstance } from "../../../..";
+import { TestAppInstance } from "../../..";
 import got from "got";
 import { BodyObject, UserAppConfig } from "../../../../../../types";
 import { NativeHttpServiceEndPointConfig } from "../../../../../../types/http";
-import startRetransmitTestInstance from "../../../../utils/startRetransmitTestInstance";
+import startRetransmitTestInstance from "../../../utils/startRetransmitTestInstance";
 
 export default async function (app: TestAppInstance) {
   it(`runs stages`, async () => {

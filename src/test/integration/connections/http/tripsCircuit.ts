@@ -1,5 +1,5 @@
 import { startBackends, getResponse } from "../../../utils/http";
-import { TestAppInstance } from "../../";
+import { TestAppInstance } from "../";
 import got from "got";
 import {
   RedisStateConfig,
@@ -9,7 +9,7 @@ import {
 import { Response } from "got/dist/source/core";
 import { createClient } from "redis";
 import { promisify } from "util";
-import startRetransmitTestInstance from "../../utils/startRetransmitTestInstance";
+import startRetransmitTestInstance from "../utils/startRetransmitTestInstance";
 import sleep from "../../../../utils/sleep";
 
 const client = createClient();
@@ -121,7 +121,6 @@ export default async function (app: TestAppInstance) {
 
       app.appControl = appControl;
       app.mockHttpServers = backendApps;
-
 
       const { port } = appControl;
 

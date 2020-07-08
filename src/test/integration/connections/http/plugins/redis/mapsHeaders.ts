@@ -1,8 +1,8 @@
-import { TestAppInstance } from "../../../../";
+import { TestAppInstance } from "../../../";
 import { createClient } from "redis";
 import got from "got";
 import {  UserAppConfig } from "../../../../../../types";
-import startRetransmitTestInstance from "../../../../utils/startRetransmitTestInstance";
+import startRetransmitTestInstance from "../../../utils/startRetransmitTestInstance";
 
 export default async function (app: TestAppInstance) {
   it(`maps headers`, async () => {

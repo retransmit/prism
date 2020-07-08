@@ -31,7 +31,7 @@ import tripsCircuit from "./tripsCircuit";
 import runsWebJobs from "./runsWebJobs";
 import cachesResponses from "./cachesResponses";
 import authenticates from "./authenticates";
-import { TestAppInstance } from "../..";
+import { TestAppInstance } from "..";
 
 export default function run(app: TestAppInstance) {
   describe("http connections", () => {

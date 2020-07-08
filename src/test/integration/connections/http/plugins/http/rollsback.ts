@@ -1,9 +1,9 @@
 import { startBackends, getResponse } from "../../../../../utils/http";
 import { Server } from "http";
-import { TestAppInstance } from "../../../..";
+import { TestAppInstance } from "../../..";
 import got from "got";
 import { UserAppConfig } from "../../../../../../types";
-import startRetransmitTestInstance from "../../../../utils/startRetransmitTestInstance";
+import startRetransmitTestInstance from "../../../utils/startRetransmitTestInstance";
 
 export default async function (app: TestAppInstance) {
   it(`rolls back`, async () => {

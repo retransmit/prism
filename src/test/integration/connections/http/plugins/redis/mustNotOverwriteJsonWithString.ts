@@ -1,9 +1,9 @@
-import { TestAppInstance } from "../../../../";
+import { TestAppInstance } from "../../../";
 import got from "got";
 import { createClient } from "redis";
 import { getResponse } from "../../../../../utils/http";
 import { UserAppConfig } from "../../../../../../types";
-import startRetransmitTestInstance from "../../../../utils/startRetransmitTestInstance";
+import startRetransmitTestInstance from "../../../utils/startRetransmitTestInstance";
 
 export default async function (app: TestAppInstance) {
   it(`must not overwrite json content with string content`, async () => {

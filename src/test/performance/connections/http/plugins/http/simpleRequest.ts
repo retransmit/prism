@@ -6,7 +6,7 @@ import {
   PerformanceTestResult,
 } from "../../../../../performance";
 import { HttpMethods } from "../../../../../../types";
-import startRetransmitTestInstance from "../../../../../integration/utils/startRetransmitTestInstance";
+import startRetransmitTestInstance from "../../../../../integration/connections/utils/startRetransmitTestInstance";
 
 export default async function (
   name: string,

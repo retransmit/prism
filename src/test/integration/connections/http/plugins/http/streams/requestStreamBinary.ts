@@ -1,11 +1,11 @@
 import { startBackends } from "../../../../../../utils/http";
-import { TestAppInstance } from "../../../../..";
+import { TestAppInstance } from "../../../..";
 import got from "got";
 import { UserAppConfig } from "../../../../../../../types";
 import { join } from "path";
 import { createWriteStream, statSync } from "fs";
 import { pipeline } from "stream";
-import startRetransmitTestInstance from "../../../../../utils/startRetransmitTestInstance";
+import startRetransmitTestInstance from "../../../../utils/startRetransmitTestInstance";
 
 export default async function (app: TestAppInstance) {
   it(`handles a stream with binary response`, async () => {

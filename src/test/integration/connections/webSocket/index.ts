@@ -2,7 +2,7 @@ import "mocha";
 import "should";
 
 import onConnect from "./plugins/onConnect";
-import { TestAppInstance } from "../../";
+import { TestAppInstance } from "../";
 import redisBasicRequest from "./plugins/redis/basicRequest";
 
 export default function run(app: TestAppInstance) {

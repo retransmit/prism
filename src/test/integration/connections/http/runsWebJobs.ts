@@ -1,7 +1,7 @@
-import { startBackends, getResponse } from "../../../utils/http";
-import { TestAppInstance } from "../../";
+import { startBackends } from "../../../utils/http";
+import { TestAppInstance } from "../";
 import { UserAppConfig } from "../../../../types";
-import startRetransmitTestInstance from "../../utils/startRetransmitTestInstance";
+import startRetransmitTestInstance from "../utils/startRetransmitTestInstance";
 
 function sleep(ms: number): Promise<void> {
   return new Promise((success) => {
@@ -41,9 +41,8 @@ export default async function (app: TestAppInstance) {
       },
     ]);
 
-      app.appControl = appControl;
-      app.mockHttpServers = backendApps;
-
+    app.appControl = appControl;
+    app.mockHttpServers = backendApps;
 
     await sleep(500);
 

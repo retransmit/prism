@@ -1,9 +1,9 @@
-import { TestAppInstance } from "../../../../";
+import { TestAppInstance } from "../../../";
 import { createClient } from "redis";
 import { getResponse } from "../../../../../utils/http";
 import got from "got";
 import { UserAppConfig } from "../../../../../../types";
-import startRetransmitTestInstance from "../../../../utils/startRetransmitTestInstance";
+import startRetransmitTestInstance from "../../../utils/startRetransmitTestInstance";
 
 const genericErrorsForRoute = [
   "shows generic errors for service",
