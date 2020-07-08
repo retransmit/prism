@@ -4,6 +4,7 @@ import { getResponse } from "../../../../../utils/http";
 import got from "got";
 import { UserAppConfig } from "../../../../../../types";
 import startRetransmitTestInstance from "../../../utils/startRetransmitTestInstance";
+import { TestEnv } from "../../../../../test";
 
 const genericErrorsForRoute = [
   "shows generic errors for service",
@@ -66,7 +67,7 @@ const configs = [genericErrorsForRoute, genericErrorsGlobally] as [
   UserAppConfig
 ][];
 
-export default async function (app: TestAppInstance) {
+export default async function (app: TestAppInstance, testEnv: TestEnv) {
   configs.forEach((testCfg: [string, UserAppConfig]) => {
     const [testName, config] = testCfg;
     it(testName, async () => {

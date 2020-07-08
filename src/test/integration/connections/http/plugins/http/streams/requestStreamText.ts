@@ -3,8 +3,9 @@ import { TestAppInstance } from "../../../..";
 import { UserAppConfig } from "../../../../../../../types";
 import got from "got";
 import startRetransmitTestInstance from "../../../../utils/startRetransmitTestInstance";
+import { TestEnv } from "../../../../../../test";
 
-export default async function (app: TestAppInstance) {
+export default async function (app: TestAppInstance, testEnv: TestEnv) {
   it(`handles a stream with text response`, async () => {
     const config: UserAppConfig = {
       http: {

@@ -1,10 +1,11 @@
 import requestStreamText from "./requestStreamText";
 import requestStreamBinary from "./requestStreamBinary";
 import { TestAppInstance } from "../../../..";
+import { TestEnv } from "../../../../../../test";
 
-export default function run(app: TestAppInstance) {
+export default function run(app: TestAppInstance, testEnv: TestEnv) {
   describe("streams", () => {
-    requestStreamText(app);
-    requestStreamBinary(app);
+    requestStreamText(app, testEnv);
+    requestStreamBinary(app, testEnv);
   });
 }

@@ -3,8 +3,9 @@ import { TestAppInstance } from "../../..";
 import got from "got";
 import { UserAppConfig } from "../../../../../../types";
 import startRetransmitTestInstance from "../../../utils/startRetransmitTestInstance";
+import { TestEnv } from "../../../../../test";
 
-export default async function (app: TestAppInstance) {
+export default async function (app: TestAppInstance, testEnv: TestEnv) {
   it(`must not overwrite json content with string content`, async () => {
     const config: UserAppConfig = {
       http: {

@@ -3,8 +3,9 @@ import { TestAppInstance } from "../";
 import got from "got";
 import { UserAppConfig } from "../../../../types";
 import startRetransmitTestInstance from "../utils/startRetransmitTestInstance";
+import { TestEnv } from "../../../test";
 
-export default async function (app: TestAppInstance) {
+export default async function (app: TestAppInstance, testEnv: TestEnv) {
   const jwt =
     "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJPbmxpbmUgSldUIEJ1aWxkZXIiLCJpYXQiOjE1OTM4NDYzNTEsImV4cCI6MTgxNDY4NDc1MSwiYXVkIjoid3d3LmV4YW1wbGUuY29tIiwic3ViIjoianJvY2tldEBleGFtcGxlLmNvbSIsIkdpdmVuTmFtZSI6IkpvaG5ueSIsIlN1cm5hbWUiOiJSb2NrZXQiLCJFbWFpbCI6Impyb2NrZXRAZXhhbXBsZS5jb20iLCJSb2xlIjpbIk1hbmFnZXIiLCJQcm9qZWN0IEFkbWluaXN0cmF0b3IiXX0._Fi5C7CUwSqOImUO3jIN-hMpKqcDmpdOl60lTa4aHMo";
 

@@ -32,56 +32,57 @@ import runsWebJobs from "./runsWebJobs";
 import cachesResponses from "./cachesResponses";
 import authenticates from "./authenticates";
 import { TestAppInstance } from "..";
+import { TestEnv } from "../../../test";
 
-export default function run(app: TestAppInstance) {
+export default function run(app: TestAppInstance, testEnv: TestEnv) {
   describe("http connections", () => {
     describe("routing", () => {
-      handlesParams(app);
-      handlesWildcardRotues(app);
+      handlesParams(app, testEnv);
+      handlesWildcardRotues(app, testEnv);
     });
     describe("http", () => {
-      httpDontMergeIgnored(app);
-      httpHttpMethods(app);
-      httpMergeResults(app);
-      httpMustNotOverwriteJsonWithString(app);
-      httpRollsback(app);
-      httpMapsBodyFields(app);
-      httpExcludesBodyFields(app);
-      httpMapsHeaders(app);
-      httpExcludesHeaders(app);
-      httpUrlEncodedRequests(app);
-      httpRedirect(app);
-      httpRunsStages(app);
-      httpStreams(app);
+      httpDontMergeIgnored(app, testEnv);
+      httpHttpMethods(app, testEnv);
+      httpMergeResults(app, testEnv);
+      httpMustNotOverwriteJsonWithString(app, testEnv);
+      httpRollsback(app, testEnv);
+      httpMapsBodyFields(app, testEnv);
+      httpExcludesBodyFields(app, testEnv);
+      httpMapsHeaders(app, testEnv);
+      httpExcludesHeaders(app, testEnv);
+      httpUrlEncodedRequests(app, testEnv);
+      httpRedirect(app, testEnv);
+      httpRunsStages(app, testEnv);
+      httpStreams(app, testEnv);
     });
 
     describe("redis", () => {
-      redisDontMergeIgnored(app);
-      redisHttpMethods(app);
-      redisMergeResults(app);
-      redisMustNotOverwriteJsonWithString(app);
-      redisRollsback(app);
-      redisShowGenericErrors(app);
-      redisMapsBodyFields(app);
-      redisExcludesBodyFields(app);
-      redisExcludesHeaders(app);
-      redisMapsHeaders(app);
+      redisDontMergeIgnored(app, testEnv);
+      redisHttpMethods(app, testEnv);
+      redisMergeResults(app, testEnv);
+      redisMustNotOverwriteJsonWithString(app, testEnv);
+      redisRollsback(app, testEnv);
+      redisShowGenericErrors(app, testEnv);
+      redisMapsBodyFields(app, testEnv);
+      redisExcludesBodyFields(app, testEnv);
+      redisExcludesHeaders(app, testEnv);
+      redisMapsHeaders(app, testEnv);
     });
 
     describe("rate limiting", () => {
-      rateLimits(app);
+      rateLimits(app, testEnv);
     });
     describe("circuit breaker", () => {
-      tripsCircuit(app);
+      tripsCircuit(app, testEnv);
     });
     describe("web jobs", () => {
-      runsWebJobs(app);
+      runsWebJobs(app, testEnv);
     });
     describe("caching", () => {
-      cachesResponses(app);
+      cachesResponses(app, testEnv);
     });
     describe("authentication", () => {
-      authenticates(app);
+      authenticates(app, testEnv);
     });
   });
 }

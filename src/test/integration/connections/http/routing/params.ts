@@ -3,8 +3,9 @@ import { TestAppInstance } from "../../";
 import got from "got";
 import { UserAppConfig } from "../../../../../types";
 import startRetransmitTestInstance from "../../utils/startRetransmitTestInstance";
+import { TestEnv } from "../../../../test";
 
-export default async function (app: TestAppInstance) {
+export default async function (app: TestAppInstance, testEnv: TestEnv) {
   it(`handles params`, async () => {
     const config: UserAppConfig = {
       http: {

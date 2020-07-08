@@ -5,13 +5,14 @@ import { AppControl } from "../../..";
 import { closeHttpServer } from "../../../utils/http/closeHttpServer";
 import integrationTestsHttp from "./http";
 import integrationTestsWebSocket from "./webSocket";
+import { TestEnv } from "../../test";
 
 export type TestAppInstance = {
   appControl?: AppControl;
   mockHttpServers?: (HttpServer | HttpsServer)[];
 };
 
-export default function run() {
+export default function run(testEnv: TestEnv) {
   describe("connection types", () => {
     let app: TestAppInstance = {
       appControl: undefined,
@@ -35,7 +36,7 @@ export default function run() {
       }
     });
 
-    integrationTestsHttp(app);
-    integrationTestsWebSocket(app);
+    integrationTestsHttp(app, testEnv);
+    integrationTestsWebSocket(app, testEnv);
   });
 }

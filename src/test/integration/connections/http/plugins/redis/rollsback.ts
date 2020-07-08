@@ -5,8 +5,9 @@ import { RedisHttpRequest } from "../../../../../../types/http";
 import { getResponse } from "../../../../../utils/http";
 import { UserAppConfig } from "../../../../../../types";
 import startRetransmitTestInstance from "../../../utils/startRetransmitTestInstance";
+import { TestEnv } from "../../../../../test";
 
-export default async function (app: TestAppInstance) {
+export default async function (app: TestAppInstance, testEnv: TestEnv) {
   it(`rolls back`, async () => {
     const config: UserAppConfig = {
       http: {

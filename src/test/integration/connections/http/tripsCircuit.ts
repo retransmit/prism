@@ -11,11 +11,12 @@ import { createClient } from "redis";
 import { promisify } from "util";
 import startRetransmitTestInstance from "../utils/startRetransmitTestInstance";
 import sleep from "../../../../utils/sleep";
+import { TestEnv } from "../../../test";
 
 const client = createClient();
 const redisFlushAll = promisify(client.flushdb);
 
-export default async function (app: TestAppInstance) {
+export default async function (app: TestAppInstance, testEnv: TestEnv) {
   function makeConfig(modification: (config: UserAppConfig) => UserAppConfig) {
     const baseConfig: UserAppConfig = {
       http: {

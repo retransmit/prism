@@ -4,8 +4,9 @@ import got from "got";
 import { BodyObject, UserAppConfig } from "../../../../../../types";
 import { NativeHttpServiceEndPointConfig } from "../../../../../../types/http";
 import startRetransmitTestInstance from "../../../utils/startRetransmitTestInstance";
+import { TestEnv } from "../../../../../test";
 
-export default async function (app: TestAppInstance) {
+export default async function (app: TestAppInstance, testEnv: TestEnv) {
   it(`runs stages`, async () => {
     const config: UserAppConfig = {
       http: {

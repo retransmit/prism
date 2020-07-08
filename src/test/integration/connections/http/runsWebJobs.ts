@@ -2,6 +2,7 @@ import { startBackends } from "../../../utils/http";
 import { TestAppInstance } from "../";
 import { UserAppConfig } from "../../../../types";
 import startRetransmitTestInstance from "../utils/startRetransmitTestInstance";
+import { TestEnv } from "../../../test";
 
 function sleep(ms: number): Promise<void> {
   return new Promise((success) => {
@@ -9,7 +10,7 @@ function sleep(ms: number): Promise<void> {
   });
 }
 
-export default async function (app: TestAppInstance) {
+export default async function (app: TestAppInstance, testEnv: TestEnv) {
   const config: UserAppConfig = {
     webJobs: {
       cleanupusers: {
