@@ -3,7 +3,7 @@ import { TestAppInstance } from "../../../../../test";
 import { createClient } from "redis";
 import got from "got";
 import random from "../../../../../../utils/random";
-import startTestApp from "../../../../../startTestApp";
+import startTestApp from "../../../../startTestApp";
 
 export default async function (app: TestAppInstance) {
   function makeConfig(options: { method: HttpMethods }): AppConfig {

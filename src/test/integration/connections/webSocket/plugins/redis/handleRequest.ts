@@ -3,7 +3,7 @@ import { TestAppInstance } from "../../../../../test";
 import { createClient } from "redis";
 import { RedisWebSocketConnectRequest } from "../../../../../../types/webSocket";
 import {  UserAppConfig } from "../../../../../../types";
-import startTestApp from "../../../../../startTestApp";
+import startTestApp from "../../../../startTestApp";
 
 export default async function (app: TestAppInstance) {
   it(`gets websocket responses from redis backends`, async () => {

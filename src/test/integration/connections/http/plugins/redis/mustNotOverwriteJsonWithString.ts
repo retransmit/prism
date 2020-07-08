@@ -3,7 +3,7 @@ import got from "got";
 import { createClient } from "redis";
 import { getResponse } from "../../../../../utils/http";
 import { UserAppConfig } from "../../../../../../types";
-import startTestApp from "../../../../../startTestApp";
+import startTestApp from "../../../../startTestApp";
 
 export default async function (app: TestAppInstance) {
   it(`must not overwrite json content with string content`, async () => {

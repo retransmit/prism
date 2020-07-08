@@ -2,7 +2,7 @@ import { startBackends } from "../../../../../../utils/http";
 import { TestAppInstance } from "../../../../../../test";
 import { UserAppConfig } from "../../../../../../../types";
 import got from "got";
-import startTestApp from "../../../../../../startTestApp";
+import startTestApp from "../../../../../startTestApp";
 
 export default async function (app: TestAppInstance) {
   it(`handles a stream with text response`, async () => {

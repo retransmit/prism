@@ -10,7 +10,7 @@ import {
 import { Response } from "got/dist/source/core";
 import { createClient } from "redis";
 import { promisify } from "util";
-import startTestApp from "../../../startTestApp";
+import startTestApp from "../../startTestApp";
 import sleep from "../../../../utils/sleep";
 
 const client = createClient();

@@ -3,7 +3,7 @@ import { createClient } from "redis";
 import { getResponse } from "../../../../../utils/http";
 import got from "got";
 import { UserAppConfig } from "../../../../../../types";
-import startTestApp from "../../../../../startTestApp";
+import startTestApp from "../../../../startTestApp";
 
 const genericErrorsForRoute = [
   "shows generic errors for service",

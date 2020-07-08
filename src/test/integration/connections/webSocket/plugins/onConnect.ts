@@ -1,6 +1,6 @@
 import WebSocket from "ws";
 import { TestAppInstance } from "../../../../test";
-import startTestApp from "../../../../startTestApp";
+import startTestApp from "../../../startTestApp";
 import { UserAppConfig } from "../../../../../types";
 
 export default async function (app: TestAppInstance) {

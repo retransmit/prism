@@ -1,5 +1,5 @@
-import { startWithConfiguration } from "..";
-import { AppConfig, UserAppConfig } from "../types";
+import { startWithConfiguration } from "../..";
+import { AppConfig, UserAppConfig } from "../../types";
 import { createClient } from "redis";
 import { promisify } from "util";
 
@@ -14,15 +14,15 @@ export default async function startTestApp(params: StartAppParams) {
   const redisFlushAll = promisify(client.flushdb);
   await redisFlushAll.call(client);
 
-  return await startWithConfiguration(
+  const port =
     typeof params.port !== "undefined"
       ? params.port
       : process.env.TEST_PORT
       ? parseInt(process.env.TEST_PORT)
-      : undefined,
-    typeof params.instanceId !== "undefined"
-      ? params.instanceId
-      : undefined,
-    params.config
-  );
+      : undefined;
+
+  const instanceId =
+    typeof params.instanceId !== "undefined" ? params.instanceId : undefined;
+    
+  return await startWithConfiguration(port, instanceId, params.config);
 }

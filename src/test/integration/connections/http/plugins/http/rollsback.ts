@@ -3,7 +3,7 @@ import { Server } from "http";
 import { TestAppInstance } from "../../../../../test";
 import got from "got";
 import { UserAppConfig } from "../../../../../../types";
-import startTestApp from "../../../../../startTestApp";
+import startTestApp from "../../../../startTestApp";
 
 export default async function (app: TestAppInstance) {
   it(`rolls back`, async () => {
