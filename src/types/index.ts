@@ -14,6 +14,7 @@ export type HttpMethods = "GET" | "POST" | "PUT" | "DELETE" | "PATCH" | "HEAD";
 // Application Config
 export type UserAppConfig = {
   instanceId?: string;
+  numWorkers?: number;
   http?: HttpProxyConfig;
   webSocket?: WebSocketProxyConfig;
   webJobs?: {
@@ -45,6 +46,7 @@ export type UserAppConfig = {
 
 export type AppConfig = UserAppConfig & {
   instanceId: string;
+  numWorkers: number;
 };
 
 export type HttpProxyAppConfig = AppConfig & { http: HttpProxyConfig };

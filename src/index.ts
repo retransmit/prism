@@ -42,17 +42,17 @@ export async function startApp(
   instanceIdArgs: string | undefined,
   configFile: string
 ) {
-  if (cluster.isMaster) {
-    const numCPUs = os.cpus().length;
+  const config: UserAppConfig = require(configFile);
+  config.numWorkers = config.numWorkers || os.cpus().length;
 
+  if (cluster.isMaster) {
     // Fork workers.
-    for (let i = 0; i < numCPUs; i++) {
+    for (let i = 0; i < config.numWorkers; i++) {
       cluster.fork();
     }
 
     cluster.on("exit", (worker, code, signal) => {});
   } else {
-    const config: AppConfig = require(configFile);
     const instanceId = instanceIdArgs || config.instanceId || random();
     return startWithConfiguration(port, instanceId, config).then(() => {
       console.log(
