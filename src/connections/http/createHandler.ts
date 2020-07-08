@@ -1,5 +1,5 @@
 import { IRouterContext } from "koa-router";
-import { HttpMethods, HttpRequest, AppConfig } from "../../types";
+import { HttpMethods, AppConfig } from "../../types";
 import randomId from "../../utils/random";
 
 import {

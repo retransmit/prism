@@ -11,7 +11,6 @@ import WebSocket from "ws";
 import * as applicationState from "./state";
 import { AppConfig, UserAppConfig } from "./types";
 
-import initHttpHandler from "./connections/http";
 import initWebSocketHandling from "./connections/webSocket";
 
 import { Server } from "http";
