@@ -2,7 +2,7 @@ import { startBackends } from "../../../../utils/http";
 import { TestAppInstance } from "../../../";
 import got from "got";
 import { UserAppConfig } from "../../../../../types";
-import startTestApp from "../../../utils/startTestApp";
+import startRetransmitTestInstance from "../../../utils/startRetransmitTestInstance";
 
 export default async function (app: TestAppInstance) {
   it(`handles wildcard routes`, async () => {
@@ -23,7 +23,7 @@ export default async function (app: TestAppInstance) {
       },
     };
 
-    const appControl = await startTestApp({ config });
+    const appControl = await startRetransmitTestInstance({ config });
 
     // Start mock servers.
     const backendApps = startBackends([

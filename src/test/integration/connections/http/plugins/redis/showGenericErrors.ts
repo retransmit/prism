@@ -3,7 +3,7 @@ import { createClient } from "redis";
 import { getResponse } from "../../../../../utils/http";
 import got from "got";
 import { UserAppConfig } from "../../../../../../types";
-import startTestApp from "../../../../utils/startTestApp";
+import startRetransmitTestInstance from "../../../../utils/startRetransmitTestInstance";
 
 const genericErrorsForRoute = [
   "shows generic errors for service",
@@ -95,7 +95,7 @@ export default async function (app: TestAppInstance) {
         },
       };
 
-      const appControl = await startTestApp({ config });
+      const appControl = await startRetransmitTestInstance({ config });
 
       app.appControl = appControl;
 

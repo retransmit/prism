@@ -3,7 +3,7 @@ import { TestAppInstance } from "../../../..";
 import got from "got";
 import { BodyObject, UserAppConfig } from "../../../../../../types";
 import { NativeHttpServiceEndPointConfig } from "../../../../../../types/http";
-import startTestApp from "../../../../utils/startTestApp";
+import startRetransmitTestInstance from "../../../../utils/startRetransmitTestInstance";
 
 export default async function (app: TestAppInstance) {
   it(`runs stages`, async () => {
@@ -43,7 +43,7 @@ export default async function (app: TestAppInstance) {
       },
     };
 
-    const appControl = await startTestApp({ config });
+    const appControl = await startRetransmitTestInstance({ config });
 
     // Start mock servers.
     const backendApps = startBackends([

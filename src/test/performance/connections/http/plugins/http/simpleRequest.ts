@@ -6,7 +6,7 @@ import {
   PerformanceTestResult,
 } from "../../../../../performance";
 import { HttpMethods } from "../../../../../../types";
-import startTestApp from "../../../../../integration/utils/startTestApp";
+import startRetransmitTestInstance from "../../../../../integration/utils/startRetransmitTestInstance";
 
 export default async function (
   name: string,
@@ -46,7 +46,7 @@ export default async function (
     },
   ]);
 
-  const appControl = await startTestApp({ config });
+  const appControl = await startRetransmitTestInstance({ config });
   app.appControl = appControl;
   const { port } = appControl;
   

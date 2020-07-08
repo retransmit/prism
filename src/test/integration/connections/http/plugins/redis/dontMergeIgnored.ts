@@ -2,7 +2,7 @@ import { TestAppInstance } from "../../../../";
 import { createClient } from "redis";
 import got from "got";
 import { UserAppConfig } from "../../../../../../types";
-import startTestApp from "../../../../utils/startTestApp";
+import startRetransmitTestInstance from "../../../../utils/startRetransmitTestInstance";
 
 export default async function (app: TestAppInstance) {
   it(`does not merge ignored results`, async () => {
@@ -31,7 +31,7 @@ export default async function (app: TestAppInstance) {
       },
     };
 
-    const appControl = await startTestApp({ config });
+    const appControl = await startRetransmitTestInstance({ config });
     app.appControl = appControl;
 
     let subscriberCb: (channel: string, message: string) => void = (a, b) => {};

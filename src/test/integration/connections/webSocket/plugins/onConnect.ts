@@ -1,6 +1,6 @@
 import WebSocket from "ws";
 import { TestAppInstance } from "../../../";
-import startTestApp from "../../../utils/startTestApp";
+import startRetransmitTestInstance from "../../../utils/startRetransmitTestInstance";
 import { UserAppConfig } from "../../../../../types";
 
 export default async function (app: TestAppInstance) {
@@ -30,7 +30,7 @@ export default async function (app: TestAppInstance) {
         },
       };
 
-      const appControl = await startTestApp({ config });
+      const appControl = await startRetransmitTestInstance({ config });
 
       app.appControl = appControl;
       const { port } = appControl;
@@ -73,7 +73,7 @@ export default async function (app: TestAppInstance) {
         },
       };
 
-      const appControl = await startTestApp({ config });
+      const appControl = await startRetransmitTestInstance({ config });
 
       app.appControl = appControl;
       const { port } = appControl;
@@ -116,7 +116,7 @@ export default async function (app: TestAppInstance) {
         },
       };
 
-      const appControl = await startTestApp({ config });
+      const appControl = await startRetransmitTestInstance({ config });
       app.appControl = appControl;
       const { port } = appControl;
 
@@ -167,7 +167,7 @@ export default async function (app: TestAppInstance) {
         },
       };
 
-      const appControl = await startTestApp({ config });
+      const appControl = await startRetransmitTestInstance({ config });
       app.appControl = appControl;
       const { port } = appControl;
 

@@ -4,7 +4,7 @@ import got from "got";
 import { RedisHttpRequest } from "../../../../../../types/http";
 import { getResponse } from "../../../../../utils/http";
 import { UserAppConfig } from "../../../../../../types";
-import startTestApp from "../../../../utils/startTestApp";
+import startRetransmitTestInstance from "../../../../utils/startRetransmitTestInstance";
 
 export default async function (app: TestAppInstance) {
   it(`rolls back`, async () => {
@@ -32,7 +32,7 @@ export default async function (app: TestAppInstance) {
       },
     };
 
-    const appControl = await startTestApp({ config });
+    const appControl = await startRetransmitTestInstance({ config });
 
     app.appControl = appControl;
 

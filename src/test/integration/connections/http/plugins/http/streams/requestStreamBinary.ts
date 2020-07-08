@@ -5,7 +5,7 @@ import { UserAppConfig } from "../../../../../../../types";
 import { join } from "path";
 import { createWriteStream, statSync } from "fs";
 import { pipeline } from "stream";
-import startTestApp from "../../../../../utils/startTestApp";
+import startRetransmitTestInstance from "../../../../../utils/startRetransmitTestInstance";
 
 export default async function (app: TestAppInstance) {
   it(`handles a stream with binary response`, async () => {
@@ -29,7 +29,7 @@ export default async function (app: TestAppInstance) {
       },
     };
 
-    const appControl = await startTestApp({ config });
+    const appControl = await startRetransmitTestInstance({ config });
 
     // Start mock servers.
     const backendApps = startBackends([

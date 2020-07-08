@@ -2,7 +2,7 @@ import { startBackends, getResponse } from "../../../../../utils/http";
 import { TestAppInstance } from "../../../..";
 import got from "got";
 import { UserAppConfig } from "../../../../../../types";
-import startTestApp from "../../../../utils/startTestApp";
+import startRetransmitTestInstance from "../../../../utils/startRetransmitTestInstance";
 
 export default async function (app: TestAppInstance) {
   it(`must not overwrite json content with string content`, async () => {
@@ -27,7 +27,7 @@ export default async function (app: TestAppInstance) {
       },
     };
 
-    const appControl = await startTestApp({ config });
+    const appControl = await startRetransmitTestInstance({ config });
 
     // Start mock servers.
     const backendApps = startBackends([

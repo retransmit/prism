@@ -2,7 +2,7 @@ import { startBackends } from "../../../../../../utils/http";
 import { TestAppInstance } from "../../../../..";
 import { UserAppConfig } from "../../../../../../../types";
 import got from "got";
-import startTestApp from "../../../../../utils/startTestApp";
+import startRetransmitTestInstance from "../../../../../utils/startRetransmitTestInstance";
 
 export default async function (app: TestAppInstance) {
   it(`handles a stream with text response`, async () => {
@@ -24,7 +24,7 @@ export default async function (app: TestAppInstance) {
       },
     };
 
-    const appControl = await startTestApp({ config });
+    const appControl = await startRetransmitTestInstance({ config });
 
     // Start mock servers.
     const backendApps = startBackends([

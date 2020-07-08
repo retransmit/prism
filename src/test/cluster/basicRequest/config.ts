@@ -1,11 +1,11 @@
 // import { startBackends, getResponse } from "../../utils/http";
 // import { TestAppInstance } from "../../test";
 // import got from "got";
-// import startTestApp from "../startTestApp";
+// import startRetransmitTestInstance from "../startRetransmitTestInstance";
 
 // export default async function (app: TestAppInstance) {
 //   it(`tests cluster mode`, async () => {
-//     const appControl = await startTestApp({ config });
+//     const appControl = await startRetransmitTestInstance({ config });
 
 //     // Start mock servers.
 //     const backendApps = startBackends([

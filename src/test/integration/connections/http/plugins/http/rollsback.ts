@@ -3,7 +3,7 @@ import { Server } from "http";
 import { TestAppInstance } from "../../../..";
 import got from "got";
 import { UserAppConfig } from "../../../../../../types";
-import startTestApp from "../../../../utils/startTestApp";
+import startRetransmitTestInstance from "../../../../utils/startRetransmitTestInstance";
 
 export default async function (app: TestAppInstance) {
   it(`rolls back`, async () => {
@@ -32,7 +32,7 @@ export default async function (app: TestAppInstance) {
       },
     };
 
-    const appControl = await startTestApp({ config });
+    const appControl = await startRetransmitTestInstance({ config });
 
     let calledRollback = false;
     let backendApps: Server[] = [];

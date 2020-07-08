@@ -1,7 +1,7 @@
 import { startBackends, getResponse } from "../../../utils/http";
 import { TestAppInstance } from "../../";
 import { UserAppConfig } from "../../../../types";
-import startTestApp from "../../utils/startTestApp";
+import startRetransmitTestInstance from "../../utils/startRetransmitTestInstance";
 
 function sleep(ms: number): Promise<void> {
   return new Promise((success) => {
@@ -21,7 +21,7 @@ export default async function (app: TestAppInstance) {
   };
 
   it("runs webjobs", async () => {
-    const appControl = await startTestApp({ config });
+    const appControl = await startRetransmitTestInstance({ config });
 
     let callCount = 0;
     // Start mock servers.

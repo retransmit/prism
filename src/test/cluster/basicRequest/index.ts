@@ -3,7 +3,7 @@
 // export default async function () {
 //   it(`responds to GET request from a cluster`, async () => {
 //     const configFile = join(__dirname, "config.js");
-//     const appControl = await startTestApp({ config });
+//     const appControl = await startRetransmitTestInstance({ config });
 
 //     // Start mock servers.
 //     const backendApps = startBackends([

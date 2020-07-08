@@ -9,7 +9,7 @@ export type StartAppParams = {
   config: UserAppConfig;
 };
 
-export default async function startTestApp(params: StartAppParams) {
+export default async function startRetransmitTestInstance(params: StartAppParams) {
   const client = createClient();
   const redisFlushAll = promisify(client.flushdb);
   await redisFlushAll.call(client);

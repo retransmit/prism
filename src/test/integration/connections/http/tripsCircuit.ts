@@ -9,7 +9,7 @@ import {
 import { Response } from "got/dist/source/core";
 import { createClient } from "redis";
 import { promisify } from "util";
-import startTestApp from "../../utils/startTestApp";
+import startRetransmitTestInstance from "../../utils/startRetransmitTestInstance";
 import sleep from "../../../../utils/sleep";
 
 const client = createClient();
@@ -76,7 +76,7 @@ export default async function (app: TestAppInstance) {
         await sleep(100);
       }
 
-      const appControl = await startTestApp({ config });
+      const appControl = await startRetransmitTestInstance({ config });
 
       let userServiceCallCount = 0;
       let messagingServiceCallCount = 0;

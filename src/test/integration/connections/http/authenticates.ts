@@ -2,7 +2,7 @@ import { startBackends, getResponse } from "../../../utils/http";
 import { TestAppInstance } from "../../";
 import got from "got";
 import { UserAppConfig } from "../../../../types";
-import startTestApp from "../../utils/startTestApp";
+import startRetransmitTestInstance from "../../utils/startRetransmitTestInstance";
 
 export default async function (app: TestAppInstance) {
   const jwt =
@@ -42,7 +42,7 @@ export default async function (app: TestAppInstance) {
     };
 
     it(name, async () => {
-      const appControl = await startTestApp({ config });
+      const appControl = await startRetransmitTestInstance({ config });
 
       let userServiceCallCount = 0;
 

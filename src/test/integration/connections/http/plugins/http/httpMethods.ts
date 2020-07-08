@@ -2,7 +2,7 @@ import { HttpMethods, UserAppConfig } from "../../../../../../types";
 import { startBackends, getResponse } from "../../../../../utils/http";
 import { TestAppInstance } from "../../../..";
 import got from "got";
-import startTestApp from "../../../../utils/startTestApp";
+import startRetransmitTestInstance from "../../../../utils/startRetransmitTestInstance";
 
 export default async function (app: TestAppInstance) {
   function makeConfig(options: { method: HttpMethods }): UserAppConfig {
@@ -36,7 +36,7 @@ export default async function (app: TestAppInstance) {
     it(`sends an HTTP ${method} request to the backend`, async () => {
       const config = makeConfig({ method });
 
-      const appControl = await startTestApp({ config });
+      const appControl = await startRetransmitTestInstance({ config });
 
       // Start mock servers.
       const backendApps = startBackends([

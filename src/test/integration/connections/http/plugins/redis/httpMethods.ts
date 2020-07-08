@@ -2,7 +2,7 @@ import { HttpMethods, UserAppConfig } from "../../../../../../types";
 import { TestAppInstance } from "../../../../";
 import { createClient } from "redis";
 import got from "got";
-import startTestApp from "../../../../utils/startTestApp";
+import startRetransmitTestInstance from "../../../../utils/startRetransmitTestInstance";
 
 export default async function (app: TestAppInstance) {
   function makeConfig(options: { method: HttpMethods }): UserAppConfig {
@@ -39,7 +39,7 @@ export default async function (app: TestAppInstance) {
     it(`adds ${method} request to the channel`, async () => {
       const config = makeConfig({ method });
 
-      const appControl = await startTestApp({ config });
+      const appControl = await startRetransmitTestInstance({ config });
 
       app.appControl = appControl;
 
