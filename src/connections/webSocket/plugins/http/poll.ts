@@ -1,7 +1,4 @@
-import {
-  HttpRequest,
-  WebSocketProxyAppConfig,
-} from "../../../../types";
+import { HttpRequest, WebSocketProxyAppConfig } from "../../../../types";
 import {
   UrlPollingWebSocketEndPointConfig,
   WebSocketRouteConfig,
@@ -44,14 +41,7 @@ function timerCallback(
       const connections = activeConnections.get().entries();
       for (const [requestId, conn] of connections) {
         if (conn.route === route) {
-          doPoll(
-            route,
-            service,
-            requestId,
-            conn,
-            serviceConfig,
-            config
-          );
+          doPoll(route, service, requestId, conn, serviceConfig, config);
         }
       }
     })();
@@ -90,7 +80,11 @@ async function doPoll(
       );
     }
   } else {
-    const options = makeGotOptions(httpRequest, serviceConfig.encoding);
+    const options = makeGotOptions(
+      httpRequest,
+      serviceConfig.contentEncoding,
+      serviceConfig.contentType
+    );
 
     got(await selectRandomUrl(serviceConfig.url, serviceConfig.getUrl), options)
       .then(async (serverResponse) => {
@@ -102,12 +96,7 @@ async function doPoll(
             ))) ||
           makeWebSocketResponse(serverResponse, requestId);
 
-        respondToWebSocketClient(
-          requestId,
-          webSocketResponse,
-          conn,
-          config
-        );
+        respondToWebSocketClient(requestId, webSocketResponse, conn, config);
       })
       .catch(async (error) => {
         const webSocketResponse: WebSocketResponse = error.response
@@ -120,12 +109,7 @@ async function doPoll(
               type: "message",
             };
 
-        respondToWebSocketClient(
-          requestId,
-          webSocketResponse,
-          conn,
-          config
-        );
+        respondToWebSocketClient(requestId, webSocketResponse, conn, config);
 
         const errorResponse = error.response
           ? makeHttpResponse(error.response)

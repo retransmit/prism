@@ -67,7 +67,8 @@ async function doRollback(
   if (!modifiedRequest.handled) {
     const options = makeGotOptions(
       modifiedRequest.request,
-      serviceConfig.rollbackRequestEncoding,
+      serviceConfig.rollbackRequestContentEncoding,
+      serviceConfig.rollbackRequestContentType,
       serviceConfig.timeout
     );
 

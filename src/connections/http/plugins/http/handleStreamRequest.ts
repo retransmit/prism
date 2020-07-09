@@ -35,7 +35,13 @@ export default async function handleStreamRequest(
     );
 
     const urlWithParamsReplaced = replaceParamsInUrl(params, serviceUrl);
-    const options = makeGotOptions(request, undefined, undefined, true);
+    const options = makeGotOptions(
+      request,
+      serviceConfig.contentEncoding,
+      serviceConfig.contentType,
+      undefined,
+      true
+    );
     const requestStream = got.stream(urlWithParamsReplaced, {
       ...options,
       throwHttpErrors: false,

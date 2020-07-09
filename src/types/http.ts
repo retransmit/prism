@@ -2,7 +2,6 @@ import {
   HttpResponse,
   HttpRequest,
   HttpMethods,
-  HttpRequestBodyEncoding,
   UrlList,
   UrlSelector,
   RateLimitingConfig,
@@ -103,7 +102,8 @@ export type HttpRouteConfigBase = {
       exclude?: string[];
     };
   };
-  encoding?: HttpRequestBodyEncoding;
+  contentEncoding?: string;
+  contentType?: string;
   stage?: number;
 };
 
@@ -112,7 +112,8 @@ export type NativeHttpServiceEndPointConfig = {
   url: UrlList;
   getUrl?: UrlSelector;
   rollback?: (request: HttpRequest) => HttpRequest | void;
-  rollbackRequestEncoding?: HttpRequestBodyEncoding;
+  rollbackRequestContentEncoding?: string;
+  rollbackRequestContentType?: string;
   onRequest?: (
     request: HttpRequest,
     otherResponses: FetchedHttpResponse[]

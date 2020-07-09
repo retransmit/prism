@@ -52,7 +52,8 @@ export default async function connect(
     } else {
       const options = makeGotOptions(
         onRequestResult.request,
-        serviceConfig.onConnectRequestEncoding
+        serviceConfig.onConnectRequestContentEncoding
+        , serviceConfig.onConnectRequestContentType
       );
 
       got(

@@ -23,7 +23,8 @@ export default async function makeGotRequest(
 ) {
   const options = makeGotOptions(
     request,
-    serviceConfig.encoding,
+    serviceConfig.contentEncoding,
+    serviceConfig.contentType,
     serviceConfig.timeout
   );
 

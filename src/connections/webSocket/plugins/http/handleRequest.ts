@@ -49,7 +49,7 @@ export default async function sendToService(
           );
         }
       } else {
-        const options = makeGotOptions(httpRequest, undefined);
+        const options = makeGotOptions(httpRequest, undefined, undefined);
         got(
           await selectRandomUrl(serviceConfig.url, serviceConfig.getUrl),
           options

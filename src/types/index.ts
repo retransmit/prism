@@ -223,12 +223,6 @@ export type HttpCookie = {
   overwrite?: boolean;
 };
 
-// That's all we support for now.
-export type HttpRequestBodyEncoding =
-  | "text/plain"
-  | "application/x-www-form-urlencoded"
-  | "application/json";
-
 export type UrlList = string | string[];
 export type UrlSelector = (urlList: UrlList) => Promise<UrlList>;
 

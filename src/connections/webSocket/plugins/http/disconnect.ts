@@ -43,7 +43,8 @@ export default async function disconnect(
     if (!onRequestResult.handled) {
       const options = makeGotOptions(
         onRequestResult.request,
-        serviceConfig.onDisconnectRequestEncoding
+        serviceConfig.onDisconnectRequestContentEncoding,
+        serviceConfig.onDisconnectRequestContentType
       );
 
       // We don't care about the response here.

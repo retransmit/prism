@@ -1,7 +1,6 @@
 import {
   HttpRequest,
   HttpResponse,
-  HttpRequestBodyEncoding,
   UrlList,
   UrlSelector,
   RateLimitingConfig,
@@ -63,15 +62,18 @@ export type UrlPollingWebSocketEndPointConfig = {
 
   url: UrlList;
   getUrl?: UrlSelector;
-  encoding?: HttpRequestBodyEncoding;
+  contentEncoding?: string;
+  contentType?: string;
 
   onConnectUrl?: UrlList;
   getOnConnectUrl?: UrlSelector;
-  onConnectRequestEncoding?: HttpRequestBodyEncoding;
+  onConnectRequestContentEncoding?: string;
+  onConnectRequestContentType?: string;
 
   onDisconnectUrl?: UrlList;
   getOnDisconnectUrl?: UrlSelector;
-  onDisconnectRequestEncoding?: HttpRequestBodyEncoding;
+  onDisconnectRequestContentEncoding?: string;
+  onDisconnectRequestContentType?: string;
 
   onError?: (response: HttpResponse | undefined, request: HttpRequest) => any;
 } & WebSocketEndPointConfigBase;

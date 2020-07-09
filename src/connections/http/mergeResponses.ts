@@ -273,7 +273,7 @@ function mergeHeadersIntoResponse(
   if (headers) {
     wrappedFinalResponse.response.headers = Object.keys(headers).reduce(
       (acc, field) =>
-        !["content-type", "content-length"].includes(field.toLowerCase())
+        !["content-length"].includes(field.toLowerCase())
           ? ((acc[field] = headers[field]), acc)
           : acc,
       wrappedFinalResponse.response.headers || {}

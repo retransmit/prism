@@ -16,7 +16,7 @@ export default async function (app: TestAppInstance, testEnv: TestEnv) {
                 userservice: {
                   type: "http" as "http",
                   url: "http://localhost:6666/users",
-                  encoding: "application/x-www-form-urlencoded",
+                  contentEncoding: "application/x-www-form-urlencoded",
                 },
               },
             },

@@ -11,7 +11,8 @@ export default async function fireAndForgetGotRequest(
 ) {
   const options = makeGotOptions(
     request,
-    serviceConfig.encoding,
+    serviceConfig.contentEncoding,
+    serviceConfig.contentType,
     serviceConfig.timeout
   );
 
