@@ -9,11 +9,13 @@ import cluster from "cluster";
 import os from "os";
 import yargs = require("yargs");
 
+import * as configModule from "./config";
+
 import { AppConfig, UserAppConfig } from "./types";
 import * as applicationState from "./state";
 import * as webSocketConnections from "./connections/webSocket";
 import * as httpConnections from "./connections/http";
-import * as webJobs from "./connections/http/webJobs";
+import * as webJobs from "./webJobs";
 
 import { closeHttpServer } from "./utils/http/closeHttpServer";
 import { closeWebSocketServer } from "./utils/webSocket/closeWebSocketServer";
@@ -118,7 +120,8 @@ export async function startWithConfiguration(
   config.instanceId = instanceId;
 
   await mutateAndCleanupConfig(config);
-  await applyConfig(config);
+  configModule.set(config);
+  await initModules(config);
 
   // Create the HttpServer
   const requestHandler = await httpConnections.createRequestHandler();
@@ -242,7 +245,7 @@ export async function mutateAndCleanupConfig(config: AppConfig) {
   }
 }
 
-export async function applyConfig(config: AppConfig) {
+export async function initModules(config: AppConfig) {
   await applicationState.init(config);
   await webJobs.init(config);
   await httpConnections.init(config);

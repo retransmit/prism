@@ -1,5 +1,5 @@
-import { AppConfig } from "../../../types";
 import { init as periodicJobInit } from "./interval";
+import { AppConfig } from "../types";
 
 export async function init(config: AppConfig) {
   if (config.webJobs) {

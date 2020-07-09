@@ -1,6 +1,6 @@
-import { PeriodicWebJob, AppConfig } from "../../../types";
 import got from "got/dist/source";
-import selectRandomUrl from "../../../utils/http/selectRandomUrl";
+import selectRandomUrl from "../utils/http/selectRandomUrl";
+import { PeriodicWebJob, AppConfig } from "../types";
 
 let interval: NodeJS.Timeout | undefined = undefined;
 
