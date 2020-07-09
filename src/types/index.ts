@@ -44,6 +44,11 @@ export type UserAppConfig = {
   ) => httpModule.Server;
 };
 
+export type WhitelistConfig = {
+  allowed?: string[],
+  disallowed?: string[]
+}
+
 export type AppConfig = UserAppConfig & {
   instanceId: string;
   numWorkers: number;
@@ -95,6 +100,7 @@ export type HttpProxyConfig = {
     responseChannel: string;
     cleanupInterval?: number;
   };
+  whitelist?: WhitelistConfig;
   onRequest?: (
     request: HttpRequest
   ) => Promise<
@@ -127,6 +133,7 @@ export type WebSocketProxyConfig = {
     responseChannel: string;
     cleanupInterval?: number;
   };
+  whitelist?: WhitelistConfig;
   onConnect?: (
     requestId: string,
     message: string

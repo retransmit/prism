@@ -11,9 +11,8 @@ import {
   HttpServiceAuthentication,
   HttpServiceErrorTrackingInfo,
   HttpProxyAppConfig,
+  WhitelistConfig,
 } from ".";
-import { IncomingMessage } from "http";
-import { ServerResponse } from "http";
 import { IRouterContext } from "koa-router";
 
 // Route Config
@@ -22,6 +21,7 @@ export type HttpRouteConfig = {
   services: {
     [key: string]: HttpServiceEndPointConfig;
   };
+  whitelist?: WhitelistConfig;
   onRequest?: (
     request: HttpRequest
   ) => Promise<
