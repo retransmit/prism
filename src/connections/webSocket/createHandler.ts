@@ -9,67 +9,70 @@ import {
   WebSocketServicePlugin,
 } from "../../types/webSocket";
 
-import { PluginList, WebSocketProxyAppConfig } from "../../types";
+import { PluginList, WebSocketProxyAppConfig, AppConfig } from "../../types";
 import { saveLastRequest } from "./plugins/urlPolling/poll";
 import applyRateLimiting from "../modules/rateLimiting";
 import plugins from "./plugins";
 import { parse } from "url";
+import { isWebSocketProxyConfig } from "./isWebSocketProxyConfig";
 
-export default function createHandler(config: WebSocketProxyAppConfig) {
+export default function createHandler(config: AppConfig) {
   return async function connection(ws: WebSocket, request: IncomingMessage) {
-    const route = request.url ? parse(request.url).pathname : "";
-    if (route) {
-      const routeConfig = config.webSocket.routes[route];
+    if (isWebSocketProxyConfig(config)) {
+      const route = request.url ? parse(request.url).pathname : "";
+      if (route) {
+        const routeConfig = config.webSocket.routes[route];
 
-      // This is for finding dead connections.
-      (ws as any).isAlive = true;
-      ws.on("pong", function heartbeat() {
-        (this as any).isAlive = true;
-      });
+        // This is for finding dead connections.
+        (ws as any).isAlive = true;
+        ws.on("pong", function heartbeat() {
+          (this as any).isAlive = true;
+        });
 
-      const requestId = randomId();
+        const requestId = randomId();
 
-      const xForwardedFor = request.headers["x-forwarded-for"];
-      const remoteAddress = Array.isArray(xForwardedFor)
-        ? xForwardedFor[0]
-        : xForwardedFor
-        ? xForwardedFor.split(/\s*,\s*/)[0]
-        : request.socket.remoteAddress;
+        const xForwardedFor = request.headers["x-forwarded-for"];
+        const remoteAddress = Array.isArray(xForwardedFor)
+          ? xForwardedFor[0]
+          : xForwardedFor
+          ? xForwardedFor.split(/\s*,\s*/)[0]
+          : request.socket.remoteAddress;
 
-      const conn = {
-        initialized: false,
-        route,
-        path: (request.url && url.parse(request.url).pathname) || "",
-        webSocket: ws,
-        remoteAddress,
-        remotePort: request.socket.remotePort,
-        saveLastRequest: saveLastRequest(routeConfig),
-        lastRequest: undefined,
-      };
-      activeConnections().set(requestId, conn);
+        const conn = {
+          initialized: false,
+          route,
+          path: (request.url && url.parse(request.url).pathname) || "",
+          webSocket: ws,
+          remoteAddress,
+          remotePort: request.socket.remotePort,
+          saveLastRequest: saveLastRequest(routeConfig),
+          lastRequest: undefined,
+        };
+        activeConnections().set(requestId, conn);
 
-      /*
-      If the onConnect hook is defined, we postpone connection init till a message arrives from the user. When the message arrives, the message is sent to the onConnect hook - which can return whether the connection needs to be dropped or not. This is useful, for say, authentication.
+        /*
+          If the onConnect hook is defined, we postpone connection init till a message arrives from the user. When the message arrives, the message is sent to the onConnect hook - which can return whether the connection needs to be dropped or not. This is useful, for say, authentication.
 
-      If there is no onConnect hook, then initialize immediately. And notify backends that a new connection has arrived.
-    */
-      if (!routeConfig.onConnect && !config.webSocket.onConnect) {
-        conn.initialized = true;
-        sendConnectionRequestsToServices(
-          requestId,
-          conn,
-          routeConfig,
-          config,
-          plugins
+          If there is no onConnect hook, then initialize immediately. And notify backends that a new connection has arrived.
+        */
+        if (!routeConfig.onConnect && !config.webSocket.onConnect) {
+          conn.initialized = true;
+          sendConnectionRequestsToServices(
+            requestId,
+            conn,
+            routeConfig,
+            config,
+            plugins
+          );
+        }
+
+        ws.on(
+          "message",
+          onMessage(requestId, request, route, ws, routeConfig, config)
         );
+
+        ws.on("close", onClose(requestId, config, plugins));
       }
-
-      ws.on(
-        "message",
-        onMessage(requestId, request, route, ws, routeConfig, config)
-      );
-
-      ws.on("close", onClose(requestId, config, plugins));
     }
   };
 }
@@ -193,12 +196,7 @@ async function sendConnectionRequestsToServices(
 ) {
   for (const service of Object.keys(routeConfig.services)) {
     const serviceConfig = routeConfig.services[service];
-    plugins[serviceConfig.type].connect(
-      requestId,
-      conn,
-      serviceConfig,
-      config
-    );
+    plugins[serviceConfig.type].connect(requestId, conn, serviceConfig, config);
   }
 }
 

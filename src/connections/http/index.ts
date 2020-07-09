@@ -3,16 +3,16 @@ import bodyParser = require("koa-body");
 import Router from "koa-router";
 import { IncomingMessage } from "http";
 import { ServerResponse } from "http";
-import { HttpMethods, HttpProxyAppConfig } from "../../types";
-import isHttpServiceAppConfig from "./isHttpServiceAppConfig";
+import { HttpMethods, AppConfig } from "../../types";
 import plugins from "./plugins";
 import createHandlerForRoute from "./createHandlerForRoute";
 import { Http2ServerRequest, Http2ServerResponse } from "http2";
+import isHttpServiceAppConfig from "./isHttpServiceAppConfig";
 
 const cors = require("@koa/cors");
 let currentRequestHandler: KoaRequestHandler | undefined = undefined;
 
-export async function init(config: HttpProxyAppConfig) {
+export async function init(config: AppConfig) {
   currentRequestHandler = await createKoaRequestHandler(config);
 }
 
@@ -22,7 +22,7 @@ type KoaRequestHandler = (
 ) => Promise<void>;
 
 async function createKoaRequestHandler(
-  config: HttpProxyAppConfig
+  config: AppConfig
 ): Promise<KoaRequestHandler> {
   const koa = new Koa();
 
@@ -60,12 +60,18 @@ async function createKoaRequestHandler(
       }
 
       if (methodConfig.GET) {
-        router.get(route, createHandlerForRoute(route, methodConfig.GET, config));
+        router.get(
+          route,
+          createHandlerForRoute(route, methodConfig.GET, config)
+        );
       }
 
       if (methodConfig.POST) {
         if (methodConfig.POST.useStream) {
-          router.post(route, createHandlerForRoute(route, methodConfig.POST, config));
+          router.post(
+            route,
+            createHandlerForRoute(route, methodConfig.POST, config)
+          );
         } else {
           router.post(
             route,
@@ -77,7 +83,10 @@ async function createKoaRequestHandler(
 
       if (methodConfig.PUT) {
         if (methodConfig.PUT.useStream) {
-          router.put(route, createHandlerForRoute(route, methodConfig.PUT, config));
+          router.put(
+            route,
+            createHandlerForRoute(route, methodConfig.PUT, config)
+          );
         } else {
           router.put(
             route,
@@ -88,12 +97,18 @@ async function createKoaRequestHandler(
       }
 
       if (methodConfig.DELETE) {
-        router.del(route, createHandlerForRoute(route, methodConfig.DELETE, config));
+        router.del(
+          route,
+          createHandlerForRoute(route, methodConfig.DELETE, config)
+        );
       }
 
       if (methodConfig.PATCH) {
         if (methodConfig.PATCH.useStream) {
-          router.patch(route, createHandlerForRoute(route, methodConfig.PATCH, config));
+          router.patch(
+            route,
+            createHandlerForRoute(route, methodConfig.PATCH, config)
+          );
         } else {
           router.patch(
             route,
@@ -104,10 +119,12 @@ async function createKoaRequestHandler(
       }
 
       if (methodConfig.ALL) {
-        router.all(route, createHandlerForRoute(route, methodConfig.ALL, config));
+        router.all(
+          route,
+          createHandlerForRoute(route, methodConfig.ALL, config)
+        );
       }
     }
-
     koa.use(router.routes());
     koa.use(router.allowedMethods());
   }

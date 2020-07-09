@@ -9,12 +9,7 @@ import cluster from "cluster";
 import os from "os";
 import yargs = require("yargs");
 
-import {
-  AppConfig,
-  UserAppConfig,
-  HttpProxyAppConfig,
-  WebSocketProxyAppConfig,
-} from "./types";
+import { AppConfig, UserAppConfig } from "./types";
 import * as applicationState from "./state";
 import * as webSocketConnections from "./connections/webSocket";
 import * as httpConnections from "./connections/http";
@@ -148,7 +143,7 @@ export async function startWithConfiguration(
   if (isWebSocketProxyConfig(config)) {
     webSocketServer = await webSocketConnections.setupRequestHandling(
       httpServer,
-      config as WebSocketProxyAppConfig
+      config
     );
   }
 
@@ -249,8 +244,8 @@ export async function mutateAndCleanupConfig(config: AppConfig) {
 
 export async function applyConfig(config: AppConfig) {
   await applicationState.init(config);
-  webJobs.init(config);
-  await httpConnections.init(config as HttpProxyAppConfig);
+  await webJobs.init(config);
+  await httpConnections.init(config);
   if (isWebSocketProxyConfig(config)) {
     await webSocketConnections.init(config);
   }

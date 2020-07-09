@@ -9,28 +9,27 @@ import plugins from "./plugins";
 
 let webSocketServer: WebSocket.Server | undefined = undefined;
 
-export async function init(config: WebSocketProxyAppConfig) {
-  const webSocketServers: {
-    [key: string]: WebSocket.Server;
-  } = {};
-
-  // Load other plugins
-  if (config.webSocket.plugins) {
-    for (const pluginName of Object.keys(config.webSocket.plugins)) {
-      plugins[pluginName] = require(config.webSocket.plugins[pluginName].path);
+export async function init(config: AppConfig) {
+  if (isWebSocketProxyConfig(config)) {
+    // Load other plugins
+    if (config.webSocket.plugins) {
+      for (const pluginName of Object.keys(config.webSocket.plugins)) {
+        plugins[pluginName] = require(config.webSocket.plugins[pluginName]
+          .path);
+      }
     }
-  }
 
-  // Call init on all the plugins.
-  for (const pluginName of Object.keys(plugins)) {
-    await plugins[pluginName].init(config);
+    // Call init on all the plugins.
+    for (const pluginName of Object.keys(plugins)) {
+      await plugins[pluginName].init(config);
+    }
   }
 
   activeConnections.init();
 }
 
 export async function setupRequestHandling(
-  httpServer: any, // TODO
+  httpServer: any,
   config: WebSocketProxyAppConfig
 ) {
   const wss = new WebSocket.Server({ noServer: true });
