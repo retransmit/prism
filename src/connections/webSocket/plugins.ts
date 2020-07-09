@@ -1,4 +1,4 @@
-import * as httpPlugin from "./plugins/http";
+import * as httpPlugin from "./plugins/urlPolling";
 import * as redisPlugin from "./plugins/redis";
 import { WebSocketServicePlugin } from "../../types/webSocket";
 

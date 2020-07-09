@@ -144,6 +144,7 @@ export async function startWithConfiguration(
 
   // Attach webSocket servers
   let webSocketServer: WebSocket.Server | undefined = undefined;
+
   if (isWebSocketProxyConfig(config)) {
     webSocketServer = await webSocketConnections.setupRequestHandling(
       httpServer,

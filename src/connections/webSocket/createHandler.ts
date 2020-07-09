@@ -10,7 +10,7 @@ import {
 } from "../../types/webSocket";
 
 import { PluginList, WebSocketProxyAppConfig } from "../../types";
-import { saveLastRequest } from "./plugins/http/poll";
+import { saveLastRequest } from "./plugins/urlPolling/poll";
 import applyRateLimiting from "../modules/rateLimiting";
 import plugins from "./plugins";
 import { parse } from "url";
