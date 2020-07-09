@@ -50,11 +50,11 @@ export default function createHandler(config: AppConfig) {
         };
         activeConnections().set(requestId, conn);
 
-        /*
-          If the onConnect hook is defined, we postpone connection init till a message arrives from the user. When the message arrives, the message is sent to the onConnect hook - which can return whether the connection needs to be dropped or not. This is useful, for say, authentication.
+        
+        // If the onConnect hook is defined, we postpone connection init till a message arrives from the user. When the message arrives, the message is sent to the onConnect hook - which can return whether the connection needs to be dropped or not. This is useful, for say, authentication.
 
-          If there is no onConnect hook, then initialize immediately. And notify backends that a new connection has arrived.
-        */
+        // If there is no onConnect hook, then initialize immediately. And notify backends that a new connection has arrived.
+        
         if (!routeConfig.onConnect && !config.webSocket.onConnect) {
           conn.initialized = true;
           sendConnectionRequestsToServices(
