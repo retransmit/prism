@@ -5,12 +5,21 @@ import {
   AppConfig,
   InMemoryCacheEntry,
 } from "../types";
+import { clearInterval } from "timers";
 
 let state: IApplicationState;
 
 const TWO_MINUTES = 2 * 60 * 1000;
 
+const intervals: NodeJS.Timeout[] = [];
+
 export async function init(config: AppConfig) {
+  // This function can be called multiple times.
+  // Let's start by cleaning up if there's anything.
+  for (const interval of intervals) {
+    clearInterval(interval);
+  }
+
   // Setup state.
   state = {
     clientTracking: new Map<string, ClientTrackingInfo[]>(),
@@ -21,14 +30,15 @@ export async function init(config: AppConfig) {
   if (config.state?.type === "memory") {
     const clientTrackingEntryExpiry =
       config.state?.clientTrackingEntryExpiry || TWO_MINUTES;
-    setInterval(
+    const cleanUpClientTrackingEntriesInterval = setInterval(
       () => cleanUpClientTrackingEntries(clientTrackingEntryExpiry, config),
       clientTrackingEntryExpiry
     );
+    intervals.push(cleanUpClientTrackingEntriesInterval);
 
     const httpServiceErrorTrackingListExpiry =
       config.state?.httpServiceErrorTrackingListExpiry || TWO_MINUTES;
-    setInterval(
+    const cleanUpHttpServiceTrackingEntriesInterval = setInterval(
       () =>
         cleanUpHttpServiceTrackingEntries(
           httpServiceErrorTrackingListExpiry,
@@ -36,8 +46,13 @@ export async function init(config: AppConfig) {
         ),
       httpServiceErrorTrackingListExpiry
     );
+    intervals.push(cleanUpHttpServiceTrackingEntriesInterval);
 
-    setInterval(() => cleanUpCacheEntries(config), TWO_MINUTES);
+    const cleanUpCacheEntriesInterval = setInterval(
+      () => cleanUpCacheEntries(config),
+      TWO_MINUTES
+    );
+    intervals.push(cleanUpCacheEntriesInterval);
   }
 }
 

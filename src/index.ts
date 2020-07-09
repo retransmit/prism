@@ -9,15 +9,21 @@ import cluster from "cluster";
 import os from "os";
 import yargs = require("yargs");
 
-import { AppConfig, UserAppConfig } from "./types";
+import {
+  AppConfig,
+  UserAppConfig,
+  HttpProxyAppConfig,
+  WebSocketProxyAppConfig,
+} from "./types";
 import * as applicationState from "./state";
-import initWebSocketHandling from "./connections/webSocket";
+import * as webSocketConnections from "./connections/webSocket";
+import * as httpConnections from "./connections/http";
 import * as webJobs from "./connections/http/webJobs";
-import initHttpHandling from "./connections/http";
 
 import { closeHttpServer } from "./utils/http/closeHttpServer";
 import { closeWebSocketServer } from "./utils/webSocket/closeWebSocketServer";
 import namesGenerator from "./utils/namesGenerator";
+import { isWebSocketProxyConfig } from "./connections/webSocket/isWebSocketProxyConfig";
 
 const ONE_MINUTE = 60 * 1000;
 const TWO_MINUTES = 2 * ONE_MINUTE;
@@ -116,46 +122,12 @@ export async function startWithConfiguration(
   // We need this so that workers don't fetch from the same redis queues.
   config.instanceId = instanceId;
 
-  // People are going to mistype 'webSocket' as all lowercase.
-  if ((config as any).websocket !== undefined) {
-    if (config.webSocket !== undefined) {
-      console.log(
-        "Both config.websocket and config.webSocket are specified. 'webSocket' is the correct property to use."
-      );
-      process.exit(1);
-    }
-    config.webSocket = (config as any).websocket;
-    (config as any).websocket = undefined;
-  }
+  await mutateAndCleanupConfig(config);
+  await applyConfig(config);
 
-  // People are going to mistype 'webjobs' as all lowercase.
-  if ((config as any).webjobs !== undefined) {
-    if (config.webJobs !== undefined) {
-      console.log(
-        "Both config.webjobs and config.webJobs are specified. 'webJobs' is the correct property to use."
-      );
-      process.exit(1);
-    }
-    config.webJobs = (config as any).webjobs;
-    (config as any).webjobs = undefined;
-  }
-
-  // Initialize state
-  if (!config.state) {
-    config.state = {
-      type: "memory",
-      clientTrackingEntryExpiry: TWO_MINUTES,
-      httpServiceErrorTrackingListExpiry: TWO_MINUTES,
-    };
-  }
-  await applicationState.init(config);
-
-  // Schedule web jobs
-  webJobs.init(config);
-
-  // Get routes to handle
-  const httpRequestHandler = await initHttpHandling(config);
   // Create the HttpServer
+  const requestHandler = await httpConnections.createRequestHandler();
+
   let httpServer: HttpServer | HttpsServer;
   if (config.useHttps) {
     const options = {
@@ -164,29 +136,31 @@ export async function startWithConfiguration(
     };
     httpServer = (config.createHttpsServer || httpsCreateServer)(
       options,
-      httpRequestHandler
+      requestHandler
     );
   } else {
-    httpServer = (config.createHttpServer || httpCreateServer)(
-      httpRequestHandler
-    );
+    httpServer = (config.createHttpServer || httpCreateServer)(requestHandler);
   }
 
-  let webSocketServers: WebSocket.Server[] = [];
-
   // Attach webSocket servers
-  webSocketServers = await initWebSocketHandling(httpServer, config);
+  let webSocketServer: WebSocket.Server | undefined = undefined;
+  if (isWebSocketProxyConfig(config)) {
+    webSocketServer = await webSocketConnections.setupRequestHandling(
+      httpServer,
+      config as WebSocketProxyAppConfig
+    );
+  }
 
   httpServer.listen(port);
 
   httpServer.on("close", () => {
-    for (const server of webSocketServers) {
-      server.close();
+    if (webSocketServer) {
+      webSocketServer.close();
     }
   });
 
   async function closeServers() {
-    for (const webSocketServer of webSocketServers) {
+    if (webSocketServer) {
       await closeWebSocketServer(webSocketServer);
     }
     await closeHttpServer(httpServer);
@@ -234,5 +208,49 @@ if (require.main === module) {
       argv.silent ?? false,
       argv.workers
     );
+  }
+}
+
+export async function mutateAndCleanupConfig(config: AppConfig) {
+  // People are going to mistype 'webSocket' as all lowercase.
+  if ((config as any).websocket !== undefined) {
+    if (config.webSocket !== undefined) {
+      console.log(
+        "Both config.websocket and config.webSocket are specified. 'webSocket' is the correct property to use."
+      );
+      process.exit(1);
+    }
+    config.webSocket = (config as any).websocket;
+    (config as any).websocket = undefined;
+  }
+
+  // People are going to mistype 'webjobs' as all lowercase.
+  if ((config as any).webjobs !== undefined) {
+    if (config.webJobs !== undefined) {
+      console.log(
+        "Both config.webjobs and config.webJobs are specified. 'webJobs' is the correct property to use."
+      );
+      process.exit(1);
+    }
+    config.webJobs = (config as any).webjobs;
+    (config as any).webjobs = undefined;
+  }
+
+  // Initialize state
+  if (!config.state) {
+    config.state = {
+      type: "memory",
+      clientTrackingEntryExpiry: TWO_MINUTES,
+      httpServiceErrorTrackingListExpiry: TWO_MINUTES,
+    };
+  }
+}
+
+export async function applyConfig(config: AppConfig) {
+  await applicationState.init(config);
+  webJobs.init(config);
+  await httpConnections.init(config as HttpProxyAppConfig);
+  if (isWebSocketProxyConfig(config)) {
+    await webSocketConnections.init(config);
   }
 }

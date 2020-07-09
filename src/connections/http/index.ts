@@ -3,14 +3,27 @@ import bodyParser = require("koa-body");
 import Router from "koa-router";
 import { IncomingMessage } from "http";
 import { ServerResponse } from "http";
-import { HttpMethods, AppConfig } from "../../types";
+import { HttpMethods, HttpProxyAppConfig } from "../../types";
 import isHttpServiceAppConfig from "./isHttpServiceAppConfig";
 import plugins from "./plugins";
-import createHandler from "./createHandler";
+import createHandlerForRoute from "./createHandlerForRoute";
+import { Http2ServerRequest, Http2ServerResponse } from "http2";
 
 const cors = require("@koa/cors");
+let currentRequestHandler: KoaRequestHandler | undefined = undefined;
 
-export default async function initHttpHandling(config: AppConfig) {
+export async function init(config: HttpProxyAppConfig) {
+  currentRequestHandler = await createKoaRequestHandler(config);
+}
+
+type KoaRequestHandler = (
+  req: IncomingMessage | Http2ServerRequest,
+  res: ServerResponse | Http2ServerResponse
+) => Promise<void>;
+
+async function createKoaRequestHandler(
+  config: HttpProxyAppConfig
+): Promise<KoaRequestHandler> {
   const koa = new Koa();
 
   if (config.cors) {
@@ -25,6 +38,7 @@ export default async function initHttpHandling(config: AppConfig) {
       }
     }
 
+    // Call init on all the plugins.
     for (const pluginName of Object.keys(plugins)) {
       await plugins[pluginName].init(config);
     }
@@ -46,51 +60,51 @@ export default async function initHttpHandling(config: AppConfig) {
       }
 
       if (methodConfig.GET) {
-        router.get(route, createHandler(route, methodConfig.GET, config));
+        router.get(route, createHandlerForRoute(route, methodConfig.GET, config));
       }
 
       if (methodConfig.POST) {
         if (methodConfig.POST.useStream) {
-          router.post(route, createHandler(route, methodConfig.POST, config));
+          router.post(route, createHandlerForRoute(route, methodConfig.POST, config));
         } else {
           router.post(
             route,
             bodyParser(),
-            createHandler(route, methodConfig.POST, config)
+            createHandlerForRoute(route, methodConfig.POST, config)
           );
         }
       }
 
       if (methodConfig.PUT) {
         if (methodConfig.PUT.useStream) {
-          router.put(route, createHandler(route, methodConfig.PUT, config));
+          router.put(route, createHandlerForRoute(route, methodConfig.PUT, config));
         } else {
           router.put(
             route,
             bodyParser(),
-            createHandler(route, methodConfig.PUT, config)
+            createHandlerForRoute(route, methodConfig.PUT, config)
           );
         }
       }
 
       if (methodConfig.DELETE) {
-        router.del(route, createHandler(route, methodConfig.DELETE, config));
+        router.del(route, createHandlerForRoute(route, methodConfig.DELETE, config));
       }
 
       if (methodConfig.PATCH) {
         if (methodConfig.PATCH.useStream) {
-          router.patch(route, createHandler(route, methodConfig.PATCH, config));
+          router.patch(route, createHandlerForRoute(route, methodConfig.PATCH, config));
         } else {
           router.patch(
             route,
             bodyParser(),
-            createHandler(route, methodConfig.PATCH, config)
+            createHandlerForRoute(route, methodConfig.PATCH, config)
           );
         }
       }
 
       if (methodConfig.ALL) {
-        router.all(route, createHandler(route, methodConfig.ALL, config));
+        router.all(route, createHandlerForRoute(route, methodConfig.ALL, config));
       }
     }
 
@@ -98,12 +112,16 @@ export default async function initHttpHandling(config: AppConfig) {
     koa.use(router.allowedMethods());
   }
 
-  const koaRequestHandler = koa.callback();
+  return koa.callback();
+}
 
+export async function createRequestHandler() {
   return function httpRequestHandler(
-    req: IncomingMessage,
-    res: ServerResponse
+    req: IncomingMessage | Http2ServerRequest,
+    res: ServerResponse | Http2ServerResponse
   ) {
-    koaRequestHandler(req, res);
+    if (currentRequestHandler) {
+      currentRequestHandler(req, res);
+    }
   };
 }

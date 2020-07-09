@@ -1,83 +1,40 @@
-import {
-  AppConfig,
-  WebSocketProxyAppConfig,
-} from "../../types";
-import * as httpPlugin from "./plugins/http";
-import * as redisPlugin from "./plugins/redis";
-import {
-  WebSocketServicePlugin,
-  WebSocketRouteConfig,
-} from "../../types/webSocket";
+import { AppConfig, WebSocketProxyAppConfig } from "../../types";
 import WebSocket from "ws";
 import createHandler from "./createHandler";
 import { IncomingMessage } from "http";
 import { Socket } from "net";
-import { init as activeConnectionsInit } from "./activeConnections";
+import * as activeConnections from "./activeConnections";
+import { isWebSocketProxyConfig } from "./isWebSocketProxyConfig";
+import plugins from "./plugins";
 
-const plugins: {
-  [name: string]: WebSocketServicePlugin;
-} = {
-  http: {
-    init: httpPlugin.init,
-    handleRequest: httpPlugin.handleRequest,
-    connect: httpPlugin.connect,
-    disconnect: httpPlugin.disconnect,
-  },
-  redis: {
-    init: redisPlugin.init,
-    handleRequest: redisPlugin.handleRequest,
-    connect: redisPlugin.connect,
-    disconnect: redisPlugin.disconnect,
-  },
-};
+let webSocketServer: WebSocket.Server | undefined = undefined;
 
-export default async function init(
-  httpServer: any, // TODO
-  config: AppConfig
-) {
+export async function init(config: WebSocketProxyAppConfig) {
   const webSocketServers: {
     [key: string]: WebSocket.Server;
   } = {};
 
-  httpServer.on("upgrade", makeUpgrade(webSocketServers));
-
-  if (isWebSocketProxyConfig(config)) {
-    // Load other plugins
-    if (config.webSocket.plugins) {
-      for (const pluginName of Object.keys(config.webSocket.plugins)) {
-        plugins[pluginName] = require(config.webSocket.plugins[pluginName]
-          .path);
-      }
-    }
-
-    for (const pluginName of Object.keys(plugins)) {
-      await plugins[pluginName].init(config);
-    }
-
-    for (const route of Object.keys(config.webSocket.routes)) {
-      const routeConfig = config.webSocket.routes[route];
-      const wss = new WebSocket.Server({ noServer: true });
-      webSocketServers[route] = wss;
-      setupWebSocketHandling(wss, route, routeConfig, config);
+  // Load other plugins
+  if (config.webSocket.plugins) {
+    for (const pluginName of Object.keys(config.webSocket.plugins)) {
+      plugins[pluginName] = require(config.webSocket.plugins[pluginName].path);
     }
   }
 
-  activeConnectionsInit();
+  // Call init on all the plugins.
+  for (const pluginName of Object.keys(plugins)) {
+    await plugins[pluginName].init(config);
+  }
 
-  return Object.keys(webSocketServers).reduce(
-    (acc, route) => acc.concat(webSocketServers[route]),
-    [] as WebSocket.Server[]
-  );
+  activeConnections.init();
 }
 
-function setupWebSocketHandling(
-  wss: WebSocket.Server,
-  route: string,
-  routeConfig: WebSocketRouteConfig,
+export async function setupRequestHandling(
+  httpServer: any, // TODO
   config: WebSocketProxyAppConfig
 ) {
-  const handler = createHandler(plugins);
-  wss.on("connection", handler(route, routeConfig, config));
+  const wss = new WebSocket.Server({ noServer: true });
+  webSocketServer = wss;
 
   const interval = setInterval(function ping() {
     wss.clients.forEach(function each(ws: any) {
@@ -93,19 +50,23 @@ function setupWebSocketHandling(
   wss.on("close", function close() {
     clearInterval(interval);
   });
+
+  httpServer.on("upgrade", makeUpgrade(wss));
+
+  wss.on("connection", createHandler(config));
+  return wss;
 }
 
-function makeUpgrade(webSocketServers: { [key: string]: WebSocket.Server }) {
+function makeUpgrade(webSocketServer: WebSocket.Server) {
   return function upgrade(
     request: IncomingMessage,
     socket: Socket,
     head: Buffer
   ) {
     if (request.url) {
-      const server = webSocketServers[request.url];
-      if (server) {
-        server.handleUpgrade(request, socket, head, function done(ws) {
-          server.emit("connection", ws, request);
+      if (webSocketServer) {
+        webSocketServer.handleUpgrade(request, socket, head, function done(ws) {
+          webSocketServer.emit("connection", ws, request);
         });
       } else {
         socket.destroy();
@@ -114,10 +75,4 @@ function makeUpgrade(webSocketServers: { [key: string]: WebSocket.Server }) {
       socket.destroy();
     }
   };
-}
-
-function isWebSocketProxyConfig(
-  config: AppConfig
-): config is WebSocketProxyAppConfig {
-  return typeof config.webSocket !== "undefined";
 }
