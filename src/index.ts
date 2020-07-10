@@ -1,9 +1,4 @@
 #!/usr/bin/env node
-
-import { createServer as httpCreateServer } from "http";
-import { Server as HttpServer } from "http";
-import { createServer as httpsCreateServer } from "https";
-import { Server as HttpsServer } from "https";
 import WebSocket from "ws";
 import cluster from "cluster";
 import os from "os";
@@ -13,8 +8,12 @@ import * as configModule from "./config";
 
 import { AppConfig, UserAppConfig } from "./types";
 import * as applicationState from "./state";
-import * as webSocketConnections from "./connections/webSocket";
+import createHttpServer from "./connections/http/createServer";
 import * as httpConnections from "./connections/http";
+
+import * as webSocketConnections from "./connections/webSocket";
+import createWebSocketServer from "./connections/webSocket/createServer";
+
 import * as webJobs from "./webJobs";
 
 import { closeHttpServer } from "./utils/http/closeHttpServer";
@@ -121,28 +120,20 @@ export async function startWithConfiguration(
 
   await mutateAndCleanupConfig(config);
   configModule.set(config);
-  await initModules(config);
+  
+  // Create the http server.
+  const httpServer = createHttpServer(config);
 
-  // Create the HttpServer
-  const requestHandler = await httpConnections.createRequestHandler();
-
-  let httpServer: HttpServer | HttpsServer;
-  if (config.useHttps) {
-    const options = {
-      key: config.useHttps.key,
-      cert: config.useHttps.cert,
-    };
-    httpServer = (config.createHttpsServer || httpsCreateServer)(
-      options,
-      requestHandler
-    );
-  } else {
-    httpServer = (config.createHttpServer || httpCreateServer)(requestHandler);
+  // Init the websocket server only if websockets are defined.
+  // This also means that you cannot dynamically add a websocket route.
+  // But if a route is already defined, you could change one or more of them.
+  if (isWebSocketProxyConfig(config)) {
+    let webSocketServer = createWebSocketServer(httpServer, config);
   }
 
-  // Attach webSocket servers
-  let webSocketServer: WebSocket.Server | undefined = undefined;
-
+  // This sets up request handlers for the servers.
+  await initModules(config);
+  
   if (isWebSocketProxyConfig(config)) {
     webSocketServer = await webSocketConnections.setupRequestHandling(
       httpServer,

@@ -132,13 +132,11 @@ async function createKoaRequestHandler(
   return koa.callback();
 }
 
-export async function createRequestHandler() {
-  return function httpRequestHandler(
-    req: IncomingMessage | Http2ServerRequest,
-    res: ServerResponse | Http2ServerResponse
-  ) {
-    if (currentRequestHandler) {
-      currentRequestHandler(req, res);
-    }
-  };
+export function requestHandler(
+  req: IncomingMessage | Http2ServerRequest,
+  res: ServerResponse | Http2ServerResponse
+) {
+  if (currentRequestHandler) {
+    currentRequestHandler(req, res);
+  }
 }

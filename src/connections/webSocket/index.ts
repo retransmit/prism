@@ -1,13 +1,13 @@
-import { AppConfig, WebSocketProxyAppConfig } from "../../types";
+import { AppConfig } from "../../types";
 import WebSocket from "ws";
-import createHandler from "./createHandler";
-import { IncomingMessage } from "http";
-import { Socket } from "net";
 import * as activeConnections from "./activeConnections";
 import { isWebSocketProxyConfig } from "./isWebSocketProxyConfig";
 import plugins from "./plugins";
+import { IncomingMessage } from "http";
 
-let webSocketServer: WebSocket.Server | undefined = undefined;
+let currentRequestHandler:
+  | ((ws: WebSocket, request: IncomingMessage) => Promise<void>)
+  | undefined = undefined;
 
 export async function init(config: AppConfig) {
   if (isWebSocketProxyConfig(config)) {
@@ -28,50 +28,8 @@ export async function init(config: AppConfig) {
   activeConnections.init();
 }
 
-export async function setupRequestHandling(
-  httpServer: any,
-  config: WebSocketProxyAppConfig
-) {
-  const wss = new WebSocket.Server({ noServer: true });
-  webSocketServer = wss;
-
-  const interval = setInterval(function ping() {
-    wss.clients.forEach(function each(ws: any) {
-      if (ws.isAlive === false) {
-        return ws.terminate();
-      }
-
-      ws.isAlive = false;
-      ws.ping(function noop() {});
-    });
-  }, 30000);
-
-  wss.on("close", function close() {
-    clearInterval(interval);
-  });
-
-  httpServer.on("upgrade", makeUpgrade(wss));
-
-  wss.on("connection", createHandler(config));
-  return wss;
-}
-
-function makeUpgrade(webSocketServer: WebSocket.Server) {
-  return function upgrade(
-    request: IncomingMessage,
-    socket: Socket,
-    head: Buffer
-  ) {
-    if (request.url) {
-      if (webSocketServer) {
-        webSocketServer.handleUpgrade(request, socket, head, function done(ws) {
-          webSocketServer.emit("connection", ws, request);
-        });
-      } else {
-        socket.destroy();
-      }
-    } else {
-      socket.destroy();
-    }
-  };
+export function requestHandler(ws: WebSocket, req: IncomingMessage) {
+  if (currentRequestHandler) {
+    currentRequestHandler(ws, req);
+  }
 }
