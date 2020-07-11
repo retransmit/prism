@@ -2,17 +2,22 @@ import redis = require("redis");
 import processMessage from "./processMessage";
 import { WebSocketProxyAppConfig } from "../../../../types";
 import { init as initPublisher } from "./publish";
+import { promisify } from "util";
 
-let subscriber: redis.RedisClient;
+let client: redis.RedisClient;
+const redisUnsubscribe = promisify(redis.createClient().unsubscribe);
 
 export default async function init(config: WebSocketProxyAppConfig) {
   if (config.webSocket.redis) {
-    subscriber = redis.createClient(config.redis?.options);
+    if (client) {
+      await redisUnsubscribe.call(client);
+    }
 
-    subscriber.on("message", processMessage(config));
-    subscriber.subscribe(
-      `${config.webSocket.redis.responseChannel}.${config.instanceId}`
-    );
+    const channel = `${config.webSocket.redis.responseChannel}.${config.instanceId}`;
+    client = redis.createClient(config.redis?.options);
+
+    client.on("message", processMessage(config));
+    client.subscribe(channel);
 
     initPublisher(config);
   }

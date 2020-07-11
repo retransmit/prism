@@ -2,20 +2,11 @@ import got from "got/dist/source";
 import selectRandomUrl from "../utils/http/selectRandomUrl";
 import { PeriodicWebJob, AppConfig } from "../types";
 
-let interval: NodeJS.Timeout | undefined = undefined;
-
-export async function init(
+export function init(
   name: string,
   job: PeriodicWebJob,
   config: AppConfig
-) {
-  if (interval) {
-    clearInterval(interval);
-  }
-  interval = setIntervalForJob(name, job);
-}
-
-function setIntervalForJob(name: string, job: PeriodicWebJob): NodeJS.Timeout {
+): NodeJS.Timeout {
   return setInterval(() => runWebJob(name, job), job.interval);
 }
 
