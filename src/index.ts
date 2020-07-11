@@ -120,26 +120,20 @@ export async function startWithConfiguration(
 
   await mutateAndCleanupConfig(config);
   configModule.set(config);
-  
+
   // Create the http server.
   const httpServer = createHttpServer(config);
+  let webSocketServer: WebSocket.Server | undefined;
 
   // Init the websocket server only if websockets are defined.
   // This also means that you cannot dynamically add a websocket route.
   // But if a route is already defined, you could change one or more of them.
   if (isWebSocketProxyConfig(config)) {
-    let webSocketServer = createWebSocketServer(httpServer, config);
+    webSocketServer = createWebSocketServer(httpServer, config);
   }
 
   // This sets up request handlers for the servers.
   await initModules(config);
-  
-  if (isWebSocketProxyConfig(config)) {
-    webSocketServer = await webSocketConnections.setupRequestHandling(
-      httpServer,
-      config
-    );
-  }
 
   httpServer.listen(port);
 

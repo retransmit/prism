@@ -13,6 +13,20 @@ const cors = require("@koa/cors");
 let currentRequestHandler: KoaRequestHandler | undefined = undefined;
 
 export async function init(config: AppConfig) {
+  if (isHttpServiceAppConfig(config)) {
+    // Load other plugins.
+    if (config.http.plugins) {
+      for (const pluginName of Object.keys(config.http.plugins)) {
+        plugins[pluginName] = require(config.http.plugins[pluginName].path);
+      }
+    }
+
+    // Call init on all the plugins.
+    for (const pluginName of Object.keys(plugins)) {
+      await plugins[pluginName].init(config);
+    }
+  }
+
   currentRequestHandler = await createKoaRequestHandler(config);
 }
 
@@ -31,18 +45,6 @@ async function createKoaRequestHandler(
   }
 
   if (isHttpServiceAppConfig(config)) {
-    // Load other plugins.
-    if (config.http.plugins) {
-      for (const pluginName of Object.keys(config.http.plugins)) {
-        plugins[pluginName] = require(config.http.plugins[pluginName].path);
-      }
-    }
-
-    // Call init on all the plugins.
-    for (const pluginName of Object.keys(plugins)) {
-      await plugins[pluginName].init(config);
-    }
-
     const router = new Router();
 
     for (const route of Object.keys(config.http.routes)) {

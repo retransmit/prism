@@ -17,7 +17,7 @@ import { parse } from "url";
 import { isWebSocketProxyConfig } from "./isWebSocketProxyConfig";
 
 export default function createHandler(config: AppConfig) {
-  return async function connection(ws: WebSocket, request: IncomingMessage) {
+  return function connection(ws: WebSocket, request: IncomingMessage) {
     if (isWebSocketProxyConfig(config)) {
       const route = request.url ? parse(request.url).pathname : "";
       if (route) {

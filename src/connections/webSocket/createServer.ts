@@ -2,8 +2,9 @@ import { IncomingMessage } from "http";
 import { Socket } from "net";
 import WebSocket from "ws";
 import { AppConfig } from "../../types";
+import { requestHandler } from ".";
 
-export default async function createServer(httpServer: any, config: AppConfig) {
+export default function createServer(httpServer: any, config: AppConfig) {
   const wss = new WebSocket.Server({ noServer: true });
 
   const interval = setInterval(function ping() {
@@ -23,7 +24,7 @@ export default async function createServer(httpServer: any, config: AppConfig) {
 
   httpServer.on("upgrade", makeUpgrade(wss));
 
-  wss.on("connection", createHandler(config));
+  wss.on("connection", requestHandler);
   return wss;
 }
 

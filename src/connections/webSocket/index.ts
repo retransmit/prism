@@ -4,9 +4,10 @@ import * as activeConnections from "./activeConnections";
 import { isWebSocketProxyConfig } from "./isWebSocketProxyConfig";
 import plugins from "./plugins";
 import { IncomingMessage } from "http";
+import createHandler from "./createHandler";
 
 let currentRequestHandler:
-  | ((ws: WebSocket, request: IncomingMessage) => Promise<void>)
+  | ((ws: WebSocket, request: IncomingMessage) => void)
   | undefined = undefined;
 
 export async function init(config: AppConfig) {
@@ -26,6 +27,8 @@ export async function init(config: AppConfig) {
   }
 
   activeConnections.init();
+
+  currentRequestHandler = createHandler(config);
 }
 
 export function requestHandler(ws: WebSocket, req: IncomingMessage) {
