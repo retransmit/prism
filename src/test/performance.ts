@@ -4,9 +4,10 @@ import { Server as HttpServer } from "http";
 import { Server as HttpsServer } from "https";
 import * as httpTests from "./performance/connections/http";
 import { AppControl } from "..";
+import { closeHttpServer } from "../utils/http/closeHttpServer";
 
 export type PerformanceTestAppInstance = {
-  appControl: AppControl;
+  appControl?: AppControl;
   mockHttpServers?: (HttpServer | HttpsServer)[];
 };
 
@@ -44,14 +45,19 @@ async function run() {
 
   const listOfTests: [string, TestFunc][] = [
     ["http-http-simple-request", httpTests.httpSimpleRequest],
+    ["http-http-simple-request-stream", httpTests.httpSimpleRequestStream],
   ];
 
   const testsToRun = tests.includes("all")
     ? listOfTests
-    : listOfTests.filter(([name, testFn]) => tests.includes(name));
+    : listOfTests.filter(([name]) => tests.includes(name));
 
   for (const [name, testFn] of testsToRun) {
     console.log(`Running performance test: ${name} ...`);
+
+    (app as any).appControl = undefined;
+    app.mockHttpServers = undefined;
+
     try {
       const result = await testFn(name, count, app);
       const timeTaken = result.endTime - result.startTime;
@@ -60,7 +66,21 @@ async function run() {
     } catch (ex) {
       console.log(ex.message);
     }
-    process.exit();
+
+    await closeServers(app);
+  }
+  process.exit();
+}
+
+async function closeServers(app: PerformanceTestAppInstance) {
+  if (app.mockHttpServers) {
+    for (const mockHttpServer of app.mockHttpServers) {
+      await closeHttpServer(mockHttpServer);
+    }
+  }
+
+  if (app.appControl) {
+    await app.appControl.closeServers();
   }
 }
 

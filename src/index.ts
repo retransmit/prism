@@ -137,12 +137,6 @@ export async function startWithConfiguration(
 
   httpServer.listen(port);
 
-  httpServer.on("close", () => {
-    if (webSocketServer) {
-      webSocketServer.close();
-    }
-  });
-
   async function closeServers() {
     if (webSocketServer) {
       await closeWebSocketServer(webSocketServer);
@@ -159,7 +153,7 @@ export async function startWithConfiguration(
   return {
     instanceId: config.instanceId,
     port,
-    closeServers: closeServers,
+    closeServers,
   };
 }
 

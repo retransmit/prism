@@ -4,7 +4,7 @@ import {
   PerformanceTestAppInstance,
   PerformanceTestResult,
 } from "../../../../../performance";
-import { HttpMethods } from "../../../../../../types";
+import { HttpMethods, UserAppConfig } from "../../../../../../types";
 import startRetransmitTestInstance from "../../../../../integration/connections/utils/startRetransmitTestInstance";
 
 export default async function (
@@ -14,11 +14,12 @@ export default async function (
 ): Promise<PerformanceTestResult> {
   const numLoops = 1000 * count;
 
-  const config = {
+  const config: UserAppConfig = {
     http: {
       routes: {
         "/users": {
           GET: {
+            useStream: true,
             services: {
               userservice: {
                 type: "http" as "http",
@@ -45,8 +46,9 @@ export default async function (
     },
   ]);
 
-  app.appControl = await startRetransmitTestInstance({ config });
-  const { port } = app.appControl;
+  const appControl = await startRetransmitTestInstance({ config });
+  app.appControl = appControl;
+  const { port } = appControl;
 
   app.mockHttpServers = backendApps;
 
