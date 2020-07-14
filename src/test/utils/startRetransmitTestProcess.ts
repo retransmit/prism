@@ -36,7 +36,7 @@ export default async function startRetransmitTestProcess(
 
   const args = [
     startUpScript,
-    "--silent",
+    // "--silent",
     "--cluster",
     "-p",
     port.toString(),
@@ -50,12 +50,13 @@ export default async function startRetransmitTestProcess(
 
   const { pid, stdout, stderr } = spawn("node", args);
 
-  // await new Promise((success) => {
-  //   stdout.on("data", (x) => {
-  //     console.log(x.toString());
-  //     success();
-  //   });
-  // });
+  await new Promise((success) => {
+    stdout.on("data", (x: Buffer) => {
+      if (x.toString().startsWith("instance")) {
+        success();
+      }
+    });
+  });
 
   return {
     port,

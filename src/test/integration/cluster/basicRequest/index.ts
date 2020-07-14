@@ -16,11 +16,6 @@ export default async function (app: TestAppInstance, testEnv: TestEnv) {
       {}
     );
 
-    // TODO
-    // Wait a second for the servers to start running.
-    // Yeah I know.
-    await sleep(2000);
-
     // Start mock servers.
     const backendApps = startBackends([
       {
