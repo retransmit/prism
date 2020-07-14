@@ -1,10 +1,7 @@
 import { startBackends, getResponse } from "../../../../../utils/http";
 import got from "got/dist/source";
-import {
-  PerformanceTestAppInstance,
-  PerformanceTestResult,
-} from "../../../..";
-import { HttpMethods, UserAppConfig } from "../../../../../../types";
+import { PerformanceTestAppInstance, PerformanceTestResult } from "../../../..";
+import { HttpMethods } from "../../../../../../types";
 import startRetransmitTestInstance from "../../../../../integration/connections/utils/startRetransmitTestInstance";
 
 export default async function (
@@ -14,26 +11,8 @@ export default async function (
 ): Promise<PerformanceTestResult> {
   const numLoops = 1000 * count;
 
-  const config: UserAppConfig = {
-    http: {
-      routes: {
-        "/users": {
-          GET: {
-            useStream: true,
-            services: {
-              userservice: {
-                type: "http" as "http",
-                url: "http://localhost:6666/users",
-              },
-            },
-          },
-        },
-      },
-    },
-  };
-
   // Start mock servers.
-  const backendApps = startBackends([
+  const backends = startBackends([
     {
       port: 6666,
       routes: (["GET", "POST", "PUT", "DELETE", "PATCH"] as HttpMethods[]).map(
@@ -46,16 +25,12 @@ export default async function (
     },
   ]);
 
-  const appControl = await startRetransmitTestInstance({ config });
-  app.appControl = appControl;
-  const { port } = appControl;
-
-  app.mockHttpServers = backendApps;
+  app.mockHttpServers = backends;
 
   const startTime = Date.now();
 
   for (let i = 0; i < numLoops; i++) {
-    const promisedResponse = got(`http://localhost:${port}/users`, {
+    const promisedResponse = got(`http://localhost:6666/users`, {
       method: "GET",
       retry: 0,
     });

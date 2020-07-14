@@ -3,7 +3,7 @@ import got from "got/dist/source";
 import {
   PerformanceTestAppInstance,
   PerformanceTestResult,
-} from "../../../../../performance";
+} from "../../../..";
 import { HttpMethods } from "../../../../../../types";
 import startRetransmitTestInstance from "../../../../../integration/connections/utils/startRetransmitTestInstance";
 

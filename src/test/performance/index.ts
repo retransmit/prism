@@ -2,9 +2,9 @@
 import yargs = require("yargs");
 import { Server as HttpServer } from "http";
 import { Server as HttpsServer } from "https";
-import * as httpTests from "./performance/connections/http";
-import { AppControl } from "..";
-import { closeHttpServer } from "../utils/http/closeHttpServer";
+import * as httpTests from "./connections/http";
+import { AppControl } from "../..";
+import { closeHttpServer } from "../../utils/http/closeHttpServer";
 
 export type PerformanceTestAppInstance = {
   appControl?: AppControl;
@@ -44,6 +44,7 @@ async function run() {
   ) => Promise<PerformanceTestResult>;
 
   const listOfTests: [string, TestFunc][] = [
+    ["http-http-simple-request-baseline", httpTests.httpSimpleRequestBaseline],
     ["http-http-simple-request", httpTests.httpSimpleRequest],
     ["http-http-simple-request-stream", httpTests.httpSimpleRequestStream],
   ];
