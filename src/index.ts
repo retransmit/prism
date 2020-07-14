@@ -6,7 +6,7 @@ import yargs = require("yargs");
 
 import * as configModule from "./config";
 
-import { AppConfig, UserAppConfig } from "./types";
+import { AppConfig, UserAppConfig, AppControl } from "./types";
 import * as applicationState from "./state";
 import createHttpServer from "./connections/http/createServer";
 import * as httpConnections from "./connections/http";
@@ -20,28 +20,11 @@ import { closeHttpServer } from "./utils/http/closeHttpServer";
 import { closeWebSocketServer } from "./utils/webSocket/closeWebSocketServer";
 import namesGenerator from "./utils/namesGenerator";
 import { isWebSocketProxyConfig } from "./connections/webSocket/isWebSocketProxyConfig";
-import { options } from "yargs";
 
 const ONE_MINUTE = 60 * 1000;
 const TWO_MINUTES = 2 * ONE_MINUTE;
 
 const packageJson = require("../package.json");
-
-const argv = yargs.options({
-  c: { type: "string", alias: "config" },
-  i: { type: "string", alias: "instance" },
-  p: { type: "number", default: 8080, alias: "port" },
-  v: { type: "boolean", alias: "version" },
-  silent: { type: "boolean" },
-  cluster: { type: "boolean" },
-  workers: { type: "number" },
-}).argv;
-
-export type AppControl = {
-  instanceId: string;
-  port: number;
-  closeServers: () => Promise<void>;
-};
 
 export type WorkerStartArgs = {
   instanceId: string;
@@ -164,6 +147,16 @@ export async function startWithConfiguration(
 }
 
 if (require.main === module) {
+  const argv = yargs.options({
+    c: { type: "string", alias: "config" },
+    i: { type: "string", alias: "instance" },
+    p: { type: "number", default: 8080, alias: "port" },
+    v: { type: "boolean", alias: "version" },
+    silent: { type: "boolean" },
+    cluster: { type: "boolean" },
+    workers: { type: "number" },
+  }).argv;
+
   // Print the version and exit
   if (argv.v) {
     console.log(packageJson.version);

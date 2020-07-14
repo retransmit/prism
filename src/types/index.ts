@@ -11,6 +11,12 @@ import * as httpsModule from "https";
 
 export type HttpMethods = "GET" | "POST" | "PUT" | "DELETE" | "PATCH" | "HEAD";
 
+export type AppControl = {
+  instanceId: string;
+  port: number;
+  closeServers: () => Promise<void>;
+};
+
 // Application Config
 export type UserAppConfig = {
   silent?: boolean;

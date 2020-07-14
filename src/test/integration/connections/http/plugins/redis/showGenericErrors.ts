@@ -148,7 +148,7 @@ export default async function (app: TestAppInstance, testEnv: TestEnv) {
           id: redisInput.id,
           service: "messagingservice",
           response: {
-            body: "Hello world",
+            body: "hello, world",
           },
         })
       );

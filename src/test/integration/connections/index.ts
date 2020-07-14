@@ -5,7 +5,7 @@ import { closeHttpServer } from "../../../utils/http/closeHttpServer";
 import integrationTestsHttp from "./http";
 import integrationTestsWebSocket from "./webSocket";
 import { TestEnv } from "..";
-import { AppControl } from "../../..";
+import { AppControl } from "../../../types";
 
 export type TestAppInstance = {
   appControl?: AppControl;

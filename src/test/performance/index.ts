@@ -3,9 +3,9 @@ import yargs = require("yargs");
 import { Server as HttpServer } from "http";
 import { Server as HttpsServer } from "https";
 import * as httpTests from "./connections/http";
-import { AppControl } from "../..";
 import { closeHttpServer } from "../../utils/http/closeHttpServer";
 import { join } from "path";
+import { AppControl } from "../../types";
 
 export type PerformanceTestEnv = {
   appRoot: string;
@@ -19,14 +19,15 @@ export type PerformanceTestAppInstance = {
 };
 
 export type PerformanceTestResult = {
-  numLoops: number;
+  count: number;
   startTime: number;
   endTime: number;
 };
 
 const argv = yargs.options({
   t: { type: "array", alias: "test" },
-  n: { type: "number", alias: "num" },
+  l: { type: "number", alias: "loop" },
+  p: { type: "number", alias: "parallel" },
 }).argv;
 
 async function run() {
@@ -39,14 +40,16 @@ async function run() {
     "WARN: These tests exist just to make sure we don't introduce silly performance issues. These numbers are not at all useful for benchmarking."
   );
 
-  const tests = argv.t || ["all"];
-  const count = argv.n || 1;
+  const tests = argv.t ?? ["all"];
+  const loop = argv.l ?? 1;
+  const parallelRequests = argv.p ?? 10;
 
   let app: PerformanceTestAppInstance = { app: { servers: undefined } } as any;
 
   type TestFunc = (
     name: string,
     count: number,
+    parallel: number,
     app: PerformanceTestAppInstance,
     testEnv: PerformanceTestEnv
   ) => Promise<PerformanceTestResult>;
@@ -60,6 +63,7 @@ async function run() {
     ["http-http-simple-request-baseline", httpTests.httpSimpleRequestBaseline],
     ["http-http-simple-request", httpTests.httpSimpleRequest],
     ["http-http-simple-request-stream", httpTests.httpSimpleRequestStream],
+    ["http-http-simple-request-cluster", httpTests.httpSimpleRequestCluster],
   ];
 
   const testsToRun = tests.includes("all")
@@ -73,12 +77,12 @@ async function run() {
     app.mockHttpServers = undefined;
 
     try {
-      const result = await testFn(name, count, app, testEnv);
+      const result = await testFn(name, loop, parallelRequests, app, testEnv);
       const timeTaken = result.endTime - result.startTime;
       const timeInSeconds = (timeTaken / 1000).toFixed(3);
-      const rps = result.numLoops / (timeTaken / 1000);
+      const rps = result.count / (timeTaken / 1000);
       console.log(
-        `${name} ${result.numLoops} times took ${timeInSeconds}s (${rps.toFixed(
+        `${name} ${result.count} times took ${timeInSeconds}s (${rps.toFixed(
           2
         )} rps). `
       );

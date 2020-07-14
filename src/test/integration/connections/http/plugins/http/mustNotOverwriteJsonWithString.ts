@@ -52,7 +52,7 @@ export default async function (app: TestAppInstance, testEnv: TestEnv) {
           {
             path: "/messages",
             method: "GET",
-            response: { body: "hello world" },
+            response: { body: "hello, world" },
           },
         ],
       },

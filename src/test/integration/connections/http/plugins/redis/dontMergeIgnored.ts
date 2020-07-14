@@ -81,7 +81,7 @@ export default async function (app: TestAppInstance, testEnv: TestEnv) {
         service: "messagingservice",
         response: {
           body: {
-            message: "Hello world",
+            message: "hello, world",
           },
         },
       })

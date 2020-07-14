@@ -81,7 +81,7 @@ export default async function (app: TestAppInstance, testEnv: TestEnv) {
         service: "messagingservice",
         response: {
           body: {
-            message: "hello world",
+            message: "hello, world",
           },
         },
       })
@@ -91,7 +91,7 @@ export default async function (app: TestAppInstance, testEnv: TestEnv) {
     serverResponse.statusCode.should.equal(200);
     JSON.parse(serverResponse.body).should.deepEqual({
       user: 1,
-      message: "hello world",
+      message: "hello, world",
     });
   });
 }

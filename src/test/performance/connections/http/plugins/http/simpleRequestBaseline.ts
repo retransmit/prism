@@ -1,15 +1,22 @@
 import { startBackends, getResponse } from "../../../../../utils/http";
 import got from "got/dist/source";
-import { PerformanceTestAppInstance, PerformanceTestResult, PerformanceTestEnv } from "../../../..";
+import {
+  PerformanceTestAppInstance,
+  PerformanceTestResult,
+  PerformanceTestEnv,
+} from "../../../..";
+import { Response } from "got/dist/source/core";
 import { HttpMethods } from "../../../../../../types";
+import sendParallelRequests from "../../../../../utils/sendParallelRequests";
 
 export default async function (
   name: string,
-  count: number,
+  loops: number,
+  parallel: number,
   app: PerformanceTestAppInstance,
   testEnv: PerformanceTestEnv
 ): Promise<PerformanceTestResult> {
-  const numLoops = 1000 * count;
+  const count = 1000 * loops;
 
   // Start mock servers.
   const backends = startBackends([
@@ -19,7 +26,9 @@ export default async function (
         (method) => ({
           path: "/users",
           method,
-          response: { body: `Hello world.` },
+          handleResponse: async (ctx) => {
+            ctx.body = "hello, world";
+          },
         })
       ),
     },
@@ -29,25 +38,27 @@ export default async function (
 
   const startTime = Date.now();
 
-  for (let i = 0; i < numLoops; i++) {
-    const promisedResponse = got(`http://localhost:6666/users`, {
-      method: "GET",
-      retry: 0,
-    });
-
-    const serverResponse = await getResponse(promisedResponse);
+  function onResponse(serverResponse: Response<string>) {
     if (
       serverResponse.statusCode !== 200 ||
-      serverResponse.body !== "Hello world."
+      serverResponse.body !== "hello, world"
     ) {
       throw new Error(`${name} test failed.`);
     }
   }
 
+  await sendParallelRequests(
+    `http://localhost:6666/users`,
+    "GET",
+    onResponse,
+    count,
+    parallel
+  );
+
   const endTime = Date.now();
 
   return {
-    numLoops,
+    count,
     startTime,
     endTime,
   };

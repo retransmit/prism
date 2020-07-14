@@ -1,6 +1,6 @@
 import { spawn } from "child_process";
 import { join } from "path";
-import { Readable } from "stream";
+import { Readable, Writable } from "stream";
 
 export type InstanceConfig = {
   stdout: Readable;
@@ -13,6 +13,8 @@ export type InstanceConfig = {
 export type StartAppParams = {
   port?: number;
   instanceId?: string;
+  workers?: number;
+  eventHandlers?: (stdin: Writable, stdout: Readable, stderr: Readable) => void;
 };
 
 export default async function startRetransmitTestProcess(
@@ -36,7 +38,6 @@ export default async function startRetransmitTestProcess(
 
   const args = [
     startUpScript,
-    // "--silent",
     "--cluster",
     "-p",
     port.toString(),
@@ -48,7 +49,15 @@ export default async function startRetransmitTestProcess(
     args.push("-i", instanceId);
   }
 
-  const { pid, stdout, stderr } = spawn("node", args);
+  if (params.workers) {
+    args.push("--workers", params.workers.toString())
+  }
+
+  const { pid, stdin, stdout, stderr } = spawn("node", args);
+
+  if (params.eventHandlers) {
+    params.eventHandlers(stdin, stdout, stderr);
+  }
 
   await new Promise((success) => {
     stdout.on("data", (x: Buffer) => {
