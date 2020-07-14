@@ -3,14 +3,16 @@ import got from "got/dist/source";
 import {
   PerformanceTestAppInstance,
   PerformanceTestResult,
+  PerformanceTestEnv,
 } from "../../../..";
 import { HttpMethods } from "../../../../../../types";
-import startRetransmitTestInstance from "../../../../../integration/connections/utils/startRetransmitTestInstance";
+import startRetransmitTestInstance from "../../../../../utils/startRetransmitTestInstance";
 
 export default async function (
   name: string,
   count: number,
-  app: PerformanceTestAppInstance
+  app: PerformanceTestAppInstance,
+  testEnv: PerformanceTestEnv
 ): Promise<PerformanceTestResult> {
   const numLoops = 1000 * count;
 

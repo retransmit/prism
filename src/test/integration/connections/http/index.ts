@@ -32,7 +32,7 @@ import runsWebJobs from "./runsWebJobs";
 import cachesResponses from "./cachesResponses";
 import authenticates from "./authenticates";
 import { TestAppInstance } from "..";
-import { TestEnv } from "../../../test";
+import { TestEnv } from "../..";
 
 export default function run(app: TestAppInstance, testEnv: TestEnv) {
   describe("http connections", () => {

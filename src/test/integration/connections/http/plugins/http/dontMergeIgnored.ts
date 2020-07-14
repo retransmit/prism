@@ -2,8 +2,8 @@ import { startBackends } from "../../../../../utils/http";
 import { TestAppInstance } from "../../..";
 import got from "got";
 import { UserAppConfig } from "../../../../../../types";
-import startRetransmitTestInstance from "../../../utils/startRetransmitTestInstance";
-import { TestEnv } from "../../../../../test";
+import startRetransmitTestInstance from "../../../../../utils/startRetransmitTestInstance";
+import { TestEnv } from "../../../..";
 
 export default async function (app: TestAppInstance, testEnv: TestEnv) {
   it(`does not merge ignored results`, async () => {
@@ -63,9 +63,8 @@ export default async function (app: TestAppInstance, testEnv: TestEnv) {
       },
     ]);
 
-      app.appControl = appControl;
-      app.mockHttpServers = backendApps;
-
+    app.appControl = appControl;
+    app.mockHttpServers = backendApps;
 
     const { port } = appControl;
     const serverResponse = await got(`http://localhost:${port}/users`, {

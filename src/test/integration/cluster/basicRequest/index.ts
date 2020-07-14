@@ -1,9 +1,9 @@
 import { join } from "path";
-import { startRetransmitTestProcess } from "../utils/startRetransmitTestProcess";
+import startRetransmitTestProcess from "../../../utils/startRetransmitTestProcess";
 import { startBackends, getResponse } from "../../../utils/http";
 import got from "got/dist/source";
 import { TestAppInstance } from "..";
-import { TestEnv } from "../../../test";
+import { TestEnv } from "../..";
 
 export default async function (app: TestAppInstance, testEnv: TestEnv) {
   it(`responds to GET request from a cluster`, async () => {

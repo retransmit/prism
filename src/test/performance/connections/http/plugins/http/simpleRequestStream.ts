@@ -1,16 +1,14 @@
 import { startBackends, getResponse } from "../../../../../utils/http";
 import got from "got/dist/source";
-import {
-  PerformanceTestAppInstance,
-  PerformanceTestResult,
-} from "../../../..";
+import { PerformanceTestAppInstance, PerformanceTestResult, PerformanceTestEnv } from "../../../..";
 import { HttpMethods, UserAppConfig } from "../../../../../../types";
-import startRetransmitTestInstance from "../../../../../integration/connections/utils/startRetransmitTestInstance";
+import startRetransmitTestInstance from "../../../../../utils/startRetransmitTestInstance";
 
 export default async function (
   name: string,
   count: number,
-  app: PerformanceTestAppInstance
+  app: PerformanceTestAppInstance,
+  testEnv: PerformanceTestEnv
 ): Promise<PerformanceTestResult> {
   const numLoops = 1000 * count;
 

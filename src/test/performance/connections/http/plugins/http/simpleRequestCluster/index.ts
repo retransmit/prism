@@ -1,14 +1,24 @@
-import { startBackends, getResponse } from "../../../../../utils/http";
+import { join } from "path";
 import got from "got/dist/source";
-import { PerformanceTestAppInstance, PerformanceTestResult, PerformanceTestEnv } from "../../../..";
-import { HttpMethods } from "../../../../../../types";
+import { PerformanceTestAppInstance, PerformanceTestEnv } from "../../../../..";
+import startRetransmitTestProcess from "../../../../../../utils/startRetransmitTestProcess";
+import { startBackends, getResponse } from "../../../../../../utils/http";
+import { HttpMethods } from "../../../../../../../types";
 
 export default async function (
   name: string,
   count: number,
   app: PerformanceTestAppInstance,
   testEnv: PerformanceTestEnv
-): Promise<PerformanceTestResult> {
+) {
+  const configFile = join(__dirname, "config.js");
+
+  const instanceConfig = await startRetransmitTestProcess(
+    testEnv.appRoot,
+    configFile,
+    {}
+  );
+
   const numLoops = 1000 * count;
 
   // Start mock servers.
@@ -30,10 +40,13 @@ export default async function (
   const startTime = Date.now();
 
   for (let i = 0; i < numLoops; i++) {
-    const promisedResponse = got(`http://localhost:6666/users`, {
-      method: "GET",
-      retry: 0,
-    });
+    const promisedResponse = got(
+      `http://localhost:${instanceConfig.port}/users`,
+      {
+        method: "GET",
+        retry: 0,
+      }
+    );
 
     const serverResponse = await getResponse(promisedResponse);
     if (

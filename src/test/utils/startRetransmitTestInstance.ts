@@ -1,8 +1,8 @@
-import { startWithConfiguration } from "../../../..";
-import { UserAppConfig } from "../../../../types";
+import { startWithConfiguration } from "../..";
+import { UserAppConfig } from "../../types";
 import { createClient } from "redis";
 import { promisify } from "util";
-import random from "../../../../utils/random";
+import random from "../../utils/random";
 
 export type StartAppParams = {
   port?: number;

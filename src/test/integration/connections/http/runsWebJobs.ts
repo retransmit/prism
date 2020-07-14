@@ -1,8 +1,8 @@
 import { startBackends } from "../../../utils/http";
-import { TestAppInstance } from "../";
+import { TestAppInstance } from "..";
 import { UserAppConfig } from "../../../../types";
-import startRetransmitTestInstance from "../utils/startRetransmitTestInstance";
-import { TestEnv } from "../../../test";
+import startRetransmitTestInstance from "../../../utils/startRetransmitTestInstance";
+import { TestEnv } from "../..";
 
 function sleep(ms: number): Promise<void> {
   return new Promise((success) => {

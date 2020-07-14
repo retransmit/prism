@@ -5,8 +5,15 @@ import { Server as HttpsServer } from "https";
 import * as httpTests from "./connections/http";
 import { AppControl } from "../..";
 import { closeHttpServer } from "../../utils/http/closeHttpServer";
+import { join } from "path";
+
+export type PerformanceTestEnv = {
+  appRoot: string;
+  testRoot: string;
+};
 
 export type PerformanceTestAppInstance = {
+  pid?: number;
   appControl?: AppControl;
   mockHttpServers?: (HttpServer | HttpsServer)[];
 };
@@ -40,8 +47,14 @@ async function run() {
   type TestFunc = (
     name: string,
     count: number,
-    app: PerformanceTestAppInstance
+    app: PerformanceTestAppInstance,
+    testEnv: PerformanceTestEnv
   ) => Promise<PerformanceTestResult>;
+
+  const testEnv = {
+    appRoot: join(__dirname, "../../"),
+    testRoot: join(__dirname, "../"),
+  };
 
   const listOfTests: [string, TestFunc][] = [
     ["http-http-simple-request-baseline", httpTests.httpSimpleRequestBaseline],
@@ -60,10 +73,15 @@ async function run() {
     app.mockHttpServers = undefined;
 
     try {
-      const result = await testFn(name, count, app);
+      const result = await testFn(name, count, app, testEnv);
       const timeTaken = result.endTime - result.startTime;
       const timeInSeconds = (timeTaken / 1000).toFixed(3);
-      console.log(`${name} (${result.numLoops} times) took ${timeInSeconds}s.`);
+      const rps = result.numLoops / (timeTaken / 1000);
+      console.log(
+        `${name} ${result.numLoops} times took ${timeInSeconds}s (${rps.toFixed(
+          2
+        )} rps). `
+      );
     } catch (ex) {
       console.log(ex.message);
     }
@@ -82,6 +100,10 @@ async function closeServers(app: PerformanceTestAppInstance) {
 
   if (app.appControl) {
     await app.appControl.closeServers();
+  }
+
+  if (app.pid) {
+    process.kill(app.pid);
   }
 }
 

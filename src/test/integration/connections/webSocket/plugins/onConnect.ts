@@ -1,8 +1,8 @@
 import WebSocket from "ws";
-import { TestAppInstance } from "../../";
-import startRetransmitTestInstance from "../../utils/startRetransmitTestInstance";
+import { TestAppInstance } from "../..";
+import startRetransmitTestInstance from "../../../../utils/startRetransmitTestInstance";
 import { UserAppConfig } from "../../../../../types";
-import { TestEnv } from "../../../../test";
+import { TestEnv } from "../../..";
 
 export default async function (app: TestAppInstance, testEnv: TestEnv) {
   it(`runs the connect hook on root config`, async () => {

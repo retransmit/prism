@@ -2,7 +2,7 @@ import basicRequest from "./basicRequest";
 import { Server as HttpServer } from "http";
 import { Server as HttpsServer } from "https";
 import { closeHttpServer } from "../../../utils/http/closeHttpServer";
-import { TestEnv } from "../../test";
+import { TestEnv } from "..";
 
 export type TestAppInstance = {
   pid?: number;

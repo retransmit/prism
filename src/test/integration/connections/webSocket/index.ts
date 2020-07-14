@@ -2,9 +2,9 @@ import "mocha";
 import "should";
 
 import onConnect from "./plugins/onConnect";
-import { TestAppInstance } from "../";
+import { TestAppInstance } from "..";
 import redisBasicRequest from "./plugins/redis/basicRequest";
-import { TestEnv } from "../../../test";
+import { TestEnv } from "../..";
 
 export default function run(app: TestAppInstance, testEnv: TestEnv) {
   describe("websocket connections", () => {

@@ -1,5 +1,5 @@
 import { startBackends, getResponse } from "../../../utils/http";
-import { TestAppInstance } from "../";
+import { TestAppInstance } from "..";
 import got from "got";
 import {
   RedisStateConfig,
@@ -9,9 +9,9 @@ import {
 import { Response } from "got/dist/source/core";
 import { createClient } from "redis";
 import { promisify } from "util";
-import startRetransmitTestInstance from "../utils/startRetransmitTestInstance";
+import startRetransmitTestInstance from "../../../utils/startRetransmitTestInstance";
 import sleep from "../../../../utils/sleep";
-import { TestEnv } from "../../../test";
+import { TestEnv } from "../..";
 
 const client = createClient();
 const redisFlushAll = promisify(client.flushdb);

@@ -3,8 +3,8 @@ import { Server } from "http";
 import { TestAppInstance } from "../../..";
 import got from "got";
 import { UserAppConfig } from "../../../../../../types";
-import startRetransmitTestInstance from "../../../utils/startRetransmitTestInstance";
-import { TestEnv } from "../../../../../test";
+import startRetransmitTestInstance from "../../../../../utils/startRetransmitTestInstance";
+import { TestEnv } from "../../../..";
 
 export default async function (app: TestAppInstance, testEnv: TestEnv) {
   it(`rolls back`, async () => {

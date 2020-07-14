@@ -1,7 +1,5 @@
 import { spawn } from "child_process";
-import { TestEnv } from "../../../test";
 import { join } from "path";
-import sleep from "../../../../utils/sleep";
 
 export type InstanceConfig = {
   port: number;
@@ -14,7 +12,7 @@ export type StartAppParams = {
   instanceId?: string;
 };
 
-export async function startRetransmitTestProcess(
+export default async function startRetransmitTestProcess(
   appRoot: string,
   configFile: string,
   params: StartAppParams

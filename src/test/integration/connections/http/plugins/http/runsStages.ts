@@ -3,8 +3,8 @@ import { TestAppInstance } from "../../..";
 import got from "got";
 import { BodyObject, UserAppConfig } from "../../../../../../types";
 import { NativeHttpServiceEndPointConfig } from "../../../../../../types/http";
-import startRetransmitTestInstance from "../../../utils/startRetransmitTestInstance";
-import { TestEnv } from "../../../../../test";
+import startRetransmitTestInstance from "../../../../../utils/startRetransmitTestInstance";
+import { TestEnv } from "../../../..";
 
 export default async function (app: TestAppInstance, testEnv: TestEnv) {
   it(`runs stages`, async () => {
@@ -78,9 +78,8 @@ export default async function (app: TestAppInstance, testEnv: TestEnv) {
       },
     ]);
 
-      app.appControl = appControl;
-      app.mockHttpServers = backendApps;
-
+    app.appControl = appControl;
+    app.mockHttpServers = backendApps;
 
     const { port } = appControl;
 

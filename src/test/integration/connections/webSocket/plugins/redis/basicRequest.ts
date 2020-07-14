@@ -3,8 +3,8 @@ import { TestAppInstance } from "../../..";
 import { createClient } from "redis";
 import { RedisWebSocketConnectRequest } from "../../../../../../types/webSocket";
 import { UserAppConfig } from "../../../../../../types";
-import startRetransmitTestInstance from "../../../utils/startRetransmitTestInstance";
-import { TestEnv } from "../../../../../test";
+import startRetransmitTestInstance from "../../../../../utils/startRetransmitTestInstance";
+import { TestEnv } from "../../../..";
 
 export default async function (app: TestAppInstance, testEnv: TestEnv) {
   it(`gets websocket responses from redis backends`, async () => {

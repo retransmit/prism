@@ -1,11 +1,11 @@
 import { Server as HttpServer } from "http";
 import { Server as HttpsServer } from "https";
 
-import { AppControl } from "../../..";
 import { closeHttpServer } from "../../../utils/http/closeHttpServer";
 import integrationTestsHttp from "./http";
 import integrationTestsWebSocket from "./webSocket";
-import { TestEnv } from "../../test";
+import { TestEnv } from "..";
+import { AppControl } from "../../..";
 
 export type TestAppInstance = {
   appControl?: AppControl;

@@ -1,9 +1,9 @@
 import { startBackends, getResponse } from "../../../utils/http";
-import { TestAppInstance } from "../";
+import { TestAppInstance } from "..";
 import got from "got";
 import { UserAppConfig } from "../../../../types";
-import startRetransmitTestInstance from "../utils/startRetransmitTestInstance";
-import { TestEnv } from "../../../test";
+import startRetransmitTestInstance from "../../../utils/startRetransmitTestInstance";
+import { TestEnv } from "../..";
 
 export default async function (app: TestAppInstance, testEnv: TestEnv) {
   const jwt =
@@ -65,7 +65,7 @@ export default async function (app: TestAppInstance, testEnv: TestEnv) {
       ]);
 
       app.appControl = appControl;
-      app.mockHttpServers = backendApps;      
+      app.mockHttpServers = backendApps;
       const { port } = appControl;
 
       const promisedResponse = got(`http://localhost:${port}/users`, {
