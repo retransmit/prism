@@ -1,7 +1,10 @@
 import { spawn } from "child_process";
 import { join } from "path";
+import { Readable } from "stream";
 
 export type InstanceConfig = {
+  stdout: Readable;
+  stderr: Readable;
   port: number;
   instanceId: string;
   pid: number;
@@ -31,21 +34,34 @@ export default async function startRetransmitTestProcess(
 
   const startUpScript = join(appRoot, "index.js");
 
-  const args = [startUpScript, "-p", port.toString(), "-c", configFile];
+  const args = [
+    startUpScript,
+    "--silent",
+    "--cluster",
+    "-p",
+    port.toString(),
+    "-c",
+    configFile,
+  ];
 
   if (instanceId) {
-    args.push("-1", instanceId);
+    args.push("-i", instanceId);
   }
 
-  const { pid, stdout } = spawn("node", args);
+  const { pid, stdout, stderr } = spawn("node", args);
 
-  await new Promise((success) => {
-    stdout.on("data", () => success());
-  });
+  // await new Promise((success) => {
+  //   stdout.on("data", (x) => {
+  //     console.log(x.toString());
+  //     success();
+  //   });
+  // });
 
   return {
     port,
     instanceId: "testinstance",
     pid,
+    stdout,
+    stderr,
   };
 }

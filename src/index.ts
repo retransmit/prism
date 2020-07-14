@@ -20,6 +20,7 @@ import { closeHttpServer } from "./utils/http/closeHttpServer";
 import { closeWebSocketServer } from "./utils/webSocket/closeWebSocketServer";
 import namesGenerator from "./utils/namesGenerator";
 import { isWebSocketProxyConfig } from "./connections/webSocket/isWebSocketProxyConfig";
+import { options } from "yargs";
 
 const ONE_MINUTE = 60 * 1000;
 const TWO_MINUTES = 2 * ONE_MINUTE;
@@ -32,7 +33,7 @@ const argv = yargs.options({
   p: { type: "number", default: 8080, alias: "port" },
   v: { type: "boolean", alias: "version" },
   silent: { type: "boolean" },
-  nocluster: { type: "boolean" },
+  cluster: { type: "boolean" },
   workers: { type: "number" },
 }).argv;
 
@@ -50,52 +51,57 @@ export async function startApp(
   port: number,
   instanceId: string | undefined,
   configFile: string,
-  notCluster: boolean,
+  useCluster: boolean,
   silent: boolean,
   workers: number | undefined
 ) {
   const config: UserAppConfig = require(configFile);
   config.numWorkers = workers ?? config.numWorkers ?? os.cpus().length;
+  config.silent = silent;
 
   const generatedName = namesGenerator("_");
   let counter = 0;
 
-  if (notCluster) {
-    return startWithConfiguration(port, config, generatedName, {
-      isCluster: false,
-      silent,
-    });
-  } else {
+  if (useCluster) {
     if (cluster.isMaster) {
+      const effectiveInstanceId =
+        instanceId || config.instanceId || generatedName;
+      if (!config.silent) {
+        console.log(
+          `cluster ${effectiveInstanceId} with ${config.numWorkers} workers, master pid = ${process.pid}.`
+        );
+      }
       function startWorker(counter: number) {
         const worker = cluster.fork();
         worker.send({
           type: "start",
-          instanceId: `${
-            instanceId || config.instanceId || generatedName
-          }_${counter}`,
+          instanceId: `${effectiveInstanceId}_${counter}`,
         });
       }
+
       // Fork workers.
       for (let i = 0; i < config.numWorkers; i++) {
         counter++;
         startWorker(counter);
       }
+
       cluster.on("exit", (worker, code, signal) => {
         startWorker(counter);
       });
     } else {
       return startWithConfiguration(port, config, "doesnt_matter", {
         isCluster: true,
-        silent,
       });
     }
+  } else {
+    return startWithConfiguration(port, config, generatedName, {
+      isCluster: false,
+    });
   }
 }
 
 export type StartOpts = {
   isCluster: boolean;
-  silent: boolean;
 };
 
 export async function startWithConfiguration(
@@ -144,9 +150,9 @@ export async function startWithConfiguration(
     await closeHttpServer(httpServer);
   }
 
-  if (!opts.silent) {
+  if (!config.silent) {
     console.log(
-      `retransmit instance ${config.instanceId} listening on port ${port}`
+      `instance ${config.instanceId} listening on port ${port}, pid = ${process.pid}.`
     );
   }
 
@@ -182,7 +188,7 @@ if (require.main === module) {
       port,
       instanceId,
       configFile,
-      argv.nocluster ?? false,
+      argv.cluster ?? false,
       argv.silent ?? false,
       argv.workers
     );
@@ -222,6 +228,8 @@ export async function mutateAndCleanupConfig(config: AppConfig) {
       httpServiceErrorTrackingListExpiry: TWO_MINUTES,
     };
   }
+
+  config.silent = config.silent ?? false;
 }
 
 export async function initModules(config: AppConfig) {

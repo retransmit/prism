@@ -4,6 +4,7 @@ import { startBackends, getResponse } from "../../../utils/http";
 import got from "got/dist/source";
 import { TestAppInstance } from "..";
 import { TestEnv } from "../..";
+import sleep from "../../../../utils/sleep";
 
 export default async function (app: TestAppInstance, testEnv: TestEnv) {
   it(`responds to GET request from a cluster`, async () => {
@@ -14,6 +15,11 @@ export default async function (app: TestAppInstance, testEnv: TestEnv) {
       configFile,
       {}
     );
+
+    // TODO
+    // Wait a second for the servers to start running.
+    // Yeah I know.
+    await sleep(2000);
 
     // Start mock servers.
     const backendApps = startBackends([

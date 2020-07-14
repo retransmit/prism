@@ -13,6 +13,7 @@ export type HttpMethods = "GET" | "POST" | "PUT" | "DELETE" | "PATCH" | "HEAD";
 
 // Application Config
 export type UserAppConfig = {
+  silent?: boolean;
   instanceId?: string;
   numWorkers?: number;
   http?: HttpProxyConfig;
@@ -52,6 +53,7 @@ export type WhitelistConfig = {
 export type AppConfig = UserAppConfig & {
   instanceId: string;
   numWorkers: number;
+  silent: boolean;
 };
 
 export type HttpProxyAppConfig = AppConfig & { http: HttpProxyConfig };

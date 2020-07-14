@@ -29,8 +29,9 @@ export default async function startRetransmitTestInstance(
       ? params.instanceId
       : `testinstance_${random()}`;
 
+  params.config.silent = true;
+
   return await startWithConfiguration(port || 6060, params.config, instanceId, {
     isCluster: false,
-    silent: true,
   });
 }

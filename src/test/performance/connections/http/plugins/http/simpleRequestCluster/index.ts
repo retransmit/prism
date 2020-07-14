@@ -4,6 +4,7 @@ import { PerformanceTestAppInstance, PerformanceTestEnv } from "../../../../..";
 import startRetransmitTestProcess from "../../../../../../utils/startRetransmitTestProcess";
 import { startBackends, getResponse } from "../../../../../../utils/http";
 import { HttpMethods } from "../../../../../../../types";
+import sleep from "../../../../../../../utils/sleep";
 
 export default async function (
   name: string,
@@ -18,6 +19,8 @@ export default async function (
     configFile,
     {}
   );
+
+  await sleep(5000);
 
   const numLoops = 1000 * count;
 
