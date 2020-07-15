@@ -63,16 +63,16 @@ function cleanUpClientTrackingEntries(
   const now = Date.now();
 
   for (const [
-    remoteAddress,
+    key,
     trackingEntries,
   ] of state.clientTracking.entries()) {
     if (
       trackingEntries.every((x) => now - x.time > clientTrackingEntryExpiry)
     ) {
-      state.clientTracking.delete(remoteAddress);
+      state.clientTracking.delete(key);
     } else {
       state.clientTracking.set(
-        remoteAddress,
+        key,
         trackingEntries.filter((x) => x.time > now - clientTrackingEntryExpiry)
       );
     }
