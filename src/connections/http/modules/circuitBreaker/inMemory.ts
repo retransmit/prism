@@ -2,18 +2,16 @@ import * as applicationState from "../../../../state";
 
 import {
   HttpServiceErrorTrackingInfo,
-  HttpServiceCircuitBreakerConfig,
-  InMemoryStateConfig,
   HttpMethods,
+  AppConfig,
 } from "../../../../types";
 
 export async function getTrackingInfo(
   route: string,
   method: HttpMethods,
-  circuitBreakerConfig: HttpServiceCircuitBreakerConfig,
-  stateConfig: InMemoryStateConfig | undefined
+  config: AppConfig
 ): Promise<HttpServiceErrorTrackingInfo[] | undefined> {
-  const key = `${route}:${method}`;
+  const key = getKey(config.hostId, route, method);
   const state = applicationState.get();
   return state.httpServiceErrorTracking.get(key);
 }
@@ -22,10 +20,9 @@ export async function setTrackingInfo(
   route: string,
   method: HttpMethods,
   trackingInfo: HttpServiceErrorTrackingInfo,
-  circuitBreakerConfig: HttpServiceCircuitBreakerConfig,
-  stateConfig: InMemoryStateConfig | undefined
+  config: AppConfig
 ): Promise<void> {
-  const key = `${route}:${method}`;
+  const key = getKey(config.hostId, route, method);
   const state = applicationState.get();
   const trackingList = state.httpServiceErrorTracking.get(key);
 
@@ -35,4 +32,8 @@ export async function setTrackingInfo(
     const newTrackingList = [trackingInfo];
     state.httpServiceErrorTracking.set(key, newTrackingList);
   }
+}
+
+function getKey(hostId: string, route: string, method: HttpMethods) {
+  return `${hostId}:${route}:${method}`;
 }

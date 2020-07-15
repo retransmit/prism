@@ -11,6 +11,7 @@ import {
   HttpServiceErrorTrackingInfo,
   HttpProxyAppConfig,
   WhitelistConfig,
+  AppConfig,
 } from ".";
 import { IRouterContext } from "koa-router";
 
@@ -226,15 +227,13 @@ export type HttpServiceCircuitBreakerStateProviderPlugin = {
   getTrackingInfo: (
     route: string,
     method: HttpMethods,
-    circuitBreakerConfig: HttpServiceCircuitBreakerConfig,
-    stateConfig: any
+    config: AppConfig
   ) => Promise<HttpServiceErrorTrackingInfo[] | undefined>;
   setTrackingInfo: (
     route: string,
     method: HttpMethods,
     trackingInfo: HttpServiceErrorTrackingInfo,
-    circuitBreakerConfig: HttpServiceCircuitBreakerConfig,
-    stateConfig: any
+    config: AppConfig
   ) => Promise<void>;
 };
 

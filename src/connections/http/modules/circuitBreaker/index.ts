@@ -44,8 +44,7 @@ export async function isTripped(
     const trackingList = await plugins[pluginType].getTrackingInfo(
       route,
       method,
-      circuitBreakerConfig,
-      config.state
+      config
     );
     if (mustReject(trackingList || [], circuitBreakerConfig)) {
       return {
@@ -89,8 +88,7 @@ export async function updateServiceTrackingInfo(
           route,
           method,
           trackingInfo,
-          circuitBreakerConfig,
-          config.state
+          config
         );
       }
     }
