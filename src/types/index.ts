@@ -19,6 +19,7 @@ export type AppControl = {
 
 // Application Config
 export type UserAppConfig = {
+  hosts?: [];
   silent?: boolean;
   instanceId?: string;
   numWorkers?: number;
@@ -52,14 +53,15 @@ export type UserAppConfig = {
 };
 
 export type WhitelistConfig = {
-  allowed?: string[],
-  disallowed?: string[]
-}
+  allowed?: string[];
+  disallowed?: string[];
+};
 
 export type AppConfig = UserAppConfig & {
   instanceId: string;
   numWorkers: number;
   silent: boolean;
+  hostId: string;
 };
 
 export type HttpProxyAppConfig = AppConfig & { http: HttpProxyConfig };
@@ -333,16 +335,14 @@ export type RateLimitingStateProviderPlugin = {
     path: string,
     method: HttpMethods,
     remoteAddress: string,
-    rateLimitingConfig: RateLimitingConfig,
-    stateConfig: any
+    config: AppConfig
   ) => Promise<ClientTrackingInfo[] | undefined>;
   setTrackingInfo: (
     path: string,
     method: HttpMethods,
     remoteAddress: string,
     trackingInfo: ClientTrackingInfo,
-    rateLimitingConfig: RateLimitingConfig,
-    stateConfig: any
+    config: AppConfig
   ) => Promise<void>;
 };
 

@@ -1,8 +1,7 @@
 import {
   HttpMethods,
-  RateLimitingConfig,
-  RedisStateConfig,
   ClientTrackingInfo,
+  AppConfig,
 } from "../../../types";
 import { createClient } from "redis";
 
@@ -16,13 +15,14 @@ export async function getTrackingInfo(
   path: string,
   method: HttpMethods,
   remoteAddress: string,
-  rateLimitingConfig: RateLimitingConfig,
-  stateConfig: RedisStateConfig | undefined
+  config: AppConfig
 ): Promise<ClientTrackingInfo[] | undefined> {
-  const client = createClient(stateConfig?.options);
-  const key = `client_tracking:${remoteAddress}`;
-  const jsonEntries = await redisLRange.call(client, key, 0, -1);
-  return jsonEntries.map((x) => JSON.parse(x) as ClientTrackingInfo);
+  if (config.state?.type === "redis") {
+    const client = createClient(config.state?.options);
+    const key = getKey(config.hostId, remoteAddress);
+    const jsonEntries = await redisLRange.call(client, key, 0, -1);
+    return jsonEntries.map((x) => JSON.parse(x) as ClientTrackingInfo);
+  }
 }
 
 export async function setTrackingInfo(
@@ -30,16 +30,21 @@ export async function setTrackingInfo(
   method: HttpMethods,
   remoteAddress: string,
   trackingInfo: ClientTrackingInfo,
-  rateLimitingConfig: RateLimitingConfig,
-  stateConfig: RedisStateConfig | undefined
+  config: AppConfig
 ): Promise<void> {
-  const client = createClient(stateConfig?.options);
-  const key = `client_tracking:${remoteAddress}`;
-  const jsonEntry = JSON.stringify(trackingInfo);
-  const multi = client.multi();
-  multi
-    .lpush(key, jsonEntry)
-    .ltrim(key, 0, stateConfig?.clientTrackingListLength || 2000)
-    .pexpire(key, stateConfig?.clientTrackingListExpiry || TWO_MINUTES);
-  multi.exec();
+  if (config.state?.type === "redis") {
+    const client = createClient(config.state?.options);
+    const key = getKey(config.hostId, remoteAddress);
+    const jsonEntry = JSON.stringify(trackingInfo);
+    const multi = client.multi();
+    multi
+      .lpush(key, jsonEntry)
+      .ltrim(key, 0, config.state?.clientTrackingListLength || 2000)
+      .pexpire(key, config.state?.clientTrackingListExpiry || TWO_MINUTES);
+    multi.exec();
+  }
+}
+
+function getKey(hostId: string, remoteAddress: string) {
+  return `client_tracking:${hostId}_${remoteAddress}`;
 }

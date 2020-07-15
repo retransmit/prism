@@ -39,8 +39,8 @@ export default async function applyRateLimiting(
   config: AppConfig
 ): Promise<{ status: number; body: any } | undefined> {
   const rateLimitingConfig =
-  routeConfig.rateLimiting || proxyConfig.rateLimiting;
-  
+    routeConfig.rateLimiting || proxyConfig.rateLimiting;
+
   if (rateLimitingConfig && rateLimitingConfig !== "none") {
     const rejectionMessage = "Too Many Requests.";
     const pluginType = config.state?.type || "memory";
@@ -48,8 +48,7 @@ export default async function applyRateLimiting(
       path,
       method,
       remoteAddress,
-      rateLimitingConfig,
-      config.state
+      config
     );
 
     if (mustReject(trackingList || [], rateLimitingConfig)) {
@@ -69,8 +68,7 @@ export default async function applyRateLimiting(
         method,
         remoteAddress,
         trackingInfo,
-        rateLimitingConfig,
-        config.state
+        config
       );
     }
   }

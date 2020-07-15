@@ -219,6 +219,9 @@ export async function mutateAndCleanupConfig(config: AppConfig) {
     };
   }
 
+  config.hostId =
+    config.hosts && config.hosts.length ? config.hosts.join("+") : "$default";
+    
   config.silent = config.silent ?? false;
 }
 
