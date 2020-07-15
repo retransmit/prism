@@ -3,11 +3,12 @@
   That's going to differ based on the backend service.
 */
 export function copyHeadersFromContext(headers: { [field: string]: string }) {
-  return Object.keys(headers || {}).reduce(
-    (acc, field) =>
-      !["content-type", "content-length"].includes(field.toLowerCase())
-        ? ((acc[field.toLowerCase()] = headers[field]), acc)
-        : acc,
-    {} as { [field: string]: string }
-  );
+  const result: { [field: string]: string } = {};
+  for (const field of Object.keys(headers || {})) {
+    const lcaseField = field.toLowerCase();
+    if (!["content-type", "content-length"].includes(lcaseField)) {
+      result[lcaseField] = headers[field];
+    }
+  }
+  return result;
 }
