@@ -33,6 +33,7 @@ import cachesResponses from "./cachesResponses";
 import authenticates from "./authenticates";
 import { TestAppInstance } from "..";
 import { TestEnv } from "../..";
+import handlesHttps from "./handlesHttps";
 
 export default function run(app: TestAppInstance, testEnv: TestEnv) {
   describe("http connections", () => {
@@ -83,6 +84,9 @@ export default function run(app: TestAppInstance, testEnv: TestEnv) {
     });
     describe("authentication", () => {
       authenticates(app, testEnv);
+    });
+    describe("https", () => {
+      handlesHttps(app, testEnv);
     });
   });
 }

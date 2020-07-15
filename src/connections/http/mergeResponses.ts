@@ -5,6 +5,7 @@ import {
   HttpRouteConfig,
   HttpServiceEndPointConfig,
 } from "../../types/http";
+import getHeader from "../../utils/http/getHeader";
 
 export default function mergeResponses(
   responses: FetchedHttpResponse[],
@@ -168,7 +169,7 @@ function mergeObjectIntoResponse(
         }
       : {
           ...wrappedFinalResponse.response.body,
-          ...fetchedResponse.response.body as BodyObject,
+          ...(fetchedResponse.response.body as BodyObject),
         };
   }
   fetchedResponse.response.body;
@@ -199,6 +200,11 @@ function mergeNonObjectIntoResponse(
 
   // final response has not been set.
   if (wrappedFinalResponse.response.body === undefined) {
+    const contentTypeFromResponse = getHeader(
+      fetchedResponse.response.headers,
+      "content-type"
+    );
+
     wrappedFinalResponse.response = serviceConfig.mergeField
       ? {
           body: {
@@ -208,7 +214,7 @@ function mergeNonObjectIntoResponse(
         }
       : {
           body: fetchedResponse.response.body,
-          contentType: "text/plain",
+          contentType: contentTypeFromResponse || "text/plain",
         };
   }
   // If final response is already an object

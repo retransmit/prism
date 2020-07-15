@@ -84,6 +84,8 @@ export default async function (app: TestAppInstance, testEnv: TestEnv) {
 
     const serverResponse = await promisedServerRespose;
     serverResponse.statusCode.should.equal(200);
-    serverResponse.body.should.equal("Contains headers: x-something-else");
+    serverResponse.body.should.equal(
+      "Contains headers: x-something-else"
+    );
   });
 }

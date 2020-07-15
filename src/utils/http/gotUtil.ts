@@ -47,16 +47,24 @@ function attachHeaders(
   encoding: string | undefined,
   contentType: string | undefined
 ) {
-  return headers
-    ? Object.keys(headers).reduce((acc, field) => {
-        if (field.toLowerCase() === "content-type" && contentType) {
-          acc[field] = contentType;
-        } else if (field.toLowerCase() === "content-encoding" && encoding) {
-          acc[field] = encoding;
-        } else {
-          acc[field] = headers[field];
-        }
-        return acc;
-      }, {} as { [field: string]: string })
-    : {};
+  const result: { [field: string]: string | undefined } = {};
+
+  if (headers) {
+    for (const field of Object.keys(headers)) {
+      const lcaseField = field.toLowerCase();
+      if (lcaseField === "host") {
+        result["x-forwarded-host"] = headers[field];
+      } else if (lcaseField === "x-forwarded-for") {
+        result["x-forwarded-for"] =
+          headers["x-forwarded-for"] + `,${headers["host"]}`;
+      } else if (lcaseField === "content-type" && contentType) {
+        result["content-type"] = contentType;
+      } else if (lcaseField === "content-encoding" && encoding) {
+        result["content-encoding"] = encoding;
+      } else {
+        result[field] = headers[field];
+      }
+    }
+    return result;
+  }
 }

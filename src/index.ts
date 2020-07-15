@@ -49,7 +49,7 @@ export async function startApp(
         instanceId || config.instanceId || generatedName;
       if (!config.silent) {
         console.log(
-          `cluster ${effectiveInstanceId} with ${config.workers} workers, master pid = ${process.pid}.`
+          `cluster ${effectiveInstanceId} with ${config.workers} workers; master pid = ${process.pid}.`
         );
       }
       function startWorker(counter: number) {
@@ -138,7 +138,9 @@ export async function startWithConfiguration(
 
   if (!config.silent) {
     console.log(
-      `instance ${config.instanceId} listening on port ${opts.port}, pid = ${process.pid}.`
+      `instance ${config.instanceId} listening on port ${opts.port}; pid = ${
+        process.pid
+      }, https = ${config.useHttps ? "yes" : "no"}.`
     );
   }
 
