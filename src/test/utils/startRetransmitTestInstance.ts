@@ -31,7 +31,10 @@ export default async function startRetransmitTestInstance(
 
   params.config.silent = true;
 
-  return await startWithConfiguration(port || 6060, params.config, instanceId, {
+  return await startWithConfiguration({
+    port: port || 6060,
+    config: params.config,
+    instanceId,
     isCluster: false,
   });
 }

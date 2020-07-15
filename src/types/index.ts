@@ -19,10 +19,10 @@ export type AppControl = {
 
 // Application Config
 export type UserAppConfig = {
-  hosts?: [];
+  hostNames?: [];
   silent?: boolean;
   instanceId?: string;
-  numWorkers?: number;
+  workers?: number;
   http?: HttpProxyConfig;
   webSocket?: WebSocketProxyConfig;
   webJobs?: {
@@ -59,7 +59,7 @@ export type WhitelistConfig = {
 
 export type AppConfig = UserAppConfig & {
   instanceId: string;
-  numWorkers: number;
+  workers: number;
   silent: boolean;
   hostId: string;
 };

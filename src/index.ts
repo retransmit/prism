@@ -37,7 +37,7 @@ export async function startApp(
   workers: number | undefined
 ) {
   const config: UserAppConfig = require(configFile);
-  config.numWorkers = workers ?? config.numWorkers ?? os.cpus().length;
+  config.workers = workers ?? config.workers ?? os.cpus().length;
   config.silent = silent;
 
   const generatedName = namesGenerator("_");
@@ -49,7 +49,7 @@ export async function startApp(
         instanceId || config.instanceId || generatedName;
       if (!config.silent) {
         console.log(
-          `cluster ${effectiveInstanceId} with ${config.numWorkers} workers, master pid = ${process.pid}.`
+          `cluster ${effectiveInstanceId} with ${config.workers} workers, master pid = ${process.pid}.`
         );
       }
       function startWorker(counter: number) {
@@ -61,7 +61,7 @@ export async function startApp(
       }
 
       // Fork workers.
-      for (let i = 0; i < config.numWorkers; i++) {
+      for (let i = 0; i < config.workers; i++) {
         counter++;
         startWorker(counter);
       }
@@ -70,28 +70,34 @@ export async function startApp(
         startWorker(counter);
       });
     } else {
-      return startWithConfiguration(port, config, "doesnt_matter", {
+      return startWithConfiguration({
+        port,
+        config,
+        instanceId: "doesnt_matter",
         isCluster: true,
       });
     }
   } else {
-    return startWithConfiguration(port, config, generatedName, {
+    return startWithConfiguration({
+      port,
+      config,
+      instanceId: generatedName,
       isCluster: false,
     });
   }
 }
 
 export type StartOpts = {
+  port: number;
+  config: UserAppConfig;
+  instanceId: string;
   isCluster: boolean;
 };
 
 export async function startWithConfiguration(
-  port: number,
-  userAppConfig: UserAppConfig,
-  workerInstanceId: string,
   opts: StartOpts
 ): Promise<AppControl> {
-  const config: AppConfig = userAppConfig as any;
+  const config: AppConfig = opts.config as any;
 
   const instanceId: string = opts.isCluster
     ? await new Promise((success) => {
@@ -99,7 +105,7 @@ export async function startWithConfiguration(
           if (data.type === "start") success(data.instanceId);
         });
       })
-    : workerInstanceId;
+    : opts.instanceId;
 
   // Append a counter to the instanceId to make it unique.
   // We need this so that workers don't fetch from the same redis queues.
@@ -121,7 +127,7 @@ export async function startWithConfiguration(
   // This sets up request handlers for the servers.
   await initModules(config);
 
-  httpServer.listen(port);
+  httpServer.listen(opts.port);
 
   async function closeServers() {
     if (webSocketServer) {
@@ -132,13 +138,13 @@ export async function startWithConfiguration(
 
   if (!config.silent) {
     console.log(
-      `instance ${config.instanceId} listening on port ${port}, pid = ${process.pid}.`
+      `instance ${config.instanceId} listening on port ${opts.port}, pid = ${process.pid}.`
     );
   }
 
   return {
     instanceId: config.instanceId,
-    port,
+    port: opts.port,
     closeServers,
   };
 }
@@ -220,8 +226,10 @@ export async function mutateAndCleanupConfig(config: AppConfig) {
   }
 
   config.hostId =
-    config.hosts && config.hosts.length ? config.hosts.join("+") : "$default";
-    
+    config.hostNames && config.hostNames.length
+      ? config.hostNames.join("+")
+      : "$default";
+
   config.silent = config.silent ?? false;
 }
 
