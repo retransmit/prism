@@ -4,8 +4,6 @@ import cluster from "cluster";
 import os from "os";
 import yargs = require("yargs");
 
-import * as configModule from "./config";
-
 import { AppConfig, UserAppConfig, AppControl } from "./types";
 import * as applicationState from "./state";
 import createHttpServer from "./connections/http/createServer";
@@ -108,7 +106,6 @@ export async function startWithConfiguration(
   config.instanceId = instanceId;
 
   await mutateAndCleanupConfig(config);
-  configModule.set(config);
 
   // Create the http server.
   const httpServer = createHttpServer(config);
