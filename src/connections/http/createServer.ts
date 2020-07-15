@@ -7,12 +7,13 @@ import { requestHandler } from ".";
 
 export default function createServer(config: AppConfig) {
   let httpServer: HttpServer | HttpsServer;
-  
+
   // Create the HttpServer
   if (config.useHttps) {
     const options = {
       key: config.useHttps.key,
       cert: config.useHttps.cert,
+      ca: config.useHttps.ca,
     };
     httpServer = (config.createHttpsServer || httpsCreateServer)(
       options,

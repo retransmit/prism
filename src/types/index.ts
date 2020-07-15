@@ -34,6 +34,7 @@ export type UserAppConfig = {
   useHttps?: {
     key: string;
     cert: string;
+    ca?: string[];
   };
   cors?: {
     origin?: string;
