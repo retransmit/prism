@@ -4,21 +4,35 @@ import {
   HttpRequest,
   BodyObject,
 } from "../../../../types";
+import { getHeaderAsString } from "../../../../utils/http/getHeaderAsString";
 
 export default async function authenticate(
   request: HttpRequest,
   authConfig: HttpServiceJwtAuthentication
 ): Promise<{ status: number; body: any } | undefined> {
-  const jwtString = authConfig.getJwt
-    ? authConfig.getJwt(request)
-    : authConfig.jwtHeaderField
-    ? request.headers?.[authConfig.jwtHeaderField]
-    : authConfig.jwtBodyField
-    ? (request.body as BodyObject)?.[authConfig.jwtBodyField]
-    : request.headers?.["authorization"] &&
-      request.headers?.["authorization"].startsWith("Bearer ")
-    ? request.headers?.["authorization"].split(" ")[1]
-    : undefined;
+  let jwtString: string | undefined = "";
+
+  if (authConfig.getJwt) {
+    jwtString = authConfig.getJwt(request);
+  }
+
+  if (authConfig.jwtHeaderField || request.headers?.["authorization"]) {
+    const headerVal = getHeaderAsString(
+      authConfig.jwtHeaderField
+        ? request.headers?.[authConfig.jwtHeaderField]
+        : request.headers?.["authorization"]
+    );
+
+    jwtString = headerVal
+      ? headerVal.startsWith("Bearer ")
+        ? headerVal.split(" ")[1]
+        : headerVal
+      : undefined;
+
+    if (authConfig.jwtBodyField) {
+      jwtString = (request.body as BodyObject)?.[authConfig.jwtBodyField];
+    }
+  }
 
   if (!jwtString) {
     throw new Error("Missing JWT.");

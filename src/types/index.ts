@@ -207,11 +207,13 @@ export type HttpRequest = {
     [key: string]: string;
   };
   body?: string | Buffer | BodyObject | Array<any> | undefined;
-  headers?: {
-    [key: string]: string;
-  };
+  headers?: HttpHeaders;
   remoteAddress: string | undefined;
   remotePort: number | undefined;
+};
+
+export type HttpHeaders = {
+  [key: string]: string | string[];
 };
 
 export type HttpResponse = {

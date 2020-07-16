@@ -1,5 +1,6 @@
-import { HttpRequest } from "../../types";
+import { HttpRequest, HttpHeaders } from "../../types";
 import { Options } from "got/dist/source/core";
+import { getHeaderAsString } from "./getHeaderAsString";
 
 export function makeGotOptions(
   request: HttpRequest,
@@ -11,7 +12,7 @@ export function makeGotOptions(
   const basicOptions = {
     searchParams: request.query,
     method: request.method,
-    headers: attachHeaders(request.headers, encoding, contentType),
+    headers: mapHeaders(request.headers, encoding, contentType),
     followRedirect: false,
     retry: 0,
     timeout,
@@ -42,21 +43,25 @@ export function makeGotOptions(
   return options;
 }
 
-function attachHeaders(
-  headers: { [field: string]: string } | undefined,
+function mapHeaders(
+  headers: HttpHeaders | undefined,
   encoding: string | undefined,
   contentType: string | undefined
-) {
-  const result: { [field: string]: string | undefined } = {};
+): HttpHeaders {
+  const result: HttpHeaders = {};
 
   if (headers) {
     for (const field of Object.keys(headers)) {
+      const currentVal = headers[field];
       const lcaseField = field.toLowerCase();
       if (lcaseField === "host") {
-        result["x-forwarded-host"] = headers[field];
+        const xForwardedHost = getHeaderAsString(currentVal);
+        if (xForwardedHost) {
+          result["x-forwarded-host"] = xForwardedHost;
+        }
       } else if (lcaseField === "x-forwarded-for") {
         result["x-forwarded-for"] =
-          headers["x-forwarded-for"] + `,${headers["host"]}`;
+          getHeaderAsString(currentVal) + `,${headers["host"]}`;
       } else if (lcaseField === "content-type" && contentType) {
         result["content-type"] = contentType;
       } else if (lcaseField === "content-encoding" && encoding) {
@@ -65,6 +70,6 @@ function attachHeaders(
         result[field] = headers[field];
       }
     }
-    return result;
   }
+  return result;
 }

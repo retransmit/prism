@@ -15,6 +15,7 @@ import applyRateLimiting from "../modules/rateLimiting";
 import plugins from "./plugins";
 import { parse } from "url";
 import { isWebSocketProxyConfig } from "./isWebSocketProxyConfig";
+import { getHeaderAsString } from "../../utils/http/getHeaderAsString";
 
 export default function createHandler(config: AppConfig) {
   return function connection(ws: WebSocket, request: IncomingMessage) {
@@ -31,10 +32,11 @@ export default function createHandler(config: AppConfig) {
 
         const requestId = randomId();
 
-        const xForwardedFor = request.headers["x-forwarded-for"];
-        const remoteAddress = Array.isArray(xForwardedFor)
-          ? xForwardedFor[0]
-          : xForwardedFor
+        const xForwardedFor = getHeaderAsString(
+          request.headers["x-forwarded-for"]
+        );
+
+        const remoteAddress = xForwardedFor
           ? xForwardedFor.split(/\s*,\s*/)[0]
           : request.socket.remoteAddress;
 
@@ -50,11 +52,10 @@ export default function createHandler(config: AppConfig) {
         };
         activeConnections().set(requestId, conn);
 
-        
         // If the onConnect hook is defined, we postpone connection init till a message arrives from the user. When the message arrives, the message is sent to the onConnect hook - which can return whether the connection needs to be dropped or not. This is useful, for say, authentication.
 
         // If there is no onConnect hook, then initialize immediately. And notify backends that a new connection has arrived.
-        
+
         if (!routeConfig.onConnect && !config.webSocket.onConnect) {
           conn.initialized = true;
           sendConnectionRequestsToServices(
