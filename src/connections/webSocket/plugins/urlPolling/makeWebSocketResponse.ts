@@ -2,7 +2,7 @@ import { Response } from "got/dist/source/core";
 import { WebSocketResponse } from "../../../../types/webSocket";
 
 export function makeWebSocketResponse(
-  serverResponse: Response<string>,
+  serverResponse: Response<any>,
   requestId?: string
 ): WebSocketResponse {
   const result = JSON.parse(serverResponse.body);

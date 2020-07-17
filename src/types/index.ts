@@ -242,13 +242,17 @@ export type UrlSelector = (urlList: UrlList) => Promise<UrlList>;
 export type ClientTrackingInfo = {
   path: string;
   method: HttpMethods;
-  time: number;
+  timestamp: number;
+  instanceId: string;
+  remoteAddress: string;
 };
 
 export type HttpServiceErrorTrackingInfo = {
   route: string;
   method: HttpMethods;
   status: number | undefined;
+  instanceId: string;
+  timestamp: number;
   requestTime: number;
   responseTime: number;
 };
@@ -333,7 +337,7 @@ export type Notification =
       phoneNumber: string;
     };
 
-export type RateLimitingStateProviderPlugin = {
+export type ClientTrackingStateProviderPlugin = {
   getTrackingInfo: (
     path: string,
     method: HttpMethods,

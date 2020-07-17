@@ -3,7 +3,7 @@ import { Response } from "got/dist/source/core";
 import { isJson } from "./isJson";
 
 export function makeHttpResponse(
-  serverResponse: Response<string>
+  serverResponse: Response<any>
 ): HttpResponse {
   const headers: { [field: string]: string | string[] | undefined } = {};
   for (const field of Object.keys(serverResponse.headers)) {

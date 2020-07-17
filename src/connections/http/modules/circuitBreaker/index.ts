@@ -72,6 +72,8 @@ export async function updateServiceTrackingInfo(
       route,
       method,
       status,
+      instanceId: config.instanceId,
+      timestamp: Date.now(),
       requestTime,
       responseTime,
     };

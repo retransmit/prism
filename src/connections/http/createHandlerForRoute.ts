@@ -17,6 +17,7 @@ import responseIsError from "../../utils/http/responseIsError";
 import plugins from "./plugins";
 import sortIntoStages from "./sortIntoStages";
 import makeHttpRequestFromContext from "./makeHttpRequestFromContext";
+import addTrackingInfo from "../modules/clientTracking";
 
 export type CreateHttpRequestHandler = (
   method: HttpMethods
@@ -87,6 +88,16 @@ async function handler(
       );
       return;
     }
+
+    // Add client tracking info
+    addTrackingInfo(
+      ctx.path,
+      requestMethod,
+      ctx.ip,
+      routeConfig,
+      config.http,
+      config
+    );
 
     const rateLimitedResponse = await applyRateLimiting(
       ctx.path,

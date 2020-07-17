@@ -1,14 +1,15 @@
 import { HttpRequest, HttpHeaders } from "../../types";
-import { Options } from "got/dist/source/core";
 import { getHeaderAsString } from "./getHeaderAsString";
+import { OptionsOfUnknownResponseBody, Options } from "got/dist/source";
 
+// TODO - I am not sure about using OptionsOfUnknownResponseBody
+// Check this discussion - https://github.com/sindresorhus/got/issues/954
 export function makeGotOptions(
   request: HttpRequest,
   encoding: string | undefined,
   contentType: string | undefined,
-  timeout?: number,
-  isStream: boolean = false
-): Options {
+  timeout?: number
+): OptionsOfUnknownResponseBody {
   const basicOptions = {
     searchParams: request.query,
     method: request.method,
@@ -18,27 +19,23 @@ export function makeGotOptions(
     timeout,
   };
 
-  const options = isStream
-    ? {
-        isStream: true,
-        ...basicOptions,
-      }
-    : typeof request.body === "string"
-    ? {
-        ...basicOptions,
-        body: request.body,
-      }
-    : typeof request.body === "object"
-    ? encoding?.includes("application/x-www-form-urlencoded")
+  const options =
+    typeof request.body === "string"
       ? {
           ...basicOptions,
-          form: request.body,
+          body: request.body,
         }
-      : {
-          ...basicOptions,
-          json: request.body,
-        }
-    : basicOptions;
+      : typeof request.body === "object"
+      ? encoding?.includes("application/x-www-form-urlencoded")
+        ? {
+            ...basicOptions,
+            form: request.body,
+          }
+        : {
+            ...basicOptions,
+            json: request.body,
+          }
+      : basicOptions;
 
   return options;
 }

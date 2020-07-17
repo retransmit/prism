@@ -23,7 +23,7 @@
     "@types/redis": "^2.8.25",
     "@types/ws": "^7.2.6",
     "@types/yargs": "^15.0.5",
-    "got": "^11.5.0",
+    "got": "^11.5.1",
     "jsonwebtoken": "^8.5.1",
     "koa": "^2.13.0",
     "koa-body": "^4.2.0",

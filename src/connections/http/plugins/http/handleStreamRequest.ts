@@ -39,11 +39,11 @@ export default async function handleStreamRequest(
       request,
       serviceConfig.contentEncoding,
       serviceConfig.contentType,
-      undefined,
-      true
+      undefined
     );
     const requestStream = got.stream(urlWithParamsReplaced, {
       ...options,
+      isStream: true,
       throwHttpErrors: false,
     });
 

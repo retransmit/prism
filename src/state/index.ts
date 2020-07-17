@@ -67,13 +67,13 @@ function cleanUpClientTrackingEntries(
     trackingEntries,
   ] of state.clientTracking.entries()) {
     if (
-      trackingEntries.every((x) => now - x.time > clientTrackingEntryExpiry)
+      trackingEntries.every((x) => now - x.timestamp > clientTrackingEntryExpiry)
     ) {
       state.clientTracking.delete(key);
     } else {
       state.clientTracking.set(
         key,
-        trackingEntries.filter((x) => x.time > now - clientTrackingEntryExpiry)
+        trackingEntries.filter((x) => x.timestamp > now - clientTrackingEntryExpiry)
       );
     }
   }

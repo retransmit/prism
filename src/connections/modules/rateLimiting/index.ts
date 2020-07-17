@@ -5,16 +5,16 @@ import {
   WebSocketProxyConfig,
   HttpMethods,
   RateLimitingConfig,
-  RateLimitingStateProviderPlugin,
+  ClientTrackingStateProviderPlugin,
 } from "../../../types";
 import { HttpRouteConfig } from "../../../types/http";
 import { WebSocketRouteConfig } from "../../../types/webSocket";
 
-import * as inMemoryPlugin from "./inMemory";
-import * as redisPlugin from "./redis";
+import * as inMemoryPlugin from "../clientTracking/inMemory";
+import * as redisPlugin from "../clientTracking/redis";
 
 const plugins: {
-  [name: string]: RateLimitingStateProviderPlugin;
+  [name: string]: ClientTrackingStateProviderPlugin;
 } = {
   memory: {
     getTrackingInfo: inMemoryPlugin.getTrackingInfo,
@@ -56,20 +56,6 @@ export default async function applyRateLimiting(
         status: rateLimitingConfig.errorStatus || 429,
         body: rateLimitingConfig.errorBody || rejectionMessage,
       };
-    } else {
-      const trackingInfo: ClientTrackingInfo = {
-        path,
-        method,
-        time: Date.now(),
-      };
-
-      plugins[pluginType].setTrackingInfo(
-        path,
-        method,
-        remoteAddress,
-        trackingInfo,
-        config
-      );
     }
   }
 }
@@ -81,8 +67,8 @@ function mustReject(
   const now = Date.now();
 
   const requestsMade = trackingInfoList.filter(
-    (x) => x.time > now - rateLimitingConfig.duration
+    (x) => x.timestamp > now - rateLimitingConfig.duration
   ).length;
 
-  return requestsMade >= rateLimitingConfig.maxRequests;
+  return requestsMade > rateLimitingConfig.maxRequests;
 }

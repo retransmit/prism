@@ -16,6 +16,7 @@ import plugins from "./plugins";
 import { parse } from "url";
 import { isWebSocketProxyConfig } from "./isWebSocketProxyConfig";
 import { getHeaderAsString } from "../../utils/http/getHeaderAsString";
+import addTrackingInfo from "../modules/clientTracking";
 
 export default function createHandler(config: AppConfig) {
   return function connection(ws: WebSocket, request: IncomingMessage) {
@@ -130,6 +131,16 @@ function onMessage(
       // This is an active connection.
       // Pass on the message to backend services.
       else {
+        // Add client tracking info
+        addTrackingInfo(
+          route,
+          "GET",
+          conn.remoteAddress || "",
+          routeConfig,
+          config.webSocket,
+          config
+        );
+
         const rateLimitedResponse = await applyRateLimiting(
           route,
           "GET",
