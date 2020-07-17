@@ -4,26 +4,10 @@ import {
   HttpProxyConfig,
   WebSocketProxyConfig,
   HttpMethods,
-  ClientTrackingStateProviderPlugin,
 } from "../../../types";
 import { HttpRouteConfig } from "../../../types/http";
 import { WebSocketRouteConfig } from "../../../types/webSocket";
-
-import * as inMemoryPlugin from "./inMemory";
-import * as redisPlugin from "./redis";
-
-const plugins: {
-  [name: string]: ClientTrackingStateProviderPlugin;
-} = {
-  memory: {
-    getTrackingInfo: inMemoryPlugin.getTrackingInfo,
-    setTrackingInfo: inMemoryPlugin.setTrackingInfo,
-  },
-  redis: {
-    getTrackingInfo: redisPlugin.getTrackingInfo,
-    setTrackingInfo: redisPlugin.setTrackingInfo,
-  },
-};
+import plugins from "./plugins";
 
 /*
   Rate limiting state is stored in memory by default,

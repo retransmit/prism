@@ -8,7 +8,7 @@ import {
   HttpServiceCircuitBreakerConfig,
   HttpServiceCacheConfig,
   HttpServiceAuthentication,
-  HttpServiceErrorTrackingInfo,
+  HttpServiceTrackingInfo,
   HttpProxyAppConfig,
   WhitelistConfig,
   AppConfig,
@@ -223,16 +223,16 @@ export type HttpServiceCacheStateProviderPlugin = {
   ) => Promise<void>;
 };
 
-export type HttpServiceCircuitBreakerStateProviderPlugin = {
+export type HttpServiceTrackingStateProviderPlugin = {
   getTrackingInfo: (
     route: string,
     method: HttpMethods,
     config: AppConfig
-  ) => Promise<HttpServiceErrorTrackingInfo[] | undefined>;
+  ) => Promise<HttpServiceTrackingInfo[] | undefined>;
   setTrackingInfo: (
     route: string,
     method: HttpMethods,
-    trackingInfo: HttpServiceErrorTrackingInfo,
+    trackingInfo: HttpServiceTrackingInfo,
     config: AppConfig
   ) => Promise<void>;
 };

@@ -96,7 +96,6 @@ export type RateLimitingConfig = {
 export type HttpServiceCircuitBreakerConfig = {
   maxErrors: number;
   duration: number;
-  isFailure?: (response: HttpServiceErrorTrackingInfo) => boolean;
   errorStatus?: number;
   errorBody?: any;
 };
@@ -247,10 +246,10 @@ export type ClientTrackingInfo = {
   remoteAddress: string;
 };
 
-export type HttpServiceErrorTrackingInfo = {
+export type HttpServiceTrackingInfo = {
   route: string;
   method: HttpMethods;
-  status: number | undefined;
+  status: number;
   instanceId: string;
   timestamp: number;
   requestTime: number;
@@ -259,7 +258,7 @@ export type HttpServiceErrorTrackingInfo = {
 
 export type IApplicationState = {
   clientTracking: Map<string, ClientTrackingInfo[]>;
-  httpServiceErrorTracking: Map<string, HttpServiceErrorTrackingInfo[]>;
+  httpServiceErrorTracking: Map<string, HttpServiceTrackingInfo[]>;
   httpResponseCache: Map<string, InMemoryCacheEntry>;
 };
 

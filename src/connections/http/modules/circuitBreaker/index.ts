@@ -1,29 +1,12 @@
 import {
   HttpMethods,
-  HttpServiceErrorTrackingInfo,
+  HttpServiceTrackingInfo,
   HttpServiceCircuitBreakerConfig,
   HttpProxyAppConfig,
 } from "../../../../types";
-import {
-  HttpRouteConfig,
-  HttpServiceCircuitBreakerStateProviderPlugin,
-} from "../../../../types/http";
+import { HttpRouteConfig } from "../../../../types/http";
 
-import * as inMemoryPlugin from "./inMemory";
-import * as redisPlugin from "./redis";
-
-const plugins: {
-  [name: string]: HttpServiceCircuitBreakerStateProviderPlugin;
-} = {
-  memory: {
-    getTrackingInfo: inMemoryPlugin.getTrackingInfo,
-    setTrackingInfo: inMemoryPlugin.setTrackingInfo,
-  },
-  redis: {
-    getTrackingInfo: redisPlugin.getTrackingInfo,
-    setTrackingInfo: redisPlugin.setTrackingInfo,
-  },
-};
+import plugins from "../serviceTracking/plugins";
 
 /*
   Rate limiting state is stored in memory by default,
@@ -55,57 +38,22 @@ export async function isTripped(
   }
 }
 
-export async function updateServiceTrackingInfo(
-  route: string,
-  method: HttpMethods,
-  status: number | undefined,
-  requestTime: number,
-  responseTime: number,
-  routeConfig: HttpRouteConfig,
-  config: HttpProxyAppConfig
-) {
-  const circuitBreakerConfig =
-    routeConfig.circuitBreaker || config.http.circuitBreaker;
-
-  if (circuitBreakerConfig && circuitBreakerConfig !== "none") {
-    const trackingInfo: HttpServiceErrorTrackingInfo = {
-      route,
-      method,
-      status,
-      instanceId: config.instanceId,
-      timestamp: Date.now(),
-      requestTime,
-      responseTime,
-    };
-
-    const isFailure =
-      (circuitBreakerConfig.isFailure &&
-        circuitBreakerConfig.isFailure(trackingInfo)) ||
-      (trackingInfo.status && trackingInfo.status >= 500);
-
-    if (isFailure) {
-      if (circuitBreakerConfig) {
-        const pluginType = config.state?.type || "memory";
-        plugins[pluginType].setTrackingInfo(
-          route,
-          method,
-          trackingInfo,
-          config
-        );
-      }
-    }
-  }
+function isFailure(status: number) {
+  return status >= 500;
 }
 
 function mustReject(
-  trackingInfoList: HttpServiceErrorTrackingInfo[],
+  trackingInfoList: HttpServiceTrackingInfo[],
   circuitBreakerConfig: HttpServiceCircuitBreakerConfig
 ) {
   const now = Date.now();
   let errorCount = 0;
 
   for (const info of trackingInfoList) {
-    if (info.responseTime > now - circuitBreakerConfig.duration) {
+    if (
+      isFailure(info.status) &&
+      info.responseTime > now - circuitBreakerConfig.duration
+    ) {
       errorCount++;
     }
     if (errorCount >= circuitBreakerConfig.maxErrors) {

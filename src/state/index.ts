@@ -1,7 +1,7 @@
 import {
   IApplicationState,
   ClientTrackingInfo,
-  HttpServiceErrorTrackingInfo,
+  HttpServiceTrackingInfo,
   AppConfig,
   InMemoryCacheEntry,
 } from "../types";
@@ -23,7 +23,7 @@ export async function init(config: AppConfig) {
   // Setup state.
   state = {
     clientTracking: new Map<string, ClientTrackingInfo[]>(),
-    httpServiceErrorTracking: new Map<string, HttpServiceErrorTrackingInfo[]>(),
+    httpServiceErrorTracking: new Map<string, HttpServiceTrackingInfo[]>(),
     httpResponseCache: new Map<string, InMemoryCacheEntry>(),
   };
 

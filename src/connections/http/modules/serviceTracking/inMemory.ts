@@ -1,7 +1,7 @@
 import * as applicationState from "../../../../state";
 
 import {
-  HttpServiceErrorTrackingInfo,
+  HttpServiceTrackingInfo,
   HttpMethods,
   AppConfig,
 } from "../../../../types";
@@ -10,7 +10,7 @@ export async function getTrackingInfo(
   route: string,
   method: HttpMethods,
   config: AppConfig
-): Promise<HttpServiceErrorTrackingInfo[] | undefined> {
+): Promise<HttpServiceTrackingInfo[] | undefined> {
   const key = getKey(config.hostId, route, method);
   const state = applicationState.get();
   return state.httpServiceErrorTracking.get(key);
@@ -19,7 +19,7 @@ export async function getTrackingInfo(
 export async function setTrackingInfo(
   route: string,
   method: HttpMethods,
-  trackingInfo: HttpServiceErrorTrackingInfo,
+  trackingInfo: HttpServiceTrackingInfo,
   config: AppConfig
 ): Promise<void> {
   const key = getKey(config.hostId, route, method);

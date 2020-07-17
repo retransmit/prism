@@ -5,8 +5,7 @@ import { promisify } from "util";
 const redisLRange = promisify(createClient().lrange);
 
 import {
-  HttpServiceErrorTrackingInfo,
-  HttpServiceCircuitBreakerConfig,
+  HttpServiceTrackingInfo
 } from "../../../../types";
 
 const ONE_MINUTE = 60 * 1000;
@@ -16,13 +15,13 @@ export async function getTrackingInfo(
   route: string,
   method: HttpMethods,
   config: AppConfig
-): Promise<HttpServiceErrorTrackingInfo[] | undefined> {
+): Promise<HttpServiceTrackingInfo[] | undefined> {
   if (config.state?.type === "redis") {
     const client = createClient(config.state.options);
     const key = getKey(config.hostId, route, method);
     const jsonEntries = await redisLRange.call(client, key, 0, -1);
     return jsonEntries.map(
-      (x) => JSON.parse(x) as HttpServiceErrorTrackingInfo
+      (x) => JSON.parse(x) as HttpServiceTrackingInfo
     );
   }
 }
@@ -30,7 +29,7 @@ export async function getTrackingInfo(
 export async function setTrackingInfo(
   route: string,
   method: HttpMethods,
-  trackingInfo: HttpServiceErrorTrackingInfo,
+  trackingInfo: HttpServiceTrackingInfo,
   config: AppConfig
 ) {
   if (config.state?.type === "redis") {

@@ -6,7 +6,7 @@ import {
   HttpProxyAppConfig,
 } from "../../types";
 import { HttpRouteConfig } from "../../types/http";
-import { updateServiceTrackingInfo } from "./modules/circuitBreaker";
+import { updateServiceTrackingInfo } from "./modules/serviceTracking";
 import { updateCache } from "./modules/caching";
 import responseIsError from "../../utils/http/responseIsError";
 
