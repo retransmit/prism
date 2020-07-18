@@ -8,7 +8,7 @@ import {
   PerformanceTestEnv,
 } from "../../../../../..";
 
-export default async function simpleRequestCluster(
+export default async function simpleRequestClusterBuffer(
   name: string,
   loops: number,
   parallel: number,

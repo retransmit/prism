@@ -5,7 +5,6 @@ import { closeHttpServer } from "../../../../../../../utils/http/closeHttpServer
 import simpleRequestBaseline from "./baseline";
 import simpleRequestBuffer from "./buffer";
 import simpleRequestStream from "./stream";
-import simpleRequestCluster from "./cluster";
 
 import {
   PerformanceTestAppInstance,
@@ -13,6 +12,8 @@ import {
   PerformanceTestResult,
   getAppRoot,
 } from "../../../../..";
+import simpleRequestClusterBuffer from "./cluster-buffer";
+import simpleRequestClusterStream from "./cluster-stream";
 
 const argv = yargs.options({
   t: { type: "array", alias: "test" },
@@ -53,7 +54,8 @@ async function run() {
     ["baseline", simpleRequestBaseline],
     ["buffer", simpleRequestBuffer],
     ["stream", simpleRequestStream],
-    ["cluster", simpleRequestCluster],
+    ["cluster-buffer", simpleRequestClusterBuffer],
+    ["cluster-stream", simpleRequestClusterStream],
   ];
 
   const testsToRun = tests.includes("all")
