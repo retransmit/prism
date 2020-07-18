@@ -1,12 +1,14 @@
 import { join } from "path";
 import { Response } from "got/dist/source/core";
-import { PerformanceTestAppInstance, PerformanceTestEnv } from "../../../../..";
-import startRetransmitTestProcess from "../../../../../../utils/startRetransmitTestProcess";
-import { startBackends } from "../../../../../../utils/http";
-import { HttpMethods } from "../../../../../../../types";
-import sendParallelRequests from "../../../../../../utils/sendParallelRequests";
+import startRetransmitTestProcess from "../../../../../../../utils/startRetransmitTestProcess";
+import sendParallelRequests from "../../../../../../../utils/sendParallelRequests";
+import startPerfTestBackends from "../startPerfTestBackends";
+import {
+  PerformanceTestAppInstance,
+  PerformanceTestEnv,
+} from "../../../../../..";
 
-export default async function (
+export default async function simpleRequestCluster(
   name: string,
   loops: number,
   parallel: number,
@@ -23,31 +25,15 @@ export default async function (
 
   const count = 1000 * loops;
 
-  // Start mock servers.
-  const backends = startBackends([
-    {
-      port: 6666,
-      routes: (["GET", "POST", "PUT", "DELETE", "PATCH"] as HttpMethods[]).map(
-        (method) => ({
-          path: "/users",
-          method,
-          handleResponse: async (ctx) => {
-            ctx.body = "hello, world";
-          },
-        })
-      ),
-    },
-  ]);
-
   app.pid = instanceConfig.pid;
-  app.mockHttpServers = backends;
+  app.mockHttpServers = startPerfTestBackends();
 
   const startTime = Date.now();
 
   function onResponse(serverResponse: Response<string>) {
     if (
       serverResponse.statusCode !== 200 ||
-      serverResponse.body !== "hello, world"
+      !serverResponse.body.startsWith("hello, world")
     ) {
       throw new Error(`${name} test failed.`);
     }

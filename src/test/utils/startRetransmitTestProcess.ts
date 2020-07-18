@@ -50,7 +50,7 @@ export default async function startRetransmitTestProcess(
   }
 
   if (params.workers) {
-    args.push("--workers", params.workers.toString())
+    args.push("--workers", params.workers.toString());
   }
 
   const { pid, stdin, stdout, stderr } = spawn("node", args);

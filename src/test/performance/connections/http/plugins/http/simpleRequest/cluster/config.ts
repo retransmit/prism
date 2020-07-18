@@ -1,4 +1,4 @@
-import { UserAppConfig } from "../../../../../../../types";
+import { UserAppConfig } from "../../../../../../../../types";
 
 const config: UserAppConfig = {
   http: {

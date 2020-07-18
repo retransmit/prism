@@ -1,16 +1,14 @@
-import { startBackends, getResponse } from "../../../../../utils/http";
-import got from "got/dist/source";
 import {
   PerformanceTestAppInstance,
-  PerformanceTestResult,
   PerformanceTestEnv,
-} from "../../../..";
-import { HttpMethods, UserAppConfig } from "../../../../../../types";
+  PerformanceTestResult,
+} from "../../../../..";
+import startRetransmitTestInstance from "../../../../../../utils/startRetransmitTestInstance";
 import { Response } from "got/dist/source/core";
-import startRetransmitTestInstance from "../../../../../utils/startRetransmitTestInstance";
-import sendParallelRequests from "../../../../../utils/sendParallelRequests";
+import sendParallelRequests from "../../../../../../utils/sendParallelRequests";
+import startPerfTestBackends from "./startPerfTestBackends";
 
-export default async function (
+export default async function simpleRequestBuffer(
   name: string,
   loops: number,
   parallel: number,
@@ -19,12 +17,11 @@ export default async function (
 ): Promise<PerformanceTestResult> {
   const count = 1000 * loops;
 
-  const config: UserAppConfig = {
+  const config = {
     http: {
       routes: {
         "/users": {
           GET: {
-            useStream: true,
             services: {
               userservice: {
                 type: "http" as "http",
@@ -37,33 +34,17 @@ export default async function (
     },
   };
 
-  // Start mock servers.
-  const backendApps = startBackends([
-    {
-      port: 6666,
-      routes: (["GET", "POST", "PUT", "DELETE", "PATCH"] as HttpMethods[]).map(
-        (method) => ({
-          path: "/users",
-          method,
-          handleResponse: async (ctx) => {
-            ctx.body = "hello, world";
-          },
-        })
-      ),
-    },
-  ]);
+  app.mockHttpServers = startPerfTestBackends();
 
   app.appControl = await startRetransmitTestInstance({ config });
   const { port } = app.appControl;
-
-  app.mockHttpServers = backendApps;
 
   const startTime = Date.now();
 
   function onResponse(serverResponse: Response<string>) {
     if (
       serverResponse.statusCode !== 200 ||
-      serverResponse.body !== "hello, world"
+      !serverResponse.body.startsWith("hello, world")
     ) {
       throw new Error(`${name} test failed.`);
     }

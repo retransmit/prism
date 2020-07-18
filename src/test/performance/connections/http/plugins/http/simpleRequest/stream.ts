@@ -1,16 +1,11 @@
-import { startBackends, getResponse } from "../../../../../utils/http";
-import got from "got/dist/source";
-import {
-  PerformanceTestAppInstance,
-  PerformanceTestResult,
-  PerformanceTestEnv,
-} from "../../../..";
-import { HttpMethods } from "../../../../../../types";
-import startRetransmitTestInstance from "../../../../../utils/startRetransmitTestInstance";
+import { UserAppConfig } from "../../../../../../../types";
 import { Response } from "got/dist/source/core";
-import sendParallelRequests from "../../../../../utils/sendParallelRequests";
+import startRetransmitTestInstance from "../../../../../../utils/startRetransmitTestInstance";
+import sendParallelRequests from "../../../../../../utils/sendParallelRequests";
+import startPerfTestBackends from "./startPerfTestBackends";
+import { PerformanceTestAppInstance, PerformanceTestEnv, PerformanceTestResult } from "../../../../..";
 
-export default async function (
+export default async function simpleRequestStream(
   name: string,
   loops: number,
   parallel: number,
@@ -19,11 +14,12 @@ export default async function (
 ): Promise<PerformanceTestResult> {
   const count = 1000 * loops;
 
-  const config = {
+  const config: UserAppConfig = {
     http: {
       routes: {
         "/users": {
           GET: {
+            useStream: true,
             services: {
               userservice: {
                 type: "http" as "http",
@@ -36,33 +32,17 @@ export default async function (
     },
   };
 
-  // Start mock servers.
-  const backendApps = startBackends([
-    {
-      port: 6666,
-      routes: (["GET", "POST", "PUT", "DELETE", "PATCH"] as HttpMethods[]).map(
-        (method) => ({
-          path: "/users",
-          method,
-          handleResponse: async (ctx) => {
-            ctx.body = "hello, world";
-          },
-        })
-      ),
-    },
-  ]);
+  app.mockHttpServers = startPerfTestBackends();
 
   app.appControl = await startRetransmitTestInstance({ config });
   const { port } = app.appControl;
-
-  app.mockHttpServers = backendApps;
 
   const startTime = Date.now();
 
   function onResponse(serverResponse: Response<string>) {
     if (
       serverResponse.statusCode !== 200 ||
-      serverResponse.body !== "hello, world"
+      !serverResponse.body.startsWith("hello, world")
     ) {
       throw new Error(`${name} test failed.`);
     }
