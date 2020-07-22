@@ -117,7 +117,7 @@ export type NativeHttpServiceEndPointConfig = {
   rollbackRequestContentType?: string;
   onRequest?: (
     request: HttpRequest,
-    otherResponses: FetchedHttpResponse[]
+    fetchedResponses: FetchedHttpResponse[]
   ) => Promise<
     | {
         handled: true;
@@ -129,7 +129,7 @@ export type NativeHttpServiceEndPointConfig = {
   onResponse?: (
     response: HttpResponse,
     request: HttpRequest,
-    otherResponses: FetchedHttpResponse[]
+    fetchedResponses: FetchedHttpResponse[]
   ) => Promise<HttpResponse | void>;
   onRollbackRequest?: (
     request: HttpRequest
@@ -149,7 +149,7 @@ export type RedisHttpServiceEndPointConfig = {
   numRequestChannels?: number;
   onRequest?: (
     request: RedisHttpRequest,
-    otherResponses: FetchedHttpResponse[]
+    fetchedResponses: FetchedHttpResponse[]
   ) => Promise<
     | {
         handled: true;
@@ -161,7 +161,7 @@ export type RedisHttpServiceEndPointConfig = {
   onResponse?: (
     response: string,
     request: HttpRequest,
-    otherResponses: FetchedHttpResponse[]
+    fetchedResponses: FetchedHttpResponse[]
   ) => Promise<RedisHttpResponse | void>;
   onRollbackRequest?: (
     request: RedisHttpRequest
@@ -187,7 +187,7 @@ export type HttpServicePlugin = {
     route: string,
     method: HttpMethods,
     stage: number | undefined,
-    otherResponses: FetchedHttpResponse[],
+    fetchedResponses: FetchedHttpResponse[],
     services: {
       [name: string]: HttpServiceEndPointConfig;
     },

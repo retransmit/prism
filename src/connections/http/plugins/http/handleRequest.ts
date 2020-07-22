@@ -22,7 +22,7 @@ export default function handleRequest(
   route: string,
   method: HttpMethods,
   stage: number | undefined,
-  otherResponses: FetchedHttpResponse[],
+  fetchedResponses: FetchedHttpResponse[],
   servicesInStage: {
     [name: string]: HttpServiceEndPointConfig;
   },
@@ -64,7 +64,7 @@ export default function handleRequest(
           const onRequestResult = (serviceConfig.onRequest &&
             (await serviceConfig.onRequest(
               requestWithEditedPath,
-              otherResponses
+              fetchedResponses
             ))) || { handled: false as false, request: requestWithEditedPath };
 
           if (onRequestResult.handled) {
@@ -74,7 +74,7 @@ export default function handleRequest(
                   (await serviceConfig.onResponse(
                     onRequestResult.response,
                     request,
-                    otherResponses
+                    fetchedResponses
                   ))) ||
                 onRequestResult.response;
 
@@ -107,7 +107,7 @@ export default function handleRequest(
                   service,
                   stage,
                   startTime,
-                  otherResponses,
+                  fetchedResponses,
                   serviceConfig,
                   success
                 );

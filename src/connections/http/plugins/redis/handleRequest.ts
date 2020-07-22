@@ -22,7 +22,7 @@ export default function handleRequest(
   route: string,
   method: HttpMethods,
   stage: number | undefined,
-  otherResponses: FetchedHttpResponse[],
+  fetchedResponses: FetchedHttpResponse[],
   servicesInStage: {
     [name: string]: HttpServiceEndPointConfig;
   },
@@ -57,7 +57,7 @@ export default function handleRequest(
           const onRequestResult = (serviceConfig.onRequest &&
             (await serviceConfig.onRequest(
               redisHttpRequest,
-              otherResponses
+              fetchedResponses
             ))) || {
             handled: false as false,
             request: JSON.stringify(redisHttpRequest),
@@ -102,7 +102,7 @@ export default function handleRequest(
                 startTime: Date.now(),
                 onResponse: success,
                 stage,
-                responses: otherResponses,
+                responses: fetchedResponses,
               });
             } else {
               if (!alreadyPublishedChannels.includes(requestChannel)) {

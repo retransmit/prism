@@ -17,7 +17,7 @@ export default async function makeGotRequest(
   service: string,
   stage: number | undefined,
   startTime: number,
-  otherResponses: FetchedHttpResponse[],
+  fetchedResponses: FetchedHttpResponse[],
   serviceConfig: NativeHttpServiceEndPointConfig,
   success: (result: InvokeHttpServiceResult) => void
 ) {
@@ -44,7 +44,7 @@ export default async function makeGotRequest(
           (await serviceConfig.onResponse(
             response,
             request,
-            otherResponses
+            fetchedResponses
           ))) ||
         response;
 
@@ -82,7 +82,7 @@ export default async function makeGotRequest(
           (await serviceConfig.onResponse(
             errorResponse,
             request,
-            otherResponses
+            fetchedResponses
           ))) ||
         errorResponse;
 
