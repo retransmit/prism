@@ -53,7 +53,7 @@ export type UserAppConfig = {
   ) => httpModule.Server;
 };
 
-export type WhitelistConfig = {
+export type AllowListConfig = {
   allowed?: string[];
   disallowed?: string[];
 };
@@ -110,7 +110,7 @@ export type HttpProxyConfig = {
     responseChannel: string;
     cleanupInterval?: number;
   };
-  whitelist?: WhitelistConfig;
+  allowList?: AllowListConfig;
   onRequest?: (
     request: HttpRequest
   ) => Promise<
@@ -143,7 +143,7 @@ export type WebSocketProxyConfig = {
     responseChannel: string;
     cleanupInterval?: number;
   };
-  whitelist?: WhitelistConfig;
+  allowList?: AllowListConfig;
   onConnect?: (
     requestId: string,
     message: string

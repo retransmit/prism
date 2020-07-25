@@ -10,7 +10,7 @@ import {
   HttpServiceAuthentication,
   HttpServiceTrackingInfo,
   HttpProxyAppConfig,
-  WhitelistConfig,
+  AllowListConfig,
   AppConfig,
 } from ".";
 import { IRouterContext } from "koa-router";
@@ -21,7 +21,7 @@ export type HttpRouteConfig = {
   services: {
     [key: string]: HttpServiceEndPointConfig;
   };
-  whitelist?: WhitelistConfig;
+  allowList?: AllowListConfig;
   onRequest?: (
     request: HttpRequest
   ) => Promise<

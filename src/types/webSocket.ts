@@ -5,7 +5,7 @@ import {
   UrlSelector,
   RateLimitingConfig,
   WebSocketProxyAppConfig,
-  WhitelistConfig,
+  AllowListConfig,
 } from ".";
 import WebSocket from "ws";
 
@@ -16,7 +16,7 @@ export type WebSocketRouteConfig = {
   services: {
     [key: string]: WebSocketServiceEndPointConfig;
   };
-  whitelist?: WhitelistConfig;
+  allowList?: AllowListConfig;
   onConnect?: (
     requestId: string,
     message: string
