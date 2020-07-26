@@ -11,7 +11,7 @@
     "test": "./build.sh && mocha --exit dist/test/integration/index.js --timeout 2000"
   },
   "bin": {
-    "retransmit": "dist/index.js"
+    "prism": "dist/index.js"
   },
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
