@@ -3,7 +3,7 @@ import {
   UrlPollingWebSocketEndPointConfig,
   WebSocketDisconnectRequest,
   ActiveWebSocketConnection,
-} from "../../../../types/webSocket";
+} from "../../../../types/webSocketProxy";
 import { makeGotOptions } from "../../../../utils/http/gotUtil";
 import got from "got";
 import { makeHttpResponse } from "../../../http/plugins/http/makeHttpResponse";

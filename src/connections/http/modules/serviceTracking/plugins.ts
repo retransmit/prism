@@ -1,6 +1,6 @@
 import * as inMemoryPlugin from "./inMemory";
 import * as redisPlugin from "./redis";
-import { HttpServiceTrackingStateProviderPlugin } from "../../../../types/http";
+import { HttpServiceTrackingStateProviderPlugin } from ".";
 
 const plugins: {
   [name: string]: HttpServiceTrackingStateProviderPlugin;

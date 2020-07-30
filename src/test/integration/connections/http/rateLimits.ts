@@ -1,17 +1,13 @@
 import { startBackends, getResponse } from "../../../utils/http";
 import { TestAppInstance } from "..";
 import got from "got";
-import {
-  RedisStateConfig,
-  InMemoryStateConfig,
-  UserAppConfig,
-} from "../../../../types";
 import { Response } from "got/dist/source/core";
 import { createClient } from "redis";
 import { promisify } from "util";
 import startRetransmitTestInstance from "../../../utils/startRetransmitTestInstance";
 import sleep from "../../../../utils/sleep";
 import { TestEnv } from "../..";
+import { UserAppConfig } from "../../../../types";
 
 const client = createClient();
 const redisFlushAll = promisify(client.flushdb);
@@ -48,9 +44,7 @@ export default async function (app: TestAppInstance, testEnv: TestEnv) {
       "rate limits with in-memory state",
       false,
       makeConfig((cfg) => {
-        cfg.state = {
-          type: "memory",
-        } as InMemoryStateConfig;
+        cfg.state = "memory";
         return cfg;
       }),
     ],
@@ -58,9 +52,7 @@ export default async function (app: TestAppInstance, testEnv: TestEnv) {
       "rate limits with redis state",
       true,
       makeConfig((cfg) => {
-        cfg.state = {
-          type: "redis",
-        } as RedisStateConfig;
+        cfg.state = "redis";
         return cfg;
       }),
     ],

@@ -1,10 +1,7 @@
 import jsonwebtoken = require("jsonwebtoken");
-import {
-  HttpServiceJwtAuthentication,
-  HttpRequest,
-  BodyObject,
-} from "../../../../types";
 import { getHeaderAsString } from "../../../../utils/http/getHeaderAsString";
+import { HttpRequest, BodyObject } from "../../../../types/http";
+import { HttpServiceJwtAuthentication } from "../../../../types/httpServiceAuthentication";
 
 export default async function authenticate(
   request: HttpRequest,

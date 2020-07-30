@@ -1,4 +1,4 @@
-import { HttpRequest, HttpMethods, AppConfig } from "../../../../types";
+import { AppConfig } from "../../../../types";
 
 import {
   InvokeHttpServiceResult,
@@ -6,12 +6,13 @@ import {
   HttpServiceEndPointConfig,
   NativeHttpServiceEndPointConfig,
   HttpRouteConfig,
-} from "../../../../types/http";
+} from "../../../../types/httpProxy";
 import mapBodyAndHeaders from "../../mapBodyAndHeaders";
 import selectRandomUrl from "../../../../utils/http/selectRandomUrl";
 import makeGotRequest from "./makeGotRequest";
 import fireAndForgetGotRequest from "./fireAndForgetGotRequest";
 import { replaceParamsInUrl } from "./replaceParamsInUrl";
+import { HttpRequest, HttpMethods } from "../../../../types/http";
 
 /*
   Make Promises for Http Services

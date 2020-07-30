@@ -1,6 +1,7 @@
 import got from "got/dist/source";
 import selectRandomUrl from "../utils/http/selectRandomUrl";
-import { PeriodicWebJob, AppConfig } from "../types";
+import { AppConfig } from "../types";
+import { PeriodicWebJob } from "../types/webJob";
 
 export function init(
   name: string,

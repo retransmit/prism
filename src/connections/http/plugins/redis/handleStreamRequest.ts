@@ -1,6 +1,4 @@
 import {
-  HttpRequest,
-  HttpMethods,
   HttpProxyAppConfig,
 } from "../../../../types";
 
@@ -8,8 +6,9 @@ import {
   InvokeHttpServiceResult,
   HttpServiceEndPointConfig,
   HttpRouteConfig,
-} from "../../../../types/http";
+} from "../../../../types/httpProxy";
 import { IRouterContext } from "koa-router";
+import { HttpRequest, HttpMethods } from "../../../../types/http";
 
 // Handle streaming http request/response
 export default function handleStreamRequest(

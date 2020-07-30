@@ -1,10 +1,10 @@
-import { HttpRequest, WebSocketProxyAppConfig } from "../../../../types";
+import { WebSocketProxyAppConfig } from "../../../../types";
 import {
   UrlPollingWebSocketEndPointConfig,
   WebSocketRouteConfig,
   WebSocketResponse,
   ActiveWebSocketConnection,
-} from "../../../../types/webSocket";
+} from "../../../../types/webSocketProxy";
 import * as activeConnections from "../../activeConnections";
 import respondToWebSocketClient from "../../respond";
 import { makeGotOptions } from "../../../../utils/http/gotUtil";
@@ -13,6 +13,7 @@ import { makeWebSocketResponse } from "./makeWebSocketResponse";
 import { makeHttpResponse } from "../../../http/plugins/http/makeHttpResponse";
 import responseIsError from "../../../../utils/http/responseIsError";
 import selectRandomUrl from "../../../../utils/http/selectRandomUrl";
+import { HttpRequest } from "../../../../types/http";
 
 export function setupPolling(config: WebSocketProxyAppConfig) {
   for (const route of Object.keys(config.webSocket.routes)) {

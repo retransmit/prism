@@ -1,4 +1,4 @@
-import { HttpRouteStageConfig, HttpRouteConfig } from "../../types/http";
+import { HttpRouteStageConfig, HttpRouteConfig } from "../../types/httpProxy";
 
 export default function sortIntoStages(routeConfig: HttpRouteConfig) {
   let stages: HttpRouteStageConfig[] = (function sortIntoStages() {

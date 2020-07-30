@@ -1,11 +1,12 @@
-import { HttpResponse, HttpProxyAppConfig, BodyObject } from "../../types";
+import { HttpProxyAppConfig } from "../../types";
 import responseIsError from "../../utils/http/responseIsError";
 import {
   FetchedHttpResponse,
   HttpRouteConfig,
   HttpServiceEndPointConfig,
-} from "../../types/http";
+} from "../../types/httpProxy";
 import getHeader from "../../utils/http/getHeader";
+import { HttpResponse, BodyObject } from "../../types/http";
 
 export default function mergeResponses(
   responses: FetchedHttpResponse[],

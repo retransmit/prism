@@ -1,11 +1,7 @@
 import { startBackends, getResponse } from "../../../utils/http";
 import { TestAppInstance } from "..";
 import got from "got";
-import {
-  RedisStateConfig,
-  InMemoryStateConfig,
-  UserAppConfig,
-} from "../../../../types";
+import { UserAppConfig } from "../../../../types";
 import { Response } from "got/dist/source/core";
 import { createClient } from "redis";
 import { promisify } from "util";
@@ -46,9 +42,7 @@ export default async function (app: TestAppInstance, testEnv: TestEnv) {
       "caches in memory",
       false,
       makeConfig((cfg) => {
-        cfg.state = {
-          type: "memory",
-        } as InMemoryStateConfig;
+        cfg.state = "memory";
         return cfg;
       }),
     ],
@@ -56,9 +50,7 @@ export default async function (app: TestAppInstance, testEnv: TestEnv) {
       "caches in redis",
       true,
       makeConfig((cfg) => {
-        cfg.state = {
-          type: "redis",
-        } as RedisStateConfig;
+        cfg.state = "redis";
         return cfg;
       }),
     ],

@@ -1,18 +1,25 @@
-import {
-  HttpMethods,
-  HttpRequest,
-  HttpServiceCacheConfig,
-  HttpResponse,
-  HttpProxyAppConfig,
-} from "../../../../types";
-import {
-  HttpRouteConfig,
-  HttpServiceCacheStateProviderPlugin,
-} from "../../../../types/http";
+import { HttpProxyAppConfig, AppConfig } from "../../../../types";
+import { HttpRouteConfig, HttpProxyConfig } from "../../../../types/httpProxy";
 import { createHash } from "crypto";
 
 import * as inMemoryPlugin from "./inMemory";
 import * as redisPlugin from "./redis";
+import { HttpResponse, HttpMethods, HttpRequest } from "../../../../types/http";
+import { HttpServiceCacheConfig } from "../../../../types/httpServiceCaching";
+
+export type HttpServiceCacheStateProviderPlugin = {
+  get: (
+    key: string,
+    cacheConfig: HttpServiceCacheConfig,
+    config: AppConfig
+  ) => Promise<HttpResponse | undefined>;
+  set: (
+    key: string,
+    response: HttpResponse,
+    cacheConfig: HttpServiceCacheConfig,
+    config: AppConfig
+  ) => Promise<void>;
+};
 
 const plugins: {
   [name: string]: HttpServiceCacheStateProviderPlugin;
@@ -28,8 +35,8 @@ const plugins: {
 };
 
 /*
-  Rate limiting state is stored in memory by default,
-  but most deployments should use redis.
+  Cache state is stored in memory by default,
+  but production should use redis.
 */
 export async function getFromCache(
   route: string,
@@ -40,10 +47,9 @@ export async function getFromCache(
 ): Promise<HttpResponse | undefined> {
   const cacheConfig = routeConfig.caching || config.http.caching;
 
-  if (cacheConfig && cacheConfig !== "none") {
+  if (cacheConfig) {
     const key = reduceRequestToHash(route, method, request, cacheConfig);
-    const pluginType = config.state?.type || "memory";
-    return await plugins[pluginType].get(key, config.state);
+    return await plugins[config.state].get(key, cacheConfig, config);
   }
 }
 
@@ -57,18 +63,17 @@ export async function updateCache(
 ) {
   const cacheConfig = routeConfig.caching || config.http.caching;
 
-  if (cacheConfig && cacheConfig !== "none") {
+  if (cacheConfig) {
     const maxSize = cacheConfig.maxSize || 5000000;
 
     // Check if any of the params are bigger than it should be.
     if (!tooBig(maxSize, response)) {
       const key = reduceRequestToHash(route, method, request, cacheConfig);
-      const pluginType = config.state?.type || "memory";
-      return await plugins[pluginType].set(
+      return await plugins[config.state].set(
         key,
         response,
-        config.state,
-        cacheConfig
+        cacheConfig,
+        config
       );
     }
   }

@@ -2,7 +2,7 @@ import Koa = require("koa");
 import { CancelableRequest } from "got/dist/source";
 import { Response } from "got/dist/source/core";
 import bodyParser = require("koa-body");
-import { HttpMethods } from "../../types";
+import { HttpMethods } from "../../types/http";
 import koaStatic = require("koa-static");
 import koaMount = require("koa-mount");
 

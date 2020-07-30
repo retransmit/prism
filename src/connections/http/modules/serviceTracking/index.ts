@@ -1,11 +1,33 @@
-import {
-  HttpMethods,
-  HttpServiceTrackingInfo,
-  HttpProxyAppConfig,
-} from "../../../../types";
-import { HttpRouteConfig } from "../../../../types/http";
+import { HttpProxyAppConfig } from "../../../../types";
+import { HttpRouteConfig } from "../../../../types/httpProxy";
 
 import plugins from "./plugins";
+import { HttpMethods } from "../../../../types/http";
+import { AppConfig } from "../../../../types";
+
+export type HttpServiceTrackingInfo = {
+  route: string;
+  method: HttpMethods;
+  status: number;
+  instanceId: string;
+  timestamp: number;
+  requestTime: number;
+  responseTime: number;
+};
+
+export type HttpServiceTrackingStateProviderPlugin = {
+  getTrackingInfo: (
+    route: string,
+    method: HttpMethods,
+    config: AppConfig
+  ) => Promise<HttpServiceTrackingInfo[] | undefined>;
+  setTrackingInfo: (
+    route: string,
+    method: HttpMethods,
+    trackingInfo: HttpServiceTrackingInfo,
+    config: AppConfig
+  ) => Promise<void>;
+};
 
 export async function updateServiceTrackingInfo(
   route: string,
@@ -29,8 +51,7 @@ export async function updateServiceTrackingInfo(
       responseTime,
     };
 
-    const pluginType = config.state?.type || "memory";
-    plugins[pluginType].setTrackingInfo(route, method, trackingInfo, config);
+    plugins[config.state].setTrackingInfo(route, method, trackingInfo, config);
   }
 }
 

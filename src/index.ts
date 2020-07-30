@@ -220,11 +220,7 @@ export async function mutateAndCleanupConfig(config: AppConfig) {
 
   // Initialize state
   if (!config.state) {
-    config.state = {
-      type: "memory",
-      clientTrackingEntryExpiry: TWO_MINUTES,
-      httpServiceErrorTrackingListExpiry: TWO_MINUTES,
-    };
+    config.state = "memory";
   }
 
   config.hostId =

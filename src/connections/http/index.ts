@@ -3,11 +3,12 @@ import bodyParser = require("koa-body");
 import Router from "koa-router";
 import { IncomingMessage } from "http";
 import { ServerResponse } from "http";
-import { HttpMethods, AppConfig } from "../../types";
+import { AppConfig } from "../../types";
 import plugins from "./plugins";
 import createHandlerForRoute from "./createHandlerForRoute";
 import { Http2ServerRequest, Http2ServerResponse } from "http2";
 import isHttpServiceAppConfig from "./isHttpServiceAppConfig";
+import { HttpMethods } from "../../types/http";
 
 const cors = require("@koa/cors");
 let currentRequestHandler: KoaRequestHandler | undefined = undefined;

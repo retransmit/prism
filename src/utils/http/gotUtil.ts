@@ -1,4 +1,4 @@
-import { HttpRequest, HttpHeaders } from "../../types";
+import { HttpRequest, HttpHeaders } from "../../types/http";
 import { getHeaderAsString } from "./getHeaderAsString";
 import { OptionsOfUnknownResponseBody, Options } from "got/dist/source";
 

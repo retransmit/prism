@@ -1,19 +1,16 @@
-import {
-  HttpRequest,
-  HttpMethods,
-  HttpProxyAppConfig,
-} from "../../../../types";
+import { HttpProxyAppConfig } from "../../../../types";
 
 import {
   HttpRouteConfig,
   NativeHttpServiceEndPointConfig,
   HttpServiceEndPointConfig,
-} from "../../../../types/http";
+} from "../../../../types/httpProxy";
 import { IRouterContext } from "koa-router";
 import got from "got/dist/source";
 import selectRandomUrl from "../../../../utils/http/selectRandomUrl";
 import { replaceParamsInUrl } from "./replaceParamsInUrl";
 import { makeGotOptions } from "../../../../utils/http/gotUtil";
+import { HttpRequest, HttpMethods } from "../../../../types/http";
 
 // Handle streaming http request/response
 export default async function handleStreamRequest(

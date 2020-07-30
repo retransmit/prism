@@ -1,15 +1,13 @@
+import { AppConfig } from "../../../types";
+import { HttpRouteConfig, HttpProxyConfig } from "../../../types/httpProxy";
 import {
-  AppConfig,
-  ClientTrackingInfo,
-  HttpProxyConfig,
+  WebSocketRouteConfig,
   WebSocketProxyConfig,
-  HttpMethods,
-  RateLimitingConfig,
-  ClientTrackingStateProviderPlugin,
-} from "../../../types";
-import { HttpRouteConfig } from "../../../types/http";
-import { WebSocketRouteConfig } from "../../../types/webSocket";
+} from "../../../types/webSocketProxy";
 import plugins from "../clientTracking/plugins";
+import { HttpMethods } from "../../../types/http";
+import { ClientTrackingInfo } from "../clientTracking";
+import { RateLimitingConfig } from "../../../types/rateLimiting";
 
 /*
   Rate limiting state is stored in memory by default,
@@ -26,10 +24,9 @@ export default async function applyRateLimiting(
   const rateLimitingConfig =
     routeConfig.rateLimiting || proxyConfig.rateLimiting;
 
-  if (rateLimitingConfig && rateLimitingConfig !== "none") {
+  if (rateLimitingConfig) {
     const rejectionMessage = "Too Many Requests.";
-    const pluginType = config.state?.type || "memory";
-    const trackingList = await plugins[pluginType].getTrackingInfo(
+    const trackingList = await plugins[config.state].getTrackingInfo(
       path,
       method,
       remoteAddress,

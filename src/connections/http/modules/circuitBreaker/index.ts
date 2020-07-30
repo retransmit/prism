@@ -1,12 +1,10 @@
-import {
-  HttpMethods,
-  HttpServiceTrackingInfo,
-  HttpServiceCircuitBreakerConfig,
-  HttpProxyAppConfig,
-} from "../../../../types";
-import { HttpRouteConfig } from "../../../../types/http";
+import { HttpProxyAppConfig } from "../../../../types";
+import { HttpRouteConfig } from "../../../../types/httpProxy";
 
 import plugins from "../serviceTracking/plugins";
+import { HttpMethods } from "../../../../types/http";
+import { HttpServiceTrackingInfo } from "../serviceTracking";
+import { HttpServiceCircuitBreakerConfig } from "../../../../types/httpServiceCircuitBreaker";
 
 /*
   Rate limiting state is stored in memory by default,
@@ -21,10 +19,9 @@ export async function isTripped(
   const circuitBreakerConfig =
     routeConfig.circuitBreaker || config.http.circuitBreaker;
 
-  if (circuitBreakerConfig && circuitBreakerConfig !== "none") {
+  if (circuitBreakerConfig) {
     const rejectionMessage = "Busy.";
-    const pluginType = config.state?.type || "memory";
-    const trackingList = await plugins[pluginType].getTrackingInfo(
+    const trackingList = await plugins[config.state].getTrackingInfo(
       route,
       method,
       config

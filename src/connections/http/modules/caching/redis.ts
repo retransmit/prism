@@ -1,11 +1,9 @@
-import {
-  RedisStateConfig,
-  HttpServiceCacheConfig,
-  HttpResponse,
-} from "../../../../types";
 import { createClient } from "redis";
 
 import { promisify } from "util";
+import { HttpResponse } from "../../../../types/http";
+import { HttpServiceCacheConfig } from "../../../../types/httpServiceCaching";
+import { AppConfig } from "../../../../types";
 
 const redisGet = promisify(createClient().get);
 const redisPSetex = promisify(createClient().psetex);
@@ -14,9 +12,10 @@ const ONE_MINUTE = 60 * 1000;
 
 export async function get(
   key: string,
-  stateConfig: RedisStateConfig
+  cacheConfig: HttpServiceCacheConfig,
+  config: AppConfig
 ): Promise<HttpResponse | undefined> {
-  const client = createClient(stateConfig?.options);
+  const client = createClient(config.redis?.options);
   const redisKey = `cache_item:${key}`;
   const response = await redisGet.call(client, redisKey);
   if (response) {
@@ -27,11 +26,11 @@ export async function get(
 export async function set(
   key: string,
   response: HttpResponse,
-  stateConfig: RedisStateConfig,
-  cacheConfig: HttpServiceCacheConfig
+  cacheConfig: HttpServiceCacheConfig,
+  config: AppConfig
 ) {
   const expiry = cacheConfig.expiry || ONE_MINUTE;
-  const client = createClient(stateConfig?.options);
+  const client = createClient(config.redis?.options);
   const redisKey = `cache_item:${key}`;
   await redisPSetex.call(client, redisKey, expiry, JSON.stringify(response));
 }

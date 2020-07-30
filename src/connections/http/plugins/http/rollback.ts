@@ -1,20 +1,16 @@
 import got from "got";
 
-import {
-  HttpRequest,
-  HttpMethods,
-  AppConfig,
-  HttpProxyAppConfig,
-} from "../../../../types";
+import { AppConfig, HttpProxyAppConfig } from "../../../../types";
 
 import responseIsError from "../../../../utils/http/responseIsError";
 import { makeHttpResponse } from "./makeHttpResponse";
 import {
   HttpRouteConfig,
   NativeHttpServiceEndPointConfig,
-} from "../../../../types/http";
+} from "../../../../types/httpProxy";
 import { makeGotOptions } from "../../../../utils/http/gotUtil";
 import { replaceParamsInUrl } from "./replaceParamsInUrl";
+import { HttpRequest, HttpMethods } from "../../../../types/http";
 
 /*
   Make Promises for Http Services

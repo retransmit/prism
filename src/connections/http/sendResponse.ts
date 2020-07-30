@@ -1,14 +1,10 @@
 import { IRouterContext } from "koa-router";
-import {
-  HttpMethods,
-  HttpRequest,
-  HttpResponse,
-  HttpProxyAppConfig,
-} from "../../types";
-import { HttpRouteConfig } from "../../types/http";
+import { HttpProxyAppConfig } from "../../types";
+import { HttpRouteConfig } from "../../types/httpProxy";
 import { updateServiceTrackingInfo } from "./modules/serviceTracking";
 import { updateCache } from "./modules/caching";
 import responseIsError from "../../utils/http/responseIsError";
+import { HttpMethods, HttpRequest, HttpResponse } from "../../types/http";
 
 export async function sendResponse(
   ctx: IRouterContext,

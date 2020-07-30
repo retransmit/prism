@@ -1,14 +1,8 @@
-import {
-  HttpRequest,
-  HttpMethods,
-  HttpProxyAppConfig,
-} from "../../../../types";
+import { HttpProxyAppConfig } from "../../../../types";
 import { getChannelForService } from "../../../../utils/redis/getChannelForService";
-import {
-  HttpRouteConfig,
-  RedisHttpRequest,
-} from "../../../../types/http";
+import { HttpRouteConfig, RedisHttpRequest } from "../../../../types/httpProxy";
 import { publish } from "./publish";
+import { HttpRequest, HttpMethods } from "../../../../types/http";
 
 /*
   Make Promises for Redis Services.

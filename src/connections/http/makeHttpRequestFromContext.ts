@@ -1,6 +1,6 @@
 import { IRouterContext } from "koa-router";
-import { HttpRouteConfig } from "../../types/http";
-import { HttpRequest, HttpMethods } from "../../types";
+import { HttpRouteConfig } from "../../types/httpProxy";
+import { HttpRequest, HttpMethods } from "../../types/http";
 import { copyHeadersFromContext } from "./copyHeadersFromContext";
 
 export default function makeHttpRequestFromContext(

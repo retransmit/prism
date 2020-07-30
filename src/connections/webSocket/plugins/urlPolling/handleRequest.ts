@@ -1,15 +1,16 @@
-import { HttpRequest, WebSocketProxyAppConfig } from "../../../../types";
+import { WebSocketProxyAppConfig } from "../../../../types";
 import {
   UrlPollingWebSocketMessageRequest,
   WebSocketResponse,
   WebSocketMessageRequest,
   ActiveWebSocketConnection,
-} from "../../../../types/webSocket";
+} from "../../../../types/webSocketProxy";
 import respondToWebSocketClient from "../../respond";
 import { makeGotOptions } from "../../../../utils/http/gotUtil";
 import got from "got";
 import { makeWebSocketResponse } from "./makeWebSocketResponse";
 import selectRandomUrl from "../../../../utils/http/selectRandomUrl";
+import { HttpRequest } from "../../../../types/http";
 
 export default async function sendToService(
   request: WebSocketMessageRequest,

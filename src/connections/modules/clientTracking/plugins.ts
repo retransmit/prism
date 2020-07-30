@@ -1,6 +1,6 @@
 import * as inMemoryPlugin from "./inMemory";
 import * as redisPlugin from "./redis";
-import { ClientTrackingStateProviderPlugin } from "../../../types";
+import { ClientTrackingStateProviderPlugin } from ".";
 
 const plugins: {
   [name: string]: ClientTrackingStateProviderPlugin;

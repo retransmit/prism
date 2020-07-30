@@ -1,5 +1,5 @@
 import { startBackends } from "../../../../../../utils/http";
-import { HttpMethods } from "../../../../../../../types";
+import { HttpMethods } from "../../../../../../../types/http";
 const { argv } = require("yargs");
 
 export default function startPerfTestBackends() {

@@ -1,5 +1,5 @@
-import { HttpRequest, BodyObject } from "../../types";
-import { HttpRouteConfigBase } from "../../types/http";
+import { HttpRequest, BodyObject } from "../../types/http";
+import { HttpRouteConfigBase } from "../../types/httpProxy";
 
 export default function mapBodyAndHeaders(
   request: HttpRequest,

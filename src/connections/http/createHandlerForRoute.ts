@@ -1,12 +1,12 @@
 import { IRouterContext } from "koa-router";
-import { HttpMethods, HttpProxyAppConfig } from "../../types";
+import { HttpProxyAppConfig } from "../../types";
 import randomId from "../../utils/random";
 
 import {
   HttpRouteConfig,
   FetchedHttpResponse,
   InvokeHttpServiceResult,
-} from "../../types/http";
+} from "../../types/httpProxy";
 import applyRateLimiting from "../modules/rateLimiting";
 import { sendResponse } from "./sendResponse";
 import { getFromCache } from "./modules/caching";
@@ -18,6 +18,7 @@ import plugins from "./plugins";
 import sortIntoStages from "./sortIntoStages";
 import makeHttpRequestFromContext from "./makeHttpRequestFromContext";
 import addTrackingInfo from "../modules/clientTracking";
+import { HttpMethods } from "../../types/http";
 
 export type CreateHttpRequestHandler = (
   method: HttpMethods

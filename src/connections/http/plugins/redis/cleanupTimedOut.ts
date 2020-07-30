@@ -1,5 +1,5 @@
 import { get as activeRequests, ActiveHttpRequest } from "./activeRequests";
-import { FetchedHttpResponse } from "../../../../types/http";
+import { FetchedHttpResponse } from "../../../../types/httpProxy";
 
 let isCleaningUp = false;
 

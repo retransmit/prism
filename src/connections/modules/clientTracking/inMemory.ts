@@ -1,9 +1,7 @@
-import {
-  HttpMethods,
-  ClientTrackingInfo,
-  AppConfig,
-} from "../../../types";
+import { AppConfig } from "../../../types";
 import * as applicationState from "../../../state";
+import { HttpMethods } from "../../../types/http";
+import { ClientTrackingInfo } from ".";
 
 export async function getTrackingInfo(
   path: string,

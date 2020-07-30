@@ -1,4 +1,4 @@
-import { HttpRequest, HttpMethods, AppConfig } from "../../../../types";
+import { AppConfig } from "../../../../types";
 
 import { get as activeRequests } from "./activeRequests";
 import { getChannelForService } from "../../../../utils/redis/getChannelForService";
@@ -9,9 +9,10 @@ import {
   HttpServiceEndPointConfig,
   RedisHttpServiceEndPointConfig,
   HttpRouteConfig,
-} from "../../../../types/http";
+} from "../../../../types/httpProxy";
 import { publish } from "./publish";
 import mapBodyAndHeaders from "../../mapBodyAndHeaders";
+import { HttpRequest, HttpMethods } from "../../../../types/http";
 
 /*
   Make Promises for Redis Services
@@ -34,7 +35,10 @@ export default function handleRequest(
   return Object.keys(servicesInStage)
     .map(
       (service) =>
-        [service, servicesInStage[service]] as [string, HttpServiceEndPointConfig]
+        [service, servicesInStage[service]] as [
+          string,
+          HttpServiceEndPointConfig
+        ]
     )
     .filter(isRedisServiceConfig)
     .map(

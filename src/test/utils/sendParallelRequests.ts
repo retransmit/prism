@@ -1,5 +1,5 @@
 import got, { CancelableRequest } from "got/dist/source";
-import { HttpMethods } from "../../types";
+import { HttpMethods } from "../../types/http";
 import { getResponse } from "./http";
 import { Response } from "got/dist/source/core";
 

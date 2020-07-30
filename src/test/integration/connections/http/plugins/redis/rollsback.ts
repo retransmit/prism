@@ -1,7 +1,7 @@
 import * as redis from "redis";
 import { TestAppInstance } from "../../..";
 import got from "got";
-import { RedisHttpRequest } from "../../../../../../types/http";
+import { RedisHttpRequest } from "../../../../../../types/httpProxy";
 import { getResponse } from "../../../../../utils/http";
 import { UserAppConfig } from "../../../../../../types";
 import startRetransmitTestInstance from "../../../../../utils/startRetransmitTestInstance";

@@ -1,10 +1,11 @@
 import { startBackends, getResponse } from "../../../../../utils/http";
 import { TestAppInstance } from "../../..";
 import got from "got";
-import { BodyObject, UserAppConfig } from "../../../../../../types";
-import { NativeHttpServiceEndPointConfig } from "../../../../../../types/http";
+import { UserAppConfig } from "../../../../../../types";
+import { NativeHttpServiceEndPointConfig } from "../../../../../../types/httpProxy";
 import startRetransmitTestInstance from "../../../../../utils/startRetransmitTestInstance";
 import { TestEnv } from "../../../..";
+import { BodyObject } from "../../../../../../types/http";
 
 export default async function (app: TestAppInstance, testEnv: TestEnv) {
   it(`runs stages`, async () => {

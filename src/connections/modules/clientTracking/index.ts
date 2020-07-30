@@ -1,13 +1,35 @@
 import {
   AppConfig,
-  ClientTrackingInfo,
-  HttpProxyConfig,
-  WebSocketProxyConfig,
-  HttpMethods,
 } from "../../../types";
-import { HttpRouteConfig } from "../../../types/http";
-import { WebSocketRouteConfig } from "../../../types/webSocket";
+import { HttpRouteConfig, HttpProxyConfig } from "../../../types/httpProxy";
+import { WebSocketRouteConfig, WebSocketProxyConfig } from "../../../types/webSocketProxy";
 import plugins from "./plugins";
+import { HttpMethods } from "../../../types/http";
+
+export type ClientTrackingInfo = {
+  path: string;
+  method: HttpMethods;
+  timestamp: number;
+  instanceId: string;
+  remoteAddress: string;
+};
+
+export type ClientTrackingStateProviderPlugin = {
+  getTrackingInfo: (
+    path: string,
+    method: HttpMethods,
+    remoteAddress: string,
+    config: AppConfig
+  ) => Promise<ClientTrackingInfo[] | undefined>;
+  setTrackingInfo: (
+    path: string,
+    method: HttpMethods,
+    remoteAddress: string,
+    trackingInfo: ClientTrackingInfo,
+    config: AppConfig
+  ) => Promise<void>;
+};
+
 
 /*
   Rate limiting state is stored in memory by default,
@@ -21,8 +43,6 @@ export default async function addTrackingInfo(
   proxyConfig: HttpProxyConfig | WebSocketProxyConfig,
   config: AppConfig
 ) {
-  const pluginType = config.state?.type || "memory";
-
   const trackingInfo: ClientTrackingInfo = {
     path,
     method,
@@ -31,7 +51,7 @@ export default async function addTrackingInfo(
     timestamp: Date.now(),
   };
 
-  plugins[pluginType].setTrackingInfo(
+  plugins[config.state].setTrackingInfo(
     path,
     method,
     remoteAddress,

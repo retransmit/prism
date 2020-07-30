@@ -4,7 +4,7 @@ import {
   RedisWebSocketMessageRequest,
   WebSocketMessageRequest,
   ActiveWebSocketConnection,
-} from "../../../../types/webSocket";
+} from "../../../../types/webSocketProxy";
 import respondToWebSocketClient from "../../respond";
 import { publish } from "./publish";
 

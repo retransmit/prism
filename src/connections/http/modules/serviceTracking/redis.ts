@@ -1,12 +1,10 @@
-import { HttpMethods, AppConfig } from "../../../../types";
+import { AppConfig } from "../../../../types";
 import { createClient } from "redis";
 import { promisify } from "util";
+import { HttpMethods } from "../../../../types/http";
+import { HttpServiceTrackingInfo } from ".";
 
 const redisLRange = promisify(createClient().lrange);
-
-import {
-  HttpServiceTrackingInfo
-} from "../../../../types";
 
 const ONE_MINUTE = 60 * 1000;
 const TWO_MINUTES = 2 * ONE_MINUTE;
@@ -16,13 +14,11 @@ export async function getTrackingInfo(
   method: HttpMethods,
   config: AppConfig
 ): Promise<HttpServiceTrackingInfo[] | undefined> {
-  if (config.state?.type === "redis") {
-    const client = createClient(config.state.options);
+  if (config.state === "redis") {
+    const client = createClient(config.redis?.options);
     const key = getKey(config.hostId, route, method);
     const jsonEntries = await redisLRange.call(client, key, 0, -1);
-    return jsonEntries.map(
-      (x) => JSON.parse(x) as HttpServiceTrackingInfo
-    );
+    return jsonEntries.map((x) => JSON.parse(x) as HttpServiceTrackingInfo);
   }
 }
 
@@ -32,18 +28,22 @@ export async function setTrackingInfo(
   trackingInfo: HttpServiceTrackingInfo,
   config: AppConfig
 ) {
-  if (config.state?.type === "redis") {
-    const client = createClient(config.state?.options);
+  if (config.state === "redis") {
+    const client = createClient(config.redis?.options);
     const key = getKey(config.hostId, route, method);
     const jsonEntry = JSON.stringify(trackingInfo);
 
     const multi = client.multi();
     multi
       .lpush(key, jsonEntry)
-      .ltrim(key, 0, config.state.httpServiceErrorTrackingListLength || 2000)
+      .ltrim(
+        key,
+        0,
+        config.http?.serviceTracking?.errorTrackingListLength || 2000
+      )
       .pexpire(
         key,
-        config.state.httpServiceErrorTrackingListExpiry || TWO_MINUTES
+        config.http?.serviceTracking?.errorTrackingListExpiry || TWO_MINUTES
       );
     multi.exec();
   }

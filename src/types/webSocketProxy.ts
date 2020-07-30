@@ -1,13 +1,42 @@
-import {
-  HttpRequest,
-  HttpResponse,
-  UrlList,
-  UrlSelector,
-  RateLimitingConfig,
-  WebSocketProxyAppConfig,
-  AllowListConfig,
-} from ".";
+import { UrlList, UrlSelector, WebSocketProxyAppConfig } from ".";
 import WebSocket from "ws";
+import { AllowListConfig } from "./allowList";
+import { RateLimitingConfig } from "./rateLimiting";
+import { HttpRequest, HttpResponse } from "./http";
+
+export type WebSocketProxyConfig = {
+  routes: {
+    [key: string]: WebSocketRouteConfig;
+  };
+  redis?: {
+    responseChannel: string;
+    cleanupInterval?: number;
+  };
+  allowList?: AllowListConfig;
+  onConnect?: (
+    requestId: string,
+    message: string
+  ) => Promise<{ drop: true; message?: string } | { drop: false }>;
+  onDisconnect?: (requestId: string) => any;
+  onRequest?: (
+    requestId: string,
+    request: string
+  ) => Promise<
+    | { handled: true; response?: WebSocketResponse }
+    | { handled: false; request: WebSocketMessageRequest }
+    | void
+  >;
+  onResponse?: (
+    requestId: string,
+    response: WebSocketResponse
+  ) => Promise<WebSocketResponse>;
+  plugins?: {
+    [pluginName: string]: {
+      path: string;
+    };
+  };
+  rateLimiting?: RateLimitingConfig;
+};
 
 /*
   Web Socket Route Config
@@ -34,7 +63,7 @@ export type WebSocketRouteConfig = {
     requestId: string,
     response: WebSocketResponse
   ) => Promise<WebSocketResponse | void>;
-  rateLimiting?: RateLimitingConfig | "none";
+  rateLimiting?: RateLimitingConfig;
 };
 
 /*

@@ -7,9 +7,9 @@ import {
   WebSocketRouteConfig,
   ActiveWebSocketConnection,
   WebSocketServicePlugin,
-} from "../../types/webSocket";
+} from "../../types/webSocketProxy";
 
-import { PluginList, WebSocketProxyAppConfig, AppConfig } from "../../types";
+import { WebSocketProxyAppConfig, AppConfig } from "../../types";
 import { saveLastRequest } from "./plugins/urlPolling/poll";
 import applyRateLimiting from "../modules/rateLimiting";
 import plugins from "./plugins";
@@ -17,6 +17,7 @@ import { parse } from "url";
 import { isWebSocketProxyConfig } from "./isWebSocketProxyConfig";
 import { getHeaderAsString } from "../../utils/http/getHeaderAsString";
 import addTrackingInfo from "../modules/clientTracking";
+import { PluginList } from "../../types/plugins";
 
 export default function createHandler(config: AppConfig) {
   return function connection(ws: WebSocket, request: IncomingMessage) {

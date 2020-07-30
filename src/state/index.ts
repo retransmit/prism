@@ -1,11 +1,20 @@
-import {
-  IApplicationState,
-  ClientTrackingInfo,
-  HttpServiceTrackingInfo,
-  AppConfig,
-  InMemoryCacheEntry,
-} from "../types";
+import { AppConfig } from "../types";
 import { clearInterval } from "timers";
+import { HttpResponse } from "../types/http";
+import { ClientTrackingInfo } from "../connections/modules/clientTracking";
+import { HttpServiceTrackingInfo } from "../connections/http/modules/serviceTracking";
+
+export type InMemoryCacheEntry = {
+  time: number;
+  expiry: number;
+  response: HttpResponse;
+};
+
+type IApplicationState = {
+  clientTracking: Map<string, ClientTrackingInfo[]>;
+  httpServiceErrorTracking: Map<string, HttpServiceTrackingInfo[]>;
+  httpResponseCache: Map<string, InMemoryCacheEntry>;
+};
 
 let state: IApplicationState;
 
@@ -27,9 +36,9 @@ export async function init(config: AppConfig) {
     httpResponseCache: new Map<string, InMemoryCacheEntry>(),
   };
 
-  if (config.state?.type === "memory") {
+  if (config.state === "memory") {
     const clientTrackingEntryExpiry =
-      config.state?.clientTrackingEntryExpiry || TWO_MINUTES;
+      config.clientTracking?.entryExpiry || TWO_MINUTES;
     const cleanUpClientTrackingEntriesInterval = setInterval(
       () => cleanUpClientTrackingEntries(clientTrackingEntryExpiry, config),
       clientTrackingEntryExpiry
@@ -37,7 +46,7 @@ export async function init(config: AppConfig) {
     intervals.push(cleanUpClientTrackingEntriesInterval);
 
     const httpServiceErrorTrackingListExpiry =
-      config.state?.httpServiceErrorTrackingListExpiry || TWO_MINUTES;
+      config.http?.serviceTracking?.errorTrackingListExpiry || TWO_MINUTES;
     const cleanUpHttpServiceTrackingEntriesInterval = setInterval(
       () =>
         cleanUpHttpServiceTrackingEntries(
@@ -62,18 +71,19 @@ function cleanUpClientTrackingEntries(
 ) {
   const now = Date.now();
 
-  for (const [
-    key,
-    trackingEntries,
-  ] of state.clientTracking.entries()) {
+  for (const [key, trackingEntries] of state.clientTracking.entries()) {
     if (
-      trackingEntries.every((x) => now - x.timestamp > clientTrackingEntryExpiry)
+      trackingEntries.every(
+        (x) => now - x.timestamp > clientTrackingEntryExpiry
+      )
     ) {
       state.clientTracking.delete(key);
     } else {
       state.clientTracking.set(
         key,
-        trackingEntries.filter((x) => x.timestamp > now - clientTrackingEntryExpiry)
+        trackingEntries.filter(
+          (x) => x.timestamp > now - clientTrackingEntryExpiry
+        )
       );
     }
   }

@@ -3,7 +3,7 @@ import {
   RedisWebSocketEndPointConfig,
   RedisWebSocketConnectRequest,
   ActiveWebSocketConnection,
-} from "../../../../types/webSocket";
+} from "../../../../types/webSocketProxy";
 import { getChannelForService } from "../../../../utils/redis/getChannelForService";
 import respondToWebSocketClient from "../../respond";
 import { publish } from "./publish";

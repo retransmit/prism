@@ -1,9 +1,9 @@
-import { NativeHttpServiceEndPointConfig } from "../../../../types/http";
-import { HttpRequest } from "../../../../types";
+import { NativeHttpServiceEndPointConfig } from "../../../../types/httpProxy";
 import responseIsError from "../../../../utils/http/responseIsError";
 import { makeHttpResponse } from "./makeHttpResponse";
 import { makeGotOptions } from "../../../../utils/http/gotUtil";
 import got from "got/dist/source";
+import { HttpRequest } from "../../../../types/http";
 
 export default async function fireAndForgetGotRequest(
   request: HttpRequest,
