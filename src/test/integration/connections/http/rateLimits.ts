@@ -7,7 +7,7 @@ import { promisify } from "util";
 import startRetransmitTestInstance from "../../../utils/startRetransmitTestInstance";
 import sleep from "../../../../utils/sleep";
 import { TestEnv } from "../..";
-import { UserAppConfig } from "../../../../types";
+import { UserAppConfig } from "../../../../types/config";
 
 const client = createClient();
 const redisFlushAll = promisify(client.flushdb);

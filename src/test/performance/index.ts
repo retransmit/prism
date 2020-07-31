@@ -1,6 +1,6 @@
 import { Server as HttpServer } from "http";
 import { Server as HttpsServer } from "https";
-import { AppControl } from "../../types";
+import { AppControl } from "../../types/prismInstance";
 import { join } from "path";
 
 export type PerformanceTestEnv = {

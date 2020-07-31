@@ -1,6 +1,6 @@
 import processMessage from "./processMessage";
 import cleanupTimedOut from "./cleanupTimedOut";
-import { HttpProxyAppConfig } from "../../../../types";
+import { HttpProxyAppConfig } from "../../../../types/config";
 import redis = require("redis");
 import { init as initPublisher } from "./publish";
 import { init as activeRequestsInit } from "./activeRequests";

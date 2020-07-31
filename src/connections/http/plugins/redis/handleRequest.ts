@@ -1,4 +1,4 @@
-import { AppConfig } from "../../../../types";
+import { AppConfig } from "../../../../types/config";
 
 import { get as activeRequests } from "./activeRequests";
 import { getChannelForService } from "../../../../utils/redis/getChannelForService";
@@ -9,7 +9,7 @@ import {
   HttpServiceEndPointConfig,
   RedisHttpServiceEndPointConfig,
   HttpRouteConfig,
-} from "../../../../types/httpProxy";
+} from "../../../../types/config/httpProxy";
 import { publish } from "./publish";
 import mapBodyAndHeaders from "../../mapBodyAndHeaders";
 import { HttpRequest, HttpMethods } from "../../../../types/http";

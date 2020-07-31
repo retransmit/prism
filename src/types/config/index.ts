@@ -1,17 +1,11 @@
 import { ClientOpts } from "redis";
 import * as httpModule from "http";
 import * as httpsModule from "https";
-import { WebJob } from "./webJob";
+import { WebJobConfig } from "./webJob";
 import { CorsConfig } from "./cors";
 import { HttpProxyConfig } from "./httpProxy";
 import { WebSocketProxyConfig } from "./webSocketProxy";
 import { ClientTrackingConfig } from "./clientTracking";
-
-export type AppControl = {
-  instanceId: string;
-  port: number;
-  closeServers: () => Promise<void>;
-};
 
 // Application Config
 export type UserAppConfig = {
@@ -22,7 +16,7 @@ export type UserAppConfig = {
   http?: HttpProxyConfig;
   webSocket?: WebSocketProxyConfig;
   webJobs?: {
-    [name: string]: WebJob;
+    [name: string]: WebJobConfig;
   };
   redis?: {
     options?: ClientOpts;

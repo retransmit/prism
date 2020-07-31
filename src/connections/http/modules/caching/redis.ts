@@ -2,8 +2,8 @@ import { createClient } from "redis";
 
 import { promisify } from "util";
 import { HttpResponse } from "../../../../types/http";
-import { HttpServiceCacheConfig } from "../../../../types/httpServiceCaching";
-import { AppConfig } from "../../../../types";
+import { HttpProxyCacheConfig } from "../../../../types/config/httpProxy/caching";
+import { AppConfig } from "../../../../types/config";
 
 const redisGet = promisify(createClient().get);
 const redisPSetex = promisify(createClient().psetex);
@@ -12,7 +12,7 @@ const ONE_MINUTE = 60 * 1000;
 
 export async function get(
   key: string,
-  cacheConfig: HttpServiceCacheConfig,
+  cacheConfig: HttpProxyCacheConfig,
   config: AppConfig
 ): Promise<HttpResponse | undefined> {
   const client = createClient(config.redis?.options);
@@ -26,7 +26,7 @@ export async function get(
 export async function set(
   key: string,
   response: HttpResponse,
-  cacheConfig: HttpServiceCacheConfig,
+  cacheConfig: HttpProxyCacheConfig,
   config: AppConfig
 ) {
   const expiry = cacheConfig.expiry || ONE_MINUTE;

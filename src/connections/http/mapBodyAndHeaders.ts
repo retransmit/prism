@@ -1,5 +1,5 @@
-import { HttpRequest, BodyObject } from "../../types/http";
-import { HttpRouteConfigBase } from "../../types/httpProxy";
+import { HttpRequest, HttpRequestBodyObject } from "../../types/http";
+import { HttpRouteConfigBase } from "../../types/config/httpProxy";
 
 export default function mapBodyAndHeaders(
   request: HttpRequest,
@@ -15,7 +15,7 @@ export default function mapBodyAndHeaders(
     body: mapObject(
       includedFields,
       excludedFields || [],
-      request.body as BodyObject | undefined
+      request.body as HttpRequestBodyObject | undefined
     ),
     headers: request.headers
       ? mapObject(includedHeaders, excludedHeaders || [], request.headers)
@@ -30,7 +30,7 @@ type Mapping = {
 function mapObject(
   included: Mapping | undefined,
   excluded: string[],
-  requestProp: BodyObject | undefined
+  requestProp: HttpRequestBodyObject | undefined
 ) {
   if (requestProp === undefined) return undefined;
 

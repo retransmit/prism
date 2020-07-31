@@ -1,14 +1,24 @@
-import jwt from "./jwt";
 import { HttpRequest } from "../../../../types/http";
-import { HttpServiceAuthentication } from "../../../../types/httpServiceAuthentication";
+import { HttpProxyAuthenticationConfig } from "../../../../types/config/httpProxy/authentication";
+import { AppConfig, HttpProxyAppConfig } from "../../../../types/config";
+import { HttpRouteConfig } from "../../../../types/config/httpProxy";
+import plugins from "./plugins";
+import getRouteConfig from "../../getRouteConfig";
 
 export default async function authenticate(
+  route: string,
   request: HttpRequest,
-  authConfig: HttpServiceAuthentication | undefined
+  config: HttpProxyAppConfig
 ): Promise<{ status: number; body: any } | undefined> {
+  const routeConfig = getRouteConfig(route, request, config);
+  const authConfig = routeConfig?.authentication || config.http.authentication;
+
   if (authConfig) {
-    if (authConfig.type === "jwt") {
-      return await jwt(request, authConfig);
-    }
+    return await plugins[authConfig.type](
+      request,
+      authConfig,
+      routeConfig,
+      config
+    );
   }
 }

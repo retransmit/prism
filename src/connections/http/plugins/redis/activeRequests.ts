@@ -1,5 +1,5 @@
 import { HttpRequest, HttpMethods } from "../../../../types/http";
-import { FetchedHttpResponse, InvokeHttpServiceResult } from "../../../../types/httpProxy";
+import { FetchedHttpResponse, InvokeHttpServiceResult } from "../../../../types/config/httpProxy";
 
 export type ActiveHttpRequest = {
   id: string;

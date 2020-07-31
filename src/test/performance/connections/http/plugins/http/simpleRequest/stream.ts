@@ -1,4 +1,4 @@
-import { UserAppConfig } from "../../../../../../../types";
+import { UserAppConfig } from "../../../../../../../types/config";
 import { Response } from "got/dist/source/core";
 import startRetransmitTestInstance from "../../../../../../utils/startRetransmitTestInstance";
 import sendParallelRequests from "../../../../../../utils/sendParallelRequests";

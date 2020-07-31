@@ -1,8 +1,9 @@
-import { AppConfig } from "../../../../types";
+import { AppConfig } from "../../../../types/config";
 import { createClient } from "redis";
 import { promisify } from "util";
-import { HttpMethods } from "../../../../types/http";
+import { HttpMethods, HttpRequest } from "../../../../types/http";
 import { HttpServiceTrackingInfo } from ".";
+import { HttpRouteConfig } from "../../../../types/config/httpProxy";
 
 const redisLRange = promisify(createClient().lrange);
 

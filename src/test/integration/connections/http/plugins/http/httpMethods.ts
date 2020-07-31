@@ -1,4 +1,4 @@
-import { UserAppConfig } from "../../../../../../types";
+import { UserAppConfig } from "../../../../../../types/config";
 import { startBackends, getResponse } from "../../../../../utils/http";
 import { TestAppInstance } from "../../..";
 import got from "got";

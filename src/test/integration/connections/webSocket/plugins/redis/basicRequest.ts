@@ -1,8 +1,8 @@
 import WebSocket from "ws";
 import { TestAppInstance } from "../../..";
 import { createClient } from "redis";
-import { RedisWebSocketConnectRequest } from "../../../../../../types/webSocketProxy";
-import { UserAppConfig } from "../../../../../../types";
+import { RedisWebSocketConnectRequest } from "../../../../../../types/config/webSocketProxy";
+import { UserAppConfig } from "../../../../../../types/config";
 import startRetransmitTestInstance from "../../../../../utils/startRetransmitTestInstance";
 import { TestEnv } from "../../../..";
 

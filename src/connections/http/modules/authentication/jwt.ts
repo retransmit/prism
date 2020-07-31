@@ -1,22 +1,30 @@
 import jsonwebtoken = require("jsonwebtoken");
 import { getHeaderAsString } from "../../../../utils/http/getHeaderAsString";
-import { HttpRequest, BodyObject } from "../../../../types/http";
-import { HttpServiceJwtAuthentication } from "../../../../types/httpServiceAuthentication";
+import { HttpRequest, HttpRequestBodyObject } from "../../../../types/http";
+import {
+  HttpProxyJwtAuthenticationConfig,
+  HttpProxyAuthenticationConfig,
+} from "../../../../types/config/httpProxy/authentication";
+import { AppConfig } from "../../../../types/config";
+import { HttpRouteConfig } from "../../../../types/config/httpProxy";
 
 export default async function authenticate(
   request: HttpRequest,
-  authConfig: HttpServiceJwtAuthentication
+  authConfig: HttpProxyAuthenticationConfig,
+  routeConfig: HttpRouteConfig,
+  config: AppConfig
 ): Promise<{ status: number; body: any } | undefined> {
+  const jwtAuthConfig = authConfig as HttpProxyJwtAuthenticationConfig;
   let jwtString: string | undefined = "";
 
-  if (authConfig.getJwt) {
-    jwtString = authConfig.getJwt(request);
+  if (jwtAuthConfig.getJwt) {
+    jwtString = jwtAuthConfig.getJwt(request);
   }
 
-  if (authConfig.jwtHeaderField || request.headers?.["authorization"]) {
+  if (jwtAuthConfig.jwtHeaderField || request.headers?.["authorization"]) {
     const headerVal = getHeaderAsString(
-      authConfig.jwtHeaderField
-        ? request.headers?.[authConfig.jwtHeaderField]
+      jwtAuthConfig.jwtHeaderField
+        ? request.headers?.[jwtAuthConfig.jwtHeaderField]
         : request.headers?.["authorization"]
     );
 
@@ -26,8 +34,10 @@ export default async function authenticate(
         : headerVal
       : undefined;
 
-    if (authConfig.jwtBodyField) {
-      jwtString = (request.body as BodyObject)?.[authConfig.jwtBodyField];
+    if (jwtAuthConfig.jwtBodyField) {
+      jwtString = (request.body as HttpRequestBodyObject)?.[
+        jwtAuthConfig.jwtBodyField
+      ];
     }
   }
 
@@ -40,23 +50,23 @@ export default async function authenticate(
   try {
     jwt = jsonwebtoken.verify(
       jwtString,
-      authConfig.key,
-      authConfig.verifyOptions
+      jwtAuthConfig.key,
+      jwtAuthConfig.verifyOptions
     );
 
-    if (authConfig.verify) {
-      const verificationResult = await authConfig.verify(jwt, request);
+    if (jwtAuthConfig.verify) {
+      const verificationResult = await jwtAuthConfig.verify(jwt, request);
       if (!verificationResult) {
         throw new Error("Custom verification returned false.");
       }
     }
   } catch (ex) {
-    return unauthorizedResponse(authConfig, ex, request);
+    return unauthorizedResponse(jwtAuthConfig, ex, request);
   }
 }
 
 function unauthorizedResponse(
-  authConfig: HttpServiceJwtAuthentication,
+  authConfig: HttpProxyJwtAuthenticationConfig,
   error: any,
   request: HttpRequest
 ) {

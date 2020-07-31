@@ -4,8 +4,8 @@ import {
   RedisHttpResponse,
   HttpRouteConfig,
   FetchedHttpResponse,
-} from "../../../../types/httpProxy";
-import { HttpProxyAppConfig } from "../../../../types";
+} from "../../../../types/config/httpProxy";
+import { HttpProxyAppConfig } from "../../../../types/config";
 
 export default function processMessage(config: HttpProxyAppConfig) {
   return async function processMessageImpl(

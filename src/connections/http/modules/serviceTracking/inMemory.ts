@@ -1,6 +1,6 @@
 import * as applicationState from "../../../../state";
 
-import { AppConfig } from "../../../../types";
+import { AppConfig } from "../../../../types/config";
 import { HttpMethods } from "../../../../types/http";
 import { HttpServiceTrackingInfo } from ".";
 

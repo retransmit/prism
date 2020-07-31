@@ -1,6 +1,6 @@
 import * as httpPlugin from "./plugins/urlPolling";
 import * as redisPlugin from "./plugins/redis";
-import { WebSocketServicePlugin } from "../../types/webSocketProxy";
+import { WebSocketServicePlugin } from "../../types/config/webSocketProxy";
 
 const plugins: {
   [name: string]: WebSocketServicePlugin;

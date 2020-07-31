@@ -1,4 +1,4 @@
-import { AppConfig, WebSocketProxyAppConfig } from "../../types";
+import { AppConfig, WebSocketProxyAppConfig } from "../../types/config";
 
 export function isWebSocketProxyConfig(
   config: AppConfig

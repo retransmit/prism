@@ -5,7 +5,7 @@ import { closeHttpServer } from "../../../utils/http/closeHttpServer";
 import integrationTestsHttp from "./http";
 import integrationTestsWebSocket from "./webSocket";
 import { TestEnv } from "..";
-import { AppControl } from "../../../types";
+import { AppControl } from "../../../types/prismInstance";
 
 export type TestAppInstance = {
   appControl?: AppControl;

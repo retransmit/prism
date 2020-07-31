@@ -4,7 +4,7 @@ import cluster from "cluster";
 import os from "os";
 import yargs = require("yargs");
 
-import { AppConfig, UserAppConfig, AppControl } from "./types";
+import { AppConfig, UserAppConfig } from "./types/config";
 import * as applicationState from "./state";
 import createHttpServer from "./connections/http/createServer";
 import * as httpConnections from "./connections/http";
@@ -18,6 +18,7 @@ import { closeHttpServer } from "./utils/http/closeHttpServer";
 import { closeWebSocketServer } from "./utils/webSocket/closeWebSocketServer";
 import namesGenerator from "./utils/namesGenerator";
 import { isWebSocketProxyConfig } from "./connections/webSocket/isWebSocketProxyConfig";
+import { AppControl } from "./types/prismInstance";
 
 const ONE_MINUTE = 60 * 1000;
 const TWO_MINUTES = 2 * ONE_MINUTE;

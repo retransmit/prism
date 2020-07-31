@@ -1,11 +1,11 @@
 import { startBackends, getResponse } from "../../../../../utils/http";
 import { TestAppInstance } from "../../..";
 import got from "got";
-import { UserAppConfig } from "../../../../../../types";
-import { NativeHttpServiceEndPointConfig } from "../../../../../../types/httpProxy";
+import { UserAppConfig } from "../../../../../../types/config";
+import { NativeHttpServiceEndPointConfig } from "../../../../../../types/config/httpProxy";
 import startRetransmitTestInstance from "../../../../../utils/startRetransmitTestInstance";
 import { TestEnv } from "../../../..";
-import { BodyObject } from "../../../../../../types/http";
+import { HttpRequestBodyObject } from "../../../../../../types/http";
 
 export default async function (app: TestAppInstance, testEnv: TestEnv) {
   it(`runs stages`, async () => {
@@ -30,8 +30,8 @@ export default async function (app: TestAppInstance, testEnv: TestEnv) {
                       request: {
                         ...request,
                         body: {
-                          ...(request.body as BodyObject),
-                          userid: (responses[0].response.body as BodyObject)
+                          ...(request.body as HttpRequestBodyObject),
+                          userid: (responses[0].response.body as HttpRequestBodyObject)
                             .userid,
                         },
                       },

@@ -7,9 +7,9 @@ import {
   WebSocketRouteConfig,
   ActiveWebSocketConnection,
   WebSocketServicePlugin,
-} from "../../types/webSocketProxy";
+} from "../../types/config/webSocketProxy";
 
-import { WebSocketProxyAppConfig, AppConfig } from "../../types";
+import { WebSocketProxyAppConfig, AppConfig } from "../../types/config";
 import { saveLastRequest } from "./plugins/urlPolling/poll";
 import applyRateLimiting from "../modules/rateLimiting";
 import plugins from "./plugins";
@@ -143,11 +143,10 @@ function onMessage(
         );
 
         const rateLimitedResponse = await applyRateLimiting(
+          "webSocket",
           route,
           "GET",
           conn.remoteAddress || "",
-          routeConfig,
-          config.webSocket,
           config
         );
 

@@ -1,9 +1,7 @@
-import { HttpProxyAppConfig } from "../../../../types";
-import { HttpRouteConfig } from "../../../../types/httpProxy";
-
+import { HttpProxyAppConfig } from "../../../../types/config";
+import { HttpRouteConfig } from "../../../../types/config/httpProxy";
+import { HttpMethods, HttpRequest, HttpResponse } from "../../../../types/http";
 import plugins from "./plugins";
-import { HttpMethods } from "../../../../types/http";
-import { AppConfig } from "../../../../types";
 
 export type HttpServiceTrackingInfo = {
   route: string;
@@ -15,35 +13,20 @@ export type HttpServiceTrackingInfo = {
   responseTime: number;
 };
 
-export type HttpServiceTrackingStateProviderPlugin = {
-  getTrackingInfo: (
-    route: string,
-    method: HttpMethods,
-    config: AppConfig
-  ) => Promise<HttpServiceTrackingInfo[] | undefined>;
-  setTrackingInfo: (
-    route: string,
-    method: HttpMethods,
-    trackingInfo: HttpServiceTrackingInfo,
-    config: AppConfig
-  ) => Promise<void>;
-};
-
 export async function updateServiceTrackingInfo(
   route: string,
-  method: HttpMethods,
-  status: number | undefined,
+  request: HttpRequest,
+  response: HttpResponse,
   requestTime: number,
   responseTime: number,
-  routeConfig: HttpRouteConfig,
   config: HttpProxyAppConfig
 ) {
-  status = status || 200;
+  const status = response.status || 200;
 
   if (isFailure(status)) {
     const trackingInfo: HttpServiceTrackingInfo = {
       route,
-      method,
+      method: request.method,
       status,
       instanceId: config.instanceId,
       timestamp: Date.now(),
@@ -51,7 +34,12 @@ export async function updateServiceTrackingInfo(
       responseTime,
     };
 
-    plugins[config.state].setTrackingInfo(route, method, trackingInfo, config);
+    plugins[config.state].setTrackingInfo(
+      route,
+      request.method,
+      trackingInfo,
+      config
+    );
   }
 }
 

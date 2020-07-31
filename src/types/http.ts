@@ -3,7 +3,7 @@ import { IncomingHttpHeaders } from "http2";
 export type HttpMethods = "GET" | "POST" | "PUT" | "DELETE" | "PATCH" | "HEAD";
 
 // Http Requests and Responses
-export type BodyObject = {
+export type HttpRequestBodyObject = {
   [field: string]: any;
 };
 
@@ -16,7 +16,7 @@ export type HttpRequest = {
   query?: {
     [key: string]: string;
   };
-  body?: string | Buffer | BodyObject | Array<any> | undefined;
+  body?: string | Buffer | HttpRequestBodyObject | Array<any> | undefined;
   headers?: HttpHeaders;
   remoteAddress: string | undefined;
   remotePort: number | undefined;
@@ -31,7 +31,7 @@ export type HttpResponse = {
   redirect?: string;
   cookies?: HttpCookie[];
   headers?: IncomingHttpHeaders;
-  body?: string | Buffer | BodyObject | Array<any> | undefined;
+  body?: string | Buffer | HttpRequestBodyObject | Array<any> | undefined;
   contentType?: string;
 };
 

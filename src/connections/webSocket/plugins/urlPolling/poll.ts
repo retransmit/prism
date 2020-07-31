@@ -1,10 +1,10 @@
-import { WebSocketProxyAppConfig } from "../../../../types";
+import { WebSocketProxyAppConfig } from "../../../../types/config";
 import {
   UrlPollingWebSocketEndPointConfig,
   WebSocketRouteConfig,
   WebSocketResponse,
   ActiveWebSocketConnection,
-} from "../../../../types/webSocketProxy";
+} from "../../../../types/config/webSocketProxy";
 import * as activeConnections from "../../activeConnections";
 import respondToWebSocketClient from "../../respond";
 import { makeGotOptions } from "../../../../utils/http/gotUtil";

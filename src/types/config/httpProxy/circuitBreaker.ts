@@ -1,4 +1,4 @@
-export type HttpServiceCircuitBreakerConfig = {
+export type HttpProxyCircuitBreakerConfig = {
   maxErrors: number;
   duration: number;
   errorStatus?: number;

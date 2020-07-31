@@ -2,7 +2,7 @@ import { createServer as httpCreateServer } from "http";
 import { Server as HttpServer } from "http";
 import { createServer as httpsCreateServer } from "https";
 import { Server as HttpsServer } from "https";
-import { AppConfig } from "../../types";
+import { AppConfig } from "../../types/config";
 import { requestHandler } from ".";
 
 export default function createServer(config: AppConfig) {

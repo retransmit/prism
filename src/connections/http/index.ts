@@ -3,18 +3,18 @@ import bodyParser = require("koa-body");
 import Router from "koa-router";
 import { IncomingMessage } from "http";
 import { ServerResponse } from "http";
-import { AppConfig } from "../../types";
+import { AppConfig } from "../../types/config";
 import plugins from "./plugins";
 import createHandlerForRoute from "./createHandlerForRoute";
 import { Http2ServerRequest, Http2ServerResponse } from "http2";
-import isHttpServiceAppConfig from "./isHttpServiceAppConfig";
+import hasHttpProxyConfig from "./hasHttpProxyConfig";
 import { HttpMethods } from "../../types/http";
 
 const cors = require("@koa/cors");
 let currentRequestHandler: KoaRequestHandler | undefined = undefined;
 
 export async function init(config: AppConfig) {
-  if (isHttpServiceAppConfig(config)) {
+  if (hasHttpProxyConfig(config)) {
     // Load other plugins.
     if (config.http.plugins) {
       for (const pluginName of Object.keys(config.http.plugins)) {
@@ -45,7 +45,7 @@ async function createKoaRequestHandler(
     koa.use(cors(config.cors));
   }
 
-  if (isHttpServiceAppConfig(config)) {
+  if (hasHttpProxyConfig(config)) {
     const router = new Router();
 
     for (const route of Object.keys(config.http.routes)) {

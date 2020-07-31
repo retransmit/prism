@@ -1,4 +1,4 @@
-import { AppConfig } from "../../types";
+import { AppConfig } from "../../types/config";
 import WebSocket from "ws";
 import * as activeConnections from "./activeConnections";
 import { isWebSocketProxyConfig } from "./isWebSocketProxyConfig";

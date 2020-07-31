@@ -1,7 +1,7 @@
 import { startBackends, getResponse } from "../../../utils/http";
 import { TestAppInstance } from "..";
 import got from "got";
-import { UserAppConfig } from "../../../../types";
+import { UserAppConfig } from "../../../../types/config";
 import { Response } from "got/dist/source/core";
 import { createClient } from "redis";
 import { promisify } from "util";

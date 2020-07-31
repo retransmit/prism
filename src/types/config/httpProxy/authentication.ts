@@ -1,4 +1,4 @@
-import { HttpRequest } from "./http";
+import { HttpRequest } from "../../http";
 
 export type Algorithm =
   | "HS256"
@@ -15,7 +15,7 @@ export type Algorithm =
   | "PS512"
   | "none";
 
-export type HttpServiceJwtAuthentication = {
+export type HttpProxyJwtAuthenticationConfig = {
   type: "jwt";
   key: string;
   jwtHeaderField?: string;
@@ -46,4 +46,4 @@ export type HttpServiceJwtAuthentication = {
   };
 };
 
-export type HttpServiceAuthentication = HttpServiceJwtAuthentication;
+export type HttpProxyAuthenticationConfig = HttpProxyJwtAuthenticationConfig;

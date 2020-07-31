@@ -1,4 +1,4 @@
-import { UserAppConfig } from "../../../../../../types";
+import { UserAppConfig } from "../../../../../../types/config";
 import { TestAppInstance } from "../../..";
 import { createClient } from "redis";
 import got from "got";

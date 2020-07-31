@@ -1,13 +1,13 @@
 import got from "got";
 
-import { AppConfig, HttpProxyAppConfig } from "../../../../types";
+import { AppConfig, HttpProxyAppConfig } from "../../../../types/config";
 
 import responseIsError from "../../../../utils/http/responseIsError";
 import { makeHttpResponse } from "./makeHttpResponse";
 import {
   HttpRouteConfig,
   NativeHttpServiceEndPointConfig,
-} from "../../../../types/httpProxy";
+} from "../../../../types/config/httpProxy";
 import { makeGotOptions } from "../../../../utils/http/gotUtil";
 import { replaceParamsInUrl } from "./replaceParamsInUrl";
 import { HttpRequest, HttpMethods } from "../../../../types/http";

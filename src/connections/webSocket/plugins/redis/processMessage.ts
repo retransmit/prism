@@ -1,9 +1,9 @@
-import { WebSocketProxyAppConfig } from "../../../../types";
+import { WebSocketProxyAppConfig } from "../../../../types/config";
 import {
   WebSocketResponse,
   RedisWebSocketEndPointConfig,
   WebSocketNotConnectedRequest,
-} from "../../../../types/webSocketProxy";
+} from "../../../../types/config/webSocketProxy";
 import { get as activeConnections } from "../../activeConnections";
 import respondToWebSocketClient from "../../respond";
 import { getChannelForService } from "../../../../utils/redis/getChannelForService";

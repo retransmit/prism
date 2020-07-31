@@ -1,12 +1,12 @@
-import { UrlList, UrlSelector, HttpProxyAppConfig, AppConfig } from ".";
+import { UrlList, UrlSelector, HttpProxyAppConfig } from "..";
 import { IRouterContext } from "koa-router";
-import { HttpMethods, HttpRequest, HttpResponse } from "./http";
-import { AllowListConfig } from "./allowList";
-import { RateLimitingConfig } from "./rateLimiting";
-import { HttpServiceCircuitBreakerConfig } from "./httpServiceCircuitBreaker";
-import { HttpServiceCacheConfig } from "./httpServiceCaching";
-import { HttpServiceTrackingConfig } from "./httpServiceTracking";
-import { HttpServiceAuthentication } from "./httpServiceAuthentication";
+import { HttpMethods, HttpRequest, HttpResponse } from "../../http";
+import { AllowListConfig } from "../allowList";
+import { RateLimitingConfig } from "../rateLimiting";
+import { HttpProxyCircuitBreakerConfig } from "./circuitBreaker";
+import { HttpProxyCacheConfig } from "./caching";
+import { HttpProxyServiceTrackingConfig } from "./serviceTracking";
+import { HttpProxyAuthenticationConfig } from "./authentication";
 
 export type HttpProxyConfig = {
   routes: {
@@ -38,10 +38,10 @@ export type HttpProxyConfig = {
     };
   };
   rateLimiting?: RateLimitingConfig;
-  circuitBreaker?: HttpServiceCircuitBreakerConfig;
-  caching?: HttpServiceCacheConfig;
-  serviceTracking?: HttpServiceTrackingConfig;
-  authentication?: HttpServiceAuthentication;
+  circuitBreaker?: HttpProxyCircuitBreakerConfig;
+  caching?: HttpProxyCacheConfig;
+  serviceTracking?: HttpProxyServiceTrackingConfig;
+  authentication?: HttpProxyAuthenticationConfig;
 };
 
 // Route Config
@@ -69,9 +69,9 @@ export type HttpRouteConfig = {
   genericErrors?: boolean;
   onError?: (responses: FetchedHttpResponse[], request: HttpRequest) => any;
   rateLimiting?: RateLimitingConfig;
-  circuitBreaker?: HttpServiceCircuitBreakerConfig;
-  caching?: HttpServiceCacheConfig;
-  authentication?: HttpServiceAuthentication;
+  circuitBreaker?: HttpProxyCircuitBreakerConfig;
+  caching?: HttpProxyCacheConfig;
+  authentication?: HttpProxyAuthenticationConfig;
 };
 
 // Result of Service Invocation

@@ -1,4 +1,4 @@
-export type Notification =
+export type NotificationConfig =
   | {
       type: "email";
       email: string;

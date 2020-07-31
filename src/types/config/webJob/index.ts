@@ -1,5 +1,5 @@
-import { UrlList, UrlSelector } from ".";
-import { HttpMethods, HttpRequest } from "./http";
+import { UrlList, UrlSelector } from "..";
+import { HttpMethods, HttpRequest } from "../../http";
 
 type WebJobBase = {
   url: UrlList;
@@ -10,14 +10,14 @@ type WebJobBase = {
   getPayload?: (url: string) => Promise<HttpRequest>;
 };
 
-export type PeriodicWebJob = {
+export type PeriodicWebJobConfig = {
   type: "periodic";
   interval: number;
 } & WebJobBase;
 
-export type CronWebJob = {
+export type CronWebJobConfig = {
   type: "cron";
   expression: string;
 } & WebJobBase;
 
-export type WebJob = PeriodicWebJob | CronWebJob;
+export type WebJobConfig = PeriodicWebJobConfig | CronWebJobConfig;

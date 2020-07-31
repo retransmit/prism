@@ -1,10 +1,9 @@
-import { HttpProxyAppConfig } from "../../../../types";
-import { HttpRouteConfig } from "../../../../types/httpProxy";
-
-import plugins from "../serviceTracking/plugins";
-import { HttpMethods } from "../../../../types/http";
+import { HttpProxyAppConfig } from "../../../../types/config";
+import { HttpRequest } from "../../../../types/http";
 import { HttpServiceTrackingInfo } from "../serviceTracking";
-import { HttpServiceCircuitBreakerConfig } from "../../../../types/httpServiceCircuitBreaker";
+import plugins from "../serviceTracking/plugins";
+import { HttpProxyCircuitBreakerConfig } from "../../../../types/config/httpProxy/circuitBreaker";
+import getRouteConfig from "../../getRouteConfig";
 
 /*
   Rate limiting state is stored in memory by default,
@@ -12,10 +11,10 @@ import { HttpServiceCircuitBreakerConfig } from "../../../../types/httpServiceCi
 */
 export async function isTripped(
   route: string,
-  method: HttpMethods,
-  routeConfig: HttpRouteConfig,
+  request: HttpRequest,
   config: HttpProxyAppConfig
 ): Promise<{ status: number; body: any } | undefined> {
+  const routeConfig = getRouteConfig(route, request, config);
   const circuitBreakerConfig =
     routeConfig.circuitBreaker || config.http.circuitBreaker;
 
@@ -23,7 +22,7 @@ export async function isTripped(
     const rejectionMessage = "Busy.";
     const trackingList = await plugins[config.state].getTrackingInfo(
       route,
-      method,
+      request.method,
       config
     );
     if (mustReject(trackingList || [], circuitBreakerConfig)) {
@@ -41,7 +40,7 @@ function isFailure(status: number) {
 
 function mustReject(
   trackingInfoList: HttpServiceTrackingInfo[],
-  circuitBreakerConfig: HttpServiceCircuitBreakerConfig
+  circuitBreakerConfig: HttpProxyCircuitBreakerConfig
 ) {
   const now = Date.now();
   let errorCount = 0;

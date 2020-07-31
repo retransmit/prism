@@ -1,6 +1,6 @@
 import redis = require("redis");
 import processMessage from "./processMessage";
-import { WebSocketProxyAppConfig } from "../../../../types";
+import { WebSocketProxyAppConfig } from "../../../../types/config";
 import { init as initPublisher } from "./publish";
 import { promisify } from "util";
 

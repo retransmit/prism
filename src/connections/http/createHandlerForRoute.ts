@@ -1,12 +1,12 @@
 import { IRouterContext } from "koa-router";
-import { HttpProxyAppConfig } from "../../types";
+import { HttpProxyAppConfig } from "../../types/config";
 import randomId from "../../utils/random";
 
 import {
   HttpRouteConfig,
   FetchedHttpResponse,
   InvokeHttpServiceResult,
-} from "../../types/httpProxy";
+} from "../../types/config/httpProxy";
 import applyRateLimiting from "../modules/rateLimiting";
 import { sendResponse } from "./sendResponse";
 import { getFromCache } from "./modules/caching";
@@ -46,9 +46,7 @@ async function handler(
 
   const requestId = randomId(32);
 
-  const authConfig = routeConfig?.authentication || config.http.authentication;
-
-  const authResponse = await authenticate(request, authConfig);
+  const authResponse = await authenticate(route, request, config);
 
   const requestMethod = ctx.method as HttpMethods;
 
@@ -67,13 +65,7 @@ async function handler(
   }
 
   if (routeConfig) {
-    const entryFromCache = await getFromCache(
-      route,
-      requestMethod,
-      request,
-      routeConfig,
-      config
-    );
+    const entryFromCache = await getFromCache(route, request, config);
 
     if (entryFromCache) {
       sendResponse(
@@ -101,11 +93,10 @@ async function handler(
     );
 
     const rateLimitedResponse = await applyRateLimiting(
-      ctx.path,
+      "http",
+      route,
       requestMethod,
       ctx.ip,
-      routeConfig,
-      config.http,
       config
     );
 
@@ -127,12 +118,7 @@ async function handler(
       return;
     }
 
-    const circuitBreakerResponse = await isTripped(
-      route,
-      requestMethod,
-      routeConfig,
-      config
-    );
+    const circuitBreakerResponse = await isTripped(route, request, config);
 
     if (circuitBreakerResponse !== undefined) {
       const response = {

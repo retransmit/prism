@@ -1,12 +1,12 @@
 import {
   HttpProxyAppConfig,
-} from "../../../../types";
+} from "../../../../types/config";
 
 import {
   InvokeHttpServiceResult,
   HttpServiceEndPointConfig,
   HttpRouteConfig,
-} from "../../../../types/httpProxy";
+} from "../../../../types/config/httpProxy";
 import { IRouterContext } from "koa-router";
 import { HttpRequest, HttpMethods } from "../../../../types/http";
 

@@ -1,7 +1,7 @@
 import { startBackends, getResponse } from "../../../utils/http";
 import { TestAppInstance } from "..";
 import got from "got";
-import { UserAppConfig } from "../../../../types";
+import { UserAppConfig } from "../../../../types/config";
 import startRetransmitTestInstance from "../../../utils/startRetransmitTestInstance";
 import { TestEnv } from "../..";
 

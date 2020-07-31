@@ -1,8 +1,12 @@
+import { AppConfig } from "../../../types/config";
 import {
-  AppConfig,
-} from "../../../types";
-import { HttpRouteConfig, HttpProxyConfig } from "../../../types/httpProxy";
-import { WebSocketRouteConfig, WebSocketProxyConfig } from "../../../types/webSocketProxy";
+  HttpRouteConfig,
+  HttpProxyConfig,
+} from "../../../types/config/httpProxy";
+import {
+  WebSocketRouteConfig,
+  WebSocketProxyConfig,
+} from "../../../types/config/webSocketProxy";
 import plugins from "./plugins";
 import { HttpMethods } from "../../../types/http";
 
@@ -29,7 +33,6 @@ export type ClientTrackingStateProviderPlugin = {
     config: AppConfig
   ) => Promise<void>;
 };
-
 
 /*
   Rate limiting state is stored in memory by default,

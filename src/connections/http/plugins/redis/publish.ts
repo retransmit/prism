@@ -1,5 +1,5 @@
 import redis = require("redis");
-import { AppConfig } from "../../../../types";
+import { AppConfig } from "../../../../types/config";
 
 let client: redis.RedisClient;
 

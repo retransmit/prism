@@ -2,7 +2,7 @@ import {
   NativeHttpServiceEndPointConfig,
   FetchedHttpResponse,
   InvokeHttpServiceResult,
-} from "../../../../types/httpProxy";
+} from "../../../../types/config/httpProxy";
 import { HttpRequest, HttpMethods } from "../../../../types/http";
 import responseIsError from "../../../../utils/http/responseIsError";
 import { makeHttpResponse } from "./makeHttpResponse";

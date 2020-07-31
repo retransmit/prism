@@ -1,4 +1,4 @@
-import { ActiveWebSocketConnection } from "../../types/webSocketProxy";
+import { ActiveWebSocketConnection } from "../../types/config/webSocketProxy";
 
 let map: Map<string, ActiveWebSocketConnection> = new Map<
   string,

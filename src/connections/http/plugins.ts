@@ -1,6 +1,6 @@
 import * as httpPlugin from "./plugins/http";
 import * as redisPlugin from "./plugins/redis";
-import { HttpServicePlugin } from "../../types/httpProxy";
+import { HttpServicePlugin } from "../../types/config/httpProxy";
 
 const plugins: {
   [name: string]: HttpServicePlugin;

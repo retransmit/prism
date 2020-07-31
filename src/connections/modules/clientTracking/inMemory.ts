@@ -1,4 +1,4 @@
-import { AppConfig } from "../../../types";
+import { AppConfig } from "../../../types/config";
 import * as applicationState from "../../../state";
 import { HttpMethods } from "../../../types/http";
 import { ClientTrackingInfo } from ".";

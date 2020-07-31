@@ -1,13 +1,13 @@
-import { AppConfig } from "../../../../types";
+import { AppConfig } from "../../../../types/config";
 import * as applicationState from "../../../../state";
 import { HttpResponse } from "../../../../types/http";
-import { HttpServiceCacheConfig } from "../../../../types/httpServiceCaching";
+import { HttpProxyCacheConfig } from "../../../../types/config/httpProxy/caching";
 
 const ONE_MINUTE = 60 * 1000;
 
 export async function get(
   key: string,
-  cacheConfig: HttpServiceCacheConfig,
+  cacheConfig: HttpProxyCacheConfig,
   config: AppConfig
 ): Promise<HttpResponse | undefined> {
   const now = Date.now();
@@ -21,7 +21,7 @@ export async function get(
 export async function set(
   key: string,
   response: HttpResponse,
-  cacheConfig: HttpServiceCacheConfig,
+  cacheConfig: HttpProxyCacheConfig,
   config: AppConfig
 ) {
   const state = applicationState.get();

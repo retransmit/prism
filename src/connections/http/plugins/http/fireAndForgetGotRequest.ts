@@ -1,4 +1,4 @@
-import { NativeHttpServiceEndPointConfig } from "../../../../types/httpProxy";
+import { NativeHttpServiceEndPointConfig } from "../../../../types/config/httpProxy";
 import responseIsError from "../../../../utils/http/responseIsError";
 import { makeHttpResponse } from "./makeHttpResponse";
 import { makeGotOptions } from "../../../../utils/http/gotUtil";

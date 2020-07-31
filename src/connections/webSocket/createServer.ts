@@ -1,7 +1,7 @@
 import { IncomingMessage } from "http";
 import { Socket } from "net";
 import WebSocket from "ws";
-import { AppConfig } from "../../types";
+import { AppConfig } from "../../types/config";
 import { requestHandler } from ".";
 
 export default function createServer(httpServer: any, config: AppConfig) {

@@ -1,4 +1,4 @@
-import { AppConfig } from "../types";
+import { AppConfig } from "../types/config";
 import { clearInterval } from "timers";
 import { HttpResponse } from "../types/http";
 import { ClientTrackingInfo } from "../connections/modules/clientTracking";

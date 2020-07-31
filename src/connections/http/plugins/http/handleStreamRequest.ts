@@ -1,10 +1,10 @@
-import { HttpProxyAppConfig } from "../../../../types";
+import { HttpProxyAppConfig } from "../../../../types/config";
 
 import {
   HttpRouteConfig,
   NativeHttpServiceEndPointConfig,
   HttpServiceEndPointConfig,
-} from "../../../../types/httpProxy";
+} from "../../../../types/config/httpProxy";
 import { IRouterContext } from "koa-router";
 import got from "got/dist/source";
 import selectRandomUrl from "../../../../utils/http/selectRandomUrl";

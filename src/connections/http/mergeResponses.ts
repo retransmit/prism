@@ -1,12 +1,12 @@
-import { HttpProxyAppConfig } from "../../types";
+import { HttpProxyAppConfig } from "../../types/config";
 import responseIsError from "../../utils/http/responseIsError";
 import {
   FetchedHttpResponse,
   HttpRouteConfig,
   HttpServiceEndPointConfig,
-} from "../../types/httpProxy";
+} from "../../types/config/httpProxy";
 import getHeader from "../../utils/http/getHeader";
-import { HttpResponse, BodyObject } from "../../types/http";
+import { HttpResponse, HttpRequestBodyObject } from "../../types/http";
 
 export default function mergeResponses(
   responses: FetchedHttpResponse[],
@@ -170,7 +170,7 @@ function mergeObjectIntoResponse(
         }
       : {
           ...wrappedFinalResponse.response.body,
-          ...(fetchedResponse.response.body as BodyObject),
+          ...(fetchedResponse.response.body as HttpRequestBodyObject),
         };
   }
   fetchedResponse.response.body;

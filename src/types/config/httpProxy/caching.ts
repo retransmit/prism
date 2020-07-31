@@ -1,4 +1,4 @@
-export type HttpServiceCacheConfig = {
+export type HttpProxyCacheConfig = {
   varyBy?: {
     headers?: string[];
     query?: string[];

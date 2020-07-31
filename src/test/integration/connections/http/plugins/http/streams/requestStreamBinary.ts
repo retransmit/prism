@@ -1,7 +1,7 @@
 import { startBackends } from "../../../../../../utils/http";
 import { TestAppInstance } from "../../../..";
 import got from "got";
-import { UserAppConfig } from "../../../../../../../types";
+import { UserAppConfig } from "../../../../../../../types/config";
 import { join } from "path";
 import { createWriteStream, statSync } from "fs";
 import { pipeline } from "stream";

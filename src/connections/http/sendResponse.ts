@@ -1,6 +1,6 @@
 import { IRouterContext } from "koa-router";
-import { HttpProxyAppConfig } from "../../types";
-import { HttpRouteConfig } from "../../types/httpProxy";
+import { HttpProxyAppConfig } from "../../types/config";
+import { HttpRouteConfig } from "../../types/config/httpProxy";
 import { updateServiceTrackingInfo } from "./modules/serviceTracking";
 import { updateCache } from "./modules/caching";
 import responseIsError from "../../utils/http/responseIsError";
@@ -23,16 +23,15 @@ export async function sendResponse(
     if (routeConfig && !fromCache) {
       updateServiceTrackingInfo(
         route,
-        method,
-        response.status,
+        request,
+        response,
         requestTime,
         responseTime,
-        routeConfig,
         config
       );
 
       if (!responseIsError(response)) {
-        updateCache(route, method, request, response, routeConfig, config);
+        updateCache(route, request, response, config);
       }
     }
 

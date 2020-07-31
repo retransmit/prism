@@ -1,4 +1,4 @@
-import { AppConfig } from "../../../../types";
+import { AppConfig } from "../../../../types/config";
 
 import {
   InvokeHttpServiceResult,
@@ -6,7 +6,7 @@ import {
   HttpServiceEndPointConfig,
   NativeHttpServiceEndPointConfig,
   HttpRouteConfig,
-} from "../../../../types/httpProxy";
+} from "../../../../types/config/httpProxy";
 import mapBodyAndHeaders from "../../mapBodyAndHeaders";
 import selectRandomUrl from "../../../../utils/http/selectRandomUrl";
 import makeGotRequest from "./makeGotRequest";

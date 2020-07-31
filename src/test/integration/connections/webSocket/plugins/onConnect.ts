@@ -1,7 +1,7 @@
 import WebSocket from "ws";
 import { TestAppInstance } from "../..";
 import startRetransmitTestInstance from "../../../../utils/startRetransmitTestInstance";
-import { UserAppConfig } from "../../../../../types";
+import { UserAppConfig } from "../../../../../types/config";
 import { TestEnv } from "../../..";
 
 export default async function (app: TestAppInstance, testEnv: TestEnv) {

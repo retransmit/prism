@@ -1,5 +1,5 @@
 import { Response } from "got/dist/source/core";
-import { WebSocketResponse } from "../../../../types/webSocketProxy";
+import { WebSocketResponse } from "../../../../types/config/webSocketProxy";
 
 export function makeWebSocketResponse(
   serverResponse: Response<any>,

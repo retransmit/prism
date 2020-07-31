@@ -1,4 +1,4 @@
-import { AppConfig } from "../../../types";
+import { AppConfig } from "../../../types/config";
 import { createClient } from "redis";
 
 const ONE_MINUTE = 60 * 1000;

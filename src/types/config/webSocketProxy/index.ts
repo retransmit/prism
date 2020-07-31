@@ -1,8 +1,8 @@
-import { UrlList, UrlSelector, WebSocketProxyAppConfig } from ".";
+import { UrlList, UrlSelector, WebSocketProxyAppConfig } from "..";
 import WebSocket from "ws";
-import { AllowListConfig } from "./allowList";
-import { RateLimitingConfig } from "./rateLimiting";
-import { HttpRequest, HttpResponse } from "./http";
+import { AllowListConfig } from "../allowList";
+import { RateLimitingConfig } from "../rateLimiting";
+import { HttpRequest, HttpResponse } from "../../http";
 
 export type WebSocketProxyConfig = {
   routes: {

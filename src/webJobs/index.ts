@@ -1,5 +1,5 @@
 import { init as periodicJobInit } from "./interval";
-import { AppConfig } from "../types";
+import { AppConfig } from "../types/config";
 
 const intervals: NodeJS.Timeout[] = [];
 

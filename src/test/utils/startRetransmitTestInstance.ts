@@ -1,5 +1,5 @@
 import { startWithConfiguration } from "../..";
-import { UserAppConfig } from "../../types";
+import { UserAppConfig } from "../../types/config";
 import { createClient } from "redis";
 import { promisify } from "util";
 import random from "../../utils/random";

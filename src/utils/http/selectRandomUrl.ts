@@ -1,4 +1,4 @@
-import { UrlList, UrlSelector } from "../../types";
+import { UrlList, UrlSelector } from "../../types/config";
 
 export default async function selectRandomUrl(
   urls: UrlList,

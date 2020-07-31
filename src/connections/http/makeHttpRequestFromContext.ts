@@ -1,5 +1,5 @@
 import { IRouterContext } from "koa-router";
-import { HttpRouteConfig } from "../../types/httpProxy";
+import { HttpRouteConfig } from "../../types/config/httpProxy";
 import { HttpRequest, HttpMethods } from "../../types/http";
 import { copyHeadersFromContext } from "./copyHeadersFromContext";
 

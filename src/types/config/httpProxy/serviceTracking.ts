@@ -1,4 +1,4 @@
-export type HttpServiceTrackingConfig = {
+export type HttpProxyServiceTrackingConfig = {
   errorTrackingListLength?: number;
   errorTrackingListExpiry?: number;
 };
