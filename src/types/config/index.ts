@@ -48,6 +48,16 @@ export type AppConfig = UserAppConfig & {
   silent: boolean;
   hostId: string;
   state: "memory" | "redis";
+  http?: HttpProxyConfig & {
+    redis?: {
+      responseChannel: string;
+    };
+  };
+  webSocket?: HttpProxyConfig & {
+    redis?: {
+      responseChannel: string;
+    };
+  };
 };
 
 export type HttpProxyAppConfig = AppConfig & { http: HttpProxyConfig };

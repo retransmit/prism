@@ -19,6 +19,7 @@ import { closeWebSocketServer } from "./utils/webSocket/closeWebSocketServer";
 import namesGenerator from "./utils/namesGenerator";
 import { isWebSocketProxyConfig } from "./connections/webSocket/isWebSocketProxyConfig";
 import { AppControl } from "./types/prismInstance";
+import normalizeConfig from "./normalizeConfig";
 
 const ONE_MINUTE = 60 * 1000;
 const TWO_MINUTES = 2 * ONE_MINUTE;
@@ -112,7 +113,7 @@ export async function startWithConfiguration(
   // We need this so that workers don't fetch from the same redis queues.
   config.instanceId = instanceId;
 
-  await mutateAndCleanupConfig(config);
+  await normalizeConfig(config);
 
   // Create the http server.
   const httpServer = createHttpServer(config);
@@ -146,6 +147,7 @@ export async function startWithConfiguration(
   }
 
   return {
+    config,
     instanceId: config.instanceId,
     port: opts.port,
     closeServers,
@@ -194,45 +196,7 @@ if (require.main === module) {
   }
 }
 
-export async function mutateAndCleanupConfig(config: AppConfig) {
-  // People are going to mistype 'webSocket' as all lowercase.
-  if ((config as any).websocket !== undefined) {
-    if (config.webSocket !== undefined) {
-      console.log(
-        "Both config.websocket and config.webSocket are specified. 'webSocket' is the correct property to use."
-      );
-      process.exit(1);
-    }
-    config.webSocket = (config as any).websocket;
-    (config as any).websocket = undefined;
-  }
-
-  // People are going to mistype 'webjobs' as all lowercase.
-  if ((config as any).webjobs !== undefined) {
-    if (config.webJobs !== undefined) {
-      console.log(
-        "Both config.webjobs and config.webJobs are specified. 'webJobs' is the correct property to use."
-      );
-      process.exit(1);
-    }
-    config.webJobs = (config as any).webjobs;
-    (config as any).webjobs = undefined;
-  }
-
-  // Initialize state
-  if (!config.state) {
-    config.state = "memory";
-  }
-
-  config.hostId =
-    config.hostNames && config.hostNames.length
-      ? config.hostNames.join("+")
-      : "$default";
-
-  config.silent = config.silent ?? false;
-}
-
-export async function initModules(config: AppConfig) {
+async function initModules(config: AppConfig) {
   await applicationState.init(config);
   await webJobs.init(config);
   await httpConnections.init(config);

@@ -76,7 +76,6 @@ export default async function (app: TestAppInstance, testEnv: TestEnv) {
       const redisInput = JSON.parse(inputMessage.message);
 
       const publisher = createClient();
-
       publisher.publish(
         redisInput.responseChannel,
         JSON.stringify({

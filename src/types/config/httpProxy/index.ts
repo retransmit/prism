@@ -15,7 +15,7 @@ export type HttpProxyConfig = {
     };
   };
   redis?: {
-    responseChannel: string;
+    responseChannel?: string;
     cleanupInterval?: number;
   };
   allowList?: AllowListConfig;
