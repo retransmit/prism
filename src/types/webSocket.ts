@@ -1,5 +1,17 @@
 import { WebSocketProxyAppConfig } from "./config";
-import { WebSocketMessageRequest, ActiveWebSocketConnection } from "./config/webSocketProxy";
+import { WebSocketMessageRequest } from "./config/webSocketProxy";
+import WebSocket from "ws";
+
+export type ActiveWebSocketConnection = {
+  initialized: boolean;
+  route: string;
+  path: string;
+  webSocket: WebSocket;
+  remoteAddress: string | undefined;
+  remotePort: number | undefined;
+  saveLastRequest: boolean;
+  lastRequest: WebSocketMessageRequest | undefined;
+};
 
 export type WebSocketServicePlugin = {
   init: (config: WebSocketProxyAppConfig) => any;

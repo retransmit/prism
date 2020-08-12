@@ -202,14 +202,3 @@ export type RedisWebSocketRequest =
 export type WebSocketRequest =
   | UrlPollingWebSocketRequest
   | RedisWebSocketRequest;
-
-export type ActiveWebSocketConnection = {
-  initialized: boolean;
-  route: string;
-  path: string;
-  webSocket: WebSocket;
-  remoteAddress: string | undefined;
-  remotePort: number | undefined;
-  saveLastRequest: boolean;
-  lastRequest: WebSocketMessageRequest | undefined;
-};

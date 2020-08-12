@@ -3,9 +3,9 @@ import WebSocket from "ws";
 import * as url from "url";
 import randomId from "../../utils/random";
 import { get as activeConnections } from "./activeConnections";
+import { ActiveWebSocketConnection } from "../../types/webSocket";
 import {
   WebSocketRouteConfig,
-  ActiveWebSocketConnection,
 } from "../../types/config/webSocketProxy";
 
 import { WebSocketProxyAppConfig, AppConfig } from "../../types/config";
@@ -42,7 +42,7 @@ export default function createHandler(config: AppConfig) {
           ? xForwardedFor.split(/\s*,\s*/)[0]
           : request.socket.remoteAddress;
 
-        const conn = {
+        const conn: ActiveWebSocketConnection = {
           initialized: false,
           route,
           path: (request.url && url.parse(request.url).pathname) || "",

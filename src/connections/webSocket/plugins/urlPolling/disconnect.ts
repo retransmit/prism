@@ -2,13 +2,13 @@ import { WebSocketProxyAppConfig } from "../../../../types/config";
 import {
   UrlPollingWebSocketEndPointConfig,
   WebSocketDisconnectRequest,
-  ActiveWebSocketConnection,
 } from "../../../../types/config/webSocketProxy";
 import { makeGotOptions } from "../../../../utils/http/gotUtil";
 import got from "got";
 import { makeHttpResponse } from "../../../http/plugins/http/makeHttpResponse";
 import responseIsError from "../../../../utils/http/responseIsError";
 import selectRandomUrl from "../../../../utils/http/selectRandomUrl";
+import { ActiveWebSocketConnection } from "../../../../types/webSocket";
 
 export default async function disconnect(
   requestId: string,

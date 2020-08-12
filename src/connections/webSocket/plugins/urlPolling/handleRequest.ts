@@ -3,7 +3,6 @@ import {
   UrlPollingWebSocketMessageRequest,
   WebSocketResponse,
   WebSocketMessageRequest,
-  ActiveWebSocketConnection,
 } from "../../../../types/config/webSocketProxy";
 import respondToWebSocketClient from "../../respond";
 import { makeGotOptions } from "../../../../utils/http/gotUtil";
@@ -11,6 +10,7 @@ import got from "got";
 import { makeWebSocketResponse } from "./makeWebSocketResponse";
 import selectRandomUrl from "../../../../utils/http/selectRandomUrl";
 import { HttpRequest } from "../../../../types/http";
+import { ActiveWebSocketConnection } from "../../../../types/webSocket";
 
 export default async function sendToService(
   request: WebSocketMessageRequest,

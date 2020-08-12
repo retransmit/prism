@@ -3,10 +3,10 @@ import { getChannelForService } from "../../../../utils/redis/getChannelForServi
 import {
   RedisWebSocketMessageRequest,
   WebSocketMessageRequest,
-  ActiveWebSocketConnection,
 } from "../../../../types/config/webSocketProxy";
 import respondToWebSocketClient from "../../respond";
 import { publish } from "./publish";
+import { ActiveWebSocketConnection } from "../../../../types/webSocket";
 
 export default async function sendToService(
   request: WebSocketMessageRequest,

@@ -2,7 +2,6 @@ import { WebSocketProxyAppConfig } from "../../../../types/config";
 import {
   UrlPollingWebSocketEndPointConfig,
   WebSocketConnectRequest,
-  ActiveWebSocketConnection,
 } from "../../../../types/config/webSocketProxy";
 import { makeGotOptions } from "../../../../utils/http/gotUtil";
 import got from "got";
@@ -10,6 +9,7 @@ import respondToWebSocketClient from "../../respond";
 import { makeHttpResponse } from "../../../http/plugins/http/makeHttpResponse";
 import responseIsError from "../../../../utils/http/responseIsError";
 import selectRandomUrl from "../../../../utils/http/selectRandomUrl";
+import { ActiveWebSocketConnection } from "../../../../types/webSocket";
 
 export default async function connect(
   requestId: string,
