@@ -1,8 +1,8 @@
-import { UrlList, UrlSelector, WebSocketProxyAppConfig } from "..";
-import WebSocket from "ws";
+import { UrlList, UrlSelector } from "..";
 import { AllowListConfig } from "../allowList";
 import { RateLimitingConfig } from "../rateLimiting";
 import { HttpRequest, HttpResponse } from "../../http";
+import { WebSocketRequest } from "../../webSocket";
 
 export type WebSocketProxyConfig = {
   routes: {
@@ -14,9 +14,12 @@ export type WebSocketProxyConfig = {
   };
   allowList?: AllowListConfig;
   onConnect?: (
-    requestId: string,
-    message: string
-  ) => Promise<{ drop: true; message?: string } | { drop: false }>;
+    request: WebSocketRequest
+  ) => Promise<{
+    drop: boolean;
+    message?: string;
+    connectMessage?: string;
+  } | void>;
   onDisconnect?: (requestId: string) => any;
   onRequest?: (
     requestId: string,
@@ -47,9 +50,12 @@ export type WebSocketRouteConfig = {
   };
   allowList?: AllowListConfig;
   onConnect?: (
-    requestId: string,
-    message: string
-  ) => Promise<{ drop: true; message?: string } | { drop: false } | void>;
+    request: WebSocketRequest
+  ) => Promise<{
+    drop: boolean;
+    message?: string;
+    connectMessage?: string;
+  } | void>;
   onDisconnect?: (requestId: string) => any;
   onRequest?: (
     requestId: string,
@@ -199,6 +205,6 @@ export type RedisWebSocketRequest =
   | WebSocketDisconnectRequest
   | WebSocketNotConnectedRequest;
 
-export type WebSocketRequest =
-  | UrlPollingWebSocketRequest
-  | RedisWebSocketRequest;
+// export type WebSocketRequest =
+//   | UrlPollingWebSocketRequest
+//   | RedisWebSocketRequest;

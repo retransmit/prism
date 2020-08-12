@@ -13,6 +13,13 @@ export type ActiveWebSocketConnection = {
   lastRequest: WebSocketMessageRequest | undefined;
 };
 
+export type WebSocketRequest = {
+  id: string;
+  message: string;
+  remoteAddress: string | undefined;
+  remotePort: number | undefined;
+};
+
 export type WebSocketServicePlugin = {
   init: (config: WebSocketProxyAppConfig) => any;
   handleRequest: (
@@ -22,6 +29,7 @@ export type WebSocketServicePlugin = {
   ) => void;
   connect: (
     requestId: string,
+    message: string | undefined,
     conn: ActiveWebSocketConnection,
     serviceConfig: any,
     config: WebSocketProxyAppConfig

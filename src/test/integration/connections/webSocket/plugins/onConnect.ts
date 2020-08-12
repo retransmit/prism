@@ -3,6 +3,7 @@ import { TestAppInstance } from "../..";
 import startRetransmitTestInstance from "../../../../utils/startRetransmitTestInstance";
 import { UserAppConfig } from "../../../../../types/config";
 import { TestEnv } from "../../..";
+import { WebSocketRequest } from "../../../../../types/webSocket";
 
 export default async function (app: TestAppInstance, testEnv: TestEnv) {
   it(`runs the connect hook on root config`, async () => {
@@ -12,9 +13,9 @@ export default async function (app: TestAppInstance, testEnv: TestEnv) {
     const connectedPromise: Promise<void> = new Promise(async (success) => {
       const config: UserAppConfig = {
         webSocket: {
-          onConnect: async (requestId: string, message: string) => {
+          onConnect: async (request: WebSocketRequest) => {
             ran = true;
-            receivedMessage = message;
+            receivedMessage = request.message;
             success();
             return { drop: false };
           },
@@ -57,9 +58,9 @@ export default async function (app: TestAppInstance, testEnv: TestEnv) {
         webSocket: {
           routes: {
             "/quotes": {
-              onConnect: async (requestId: string, message: string) => {
+              onConnect: async (request: WebSocketRequest) => {
                 ran = true;
-                receivedMessage = message;
+                receivedMessage = request.message;
                 success();
                 return { drop: false };
               },
@@ -99,9 +100,9 @@ export default async function (app: TestAppInstance, testEnv: TestEnv) {
     const connectedPromise: Promise<void> = new Promise(async (success) => {
       const config: UserAppConfig = {
         webSocket: {
-          onConnect: async (requestId: string, message: string) => {
+          onConnect: async (request: WebSocketRequest) => {
             ran = true;
-            receivedMessage = message;
+            receivedMessage = request.message;
             return { drop: true, message: "NOPE" };
           },
           routes: {
@@ -152,9 +153,9 @@ export default async function (app: TestAppInstance, testEnv: TestEnv) {
         webSocket: {
           routes: {
             "/quotes": {
-              onConnect: async (requestId: string, message: string) => {
+              onConnect: async (request: WebSocketRequest) => {
                 ran = true;
-                receivedMessage = message;
+                receivedMessage = request.message;
                 return { drop: true, message: "NOPE" };
               },
               services: {

@@ -3,10 +3,11 @@ import WebSocket from "ws";
 import * as url from "url";
 import randomId from "../../utils/random";
 import { get as activeConnections } from "./activeConnections";
-import { ActiveWebSocketConnection } from "../../types/webSocket";
 import {
-  WebSocketRouteConfig,
-} from "../../types/config/webSocketProxy";
+  ActiveWebSocketConnection,
+  WebSocketRequest,
+} from "../../types/webSocket";
+import { WebSocketRouteConfig } from "../../types/config/webSocketProxy";
 
 import { WebSocketProxyAppConfig, AppConfig } from "../../types/config";
 import { saveLastRequest } from "./plugins/urlPolling/poll";
@@ -62,6 +63,7 @@ export default function createHandler(config: AppConfig) {
           conn.initialized = true;
           sendConnectionRequestsToServices(
             requestId,
+            undefined,
             conn,
             routeConfig,
             config,
@@ -102,7 +104,14 @@ function onMessage(
         // If conn is not initialized, onConnect must exist.
         // Treat the first message as the onConnect argument.
 
-        const onConnectResult = (await onConnect(requestId, message)) || {
+        const connectRequest: WebSocketRequest = {
+          id: requestId,
+          message,
+          remoteAddress: conn.remoteAddress,
+          remotePort: conn.remotePort,
+        };
+
+        const onConnectResult = (await onConnect(connectRequest)) || {
           drop: false,
         };
 
@@ -123,6 +132,7 @@ function onMessage(
         conn.initialized = true;
         sendConnectionRequestsToServices(
           requestId,
+          onConnectResult.connectMessage,
           conn,
           routeConfig,
           config,
@@ -201,6 +211,7 @@ function onMessage(
 
 async function sendConnectionRequestsToServices(
   requestId: string,
+  message: string | undefined,
   conn: ActiveWebSocketConnection,
   routeConfig: WebSocketRouteConfig,
   config: WebSocketProxyAppConfig,
@@ -208,7 +219,13 @@ async function sendConnectionRequestsToServices(
 ) {
   for (const service of Object.keys(routeConfig.services)) {
     const serviceConfig = routeConfig.services[service];
-    plugins[serviceConfig.type].connect(requestId, conn, serviceConfig, config);
+    plugins[serviceConfig.type].connect(
+      requestId,
+      message,
+      conn,
+      serviceConfig,
+      config
+    );
   }
 }
 

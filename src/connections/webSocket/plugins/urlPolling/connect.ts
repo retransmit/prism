@@ -13,6 +13,7 @@ import { ActiveWebSocketConnection } from "../../../../types/webSocket";
 
 export default async function connect(
   requestId: string,
+  message: string | undefined,
   conn: ActiveWebSocketConnection,
   serviceConfig: UrlPollingWebSocketEndPointConfig,
   config: WebSocketProxyAppConfig
