@@ -1,11 +1,8 @@
 import { get as activeRequests } from "./activeRequests";
 import responseIsError from "../../../../utils/http/responseIsError";
-import {
-  RedisHttpResponse,
-  HttpRouteConfig,
-  FetchedHttpResponse,
-} from "../../../../types/config/httpProxy";
+import { HttpRouteConfig } from "../../../../types/config/httpProxy";
 import { HttpProxyAppConfig } from "../../../../types/config";
+import { RedisHttpResponse, FetchedHttpResponse } from "../../../../types/http";
 
 export default function processMessage(config: HttpProxyAppConfig) {
   return async function processMessageImpl(

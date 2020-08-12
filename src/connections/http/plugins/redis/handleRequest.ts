@@ -3,16 +3,14 @@ import { AppConfig } from "../../../../types/config";
 import { get as activeRequests } from "./activeRequests";
 import { getChannelForService } from "../../../../utils/redis/getChannelForService";
 import {
-  RedisHttpRequest,
   InvokeHttpServiceResult,
-  FetchedHttpResponse,
   HttpServiceEndPointConfig,
   RedisHttpServiceEndPointConfig,
   HttpRouteConfig,
 } from "../../../../types/config/httpProxy";
 import { publish } from "./publish";
 import mapBodyAndHeaders from "../../mapBodyAndHeaders";
-import { HttpRequest, HttpMethods } from "../../../../types/http";
+import { HttpRequest, HttpMethods, FetchedHttpResponse, RedisHttpRequest } from "../../../../types/http";
 
 /*
   Make Promises for Redis Services

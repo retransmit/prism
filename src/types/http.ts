@@ -1,4 +1,7 @@
 import { IncomingHttpHeaders } from "http2";
+import { HttpProxyAppConfig } from "./config";
+import { HttpServiceEndPointConfig, InvokeHttpServiceResult, HttpRouteConfig } from "./config/httpProxy";
+import { IRouterContext } from "koa-router";
 
 export type HttpMethods = "GET" | "POST" | "PUT" | "DELETE" | "PATCH" | "HEAD";
 
@@ -44,4 +47,71 @@ export type HttpCookie = {
   httpOnly?: boolean;
   maxAge?: number;
   overwrite?: boolean;
+};
+
+// Http Requests and Responses for Redis-based Services
+export type RedisHttpRequest =
+  | {
+      type: "request";
+      id: string;
+      request: HttpRequest;
+      responseChannel: string;
+    }
+  | {
+      id: string;
+      request: HttpRequest;
+      type: "rollback";
+    };
+
+export type RedisHttpResponse = {
+  id: string;
+  service: string;
+  response: HttpResponse;
+};
+
+// Output of processMessage()
+export type FetchedHttpResponse = {
+  type: "http" | "redis";
+  id: string;
+  service: string;
+  time: number;
+  route: string;
+  path: string;
+  method: HttpMethods;
+  response: HttpResponse;
+  stage: number | undefined;
+};
+
+export type HttpServicePlugin = {
+  init: (config: HttpProxyAppConfig) => any;
+  handleRequest: (
+    requestId: string,
+    request: HttpRequest,
+    route: string,
+    method: HttpMethods,
+    stage: number | undefined,
+    fetchedResponses: FetchedHttpResponse[],
+    services: {
+      [name: string]: HttpServiceEndPointConfig;
+    },
+    routeConfig: HttpRouteConfig,
+    config: HttpProxyAppConfig
+  ) => Promise<InvokeHttpServiceResult>[];
+  handleStreamRequest: (
+    ctx: IRouterContext,
+    requestId: string,
+    request: HttpRequest,
+    route: string,
+    method: HttpMethods,
+    serviceConfig: HttpServiceEndPointConfig,
+    routeConfig: HttpRouteConfig,
+    config: HttpProxyAppConfig
+  ) => Promise<void>;
+  rollback: (
+    requestId: string,
+    request: HttpRequest,
+    route: string,
+    method: HttpMethods,
+    config: HttpProxyAppConfig
+  ) => void;
 };

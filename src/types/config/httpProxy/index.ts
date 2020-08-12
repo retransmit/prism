@@ -1,6 +1,12 @@
-import { UrlList, UrlSelector, HttpProxyAppConfig } from "..";
-import { IRouterContext } from "koa-router";
-import { HttpMethods, HttpRequest, HttpResponse } from "../../http";
+import { UrlList, UrlSelector } from "..";
+import {
+  HttpMethods,
+  HttpRequest,
+  HttpResponse,
+  FetchedHttpResponse,
+  RedisHttpRequest,
+  RedisHttpResponse,
+} from "../../http";
 import { AllowListConfig } from "../allowList";
 import { RateLimitingConfig } from "../rateLimiting";
 import { HttpProxyCircuitBreakerConfig } from "./circuitBreaker";
@@ -78,39 +84,6 @@ export type HttpRouteConfig = {
 export type InvokeHttpServiceResult =
   | { skip: true }
   | { skip: false; response: FetchedHttpResponse };
-
-// Output of processMessage()
-export type FetchedHttpResponse = {
-  type: "http" | "redis";
-  id: string;
-  service: string;
-  time: number;
-  route: string;
-  path: string;
-  method: HttpMethods;
-  response: HttpResponse;
-  stage: number | undefined;
-};
-
-// Http Requests and Responses for Redis-based Services
-export type RedisHttpRequest =
-  | {
-      type: "request";
-      id: string;
-      request: HttpRequest;
-      responseChannel: string;
-    }
-  | {
-      id: string;
-      request: HttpRequest;
-      type: "rollback";
-    };
-
-export type RedisHttpResponse = {
-  id: string;
-  service: string;
-  response: HttpResponse;
-};
 
 // Service Configuration
 export type HttpRouteConfigBase = {
@@ -207,40 +180,6 @@ export type RedisHttpServiceEndPointConfig = {
 export type HttpServiceEndPointConfig =
   | RedisHttpServiceEndPointConfig
   | NativeHttpServiceEndPointConfig;
-
-export type HttpServicePlugin = {
-  init: (config: HttpProxyAppConfig) => any;
-  handleRequest: (
-    requestId: string,
-    request: HttpRequest,
-    route: string,
-    method: HttpMethods,
-    stage: number | undefined,
-    fetchedResponses: FetchedHttpResponse[],
-    services: {
-      [name: string]: HttpServiceEndPointConfig;
-    },
-    routeConfig: HttpRouteConfig,
-    config: HttpProxyAppConfig
-  ) => Promise<InvokeHttpServiceResult>[];
-  handleStreamRequest: (
-    ctx: IRouterContext,
-    requestId: string,
-    request: HttpRequest,
-    route: string,
-    method: HttpMethods,
-    serviceConfig: HttpServiceEndPointConfig,
-    routeConfig: HttpRouteConfig,
-    config: HttpProxyAppConfig
-  ) => Promise<void>;
-  rollback: (
-    requestId: string,
-    request: HttpRequest,
-    route: string,
-    method: HttpMethods,
-    config: HttpProxyAppConfig
-  ) => void;
-};
 
 export type HttpRouteStageConfig = {
   stage: number | undefined;

@@ -1,11 +1,11 @@
 import * as redis from "redis";
 import { TestAppInstance } from "../../..";
 import got from "got";
-import { RedisHttpRequest } from "../../../../../../types/config/httpProxy";
 import { getResponse } from "../../../../../utils/http";
 import { UserAppConfig } from "../../../../../../types/config";
 import startRetransmitTestInstance from "../../../../../utils/startRetransmitTestInstance";
 import { TestEnv } from "../../../..";
+import { RedisHttpRequest } from "../../../../../../types/http";
 
 export default async function (app: TestAppInstance, testEnv: TestEnv) {
   it(`rolls back`, async () => {

@@ -4,7 +4,6 @@ import randomId from "../../utils/random";
 
 import {
   HttpRouteConfig,
-  FetchedHttpResponse,
   InvokeHttpServiceResult,
 } from "../../types/config/httpProxy";
 import applyRateLimiting from "../modules/rateLimiting";
@@ -18,7 +17,7 @@ import plugins from "./plugins";
 import sortIntoStages from "./sortIntoStages";
 import makeHttpRequestFromContext from "./makeHttpRequestFromContext";
 import addTrackingInfo from "../modules/clientTracking";
-import { HttpMethods } from "../../types/http";
+import { HttpMethods, FetchedHttpResponse } from "../../types/http";
 
 export type CreateHttpRequestHandler = (
   method: HttpMethods
