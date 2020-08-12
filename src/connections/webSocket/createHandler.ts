@@ -6,7 +6,6 @@ import { get as activeConnections } from "./activeConnections";
 import {
   WebSocketRouteConfig,
   ActiveWebSocketConnection,
-  WebSocketServicePlugin,
 } from "../../types/config/webSocketProxy";
 
 import { WebSocketProxyAppConfig, AppConfig } from "../../types/config";
@@ -18,6 +17,7 @@ import { isWebSocketProxyConfig } from "./isWebSocketProxyConfig";
 import { getHeaderAsString } from "../../utils/http/getHeaderAsString";
 import addTrackingInfo from "../modules/clientTracking";
 import { PluginList } from "../../types/plugins";
+import { WebSocketServicePlugin } from "../../types/webSocket";
 
 export default function createHandler(config: AppConfig) {
   return function connection(ws: WebSocket, request: IncomingMessage) {
