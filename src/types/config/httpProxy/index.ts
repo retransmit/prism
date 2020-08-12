@@ -35,7 +35,7 @@ export type HttpProxyConfig = {
   onResponse?: (
     response: HttpResponse,
     request: HttpRequest
-  ) => Promise<HttpResponse>;
+  ) => Promise<HttpResponse | void>;
   genericErrors?: boolean;
   onError?: (responses: FetchedHttpResponse[], request: HttpRequest) => any;
   plugins?: {
