@@ -2,7 +2,7 @@ import { UrlList, UrlSelector } from "..";
 import { AllowListConfig } from "../allowList";
 import { RateLimitingConfig } from "../rateLimiting";
 import { HttpRequest, HttpResponse } from "../../http";
-import { WebSocketRequest } from "../../webSocket";
+import { WebSocketRequest, ActiveWebSocketConnection } from "../../webSocket";
 
 export type WebSocketProxyConfig = {
   routes: {
@@ -20,7 +20,9 @@ export type WebSocketProxyConfig = {
     message?: string;
     connectMessage?: string;
   } | void>;
-  onDisconnect?: (requestId: string) => any;
+  onDisconnect?: (
+    conn: ActiveWebSocketConnection
+  ) => Promise<string | void>;
   onRequest?: (
     requestId: string,
     request: string
@@ -56,7 +58,9 @@ export type WebSocketRouteConfig = {
     message?: string;
     connectMessage?: string;
   } | void>;
-  onDisconnect?: (requestId: string) => any;
+  onDisconnect?: (
+    conn: ActiveWebSocketConnection
+  ) => Promise<string | void>;
   onRequest?: (
     requestId: string,
     message: string

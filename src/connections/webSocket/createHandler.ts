@@ -19,6 +19,7 @@ import { getHeaderAsString } from "../../utils/http/getHeaderAsString";
 import addTrackingInfo from "../modules/clientTracking";
 import { PluginList } from "../../types/plugins";
 import { WebSocketServicePlugin } from "../../types/webSocket";
+import { request } from "https";
 
 export default function createHandler(config: AppConfig) {
   return function connection(ws: WebSocket, request: IncomingMessage) {
@@ -61,7 +62,7 @@ export default function createHandler(config: AppConfig) {
 
         if (!routeConfig.onConnect && !config.webSocket.onConnect) {
           conn.initialized = true;
-          sendConnectionRequestsToServices(
+          sendMessageToServices(
             requestId,
             undefined,
             conn,
@@ -130,7 +131,7 @@ function onMessage(
         // Not dropping. Initialize the connection.
         // And send the connect request.
         conn.initialized = true;
-        sendConnectionRequestsToServices(
+        sendMessageToServices(
           requestId,
           onConnectResult.connectMessage,
           conn,
@@ -209,7 +210,7 @@ function onMessage(
   };
 }
 
-async function sendConnectionRequestsToServices(
+async function sendMessageToServices(
   requestId: string,
   message: string | undefined,
   conn: ActiveWebSocketConnection,
@@ -242,7 +243,17 @@ function onClose(
       const onDisconnect =
         routeConfig.onDisconnect || config.webSocket.onDisconnect;
       if (onDisconnect) {
-        onDisconnect(requestId);
+        const onDisconnectResult = await onDisconnect(conn);
+        if (typeof onDisconnectResult !== "undefined") {
+          sendMessageToServices(
+            requestId,
+            onDisconnectResult,
+            conn,
+            routeConfig,
+            config,
+            plugins
+          );
+        }
       }
 
       // Call disconnect for services
