@@ -9,6 +9,7 @@ import {
   WebSocketServiceRequest,
   WebSocketServiceResponse,
 } from "../../../../types/webSocket";
+import { makeHttpResponse } from "../../../http/plugins/http/makeHttpResponse";
 
 export default async function handleRequest(
   request: WebSocketServiceRequest,
@@ -18,14 +19,12 @@ export default async function handleRequest(
   const routeConfig = config.webSocket.routes[conn.route];
 
   for (const service of Object.keys(routeConfig.services)) {
-    const cfg = routeConfig.services[service];
-    if (cfg.type === "http") {
-      const serviceConfig = cfg;
-
-      const serviceUrl = selectRandomUrl(cfg.url, cfg.getUrl);
+    const serviceConfig = routeConfig.services[service];
+    if (serviceConfig.type === "http") {
+      const serviceUrl = selectRandomUrl(serviceConfig.url, serviceConfig.getUrl);
 
       const httpRequest: HttpRequest = {
-        path: await selectRandomUrl(cfg.url, cfg.getUrl),
+        path: await selectRandomUrl(serviceConfig.url, serviceConfig.getUrl),
         method: "POST",
         body: request,
         remoteAddress: conn.remoteAddress,
@@ -49,9 +48,13 @@ export default async function handleRequest(
           options
         )
           .then(async (serverResponse) => {
-            const webSocketResponse: WebSocketServiceResponse = JSON.parse(
-              (serverResponse as Response<any>).body
-            );
+            const webSocketResponse =
+              (serviceConfig.onResponse &&
+                (await serviceConfig.onResponse(
+                  makeHttpResponse(serverResponse)
+                ))) ||
+              JSON.parse((serverResponse as Response<any>).body);
+
             respondToWebSocketClient(webSocketResponse, conn, config);
           })
           .catch(async (error) => {
