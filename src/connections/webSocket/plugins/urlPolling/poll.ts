@@ -43,9 +43,9 @@ function timerCallback(
   return () => {
     (async function () {
       const connections = activeConnections.get().entries();
-      for (const [requestId, conn] of connections) {
+      for (const [connectionId, conn] of connections) {
         if (conn.route === route) {
-          doPoll(route, service, requestId, conn, serviceConfig, config);
+          doPoll(route, service, connectionId, conn, serviceConfig, config);
         }
       }
     })();
@@ -55,13 +55,13 @@ function timerCallback(
 async function doPoll(
   route: string,
   service: string,
-  requestId: string,
+  connectionId: string,
   conn: ActiveWebSocketConnection,
   serviceConfig: UrlPollingWebSocketEndPointConfig,
   config: WebSocketProxyAppConfig
 ) {
   const lastServiceRequest: WebSocketServiceMessageRequest = {
-    id: requestId,
+    id: connectionId,
     type: "message",
     route: conn.route,
     message: conn.lastRequest || "",
@@ -109,7 +109,7 @@ async function doPoll(
         const webSocketResponse: WebSocketServiceMessageResponse = error.response
           ? JSON.parse((error.response as Response<any>).body)
           : {
-              id: requestId,
+              id: connectionId,
               type: "message",
               service,
               message: error.message,

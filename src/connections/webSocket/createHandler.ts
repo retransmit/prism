@@ -37,7 +37,7 @@ export default function createHandler(config: AppConfig) {
           (this as any).isAlive = true;
         });
 
-        const requestId = randomId();
+        const connectionId = randomId();
 
         const xForwardedFor = getHeaderAsString(
           request.headers["x-forwarded-for"]
@@ -48,7 +48,7 @@ export default function createHandler(config: AppConfig) {
           : request.socket.remoteAddress;
 
         const conn: ActiveWebSocketConnection = {
-          id: requestId,
+          id: connectionId,
           initialized: false,
           route,
           webSocket: ws,
@@ -58,7 +58,7 @@ export default function createHandler(config: AppConfig) {
           lastRequest: undefined,
         };
 
-        activeConnections().set(requestId, conn);
+        activeConnections().set(connectionId, conn);
 
         // If the onConnect hook is defined, we postpone connection init till a message arrives from the user. When the message arrives, the message is sent to the onConnect hook - which can decide whether the connection needs to be dropped or not. This is useful for say, authentication.
 
@@ -67,7 +67,7 @@ export default function createHandler(config: AppConfig) {
         if (!routeConfig.onConnect && !config.webSocket.onConnect) {
           conn.initialized = true;
           const connectRequest: WebSocketServiceConnectRequest = {
-            id: requestId,
+            id: connectionId,
             type: "connect",
             route,
             remoteAddress: conn.remoteAddress,
@@ -78,17 +78,17 @@ export default function createHandler(config: AppConfig) {
 
         ws.on(
           "message",
-          onMessage(requestId, request, route, ws, routeConfig, config)
+          onMessage(connectionId, request, route, ws, routeConfig, config)
         );
 
-        ws.on("close", onClose(requestId, config, plugins));
+        ws.on("close", onClose(connectionId, config, plugins));
       }
     }
   };
 }
 
 function onMessage(
-  requestId: string,
+  connectionId: string,
   request: IncomingMessage,
   route: string,
   ws: WebSocket,
@@ -96,7 +96,7 @@ function onMessage(
   config: WebSocketProxyAppConfig
 ) {
   return async function (message: string) {
-    const conn = activeConnections().get(requestId);
+    const conn = activeConnections().get(connectionId);
 
     // This should never happen.
     if (!conn) {
@@ -109,7 +109,7 @@ function onMessage(
         // If conn is not initialized, onConnect must exist.
         // Treat the first message as the onConnect argument.
         const clientRequest: WebSocketClientRequest = {
-          id: requestId,
+          id: connectionId,
           message,
           remoteAddress: conn.remoteAddress,
           remotePort: conn.remotePort,
@@ -118,7 +118,7 @@ function onMessage(
         const onConnectResult = await onConnect(clientRequest);
 
         if (onConnectResult && onConnectResult.drop) {
-          activeConnections().delete(requestId);
+          activeConnections().delete(connectionId);
           if (onConnectResult.message) {
             ws.send(onConnectResult.message);
           }
@@ -167,7 +167,7 @@ function onMessage(
           config.webSocket.onRequest;
 
         const clientRequest: WebSocketClientRequest = {
-          id: requestId,
+          id: connectionId,
           message,
           remoteAddress: conn.remoteAddress,
           remotePort: conn.remotePort,
@@ -185,7 +185,7 @@ function onMessage(
           }
         } else {
           const serviceRequest: WebSocketServiceMessageRequest = {
-            id: requestId,
+            id: connectionId,
             route,
             type: "message",
             message: onRequestResult.message,
