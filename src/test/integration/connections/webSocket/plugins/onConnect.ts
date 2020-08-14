@@ -103,7 +103,7 @@ export default async function (app: TestAppInstance, testEnv: TestEnv) {
           onConnect: async (request: WebSocketRequest) => {
             ran = true;
             receivedMessage = request.message;
-            return { drop: true, message: "NOPE" };
+            return { drop: true, response: "NOPE" };
           },
           routes: {
             "/quotes": {
@@ -156,7 +156,7 @@ export default async function (app: TestAppInstance, testEnv: TestEnv) {
               onConnect: async (request: WebSocketRequest) => {
                 ran = true;
                 receivedMessage = request.message;
-                return { drop: true, message: "NOPE" };
+                return { drop: true, response: "NOPE" };
               },
               services: {
                 quoteservice: {

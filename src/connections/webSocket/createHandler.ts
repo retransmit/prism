@@ -118,8 +118,8 @@ function onMessage(
 
         if (onConnectResult.drop === true) {
           activeConnections().delete(requestId);
-          if (onConnectResult.message) {
-            ws.send(onConnectResult.message);
+          if (onConnectResult.response) {
+            ws.send(onConnectResult.response);
             ws.terminate();
           } else {
             ws.terminate();
@@ -133,7 +133,7 @@ function onMessage(
         conn.initialized = true;
         sendMessageToServices(
           requestId,
-          onConnectResult.messageToService,
+          onConnectResult.request,
           conn,
           routeConfig,
           config,

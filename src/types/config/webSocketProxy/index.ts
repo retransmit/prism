@@ -17,8 +17,8 @@ export type WebSocketProxyConfig = {
     request: WebSocketRequest
   ) => Promise<{
     drop: boolean;
-    message?: string;
-    messageToService?: string;
+    response?: string;
+    request?: string;
   } | void>;
   onDisconnect?: (
     conn: ActiveWebSocketConnection
@@ -55,8 +55,8 @@ export type WebSocketRouteConfig = {
     request: WebSocketRequest
   ) => Promise<{
     drop: boolean;
-    message?: string;
-    messageToService?: string;
+    response?: string;
+    request?: string;
   } | void>;
   onDisconnect?: (
     conn: ActiveWebSocketConnection
