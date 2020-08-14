@@ -125,6 +125,7 @@ export default async function (app: TestAppInstance, testEnv: TestEnv) {
       const ws = new WebSocket(`ws://localhost:${port}/quotes`);
 
       ws.on("open", () => {
+        console.log("sending...")
         ws.send("HELO");
       });
 
