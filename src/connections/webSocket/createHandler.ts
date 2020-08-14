@@ -121,10 +121,9 @@ function onMessage(
           activeConnections().delete(requestId);
           if (onConnectResult.message) {
             ws.send(onConnectResult.message);
-            ws.terminate();
-          } else {
-            ws.terminate();
           }
+          ws.terminate();
+
           // We're done here.
           return;
         }

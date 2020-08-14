@@ -48,22 +48,22 @@ export type AppConfig = UserAppConfig & {
   silent: boolean;
   hostId: string;
   state: "memory" | "redis";
-  http?: HttpProxyConfig & {
-    redis?: {
-      responseChannel: string;
-    };
-  };
-  webSocket?: HttpProxyConfig & {
-    redis?: {
+};
+
+export type HttpProxyAppConfig = AppConfig & {
+  http: HttpProxyConfig & {
+    redis: {
       responseChannel: string;
     };
   };
 };
 
-export type HttpProxyAppConfig = AppConfig & { http: HttpProxyConfig };
-
 export type WebSocketProxyAppConfig = AppConfig & {
-  webSocket: WebSocketProxyConfig;
+  webSocket: WebSocketProxyConfig & {
+    redis: {
+      responseChannel: string;
+    };
+  };
 };
 
 export type UrlList = string | string[];

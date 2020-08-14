@@ -21,9 +21,12 @@ export default async function handleRequest(
     const cfg = routeConfig.services[service];
     if (cfg.type === "redis") {
       const serviceConfig = cfg;
+
+      const responseChannel = `${config.webSocket.redis.responseChannel}.${config.instanceId}`;
+
       const redisRequest: RedisWebSocketServiceRequest = {
         ...request,
-        responseChannel: `${serviceConfig.requestChannel}.${config.instanceId}`,
+        responseChannel
       };
 
       const requestChannel = getChannelForService(

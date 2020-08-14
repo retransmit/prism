@@ -1,4 +1,4 @@
-import { AppConfig } from "../../../../types/config";
+import { AppConfig, HttpProxyAppConfig } from "../../../../types/config";
 
 import { get as activeRequests } from "./activeRequests";
 import { getChannelForService } from "../../../../utils/redis/getChannelForService";
@@ -10,7 +10,12 @@ import {
 } from "../../../../types/config/httpProxy";
 import { publish } from "./publish";
 import mapBodyAndHeaders from "../../mapBodyAndHeaders";
-import { HttpRequest, HttpMethods, FetchedHttpResponse, RedisHttpRequest } from "../../../../types/http";
+import {
+  HttpRequest,
+  HttpMethods,
+  FetchedHttpResponse,
+  RedisHttpRequest,
+} from "../../../../types/http";
 
 /*
   Make Promises for Redis Services
@@ -26,7 +31,7 @@ export default function handleRequest(
     [name: string]: HttpServiceEndPointConfig;
   },
   routeConfig: HttpRouteConfig,
-  config: AppConfig
+  config: HttpProxyAppConfig
 ): Promise<InvokeHttpServiceResult>[] {
   const alreadyPublishedChannels: string[] = [];
 
@@ -50,7 +55,7 @@ export default function handleRequest(
           const redisHttpRequest: RedisHttpRequest = {
             id: requestId,
             request: httpRequestWithMappedFields,
-            responseChannel: `${config.http?.redis?.responseChannel}.${config.instanceId}`,
+            responseChannel: `${config.http.redis.responseChannel}.${config.instanceId}`,
             type: "request",
           };
 

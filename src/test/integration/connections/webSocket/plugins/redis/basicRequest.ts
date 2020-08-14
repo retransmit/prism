@@ -66,7 +66,7 @@ export default async function (app: TestAppInstance, testEnv: TestEnv) {
         id: connectRequest.id,
         service: "quoteservice",
         route: "/quotes",
-        response: "GOOG: 1425.1",
+        message: "GOOG: 1425.1",
       })
     );
 
@@ -76,7 +76,7 @@ export default async function (app: TestAppInstance, testEnv: TestEnv) {
         id: connectRequest.id,
         service: "quoteservice",
         route: "/quotes",
-        response: "AAPL: 331.8",
+        message: "AAPL: 331.8",
       })
     );
 

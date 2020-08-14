@@ -103,7 +103,7 @@ export default async function (app: TestAppInstance, testEnv: TestEnv) {
           onConnect: async (request: WebSocketClientRequest) => {
             ran = true;
             receivedMessage = request.message || "";
-            return { drop: true, response: "NOPE" };
+            return { drop: true, message: "NOPE" };
           },
           routes: {
             "/quotes": {
@@ -125,7 +125,6 @@ export default async function (app: TestAppInstance, testEnv: TestEnv) {
       const ws = new WebSocket(`ws://localhost:${port}/quotes`);
 
       ws.on("open", () => {
-        console.log("sending...")
         ws.send("HELO");
       });
 
@@ -157,7 +156,7 @@ export default async function (app: TestAppInstance, testEnv: TestEnv) {
               onConnect: async (request: WebSocketClientRequest) => {
                 ran = true;
                 receivedMessage = request.message || "";
-                return { drop: true, response: "NOPE" };
+                return { drop: true, message: "NOPE" };
               },
               services: {
                 quoteservice: {
