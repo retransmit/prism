@@ -1,12 +1,12 @@
-import {
-  WebSocketResponse,
-} from "../../types/config/webSocketProxy";
 import { WebSocketProxyAppConfig } from "../../types/config";
-import { ActiveWebSocketConnection } from "../../types/webSocket";
+import {
+  ActiveWebSocketConnection,
+  WebSocketServiceResponse,
+} from "../../types/webSocket";
+import { get as activeConnections } from "./activeConnections";
 
 export default async function respondToWebSocketClient(
-  requestId: string,
-  webSocketResponse: WebSocketResponse,
+  webSocketResponse: WebSocketServiceResponse,
   conn: ActiveWebSocketConnection,
   config: WebSocketProxyAppConfig
 ) {
@@ -15,14 +15,14 @@ export default async function respondToWebSocketClient(
   const onResponse = routeConfig.onResponse || config.webSocket.onResponse;
 
   const onResponseResult =
-    (onResponse && (await onResponse(requestId, webSocketResponse))) ||
-    webSocketResponse;
+    (onResponse && (await onResponse(webSocketResponse))) || webSocketResponse;
 
   if (onResponseResult.type === "message") {
-    if (onResponseResult.response) {
-      conn.webSocket.send(webSocketResponse.response);
+  } else if (onResponseResult.type === "drop") {
+    if (onResponseResult.message) {
+      conn.webSocket.send(onResponseResult.message);
     }
-  } else if (onResponseResult.type === "disconnect") {
+    activeConnections().delete(webSocketResponse.id);
     conn.webSocket.terminate();
   }
 }

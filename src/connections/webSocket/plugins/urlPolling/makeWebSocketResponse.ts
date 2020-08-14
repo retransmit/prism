@@ -1,11 +1,10 @@
 import { Response } from "got/dist/source/core";
-import { WebSocketResponse } from "../../../../types/config/webSocketProxy";
+import { WebSocketServiceResponse } from "../../../../types/webSocket";
 
 export function makeWebSocketResponse(
-  serverResponse: Response<any>,
-  requestId?: string
-): WebSocketResponse {
-  const result = JSON.parse(serverResponse.body);
+  serverResponse: Response<any>
+): WebSocketServiceResponse {
+  return JSON.parse(serverResponse.body);
   return requestId
     ? {
         ...result,

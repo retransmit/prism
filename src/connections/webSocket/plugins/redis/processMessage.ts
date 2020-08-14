@@ -1,20 +1,23 @@
 import { WebSocketProxyAppConfig } from "../../../../types/config";
-import {
-  WebSocketResponse,
-  RedisWebSocketEndPointConfig,
-  WebSocketNotConnectedRequest,
-} from "../../../../types/config/webSocketProxy";
+import { RedisWebSocketEndPointConfig } from "../../../../types/config/webSocketProxy";
 import { get as activeConnections } from "../../activeConnections";
 import respondToWebSocketClient from "../../respond";
 import { getChannelForService } from "../../../../utils/redis/getChannelForService";
 import { publish } from "./publish";
+import {
+  WebSocketServiceResponse,
+  WebSocketServiceNotConnectedRequest,
+  RedisWebSocketServiceResponse,
+} from "../../../../types/webSocket";
 
 export default function processMessage(config: WebSocketProxyAppConfig) {
   return async function processMessageImpl(
     channel: string,
     messageString: string
   ) {
-    const redisResponse = JSON.parse(messageString) as WebSocketResponse;
+    const redisResponse = JSON.parse(
+      messageString
+    ) as RedisWebSocketServiceResponse;
 
     // Default to 'message' type.
     // Some services might forget to add this.
@@ -22,38 +25,36 @@ export default function processMessage(config: WebSocketProxyAppConfig) {
 
     const conn = activeConnections().get(redisResponse.id);
 
-    const serviceConfig = config.webSocket.routes[redisResponse.route].services[
-      redisResponse.service
-    ] as RedisWebSocketEndPointConfig;
-
     if (conn) {
-      const onResponseResult =
-        (serviceConfig.onResponse &&
-          (await serviceConfig.onResponse(redisResponse.id, messageString))) ||
-        redisResponse;
+      const serviceConfig = config.webSocket.routes[conn.route].services[
+        redisResponse.service
+      ] as RedisWebSocketEndPointConfig;
 
-      respondToWebSocketClient(
-        redisResponse.id,
-        onResponseResult,
-        conn,
-        config
-      );
+      if (serviceConfig) {
+        const onResponseResult =
+          (serviceConfig.onResponse &&
+            (await serviceConfig.onResponse(redisResponse))) ||
+          redisResponse;
+
+        respondToWebSocketClient(onResponseResult, conn, config);
+      } else {
+        // TODO: Invoke error handler
+      }
     } else {
-      const webSocketRequest: WebSocketNotConnectedRequest = {
-        id: redisResponse.id,
-        type: "notconnected",
-        route: redisResponse.route,
-        path: "",
-        remoteAddress: undefined,
-        remotePort: undefined,
-      };
+      if (redisResponse.responseChannel) {
+        const webSocketRequest: WebSocketServiceNotConnectedRequest = {
+          id: redisResponse.id,
+          type: "notconnected",
+          route: "", // TODO - what do do here?
+          remoteAddress: undefined,
+          remotePort: undefined,
+        };
 
-      const requestChannel = getChannelForService(
-        serviceConfig.requestChannel,
-        serviceConfig.numRequestChannels
-      );
-
-      publish(requestChannel, JSON.stringify(webSocketRequest));
+        publish(
+          redisResponse.responseChannel,
+          JSON.stringify(webSocketRequest)
+        );
+      }
     }
   };
 }

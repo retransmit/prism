@@ -3,7 +3,7 @@ import { TestAppInstance } from "../..";
 import startRetransmitTestInstance from "../../../../utils/startRetransmitTestInstance";
 import { UserAppConfig } from "../../../../../types/config";
 import { TestEnv } from "../../..";
-import { WebSocketRequest } from "../../../../../types/webSocket";
+import { WebSocketClientRequest } from "../../../../../types/webSocket";
 
 export default async function (app: TestAppInstance, testEnv: TestEnv) {
   it(`runs the connect hook on root config`, async () => {
@@ -13,7 +13,7 @@ export default async function (app: TestAppInstance, testEnv: TestEnv) {
     const connectedPromise: Promise<void> = new Promise(async (success) => {
       const config: UserAppConfig = {
         webSocket: {
-          onConnect: async (request: WebSocketRequest) => {
+          onConnect: async (request: WebSocketClientRequest) => {
             ran = true;
             receivedMessage = request.message;
             success();
@@ -58,7 +58,7 @@ export default async function (app: TestAppInstance, testEnv: TestEnv) {
         webSocket: {
           routes: {
             "/quotes": {
-              onConnect: async (request: WebSocketRequest) => {
+              onConnect: async (request: WebSocketClientRequest) => {
                 ran = true;
                 receivedMessage = request.message;
                 success();
@@ -100,7 +100,7 @@ export default async function (app: TestAppInstance, testEnv: TestEnv) {
     const connectedPromise: Promise<void> = new Promise(async (success) => {
       const config: UserAppConfig = {
         webSocket: {
-          onConnect: async (request: WebSocketRequest) => {
+          onConnect: async (request: WebSocketClientRequest) => {
             ran = true;
             receivedMessage = request.message;
             return { drop: true, response: "NOPE" };
@@ -153,7 +153,7 @@ export default async function (app: TestAppInstance, testEnv: TestEnv) {
         webSocket: {
           routes: {
             "/quotes": {
-              onConnect: async (request: WebSocketRequest) => {
+              onConnect: async (request: WebSocketClientRequest) => {
                 ran = true;
                 receivedMessage = request.message;
                 return { drop: true, response: "NOPE" };

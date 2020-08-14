@@ -1,15 +1,15 @@
 import { WebSocketProxyAppConfig } from "../../../../types/config";
 import { getChannelForService } from "../../../../utils/redis/getChannelForService";
-import {
-  RedisWebSocketMessageRequest,
-  WebSocketMessageRequest,
-} from "../../../../types/config/webSocketProxy";
 import respondToWebSocketClient from "../../respond";
 import { publish } from "./publish";
-import { ActiveWebSocketConnection } from "../../../../types/webSocket";
+import {
+  ActiveWebSocketConnection,
+  WebSocketServiceRequest,
+  RedisWebSocketServiceRequest,
+} from "../../../../types/webSocket";
 
-export default async function sendToService(
-  request: WebSocketMessageRequest,
+export default async function handleRequest(
+  request: WebSocketServiceRequest,
   conn: ActiveWebSocketConnection,
   config: WebSocketProxyAppConfig
 ) {
@@ -21,7 +21,7 @@ export default async function sendToService(
     const cfg = routeConfig.services[service];
     if (cfg.type === "redis") {
       const serviceConfig = cfg;
-      const redisRequest: RedisWebSocketMessageRequest = {
+      const redisRequest: RedisWebSocketServiceRequest = {
         ...request,
         responseChannel: `${serviceConfig.requestChannel}.${config.instanceId}`,
       };
@@ -39,12 +39,7 @@ export default async function sendToService(
 
       if (onRequestResult.handled) {
         if (onRequestResult.response) {
-          respondToWebSocketClient(
-            request.id,
-            onRequestResult.response,
-            conn,
-            config
-          );
+          respondToWebSocketClient(onRequestResult.response, conn, config);
         }
       } else {
         if (!alreadyPublishedChannels.includes(requestChannel)) {

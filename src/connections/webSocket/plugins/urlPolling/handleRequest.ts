@@ -1,19 +1,18 @@
 import { WebSocketProxyAppConfig } from "../../../../types/config";
-import {
-  UrlPollingWebSocketMessageRequest,
-  WebSocketResponse,
-  WebSocketMessageRequest,
-} from "../../../../types/config/webSocketProxy";
 import respondToWebSocketClient from "../../respond";
 import { makeGotOptions } from "../../../../utils/http/gotUtil";
-import got from "got";
-import { makeWebSocketResponse } from "./makeWebSocketResponse";
+import got, { Response } from "got";
 import selectRandomUrl from "../../../../utils/http/selectRandomUrl";
 import { HttpRequest } from "../../../../types/http";
-import { ActiveWebSocketConnection } from "../../../../types/webSocket";
+import {
+  ActiveWebSocketConnection,
+  WebSocketClientRequest,
+  WebSocketServiceRequest,
+  WebSocketServiceResponse,
+} from "../../../../types/webSocket";
 
-export default async function sendToService(
-  request: WebSocketMessageRequest,
+export default async function handleRequest(
+  request: WebSocketServiceRequest,
   conn: ActiveWebSocketConnection,
   config: WebSocketProxyAppConfig
 ) {
@@ -24,12 +23,12 @@ export default async function sendToService(
     if (cfg.type === "http") {
       const serviceConfig = cfg;
 
-      const webSocketRequest: UrlPollingWebSocketMessageRequest = request;
+      const serviceUrl = selectRandomUrl(cfg.url, cfg.getUrl);
 
       const httpRequest: HttpRequest = {
-        path: conn.path,
+        path: await selectRandomUrl(cfg.url, cfg.getUrl),
         method: "POST",
-        body: webSocketRequest,
+        body: request,
         remoteAddress: conn.remoteAddress,
         remotePort: conn.remotePort,
       };
@@ -42,12 +41,7 @@ export default async function sendToService(
 
       if (onRequestResult.handled) {
         if (onRequestResult.response) {
-          respondToWebSocketClient(
-            request.id,
-            onRequestResult.response,
-            conn,
-            config
-          );
+          respondToWebSocketClient(onRequestResult.response, conn, config);
         }
       } else {
         const options = makeGotOptions(httpRequest, undefined, undefined);
@@ -56,27 +50,21 @@ export default async function sendToService(
           options
         )
           .then(async (serverResponse) => {
-            const webSocketResponse = makeWebSocketResponse(
-              serverResponse,
-              request.id
+            const webSocketResponse: WebSocketServiceResponse = JSON.parse(
+              (serverResponse as Response<any>).body
             );
-            respondToWebSocketClient(
-              request.id,
-              webSocketResponse,
-              conn,
-              config
-            );
+            respondToWebSocketClient(webSocketResponse, conn, config);
           })
           .catch(async (error) => {
-            const webSocketResponse: WebSocketResponse = error.response
-              ? makeWebSocketResponse(error.response, request.id)
+            const webSocketResponse: WebSocketServiceResponse = error.response
+              ? JSON.parse((error.response as any).body)
               : {
                   id: request.id,
-                  response: error.message,
-                  route: conn.route,
-                  service,
                   type: "message",
+                  response: error.message,
+                  service,
                 };
+            respondToWebSocketClient(webSocketResponse, conn, config);
           });
       }
     }

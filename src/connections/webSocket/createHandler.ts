@@ -1,11 +1,10 @@
 import { IncomingMessage } from "http";
 import WebSocket from "ws";
-import * as url from "url";
 import randomId from "../../utils/random";
 import { get as activeConnections } from "./activeConnections";
 import {
   ActiveWebSocketConnection,
-  WebSocketRequest,
+  WebSocketClientRequest,
 } from "../../types/webSocket";
 import { WebSocketRouteConfig } from "../../types/config/webSocketProxy";
 
@@ -19,7 +18,6 @@ import { getHeaderAsString } from "../../utils/http/getHeaderAsString";
 import addTrackingInfo from "../modules/clientTracking";
 import { PluginList } from "../../types/plugins";
 import { WebSocketServicePlugin } from "../../types/webSocket";
-import { request } from "https";
 
 export default function createHandler(config: AppConfig) {
   return function connection(ws: WebSocket, request: IncomingMessage) {
@@ -45,9 +43,9 @@ export default function createHandler(config: AppConfig) {
           : request.socket.remoteAddress;
 
         const conn: ActiveWebSocketConnection = {
+          id: requestId,
           initialized: false,
           route,
-          path: (request.url && url.parse(request.url).pathname) || "",
           webSocket: ws,
           remoteAddress,
           remotePort: request.socket.remotePort,
@@ -62,14 +60,7 @@ export default function createHandler(config: AppConfig) {
 
         if (!routeConfig.onConnect && !config.webSocket.onConnect) {
           conn.initialized = true;
-          sendMessageToServices(
-            requestId,
-            undefined,
-            conn,
-            routeConfig,
-            config,
-            plugins
-          );
+          sendRequestToServices(undefined, conn, routeConfig, config, plugins);
         }
 
         ws.on(
@@ -104,19 +95,16 @@ function onMessage(
         // One check above is redundant.
         // If conn is not initialized, onConnect must exist.
         // Treat the first message as the onConnect argument.
-
-        const connectRequest: WebSocketRequest = {
+        const clientConnectRequest: WebSocketClientRequest = {
           id: requestId,
           message,
           remoteAddress: conn.remoteAddress,
           remotePort: conn.remotePort,
         };
 
-        const onConnectResult = (await onConnect(connectRequest)) || {
-          drop: false,
-        };
+        const onConnectResult = await onConnect(clientConnectRequest);
 
-        if (onConnectResult.drop === true) {
+        if (onConnectResult && onConnectResult.type === "drop") {
           activeConnections().delete(requestId);
           if (onConnectResult.response) {
             ws.send(onConnectResult.response);
@@ -131,14 +119,13 @@ function onMessage(
         // Not dropping. Initialize the connection.
         // And send the connect request.
         conn.initialized = true;
-        sendMessageToServices(
-          requestId,
-          onConnectResult.request,
-          conn,
-          routeConfig,
-          config,
-          plugins
-        );
+        if (onConnectResult.request) {
+          const connectRequest = {
+            ...clientConnectRequest,
+            message: onConnectResult.request,
+          }
+          sendRequestToServices(onConnectResult.request, conn, config);
+        }
       }
       // This is an active connection.
       // Pass on the message to backend services.
@@ -170,63 +157,46 @@ function onMessage(
           config.webSocket.onRequest ||
           config.webSocket.routes[route].onRequest;
 
+        const webSocketRequest: WebSocketClientRequest = {
+          id: requestId,
+          message,
+          remoteAddress: conn.remoteAddress,
+          remotePort: conn.remotePort,
+        };
+
+        const stringifiedWebSocketRequest = JSON.stringify(webSocketRequest);
+
         const onRequestResult = (onRequest &&
-          (await onRequest(requestId, message))) || {
+          (await onRequest(webSocketRequest))) || {
           handled: false as false,
-          request: {
-            id: requestId,
-            path: conn.path,
-            request: message,
-            route,
-            remoteAddress: request.connection.remoteAddress,
-            remotePort: request.connection.remotePort,
-            type: "message" as "message",
-          },
+          request: stringifiedWebSocketRequest,
         };
 
         if (onRequestResult.handled) {
           if (onRequestResult.response) {
-            if (onRequestResult.response.type === "message") {
-              ws.send(onRequestResult.response.response);
-            } else if (onRequestResult.response.type === "disconnect") {
-              ws.terminate();
-            }
+            ws.send(onRequestResult.response);
+          }
+          if (onRequestResult.drop) {
+            ws.terminate();
           }
         } else {
           if (conn.saveLastRequest) {
             conn.lastRequest = onRequestResult.request;
           }
-
-          for (const pluginName of Object.keys(plugins)) {
-            plugins[pluginName].handleRequest(
-              onRequestResult.request,
-              conn,
-              config
-            );
-          }
+          sendRequestToServices(onRequestResult.request, conn, config);
         }
       }
     }
   };
 }
 
-async function sendMessageToServices(
-  requestId: string,
-  message: string | undefined,
+function sendRequestToServices(
+  request: string,
   conn: ActiveWebSocketConnection,
-  routeConfig: WebSocketRouteConfig,
-  config: WebSocketProxyAppConfig,
-  plugins: PluginList<WebSocketServicePlugin>
+  config: WebSocketProxyAppConfig
 ) {
-  for (const service of Object.keys(routeConfig.services)) {
-    const serviceConfig = routeConfig.services[service];
-    plugins[serviceConfig.type].connect(
-      requestId,
-      message,
-      conn,
-      serviceConfig,
-      config
-    );
+  for (const pluginName of Object.keys(plugins)) {
+    plugins[pluginName].handleRequest(request, conn, config);
   }
 }
 
@@ -245,8 +215,7 @@ function onClose(
       if (onDisconnect) {
         const onDisconnectResult = await onDisconnect(conn);
         if (typeof onDisconnectResult !== "undefined") {
-          sendMessageToServices(
-            requestId,
+          sendRequestToServices(
             onDisconnectResult,
             conn,
             routeConfig,
@@ -262,12 +231,7 @@ function onClose(
       )) {
         const serviceConfig =
           config.webSocket.routes[conn.route].services[service];
-        plugins[serviceConfig.type].disconnect(
-          requestId,
-          conn,
-          serviceConfig,
-          config
-        );
+        plugins[serviceConfig.type].disconnect(conn, serviceConfig, config);
       }
     }
   };

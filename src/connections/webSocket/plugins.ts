@@ -8,14 +8,10 @@ const plugins: {
   http: {
     init: httpPlugin.init,
     handleRequest: httpPlugin.handleRequest,
-    connect: httpPlugin.connect,
-    disconnect: httpPlugin.disconnect,
   },
   redis: {
     init: redisPlugin.init,
     handleRequest: redisPlugin.handleRequest,
-    connect: redisPlugin.connect,
-    disconnect: redisPlugin.disconnect,
   },
 };
 
