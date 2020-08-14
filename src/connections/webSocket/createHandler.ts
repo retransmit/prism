@@ -133,7 +133,7 @@ function onMessage(
         conn.initialized = true;
         sendMessageToServices(
           requestId,
-          onConnectResult.connectMessage,
+          onConnectResult.messageToService,
           conn,
           routeConfig,
           config,
