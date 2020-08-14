@@ -15,7 +15,7 @@ export default async function (app: TestAppInstance, testEnv: TestEnv) {
         webSocket: {
           onConnect: async (request: WebSocketClientRequest) => {
             ran = true;
-            receivedMessage = request.message;
+            receivedMessage = request.message || "";
             success();
             return { drop: false };
           },
@@ -60,7 +60,7 @@ export default async function (app: TestAppInstance, testEnv: TestEnv) {
             "/quotes": {
               onConnect: async (request: WebSocketClientRequest) => {
                 ran = true;
-                receivedMessage = request.message;
+                receivedMessage = request.message || "";
                 success();
                 return { drop: false };
               },
@@ -102,7 +102,7 @@ export default async function (app: TestAppInstance, testEnv: TestEnv) {
         webSocket: {
           onConnect: async (request: WebSocketClientRequest) => {
             ran = true;
-            receivedMessage = request.message;
+            receivedMessage = request.message || "";
             return { drop: true, response: "NOPE" };
           },
           routes: {
@@ -155,7 +155,7 @@ export default async function (app: TestAppInstance, testEnv: TestEnv) {
             "/quotes": {
               onConnect: async (request: WebSocketClientRequest) => {
                 ran = true;
-                receivedMessage = request.message;
+                receivedMessage = request.message || "";
                 return { drop: true, response: "NOPE" };
               },
               services: {

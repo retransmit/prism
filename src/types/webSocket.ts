@@ -50,9 +50,12 @@ export type WebSocketServiceRequest =
   | WebSocketServiceDisconnectRequest
   | WebSocketServiceNotConnectedRequest;
 
-export type RedisWebSocketServiceRequest = WebSocketServiceRequest & {
+export type RedisWebSocketServiceRequestProps = {
   responseChannel: string;
 };
+
+export type RedisWebSocketServiceRequest = WebSocketServiceRequest &
+  RedisWebSocketServiceRequestProps;
 
 export type WebSocketServiceResponseBase = {
   id: string;

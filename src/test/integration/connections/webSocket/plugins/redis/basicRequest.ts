@@ -1,10 +1,13 @@
 import WebSocket from "ws";
 import { TestAppInstance } from "../../..";
 import { createClient } from "redis";
-import { RedisWebSocketConnectRequest } from "../../../../../../types/config/webSocketProxy";
 import { UserAppConfig } from "../../../../../../types/config";
 import startRetransmitTestInstance from "../../../../../utils/startRetransmitTestInstance";
 import { TestEnv } from "../../../..";
+import {
+  WebSocketServiceConnectRequest,
+  RedisWebSocketServiceRequestProps,
+} from "../../../../../../types/webSocket";
 
 export default async function (app: TestAppInstance, testEnv: TestEnv) {
   it(`gets websocket responses from redis backends`, async () => {
@@ -31,7 +34,10 @@ export default async function (app: TestAppInstance, testEnv: TestEnv) {
     app.appControl = appControl;
     const { port } = appControl;
 
-    const promisedConnectRequest = new Promise<RedisWebSocketConnectRequest>(
+    type ServiceConnectRequest = WebSocketServiceConnectRequest &
+      RedisWebSocketServiceRequestProps;
+
+    const promisedConnectRequest = new Promise<ServiceConnectRequest>(
       (success) => {
         const subscriber = createClient();
         subscriber.subscribe("input");
@@ -50,7 +56,7 @@ export default async function (app: TestAppInstance, testEnv: TestEnv) {
       ws.send("HELO");
     });
 
-    const connectRequest: RedisWebSocketConnectRequest = await promisedConnectRequest;
+    const connectRequest: ServiceConnectRequest = await promisedConnectRequest;
 
     const publisher = createClient();
 

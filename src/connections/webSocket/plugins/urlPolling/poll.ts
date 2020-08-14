@@ -2,18 +2,21 @@ import { WebSocketProxyAppConfig } from "../../../../types/config";
 import {
   UrlPollingWebSocketEndPointConfig,
   WebSocketRouteConfig,
-  WebSocketResponse,
 } from "../../../../types/config/webSocketProxy";
 import * as activeConnections from "../../activeConnections";
 import respondToWebSocketClient from "../../respond";
 import { makeGotOptions } from "../../../../utils/http/gotUtil";
-import got from "got";
-import { makeWebSocketResponse } from "./makeWebSocketResponse";
+import got, { Response } from "got";
 import { makeHttpResponse } from "../../../http/plugins/http/makeHttpResponse";
 import responseIsError from "../../../../utils/http/responseIsError";
 import selectRandomUrl from "../../../../utils/http/selectRandomUrl";
 import { HttpRequest } from "../../../../types/http";
-import { ActiveWebSocketConnection } from "../../../../types/webSocket";
+import {
+  ActiveWebSocketConnection,
+  WebSocketServiceMessageRequest,
+  WebSocketServiceMessageResponse,
+} from "../../../../types/webSocket";
+import { addListener } from "process";
 
 export function setupPolling(config: WebSocketProxyAppConfig) {
   for (const route of Object.keys(config.webSocket.routes)) {
@@ -57,10 +60,19 @@ async function doPoll(
   serviceConfig: UrlPollingWebSocketEndPointConfig,
   config: WebSocketProxyAppConfig
 ) {
+  const lastServiceRequest: WebSocketServiceMessageRequest = {
+    id: requestId,
+    type: "message",
+    route: conn.route,
+    message: conn.lastRequest || "",
+    remoteAddress: conn.remoteAddress,
+    remotePort: conn.remotePort,
+  };
+
   const httpRequest: HttpRequest = {
-    path: conn.path,
+    path: conn.route,
     method: "POST",
-    body: conn.lastRequest || { id: requestId },
+    body: lastServiceRequest,
     remoteAddress: conn.remoteAddress,
     remotePort: conn.remotePort,
   };
@@ -73,12 +85,7 @@ async function doPoll(
 
   if (onRequestResult.handled) {
     if (onRequestResult.response) {
-      respondToWebSocketClient(
-        requestId,
-        onRequestResult.response,
-        conn,
-        config
-      );
+      respondToWebSocketClient(onRequestResult.response, conn, config);
     }
   } else {
     const options = makeGotOptions(
@@ -92,25 +99,23 @@ async function doPoll(
         const webSocketResponse =
           (serviceConfig.onResponse &&
             (await serviceConfig.onResponse(
-              requestId,
               makeHttpResponse(serverResponse)
             ))) ||
-          makeWebSocketResponse(serverResponse, requestId);
+          JSON.parse((serverResponse as Response<any>).body);
 
-        respondToWebSocketClient(requestId, webSocketResponse, conn, config);
+        respondToWebSocketClient(webSocketResponse, conn, config);
       })
       .catch(async (error) => {
-        const webSocketResponse: WebSocketResponse = error.response
-          ? makeWebSocketResponse(error.response, requestId)
+        const webSocketResponse: WebSocketServiceMessageResponse = error.response
+          ? JSON.parse((error.response as Response<any>).body)
           : {
               id: requestId,
-              response: error.message,
-              route,
-              service,
               type: "message",
+              service,
+              message: error.message,
             };
 
-        respondToWebSocketClient(requestId, webSocketResponse, conn, config);
+        respondToWebSocketClient(webSocketResponse, conn, config);
 
         const errorResponse = error.response
           ? makeHttpResponse(error.response)

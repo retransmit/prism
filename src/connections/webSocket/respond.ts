@@ -18,6 +18,7 @@ export default async function respondToWebSocketClient(
     (onResponse && (await onResponse(webSocketResponse))) || webSocketResponse;
 
   if (onResponseResult.type === "message") {
+    conn.webSocket.send(onResponseResult.message);
   } else if (onResponseResult.type === "drop") {
     if (onResponseResult.message) {
       conn.webSocket.send(onResponseResult.message);

@@ -32,7 +32,7 @@ export type WebSocketProxyConfig = {
     request: WebSocketClientRequest
   ) => Promise<
     | { handled: true; response?: WebSocketServiceResponse }
-    | { handled: false; request: WebSocketClientRequest }
+    | { handled: false; message: string }
     | void
   >;
   onResponse?: (
@@ -66,7 +66,7 @@ export type WebSocketRouteConfig = {
     request: WebSocketClientRequest
   ) => Promise<
     | { handled: true; response?: WebSocketServiceResponse }
-    | { handled: false; request: WebSocketClientRequest }
+    | { handled: false; message: string }
     | void
   >;
   onResponse?: (
@@ -92,7 +92,7 @@ export type UrlPollingWebSocketEndPointConfig = {
     | void
   >;
   onResponse?: (
-    response: WebSocketServiceResponse
+    response: HttpResponse
   ) => Promise<WebSocketServiceResponse | void>;
 
   url: UrlList;

@@ -6,7 +6,6 @@ import selectRandomUrl from "../../../../utils/http/selectRandomUrl";
 import { HttpRequest } from "../../../../types/http";
 import {
   ActiveWebSocketConnection,
-  WebSocketClientRequest,
   WebSocketServiceRequest,
   WebSocketServiceResponse,
 } from "../../../../types/webSocket";
