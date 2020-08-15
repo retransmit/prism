@@ -11,7 +11,12 @@ import selectRandomUrl from "../../../../utils/http/selectRandomUrl";
 import makeGotRequest from "./makeGotRequest";
 import fireAndForgetGotRequest from "./fireAndForgetGotRequest";
 import { replaceParamsInUrl } from "./replaceParamsInUrl";
-import { HttpRequest, HttpMethods, FetchedHttpResponse } from "../../../../types/http";
+import {
+  HttpRequest,
+  HttpMethods,
+  FetchedHttpResponse,
+  HttpResponse,
+} from "../../../../types/http";
 
 /*
   Make Promises for Http Services
@@ -56,7 +61,7 @@ export default function handleRequest(
             serviceConfig
           );
 
-          const requestWithEditedPath = {
+          const requestWithEditedPath: HttpRequest = {
             ...requestWithMappedFields,
             path: urlWithParamsReplaced,
           };
@@ -69,15 +74,6 @@ export default function handleRequest(
 
           if (onRequestResult.handled) {
             if (serviceConfig.awaitResponse !== false) {
-              const modifiedResponse =
-                (serviceConfig.onResponse &&
-                  (await serviceConfig.onResponse(
-                    onRequestResult.response,
-                    request,
-                    fetchedResponses
-                  ))) ||
-                onRequestResult.response;
-
               const fetchedResponse = {
                 type: "http" as "http",
                 id: requestId,
@@ -86,7 +82,7 @@ export default function handleRequest(
                 path: request.path,
                 service,
                 time: Date.now() - startTime,
-                response: modifiedResponse,
+                response: onRequestResult.response,
                 stage,
               };
               success({

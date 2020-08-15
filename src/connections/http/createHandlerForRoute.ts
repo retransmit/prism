@@ -63,83 +63,81 @@ async function handler(
     return;
   }
 
-  if (routeConfig) {
-    const entryFromCache = await getFromCache(route, request, config);
+  const entryFromCache = await getFromCache(route, request, config);
 
-    if (entryFromCache) {
-      sendResponse(
-        ctx,
-        route,
-        requestMethod,
-        startTime,
-        request,
-        entryFromCache,
-        routeConfig,
-        config,
-        true
-      );
-      return;
-    }
-
-    // Add client tracking info
-    addTrackingInfo(
-      ctx.path,
-      requestMethod,
-      ctx.ip,
-      routeConfig,
-      config.http,
-      config
-    );
-
-    const rateLimitedResponse = await applyRateLimiting(
-      "http",
+  if (entryFromCache) {
+    sendResponse(
+      ctx,
       route,
       requestMethod,
-      ctx.ip,
+      startTime,
+      request,
+      entryFromCache,
+      routeConfig,
+      config,
+      true
+    );
+    return;
+  }
+
+  // Add client tracking info
+  addTrackingInfo(
+    ctx.path,
+    requestMethod,
+    ctx.ip,
+    routeConfig,
+    config.http,
+    config
+  );
+
+  const rateLimitedResponse = await applyRateLimiting(
+    "http",
+    route,
+    requestMethod,
+    ctx.ip,
+    config
+  );
+
+  if (rateLimitedResponse !== undefined) {
+    const response = {
+      status: rateLimitedResponse.status,
+      body: rateLimitedResponse.body,
+    };
+    sendResponse(
+      ctx,
+      route,
+      requestMethod,
+      startTime,
+      request,
+      response,
+      routeConfig,
       config
     );
+    return;
+  }
 
-    if (rateLimitedResponse !== undefined) {
-      const response = {
-        status: rateLimitedResponse.status,
-        body: rateLimitedResponse.body,
-      };
-      sendResponse(
-        ctx,
-        route,
-        requestMethod,
-        startTime,
-        request,
-        response,
-        routeConfig,
-        config
-      );
-      return;
-    }
+  const circuitBreakerResponse = await isTripped(route, request, config);
 
-    const circuitBreakerResponse = await isTripped(route, request, config);
-
-    if (circuitBreakerResponse !== undefined) {
-      const response = {
-        status: circuitBreakerResponse.status,
-        body: circuitBreakerResponse.body,
-      };
-      sendResponse(
-        ctx,
-        route,
-        requestMethod,
-        startTime,
-        request,
-        response,
-        routeConfig,
-        config
-      );
-      return;
-    }
+  if (circuitBreakerResponse !== undefined) {
+    const response = {
+      status: circuitBreakerResponse.status,
+      body: circuitBreakerResponse.body,
+    };
+    sendResponse(
+      ctx,
+      route,
+      requestMethod,
+      startTime,
+      request,
+      response,
+      routeConfig,
+      config
+    );
+    return;
   }
 
   // Are there custom handlers for the request?
-  const onRequest = routeConfig?.onRequest || config.http.onRequest;
+  const onRequest = routeConfig.onRequest || config.http.onRequest;
 
   const modResult = (onRequest && (await onRequest(request))) || {
     handled: false as false,

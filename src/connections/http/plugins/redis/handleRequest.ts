@@ -72,19 +72,20 @@ export default function handleRequest(
 
           if (onRequestResult.handled) {
             if (serviceConfig.awaitResponse !== false) {
+              const fetchedResponse = {
+                type: "redis" as "redis",
+                id: requestId,
+                route,
+                method,
+                path: request.path,
+                service,
+                time: Date.now() - timeBeforeOnRequestResult,
+                response: onRequestResult.response,
+                stage,
+              };
               success({
                 skip: false,
-                response: {
-                  type: "redis",
-                  id: requestId,
-                  route,
-                  method,
-                  path: request.path,
-                  service,
-                  time: Date.now() - timeBeforeOnRequestResult,
-                  response: onRequestResult.response,
-                  stage,
-                },
+                response: fetchedResponse,
               });
             } else {
               success({ skip: true });
