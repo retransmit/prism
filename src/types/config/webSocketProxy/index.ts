@@ -7,8 +7,8 @@ import {
   ActiveWebSocketConnection,
   WebSocketServiceResponse,
   WebSocketServiceConnectRequest,
-  WebSocketServiceRequest,
   RedisWebSocketServiceRequest,
+  RedisWebSocketServiceResponse,
 } from "../../webSocket";
 
 export type WebSocketProxyConfig = {
@@ -113,7 +113,7 @@ export type RedisWebSocketEndPointConfig = {
     | void
   >;
   onResponse?: (
-    response: WebSocketServiceResponse
+    response: RedisWebSocketServiceResponse
   ) => Promise<WebSocketServiceResponse | void>;
   
   requestChannel: string;
