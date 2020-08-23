@@ -1,5 +1,4 @@
 import { HttpProxyAppConfig } from "../../../../types/config";
-import { getChannelForService } from "../../../../utils/redis/getChannelForService";
 import { HttpRouteConfig } from "../../../../types/config/httpProxy";
 import { publish } from "./publish";
 import { HttpRequest, HttpMethods, RedisHttpRequest } from "../../../../types/http";
@@ -28,12 +27,7 @@ export default async function rollback(
         type: "rollback",
       };
 
-      const requestChannel = getChannelForService(
-        serviceConfig.requestChannel,
-        serviceConfig.numRequestChannels
-      );
-
-      if (!alreadyPublishedChannels.includes(requestChannel)) {
+      if (!alreadyPublishedChannels.includes(serviceConfig.requestChannel)) {
         const onRollbackRequestResult = (serviceConfig.onRollbackRequest &&
           (await serviceConfig.onRollbackRequest(redisHttpRequest))) || {
           handled: false as false,
@@ -41,9 +35,9 @@ export default async function rollback(
         };
 
         if (!onRollbackRequestResult.handled) {
-          alreadyPublishedChannels.push(requestChannel);
+          alreadyPublishedChannels.push(serviceConfig.requestChannel);
 
-          publish(requestChannel, onRollbackRequestResult.request);
+          publish(serviceConfig.requestChannel, onRollbackRequestResult.request);
         }
       }
     }

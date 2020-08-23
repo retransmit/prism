@@ -148,7 +148,6 @@ export type NativeHttpServiceEndPointConfig = {
 export type RedisHttpServiceEndPointConfig = {
   type: "redis";
   requestChannel: string;
-  numRequestChannels?: number;
   onRequest?: (
     request: RedisHttpRequest,
     fetchedResponses: FetchedHttpResponse[]

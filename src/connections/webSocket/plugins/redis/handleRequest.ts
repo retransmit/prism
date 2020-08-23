@@ -1,5 +1,4 @@
 import { WebSocketProxyAppConfig } from "../../../../types/config";
-import { getChannelForService } from "../../../../utils/redis/getChannelForService";
 import respondToWebSocketClient from "../../respond";
 import { publish } from "./publish";
 import {
@@ -26,13 +25,8 @@ export default async function handleRequest(
 
       const redisRequest: RedisWebSocketServiceRequest = {
         ...request,
-        responseChannel
+        responseChannel,
       };
-
-      const requestChannel = getChannelForService(
-        serviceConfig.requestChannel,
-        serviceConfig.numRequestChannels
-      );
 
       const onRequestResult = (serviceConfig.onRequest &&
         (await serviceConfig.onRequest(redisRequest))) || {
@@ -45,9 +39,12 @@ export default async function handleRequest(
           respondToWebSocketClient(onRequestResult.response, conn, config);
         }
       } else {
-        if (!alreadyPublishedChannels.includes(requestChannel)) {
-          alreadyPublishedChannels.push(requestChannel);
-          publish(requestChannel, JSON.stringify(onRequestResult.request));
+        if (!alreadyPublishedChannels.includes(serviceConfig.requestChannel)) {
+          alreadyPublishedChannels.push(serviceConfig.requestChannel);
+          publish(
+            serviceConfig.requestChannel,
+            JSON.stringify(onRequestResult.request)
+          );
         }
       }
     }

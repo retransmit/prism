@@ -1,7 +1,6 @@
 import { AppConfig, HttpProxyAppConfig } from "../../../../types/config";
 
 import { get as activeRequests } from "./activeRequests";
-import { getChannelForService } from "../../../../utils/redis/getChannelForService";
 import {
   InvokeHttpServiceResult,
   HttpServiceEndPointConfig,
@@ -91,14 +90,12 @@ export default function handleRequest(
               success({ skip: true });
             }
           } else {
-            const requestChannel = getChannelForService(
-              serviceConfig.requestChannel,
-              serviceConfig.numRequestChannels
-            );
             if (serviceConfig.awaitResponse !== false) {
-              if (!alreadyPublishedChannels.includes(requestChannel)) {
-                alreadyPublishedChannels.push(requestChannel);
-                publish(requestChannel, onRequestResult.request);
+              if (
+                !alreadyPublishedChannels.includes(serviceConfig.requestChannel)
+              ) {
+                alreadyPublishedChannels.push(serviceConfig.requestChannel);
+                publish(serviceConfig.requestChannel, onRequestResult.request);
               }
               activeRequests().set(`${requestId}+${service}`, {
                 id: requestId,
@@ -113,8 +110,10 @@ export default function handleRequest(
                 responses: fetchedResponses,
               });
             } else {
-              if (!alreadyPublishedChannels.includes(requestChannel)) {
-                publish(requestChannel, onRequestResult.request);
+              if (
+                !alreadyPublishedChannels.includes(serviceConfig.requestChannel)
+              ) {
+                publish(serviceConfig.requestChannel, onRequestResult.request);
               }
               success({ skip: true });
             }

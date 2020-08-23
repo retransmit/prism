@@ -117,7 +117,6 @@ export type RedisWebSocketEndPointConfig = {
   ) => Promise<WebSocketServiceResponse | void>;
   
   requestChannel: string;
-  numRequestChannels?: number;
 } & WebSocketEndPointConfigBase;
 
 export type WebSocketServiceEndPointConfig =
