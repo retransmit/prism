@@ -20,6 +20,7 @@ import namesGenerator from "./utils/namesGenerator";
 import { isWebSocketProxyConfig } from "./connections/webSocket/isWebSocketProxyConfig";
 import { AppControl } from "./types/prismInstance";
 import normalizeConfig from "./normalizeConfig";
+import { join } from "path";
 
 const ONE_MINUTE = 60 * 1000;
 const TWO_MINUTES = 2 * ONE_MINUTE;
@@ -38,6 +39,9 @@ export async function startApp(
   silent: boolean,
   workers: number | undefined
 ) {
+  configFile = configFile.startsWith("/")
+    ? configFile
+    : join(process.cwd(), configFile);
   const config: UserAppConfig = require(configFile);
   config.workers = workers ?? config.workers ?? os.cpus().length;
   config.silent = silent;
