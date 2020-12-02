@@ -59,7 +59,7 @@ export default async function startRetransmitTestProcess(
     params.eventHandlers(stdin, stdout, stderr);
   }
 
-  await new Promise((success) => {
+  await new Promise<void>((success) => {
     stdout.on("data", (x: Buffer) => {
       if (x.toString().startsWith("instance")) {
         success();

@@ -38,7 +38,7 @@ export default async function (app: TestAppInstance, testEnv: TestEnv) {
     let calledRollback = false;
     let backendApps: Server[] = [];
 
-    const calledPromise = new Promise((success) => {
+    const calledPromise = new Promise<void>((success) => {
       // Start mock servers.
       backendApps = startBackends([
         {
