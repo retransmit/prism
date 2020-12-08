@@ -14,7 +14,7 @@ export default async function (app: TestAppInstance, testEnv: TestEnv) {
     const {
       promise: onRequestPromise,
       resolve: onRequestResolve,
-    } = promiseSignal();
+    } = promiseSignal<void>();
 
     const config: UserAppConfig = {
       webSocket: {
@@ -78,7 +78,7 @@ export default async function (app: TestAppInstance, testEnv: TestEnv) {
     const {
       promise: onRequestPromise,
       resolve: onRequestResolve,
-    } = promiseSignal();
+    } = promiseSignal<void>();
 
     const config: UserAppConfig = {
       webSocket: {
