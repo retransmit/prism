@@ -1,6 +1,8 @@
 import { HttpRequest, HttpHeaders } from "../../types/http";
 import { getHeaderAsString } from "./getHeaderAsString";
 import { OptionsOfUnknownResponseBody, Options } from "got/dist/source";
+import makeUSVStringPairArray from "../../connections/http/makeUSVStringPairArray";
+import { URLSearchParams } from "url";
 
 // TODO - I am not sure about using OptionsOfUnknownResponseBody
 // Check this discussion - https://github.com/sindresorhus/got/issues/954
@@ -11,7 +13,7 @@ export function makeGotOptions(
   timeout?: number
 ): OptionsOfUnknownResponseBody {
   const basicOptions = {
-    searchParams: request.query,
+    searchParams: new URLSearchParams(makeUSVStringPairArray(request.query)),
     method: request.method,
     headers: mapHeaders(request.headers, encoding, contentType),
     followRedirect: false,

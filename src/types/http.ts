@@ -17,7 +17,7 @@ export type HttpRequest = {
     [key: string]: string;
   };
   query?: {
-    [key: string]: string;
+    [key: string]: string | string[] | undefined;
   };
   body?: string | Buffer | HttpRequestBodyObject | Array<any> | undefined;
   headers?: HttpHeaders;
@@ -26,7 +26,7 @@ export type HttpRequest = {
 };
 
 export type HttpHeaders = {
-  [key: string]: string | string[];
+  [key: string]: string | string[] | undefined;
 };
 
 export type HttpResponse = {

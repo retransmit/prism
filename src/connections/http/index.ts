@@ -34,7 +34,7 @@ export async function init(config: AppConfig) {
 type KoaRequestHandler = (
   req: IncomingMessage | Http2ServerRequest,
   res: ServerResponse | Http2ServerResponse
-) => Promise<void>;
+) => void;
 
 async function createKoaRequestHandler(
   config: AppConfig

@@ -6,7 +6,7 @@
     "module": "commonjs",
     "moduleResolution": "node",
     "declaration": true,
-    "lib": ["es2017", "esnext", "dom"],
+    "lib": ["es2017", "esnext"],
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "sourceMap": true,

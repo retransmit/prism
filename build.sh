@@ -1,3 +1,3 @@
 rm -rf dist
-tsc
+npx tsc
 cp -r src/test/fixtures dist/test
