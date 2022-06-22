@@ -24,7 +24,7 @@
     "@types/redis": "^2.8.28",
     "@types/ws": "^7.4.1",
     "@types/yargs": "^16.0.1",
-    "got": "^11.8.2",
+    "got": "^11.8.5",
     "jsonwebtoken": "^8.5.1",
     "koa": "^2.13.1",
     "koa-body": "^4.2.0",
